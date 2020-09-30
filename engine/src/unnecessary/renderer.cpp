@@ -36,9 +36,9 @@ namespace un {
         propertiesRequirements.emplace<VulkanDeviceTypeRequirement>(vk::PhysicalDeviceType::eDiscreteGpu);
 
 
-        std::unordered_map<vk::PhysicalDevice, u32> scores;
-
-        for (const vk::PhysicalDevice &device : devices) {
+        std::unordered_map<u32, u32> scores;
+        for (u32 i = 0; i < devices.size(); ++i) {
+            const vk::PhysicalDevice &device = devices[i];
             vk::PhysicalDeviceProperties properties = device.getProperties();
             if (!deviceRequirements.isMet(device)) {
                 LOG(INFO) << "Device " << RED(properties.deviceName) << " is not suitable.";
@@ -49,17 +49,19 @@ namespace un {
             std::vector<vk::QueueFamilyProperties> queueProperties = device.getQueueFamilyProperties();
             u32 score = 0;
             //TODO: Scoring
-            scores[device] = score;
+            scores[i] = score;
         }
-        typedef std::unordered_map<vk::PhysicalDevice, u32>::value_type pair_type;
-        auto elected = std::max_element(
+        typedef std::unordered_map<u32, u32>::value_type pair_type;
+        auto electedIndex = std::max_element(
                 std::begin(scores), std::end(scores),
                 [](const pair_type &p1, const pair_type &p2) {
                     return p1.second < p2.second;
                 }
         );
-        LOG(INFO) << "Elected " << GREEN(elected->first.getProperties().deviceName) << " @ " << PURPLE(elected->second);
-        physicalDevice = elected->first;
+        vk::PhysicalDevice elected = devices[electedIndex->first];
+        u32 score = electedIndex->second;
+        LOG(INFO) << "Elected " << GREEN(elected.getProperties().deviceName) << " @ " << PURPLE(score);
+        physicalDevice = elected;
         vk::DeviceCreateInfo deviceCreateInfo;
         vk::DeviceQueueCreateInfo graphicsQueue;
         auto queueProperties = physicalDevice.getQueueFamilyProperties();

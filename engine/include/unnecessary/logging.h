@@ -21,12 +21,16 @@ namespace un {
 }
 #define INFO "INFO"
 #define WARN "WARN"
-#define SHIT "SHIT"
+#define FUCK "OH SHIT OH FUCK"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wstring-plus-int"
 #define COLORED(MSG, COLOR) COLOR << MSG << termcolor::grey
-
+#define __FILENAME__ (__FILE__ + SOURCE_PATH_SIZE)
 #define GREEN(MSG) COLORED(MSG, termcolor::green)
 #define RED(MSG) COLORED(MSG, termcolor::red)
 #define PURPLE(MSG) COLORED(MSG, termcolor::magenta)
-#define LOG(LEVEL) Log(LEVEL, __LINE__, __FILE__).stream()
+#define LOG(LEVEL) Log(LEVEL, __LINE__, __FILENAME__).stream()
+#pragma clang diagnostic pop
+
 #endif

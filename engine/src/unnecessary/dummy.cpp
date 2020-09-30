@@ -12,8 +12,7 @@ int main() {
     un::ShaderStage vert("standart.vert", device);
     un::Shader shader(device, {frag, vert});
     un::GraphicsPipelineSpecification specification;
-    specification.vertexInput().
-    specification.addStages(frag, vert);
+    //specification.addStages(frag, vert);
     world.addSystem<un::TransformSystem>();
     entt::registry &registry = world.getRegistry();
     entt::entity cube = registry.create();

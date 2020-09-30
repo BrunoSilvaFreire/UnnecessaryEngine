@@ -33,21 +33,21 @@ namespace un {
         void withVertexInput(
                 vk::PipelineVertexInputStateCreateFlags flags,
                 const std::vector<vk::VertexInputBindingDescription> &inputBindings,
-                const std::vector<vk::VertexInputAttributeDescription>& inputAttributes
+                const std::vector<vk::VertexInputAttributeDescription> &inputAttributes
         ) {
-vk::PipelineVertexInputStateCreateInfo info(flags, inputBindings, inputAttributes)
+            //vk::PipelineVertexInputStateCreateInfo info(flags, inputBindings, inputAttributes);
         }
 
         void addStage(const vk::PipelineShaderStageCreateInfo &info);
 
         void addStage(const ShaderStage &stage);
 
-        template<class... Args>
-        void addStages(Args... args) {
-            for (const ShaderStage &stage : args) {
-                addStage(stage);
-            }
-        }
+//        template<class... Args>
+//        void addStages(Args... args) {
+//            for (const ShaderStage &stage : ...args) {
+//                addStage(stage);
+//            }
+//        }
 
         vk::Pipeline create(const vk::Device &device);
     };

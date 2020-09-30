@@ -7,6 +7,7 @@ namespace un {
             const vk::Device &device,
             const vk::CommandPool &pool
             ) {
+        /*
         vk::CommandBuffer presentBuffer;
         presentBuffer = device.allocateCommandBuffers(
                 vk::CommandBufferAllocateInfo(
@@ -17,6 +18,7 @@ namespace un {
         );
         FrameNode present("present", presentBuffer);
         boost::add_vertex( present, *this);
+        */
     }
 
     FrameNode::FrameNode(

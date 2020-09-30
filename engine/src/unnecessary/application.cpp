@@ -1,8 +1,40 @@
 #include <unnecessary/application.h>
 #include <unnecessary/logging.h>
 #include <unordered_set>
+#include <functional>
 
 namespace un {
+    template<typename T>
+    void assertHasElements(
+            const std::string &name,
+            std::vector<T> elements,
+            std::vector<const char *> &requirements,
+            const std::function<const char *(const T &)> &selector
+    ) {
+        std::vector<std::string> notFound;
+        for (const char *&requirement : requirements) {
+            bool found = false;
+            for (const T &property : elements) {
+                std::string propertyName = std::string(selector(property));
+
+                if (propertyName == requirement) {
+                    LOG(INFO) << "Found " << name << ' ' << propertyName;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                notFound.emplace_back(requirement);
+            }
+        }
+        if (!notFound.empty()) {
+            for (std::string &layer:notFound) {
+                LOG(FUCK) << name << " '" << layer << "' not found.";
+            }
+            throw std::runtime_error("Unable to find all required elements.");
+        }
+    }
+
     vk::Instance loadVulkan(
             const std::string &name,
             const Version &appVersion
@@ -21,8 +53,26 @@ namespace un {
             instanceExtensions.emplace_back(requiredExtensions[i]);
         }
 #ifdef DEBUG
-        layers.emplace_back("VK_LAYER_KHRONOS_validation");
+       layers.emplace_back("VK_LAYER_KHRONOS_validation");
 #endif
+        assertHasElements<vk::ExtensionProperties>(
+                "extension",
+                vk::enumerateInstanceExtensionProperties(),
+                instanceExtensions,
+                [](const vk::ExtensionProperties &properties) {
+                    return properties.extensionName.data();
+                }
+        );
+
+        assertHasElements<vk::LayerProperties>(
+                "layer",
+                vk::enumerateInstanceLayerProperties(),
+                layers,
+                [](const vk::LayerProperties &properties) {
+                    return properties.layerName.data();
+                }
+        );
+
         vk::ApplicationInfo appInfo(
                 name.c_str(),
                 VK_MAKE_VERSION(appVersion.getMajor(), appVersion.getMinor(), appVersion.getMinor()),
@@ -32,11 +82,17 @@ namespace un {
         );
         vk::InstanceCreateInfo info(
                 (vk::InstanceCreateFlags) 0,
-                &appInfo
+                &appInfo,
+                layers,
+                instanceExtensions
         );
-        info.setPEnabledExtensionNames(instanceExtensions);
-        info.setPEnabledLayerNames(layers);
-        return vk::createInstance(info);
+        try {
+            return vk::createInstance(info);
+
+        } catch (vk::LayerNotPresentError &layerNotPresentError) {
+            LOG(FUCK) << RED(layerNotPresentError.what() << " (" << layerNotPresentError.code() << ")");
+            throw layerNotPresentError;
+        }
     }
 
     Application::Application(
