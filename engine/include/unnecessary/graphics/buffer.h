@@ -1,0 +1,8 @@
+//
+// Created by Bruno on 10/5/2020.
+//
+
+#ifndef UNNECESSARYENGINE_BUFFER_H
+#define UNNECESSARYENGINE_BUFFER_H
+
+#endif //UNNECESSARYENGINE_BUFFER_H
