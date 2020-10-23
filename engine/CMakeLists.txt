@@ -1,28 +1,4 @@
-
-IF (WIN32)
-    message("\"${CMAKE_PREFIX_PATH}\"")
-    set(
-            CMAKE_PREFIX_PATH
-            "C:\\Program Files (x86) \\GLFW"
-            "C:\\Program Files (x86) \\EnTT"
-            "C:\\Program Files (x86) \\GLM"
-            "C:\\Program Files (x86) \\GLM\\cmake\\glm"
-    )
-    set(
-            BOOST_ROOT "C:\\local\\boost_1_74_0"
-    )
-    find_package(EnTT REQUIRED CONFIG)
-    find_package(GLFW3 REQUIRED CONFIG)
-    find_package(termcolor REQUIRED CONFIG)
-    find_package(GLM REQUIRED CONFIG)
-ELSE ()
-    find_package(EnTT REQUIRED)
-    find_package(GLFW3 REQUIRED)
-    find_package(termcolor REQUIRED)
-ENDIF ()
-
 find_package(Vulkan REQUIRED)
-find_package(Boost REQUIRED graph)
 add_executable(
         unnecessary
         include/unnecessary/application.h
@@ -37,7 +13,7 @@ add_executable(
         include/unnecessary/logging.h
         src/unnecessary/logging.cpp
         src/unnecessary/renderer.cpp
-        include/unnecessary/renderer.h
+        include/unnecessary/graphics/renderer.h
         include/unnecessary/algorithm/requirements.h
         src/unnecessary/algorithm/requirements.cpp
         src/unnecessary/algorithm/vulkan_requirements.cpp
@@ -97,10 +73,10 @@ endforeach ()
 
 target_link_libraries(
         unnecessary
-        EnTT::EnTT
-        termcolor::termcolor
-        glfw
         Vulkan::Vulkan
-        glm::glm
-        Boost::graph
+        CONAN_PKG::glm
+        CONAN_PKG::entt
+        CONAN_PKG::termcolor
+        CONAN_PKG::boost
+        CONAN_PKG::glfw
 )

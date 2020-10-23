@@ -7,7 +7,7 @@
 
 #include <GLFW/glfw3.h>
 #include <unnecessary/version.h>
-#include <unnecessary/renderer.h>
+#include <unnecessary/graphics/renderer.h>
 #include <unnecessary/algorithm/event.h>
 
 namespace un {
