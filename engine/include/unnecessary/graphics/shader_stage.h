@@ -5,29 +5,49 @@
 #include <utility>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
+#include <unnecessary/graphics/descriptor_layout.h>
 
 namespace un {
-    struct DescriptorElement {
+    struct PushConstants {
     public:
-        std::string name;
-        vk::DescriptorType type;
+        u32 offset, size;
+
+        PushConstants();
+
+        PushConstants(u32 offset, u32 size);
     };
 
     class ShaderStage {
     private:
         std::string name;
-        vk::ShaderModule module;
-        vk::ShaderStageFlagBits bits;
-        std::vector<un::DescriptorElement> descriptorElements;
+        /**
+         * The currently loaded module in vulkan.
+         * May be null if the SPIR-V has not yet been uploaded to the GPU
+         */
+        vk::ShaderModule loadedModule;
+        vk::ShaderStageFlagBits flags;
+        un::DescriptorLayout descriptorLayout;
+        std::optional<un::PushConstants> pushConstantRange;
     public:
-        explicit ShaderStage() = default;
+        ShaderStage(
+                std::string name,
+                const vk::ShaderStageFlagBits &flags,
+                DescriptorLayout descriptorLayout,
+                std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>()
+        );
 
-        explicit ShaderStage(std::string name);
-
-        explicit ShaderStage(const std::string &name, vk::Device &device);
+        ShaderStage(
+                const std::string &name,
+                const vk::ShaderStageFlagBits &flags,
+                const un::DescriptorLayout &descriptorLayout,
+                vk::Device &device,
+                std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>(),
+                const std::filesystem::path &root = std::filesystem::current_path()
+        );
 
         void dispose(vk::Device &device);
 
@@ -38,11 +58,13 @@ namespace un {
 
         const std::string &getName() const;
 
-        const vk::ShaderModule &getModule() const;
+        const vk::ShaderModule &getUnsafeModule() const;
 
-        vk::ShaderStageFlagBits getBits() const;
+        const vk::ShaderStageFlagBits &getFlags() const;
 
-        const std::vector<un::DescriptorElement> &getDescriptorElements() const;
+        const DescriptorLayout &getDescriptorLayout() const;
+
+        const std::optional<un::PushConstants> &getPushConstantRange() const;
     };
 }
 #endif

@@ -13,8 +13,9 @@ conan_cmake_run(
         glm/0.9.9.8
         termcolor/1.0.1
         entt/3.5.2
-        boost/1.74.0
         glfw/3.3.2
+        tinyobjloader/1.0.6
+        grapphs/0.1.0
 
         SETTINGS
         compiler.cppstd=20

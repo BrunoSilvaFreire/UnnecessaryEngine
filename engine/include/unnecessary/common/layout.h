@@ -1,8 +1,0 @@
-//
-// Created by Bruno on 10/1/2020.
-//
-
-#ifndef UNNECESSARYENGINE_LAYOUT_H
-#define UNNECESSARYENGINE_LAYOUT_H
-
-#endif //UNNECESSARYENGINE_LAYOUT_H

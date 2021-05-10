@@ -20,10 +20,10 @@ namespace un {
 
     Log::Log(const std::string &header, u32 line, const std::string &file) : flushed(false) {
         stream() <<
-                 termcolor::grey << '[' <<
+                 DEFAULT_COLOR << '[' <<
                  termcolor::green << header <<
-                 termcolor::grey << "] " <<
+                 DEFAULT_COLOR << "] " <<
                  termcolor::magenta << '<' << file << "#L" << line << '>' <<
-                 termcolor::grey << ": ";
+                 DEFAULT_COLOR << ": ";
     }
 }

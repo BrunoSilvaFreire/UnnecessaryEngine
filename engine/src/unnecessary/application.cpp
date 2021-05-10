@@ -1,5 +1,4 @@
 #include <unnecessary/application.h>
-#include <unnecessary/logging.h>
 #include <unordered_set>
 #include <functional>
 
@@ -41,19 +40,26 @@ namespace un {
     ) {
         std::vector<const char *> instanceExtensions;
         std::vector<const char *> layers;
-        u32 count;
         if (glfwInit() != GLFW_TRUE) {
             throw std::runtime_error("Unable to initialize GLFW");
         }
-        if (glfwVulkanSupported() != GLFW_TRUE) {
-            throw std::runtime_error("Vulkan not supported by runtime");
+        auto vulkanSupportCode = glfwVulkanSupported();
+        if (vulkanSupportCode != GLFW_TRUE) {
+            std::string msg = "Vulkan not supported by runtime ";
+            msg += "(";
+            msg += std::to_string(vulkanSupportCode);
+            msg += ")";
+            throw std::runtime_error(msg);
         }
+
+        u32 count;
         const char **requiredExtensions = glfwGetRequiredInstanceExtensions(&count);
         for (u32 i = 0; i < count; ++i) {
             instanceExtensions.emplace_back(requiredExtensions[i]);
         }
 #ifdef DEBUG
-       layers.emplace_back("VK_LAYER_KHRONOS_validation");
+        LOG(INFO) << "Using validation layers";
+        layers.emplace_back("VK_LAYER_KHRONOS_validation");
 #endif
         assertHasElements<vk::ExtensionProperties>(
                 "extension",
@@ -102,16 +108,30 @@ namespace un {
         version(version),
         pooling(true),
         vulkan(loadVulkan(name, version)),
-        renderer(vulkan) {
+        renderer(nullptr) {
         LOG(INFO) << "Initializing app " << GREEN(name);
 
-        auto monitor = glfwGetPrimaryMonitor();
-        auto mode = glfwGetVideoMode(monitor);
-        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-        window = glfwCreateWindow(mode->width, mode->height, name.c_str(), monitor, nullptr);
+        monitor = glfwGetPrimaryMonitor();
+        vidMode = glfwGetVideoMode(monitor);
+        bool fullscreen = false;
+        GLFWmonitor *mon;
+        if (fullscreen) {
+            glfwWindowHint(GLFW_RED_BITS, vidMode->redBits);
+            glfwWindowHint(GLFW_BLUE_BITS, vidMode->blueBits);
+            glfwWindowHint(GLFW_GREEN_BITS, vidMode->greenBits);
+            glfwWindowHint(GLFW_REFRESH_RATE, vidMode->refreshRate);
+            width = vidMode->width;
+            height = vidMode->height;
+            mon = monitor;
+        } else {
+            width = 640;
+            height = 480;
+            mon = nullptr;
+        }
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        window = glfwCreateWindow(width, height, name.c_str(), mon, nullptr);
+        glfwMakeContextCurrent(window);
+        renderer = new Renderer(vulkan, window);
     }
 
     void Application::execute() {
@@ -127,7 +147,7 @@ namespace un {
     }
 
     Renderer &Application::getRenderer() {
-        return renderer;
+        return *renderer;
     }
 
     const std::string &Application::getName() const {
@@ -144,5 +164,29 @@ namespace un {
 
     Event<f32> &Application::getOnPool() {
         return onPool;
+    }
+
+    const GLFWvidmode *const Application::getVidMode() const {
+        return vidMode;
+    }
+
+    GLFWmonitor *Application::getMonitor() const {
+        return monitor;
+    }
+
+    Application::~Application() {
+        delete renderer;
+    }
+
+    JobSystem &Application::getJobSystem() {
+        return jobSystem;
+    }
+
+    u32 Application::getWidth() const {
+        return width;
+    }
+
+    u32 Application::getHeight() const {
+        return height;
     }
 }

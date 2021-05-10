@@ -7,5 +7,8 @@
       <file path="$PROJECT_DIR$/engine/resources" />
       <file path="$PROJECT_DIR$/engine/src" />
     </sourceRoots>
+    <excludeRoots>
+      <file path="$PROJECT_DIR$/resources" />
+    </excludeRoots>
   </component>
 </project>

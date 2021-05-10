@@ -1,16 +1,18 @@
 #include <unnecessary/graphics/shader_stage.h>
 
+#include <utility>
+
 namespace un {
 
     void ShaderStage::load(vk::Device &device, const std::filesystem::path &root) {
         std::filesystem::path shaderPath = root / "resources" / "shaders" / (name + ".spv");
-        std::ifstream file(shaderPath, std::ios::ate);
+        std::ifstream file(shaderPath, std::ios::ate | std::ios::binary);
         size_t size = file.tellg();
         LOG(INFO) << "Loading " << PURPLE(shaderPath.string()) << " (" << GREEN(size << " bytes") << ")";
         file.seekg(0, std::ios::beg);
         std::vector<char> buf(size);
         file.read(buf.data(), size);
-        module = device.createShaderModule(
+        loadedModule = device.createShaderModule(
                 vk::ShaderModuleCreateInfo(
                         (vk::ShaderModuleCreateFlags) 0,
                         size,
@@ -20,31 +22,55 @@ namespace un {
     }
 
     void ShaderStage::dispose(vk::Device &device) {
-        device.destroy(module);
+        device.destroy(loadedModule);
     }
 
-    ShaderStage::ShaderStage(const std::string &name, vk::Device &device) : ShaderStage(name) {
-        load(device);
-    }
-
-    ShaderStage::ShaderStage(std::string name) : name(std::move(name)) {
-        DescriptorElement element;
-        element.type = vk::DescriptorType::eSampler;
-    }
 
     const std::string &ShaderStage::getName() const {
         return name;
     }
 
-    const vk::ShaderModule &ShaderStage::getModule() const {
-        return module;
+    const vk::ShaderModule &ShaderStage::getUnsafeModule() const {
+        return loadedModule;
     }
 
-    vk::ShaderStageFlagBits ShaderStage::getBits() const {
-        return bits;
+
+    ShaderStage::ShaderStage(
+            std::string name,
+            const vk::ShaderStageFlagBits &flags,
+            DescriptorLayout descriptorLayout,
+            std::optional<un::PushConstants> pushConstantRange
+    ) : name(std::move(name)),
+        flags(flags),
+        descriptorLayout(std::move(descriptorLayout)),
+        pushConstantRange(pushConstantRange) {
+
     }
 
-    const std::vector<un::DescriptorElement> &ShaderStage::getDescriptorElements() const {
-        return descriptorElements;
+    ShaderStage::ShaderStage(
+            const std::string &name,
+            const vk::ShaderStageFlagBits &flags,
+            const DescriptorLayout &descriptorLayout,
+            vk::Device &device,
+            std::optional<un::PushConstants> pushConstantRange,
+            const std::filesystem::path &root
+    ) : ShaderStage(name, flags, descriptorLayout, pushConstantRange) {
+        load(device, root);
     }
+
+    const vk::ShaderStageFlagBits &ShaderStage::getFlags() const {
+        return flags;
+    }
+
+    const DescriptorLayout &ShaderStage::getDescriptorLayout() const {
+        return descriptorLayout;
+    }
+
+    const std::optional<un::PushConstants> &ShaderStage::getPushConstantRange() const {
+        return pushConstantRange;
+    }
+
+    PushConstants::PushConstants(u32 offset, u32 size) : offset(offset), size(size) {}
+
+    PushConstants::PushConstants() {}
 }

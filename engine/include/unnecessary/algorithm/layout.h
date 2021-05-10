@@ -6,7 +6,7 @@
 namespace un {
     template<typename T>
     class Layout {
-    private:
+    protected:
         std::vector<T> elements;
     public:
         std::vector<T> &getElements() {

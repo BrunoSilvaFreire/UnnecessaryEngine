@@ -1,0 +1,8 @@
+#ifndef UNNECESSARYENGINE_RENDER_TARGET_H
+#define UNNECESSARYENGINE_RENDER_TARGET_H
+
+namespace un {
+
+}
+
+#endif

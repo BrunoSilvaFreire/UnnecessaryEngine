@@ -3,7 +3,8 @@
 namespace un {
     void TransformSystem::step(World &world, f32 delta) {
         auto &registry = world.getRegistry();
-        for (entt::entity entity : registry.view<LocalToWorld>()) {
+        auto view = registry.view<LocalToWorld>();
+        for (entt::entity entity : view) {
             LocalToWorld &ltw = registry.get<LocalToWorld>(entity);
             auto matrix(glm::identity<glm::mat4>());
             if (auto translation = registry.try_get<Translation>(entity); translation) {

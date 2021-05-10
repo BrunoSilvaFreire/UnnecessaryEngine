@@ -1,8 +1,11 @@
-#include <unnecessary/world.h>
+#include <unnecessary/systems/world.h>
 #include <unnecessary/systems/system.h>
+#include <unnecessary/systems/parallel_system_data.h>
+#include <unordered_set>
+#include <cmath>
 
 namespace un {
-    World::World(un::Application &app) : registry() {
+    World::World(un::Application &app) : registry(), jobSystem(&app.getJobSystem()) {
         app.getOnPool() += [this](f32 delta) {
             step(delta);
         };
@@ -13,8 +16,36 @@ namespace un {
     }
 
     void World::step(f32 delta) {
-        for (System *system : systems) {
-            system->step(*this, delta);
+        std::chrono::high_resolution_clock timer;
+        auto start = timer.now();
+        std::unordered_set<u32> ableToStart;
+        for (ParallelSystemData &data : systems) {
+            un::RunSystemJob &job = data.getJob();
+            job.setDeltaTime(delta);
+            u32 id = jobSystem->enqueue(&job, false);
+            jobIds[data.getSystem()] = id;
+            ableToStart.emplace(id);
+        }
+        for (ParallelSystemData &data : systems) {
+            const std::vector<un::System *> &dependencies = data.getDependencies();
+            if (!dependencies.empty()) {
+                u32 id = jobIds[data.getSystem()];
+                ableToStart.erase(id);
+                for (un::System *dependency : dependencies) {
+                    jobSystem->addDependency(id, jobIds[dependency]);
+                }
+            }
+        }
+        for (u32 job : ableToStart) {
+            jobSystem->markForExecution(job);
+        }
+        auto end = timer.now();
+        f32 timeLeft = 1.0F / targetFPS;
+        f32 frameTime = (end - start).count() / 1000000000.0F;
+        timeLeft -= frameTime;
+        u64 msToSleep = std::lround(timeLeft * 1000);
+        if (msToSleep > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
         }
     }
 
@@ -22,4 +53,11 @@ namespace un {
         return registry;
     }
 
+    u32 World::addSystem(System *system) {
+        return systems.addVertex(ParallelSystemData(system, this));
+    }
+
+    void World::systemMustRunAfter(u32 system, u32 after) {
+        systems.connect(after, system, true);
+    }
 }

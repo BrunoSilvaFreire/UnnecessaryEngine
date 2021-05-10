@@ -25,11 +25,19 @@ namespace un {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wstring-plus-int"
-#define COLORED(MSG, COLOR) COLOR << MSG << termcolor::grey
+
+#if defined(_WIN32)
+#define DEFAULT_COLOR termcolor::white
+#else
+#define DEFAULT_COLOR termcolor::grey
+#endif
+#define COLORED(MSG, COLOR) COLOR << MSG << DEFAULT_COLOR
+
 #define __FILENAME__ (__FILE__ + SOURCE_PATH_SIZE)
 #define GREEN(MSG) COLORED(MSG, termcolor::green)
 #define RED(MSG) COLORED(MSG, termcolor::red)
 #define PURPLE(MSG) COLORED(MSG, termcolor::magenta)
+#define YELLOW(MSG) COLORED(MSG, termcolor::yellow)
 #define LOG(LEVEL) Log(LEVEL, __LINE__, __FILENAME__).stream()
 #pragma clang diagnostic pop
 
