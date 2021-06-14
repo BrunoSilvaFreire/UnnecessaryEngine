@@ -1,15 +1,18 @@
 #include <entt/entt.hpp>
 #include <unnecessary/def.h>
 #include <unnecessary/application.h>
+#include <unnecessary/systems/parallel_system_data.h>
+#include <grapphs/adjacency_list.h>
 
 #ifndef UNNECESSARYENGINE_WORLD_H
 #define UNNECESSARYENGINE_WORLD_H
+
 namespace un {
     class System;
 
     class ParallelSystemData;
 
-    typedef AdjacencyList<ParallelSystemData, bool> SystemGraph;
+    typedef gpp::AdjacencyList<ParallelSystemData, bool> SystemGraph;
 
     class World {
     private:

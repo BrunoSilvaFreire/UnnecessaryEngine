@@ -23,7 +23,7 @@ namespace un {
         u32 id;
         {
             std::lock_guard<std::mutex> guard(graphUsage);
-            id = tasks.addVertex(job);
+            id = tasks.push(job);
         }
         if (alsoMarkForExecution) {
             markForExecution(id);
@@ -99,7 +99,11 @@ namespace un {
     }
 
     Job *JobSystem::getJob(u32 id) {
-        return tasks[id];
+        Job *job;
+        if (tasks.try_get_vertex(id, job)) {
+            return job;
+        }
+        return nullptr;
     }
 
     JobSystem::JobWorker::JobWorker(
@@ -162,7 +166,8 @@ namespace un {
     void JobSystem::notifyCompletion(u32 id) {
         {
             std::lock_guard<std::mutex> guard(graphUsage);
-            for (std::tuple<u32, un::JobDependencyType> edge : tasks.edgesFrom(id)) {
+            auto view = tasks.edges_from(id);
+            for (std::tuple<u32, un::JobDependencyType> edge : view) {
                 un::JobDependencyType type = std::get<1>(edge);
                 if (type != un::JobDependencyType::eRequirement) {
                     continue;
@@ -170,7 +175,7 @@ namespace un {
                 u32 dependantID = std::get<0>(edge);
                 bool ready = true;
                 tasks.disconnect(id, dependantID);
-                for (std::tuple<u32, un::JobDependencyType> other : tasks.edgesFrom(dependantID)) {
+                for (std::tuple<u32, un::JobDependencyType> other : tasks.edges_from(dependantID)) {
                     un::JobDependencyType otherType = std::get<1>(edge);
                     if (otherType == un::JobDependencyType::eRequirement) {
                         ready = false;
@@ -180,7 +185,7 @@ namespace un {
                     awaitingExecution.push(dependantID);
                 }
             }
-            tasks.removeVertex(id);
+            tasks.remove(id);
         }
     }
 

@@ -6,6 +6,7 @@
       <file path="$PROJECT_DIR$/engine/include" />
       <file path="$PROJECT_DIR$/engine/resources" />
       <file path="$PROJECT_DIR$/engine/src" />
+      <file path="$PROJECT_DIR$/thirdparty/grapphs/include" />
     </sourceRoots>
     <excludeRoots>
       <file path="$PROJECT_DIR$/resources" />

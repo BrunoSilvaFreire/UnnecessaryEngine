@@ -19,6 +19,10 @@ namespace un {
         dependencies.push_back(other);
     }
 
+    const un::RunSystemJob &ParallelSystemData::getJob() const {
+        return job;
+    }
+
     const std::vector<un::System *> &ParallelSystemData::getDependencies() {
         return dependencies;
     }

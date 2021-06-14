@@ -53,8 +53,6 @@ add_executable(
         src/unnecessary/def.cpp
         include/unnecessary/systems/run_system_job.h
         src/unnecessary/systems/run_system_job.cpp
-        include/unnecessary/algorithm/graphs/graph.h
-        include/unnecessary/algorithm/graphs/adjacency_list.h
         include/unnecessary/systems/parallel_system_data.h
         src/unnecessary/systems/parallel_system_data.cpp
         include/unnecessary/graphics/systems/drawing.h
@@ -92,18 +90,7 @@ set(
 set(resources_output ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources)
 set(shader_output_dir ${resources_output}/shaders)
 foreach (shader ${SHADERS})
-    get_filename_component(shader_filename ${shader} NAME)
-    set(shader_abs ${CMAKE_CURRENT_SOURCE_DIR}/${shader})
-    set(shader_output ${shader_output_dir}/${shader_filename}.spv)
-    set(target_name compileUnnecessaryShader-${shader_filename})
-    add_custom_target(
-            ${target_name}
-            COMMENT "Compiling ${shader_abs} to SPIR_V (${shader_output})"
-            BYPRODUCTS ${shader_output}
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
-            COMMAND glslc ${shader_abs} -o ${shader_output}
-    )
-    add_dependencies(unnecessary ${target_name})
+    add_shader(${shader})
 endforeach ()
 set(
         RESOURCES
@@ -131,4 +118,5 @@ target_link_libraries(
         CONAN_PKG::termcolor
         CONAN_PKG::glfw
         CONAN_PKG::tinyobjloader
+        grapphs
 )

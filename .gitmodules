@@ -1,0 +1,3 @@
+[submodule "thirdparty/grapphs"]
+	path = thirdparty/grapphs
+	url = https://github.com/BrunoSilvaFreire/grapphs.git

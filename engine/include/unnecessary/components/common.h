@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <vulkan/vulkan.hpp>
+#include <entt/entt.hpp>
+#include <unnecessary/def.h>
 #include <unnecessary/graphics/matrices.h>
 
 namespace un {
@@ -19,7 +21,10 @@ namespace un {
 
     struct Perspective {
     public:
-        f32 fieldOfView, zNear, zFar, aspect;
+        f32 fieldOfView;
+        f32 zNear;
+        f32 zFar;
+        f32 aspect;
     };
 
     struct Projection {

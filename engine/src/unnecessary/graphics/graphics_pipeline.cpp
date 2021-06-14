@@ -182,20 +182,18 @@ namespace un {
                 (vk::CullModeFlags) vk::CullModeFlagBits::eBack
         );
         rasterization.setLineWidth(1.0F);
+        std::vector<vk::PipelineColorBlendAttachmentState> attachments = {
+                vk::PipelineColorBlendAttachmentState(
+                        VK_TRUE,
+                        vk::BlendFactor::eSrcAlpha,
+                        vk::BlendFactor::eOneMinusSrcAlpha
+                )
+        };
         vk::PipelineColorBlendStateCreateInfo colorBlend(
                 (vk::PipelineColorBlendStateCreateFlags) 0,
                 0,
                 vk::LogicOp::eClear,
-                std::vector<vk::PipelineColorBlendAttachmentState>(
-                        {
-                                vk::PipelineColorBlendAttachmentState(
-                                        VK_TRUE,
-                                        vk::BlendFactor::eSrcAlpha,
-                                        vk::BlendFactor::eOneMinusSrcAlpha
-
-                                )
-                        }
-                )
+                attachments
         );
 
         vk::AttachmentDescription colorAttachment(
@@ -206,28 +204,27 @@ namespace un {
         colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
         colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 
-        std::vector<vk::AttachmentReference> references;
+        std::vector<vk::AttachmentReference> colorAttachments;
+        std::vector<vk::AttachmentReference> inputAttachments;
         std::vector<vk::SubpassDescription> subpasses(
                 {
                         vk::SubpassDescription(
 
                                 (vk::SubpassDescriptionFlags) 0,
                                 vk::PipelineBindPoint::eGraphics,
-                                std::vector<vk::AttachmentReference>(),
-                                references
+                                inputAttachments,
+                                colorAttachments
                         )
                 }
         );
 
+        std::array<vk::AttachmentDescription, 1> attachmentDescriptions = {
+                colorAttachment
+        };
         auto renderPass = device.createRenderPass(
                 vk::RenderPassCreateInfo(
                         (vk::RenderPassCreateFlags) 0,
-                        std::array<vk::AttachmentDescription, 1>(
-                                {
-                                        colorAttachment
-
-                                }
-                        ),
+                        attachmentDescriptions,
                         subpasses
                 )
         );

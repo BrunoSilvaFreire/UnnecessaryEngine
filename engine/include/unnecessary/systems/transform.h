@@ -1,8 +1,9 @@
 #ifndef UNNECESSARYENGINE_TRANSFORM_H
 #define UNNECESSARYENGINE_TRANSFORM_H
 
-#include <unnecessary/systems/system.h>
 #include <unnecessary/components/common.h>
+#include <unnecessary/systems/system.h>
+#include <unnecessary/systems/world.h>
 
 namespace un {
     class TransformSystem : public System {

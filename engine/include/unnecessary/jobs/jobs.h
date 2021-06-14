@@ -4,7 +4,7 @@
 #include <queue>
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
-#include <unnecessary/algorithm/graphs/adjacency_list.h>
+#include <grapphs/adjacency_list.h>
 #include <utility>
 #include <chrono>
 #include <thread>
@@ -38,7 +38,7 @@ namespace un {
         eRequired = 2
     };
 
-    typedef un::AdjacencyList<Job *, JobDependencyType> JobGraph;
+    typedef gpp::AdjacencyList<Job *, JobDependencyType, u32> JobGraph;
 
     class LambdaJob : public Job {
     public:

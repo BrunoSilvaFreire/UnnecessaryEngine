@@ -53,12 +53,12 @@ int main() {
 
     auto transformSystem = world.addSystem<un::TransformSystem>();
     auto projectionSystem = world.addSystem<un::ProjectionSystem>();
-    auto drawingSystem = new un::DrawingSystem(app.getRenderer());
-    auto drawingSystemId = world.addSystem(drawingSystem);
-    auto renderMeshSystem = world.addSystem<un::RenderMeshSystem>(app.getRenderer(), drawingSystem);
+    //auto drawingSystem = new un::DrawingSystem(app.getRenderer());
+    //auto drawingSystemId = world.addSystem(drawingSystem);
+    //auto renderMeshSystem = world.addSystem<un::RenderMeshSystem>(app.getRenderer(), drawingSystem);
     world.systemMustRunAfter(transformSystem, projectionSystem);
-    world.systemMustRunAfter(renderMeshSystem, transformSystem);
-    world.systemMustRunAfter(drawingSystemId, renderMeshSystem);
+    //world.systemMustRunAfter(renderMeshSystem, transformSystem);
+    //world.systemMustRunAfter(drawingSystemId, renderMeshSystem);
     world.createEntity<un::Translation, un::Rotation, un::Camera, un::Projection, un::Perspective>();
 
     app.execute();

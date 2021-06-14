@@ -7,7 +7,7 @@ if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
             "${CMAKE_BINARY_DIR}/conan.cmake")
 endif ()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
-
+include(cmake/Unnecessary.cmake)
 conan_cmake_run(
         REQUIRES
         glm/0.9.9.8
@@ -15,7 +15,6 @@ conan_cmake_run(
         entt/3.5.2
         glfw/3.3.2
         tinyobjloader/1.0.6
-        grapphs/0.1.0
 
         SETTINGS
         compiler.cppstd=20
@@ -24,4 +23,11 @@ conan_cmake_run(
         CMAKE_TARGETS
         BUILD missing
 )
+
+
+set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
+add_unnecessary_thirdparty_library(grapphs)
+
 add_subdirectory(engine)
+
+
