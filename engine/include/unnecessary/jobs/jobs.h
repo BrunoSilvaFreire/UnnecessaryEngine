@@ -70,17 +70,19 @@ namespace un {
 
         class JobWorker {
         private:
+            size_t index;
             std::thread *thread;
             JobSystem *jobSystem;
             bool running = true;
             bool awaken;
-            std::mutex mutex;
+            std::mutex handbrakeMutex;
+            std::mutex sleepMutex;
             std::condition_variable waiting;
 
             void workerThread();
 
         public:
-            explicit JobWorker(JobSystem *jobSystem);
+            explicit JobWorker(JobSystem *jobSystem, size_t index);
 
             JobWorker(JobWorker &&copy) noexcept;
 

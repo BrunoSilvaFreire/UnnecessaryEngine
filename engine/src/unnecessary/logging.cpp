@@ -1,6 +1,7 @@
 #include <unnecessary/logging.h>
 
 namespace un {
+    std::mutex Log::globalMutex;
 
     void Log::flush() {
         if (flushed) {
@@ -8,6 +9,7 @@ namespace un {
         }
         flushed = true;
         stream() << std::endl;
+        globalMutex.unlock();
     }
 
     std::ostream &Log::stream() {
@@ -19,6 +21,7 @@ namespace un {
     }
 
     Log::Log(const std::string &header, u32 line, const std::string &file) : flushed(false) {
+        globalMutex.lock();
         stream() <<
                  DEFAULT_COLOR << '[' <<
                  termcolor::green << header <<

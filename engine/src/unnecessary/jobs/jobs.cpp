@@ -80,15 +80,16 @@ namespace un {
         }
     }
 
-    JobSystem::JobSystem() : queueUsage() {
-        auto nCores = std::thread::hardware_concurrency();
+    JobSystem::JobSystem() : queueUsage(), graphUsage() {
+        size_t nCores = std::thread::hardware_concurrency();
         if (nCores == 0) {
             nCores = 4;
         }
+        nCores = 4;
         LOG(INFO) << "Using " << GREEN(nCores) << " workers for job system.";
         threads.reserve(nCores);
-        for (int i = 0; i < nCores; ++i) {
-            threads.emplace_back(this);
+        for (size_t i = 0; i < nCores; ++i) {
+            threads.emplace_back(this, i);
         }
     }
 
@@ -114,12 +115,11 @@ namespace un {
                 waiting() {
     }
 
-    JobSystem::JobWorker::JobWorker(
-            JobSystem *jobSystem
-    ) : thread(new std::thread(&JobWorker::workerThread, this)),
-        jobSystem(jobSystem),
-        waiting(),
-        running(true) {
+    JobSystem::JobWorker::JobWorker(JobSystem *jobSystem, size_t index) : thread(
+            new std::thread(&JobWorker::workerThread, this)),
+                                                                          jobSystem(jobSystem),
+                                                                          waiting(),
+                                                                          running(true), index(index) {
 
     }
 
@@ -133,18 +133,24 @@ namespace un {
     }
 
     void JobSystem::JobWorker::awake() {
-        if (!awaken) {
-            awaken = true;
-            waiting.notify_one();
+        {
+            std::lock_guard<std::mutex> lock(sleepMutex);
+            if (!awaken) {
+                awaken = true;
+                waiting.notify_one();
+            }
         }
     }
 
     void JobSystem::JobWorker::sleep() {
-        if (awaken) {
-            awaken = false;
-            std::unique_lock<std::mutex> lock(mutex);
-            waiting.wait(lock);
+        {
+            std::lock_guard<std::mutex> lock(sleepMutex);
+            if (awaken) {
+                awaken = false;
+            }
         }
+        std::unique_lock<std::mutex> lock(handbrakeMutex);
+        waiting.wait(lock);
     }
 
     void JobSystem::JobWorker::workerThread() {
@@ -156,7 +162,6 @@ namespace un {
                 jobSystem->notifyCompletion(id);
             }
             if (running) {
-
                 sleep();
             }
         } while (running);
@@ -186,6 +191,15 @@ namespace un {
                 }
             }
             tasks.remove(id);
+            auto toAwake = awaitingExecution.size();
+            int i = 0;
+            while (i < threads.size() && toAwake > 0) {
+                JobWorker &worker = threads[i++];
+                if (!worker.isAwake()) {
+                    worker.awake();
+                    toAwake--;
+                };
+            }
         }
     }
 

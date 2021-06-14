@@ -3,11 +3,14 @@
 
 #include <iostream>
 #include <termcolor/termcolor.hpp>
+#include <mutex>
 #include "def.h"
 
 namespace un {
     class Log {
     private:
+        static std::mutex globalMutex;
+
         bool flushed;
     public:
         void flush();

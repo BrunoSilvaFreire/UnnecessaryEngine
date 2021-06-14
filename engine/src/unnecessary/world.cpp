@@ -43,9 +43,11 @@ namespace un {
         f32 timeLeft = 1.0F / targetFPS;
         f32 frameTime = (end - start).count() / 1000000000.0F;
         timeLeft -= frameTime;
-        u64 msToSleep = std::lround(timeLeft * 1000);
-        if (msToSleep > 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
+        if (timeLeft > 0) {
+            u64 msToSleep = std::lround(timeLeft * 1000);
+            if (msToSleep > 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
+            }
         }
     }
 
