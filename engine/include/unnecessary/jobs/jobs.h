@@ -17,23 +17,30 @@
 #define WRITE_ONLY()
 
 namespace un {
+    class Application;
+
     typedef u64 JobHandle;
+
+    class JobSystem;
+
+    class JobWorker;
+
 
     class Job {
     public:
-        virtual explicit operator void() = 0;
+        virtual void operator()(un::JobWorker *worker) = 0;
     };
 
     enum JobDependencyType : u8 {
         eNone = 0,
         /**
-         * Marks that THIS JOB is a requirement of the OTHER JOB
-         * (Used to find all jobs that may be started by the completion on this job)
+         * Marks that the OTHER JOB is a requirement of THIS JOB
+         * (Used to check whether all dependency of this job have been solved)
          */
         eRequirement = 1,
         /**
-         * Marks that the OTHER JOB is required by THIS JOB
-         * (Used to check whether all dependency of this job have been solved)
+         * Marks that the THIS JOB is required by the OTHER JOB
+         * (Used to find all jobs that may be started by the completion on this job)
          */
         eRequired = 2
     };
@@ -48,16 +55,46 @@ namespace un {
     public:
         LambdaJob(Callback callback);
 
-        explicit operator void() override;
+        void operator()(un::JobWorker *worker) override;
+    };
+
+
+    class JobWorker {
+    private:
+        size_t index;
+        std::thread *thread;
+        JobSystem *jobSystem;
+        bool running = true;
+        bool awaken;
+        std::mutex handbrakeMutex;
+        std::mutex sleepMutex;
+        std::condition_variable waiting;
+        vk::CommandPool commandPool;
+
+        void workerThread();
+
+    public:
+        explicit JobWorker(un::Application &application, JobSystem *jobSystem, size_t index);
+
+        JobWorker(JobWorker &&copy) noexcept;
+
+        ~JobWorker();
+
+        bool isAwake();
+
+        void awake();
+
+        void sleep();
     };
 
     class JobSystem {
+        friend class JobWorker;
+
     private:
         JobGraph tasks;
 
-        class JobWorker;
 
-        std::vector<JobWorker> threads;
+        std::vector<JobWorker> workers;
         std::queue<u32> awaitingExecution;
         std::mutex queueUsage, graphUsage;
 
@@ -68,34 +105,6 @@ namespace un {
         void notifyCompletion(u32 id);
 
 
-        class JobWorker {
-        private:
-            size_t index;
-            std::thread *thread;
-            JobSystem *jobSystem;
-            bool running = true;
-            bool awaken;
-            std::mutex handbrakeMutex;
-            std::mutex sleepMutex;
-            std::condition_variable waiting;
-
-            void workerThread();
-
-        public:
-            explicit JobWorker(JobSystem *jobSystem, size_t index);
-
-            JobWorker(JobWorker &&copy) noexcept;
-
-            ~JobWorker();
-
-            bool isAwake();
-
-            void awake();
-
-            void sleep();
-        };
-
-
     public:
         u32 enqueue(Job *job, bool markForExecution);
 
@@ -103,7 +112,7 @@ namespace un {
 
         void markForExecution(u32 job);
 
-        JobSystem();
+        JobSystem(un::Application &application);
 
         ~JobSystem();
 
@@ -136,6 +145,8 @@ namespace un {
         u32 enqueue(un::LambdaJob::Callback callback);
 
         u32 enqueue(u32 dependsOn, un::LambdaJob::Callback callback);
+
+        int getNumWorkers();
     };
 }
 #endif

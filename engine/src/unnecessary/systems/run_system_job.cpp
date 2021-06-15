@@ -6,7 +6,7 @@ namespace un {
             un::System *system
     ) : world(world), system(system), deltaTime(0) {}
 
-    un::RunSystemJob::operator void() {
+    void RunSystemJob::operator()(un::JobWorker *worker) {
         system->step(*world, deltaTime);
     }
 

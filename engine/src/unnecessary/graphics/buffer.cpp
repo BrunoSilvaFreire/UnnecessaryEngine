@@ -16,9 +16,10 @@ namespace un {
                 )
         );
         if (allocate) {
+            vk::MemoryRequirements requirements = device.getBufferMemoryRequirements(buffer);
             memory = device.allocateMemory(vk::MemoryAllocateInfo(
-                    size,
-                    renderer.getRenderingDevice().selectMemoryTypeFor(buffer)
+                    requirements.size,
+                    renderer.getRenderingDevice().selectMemoryTypeFor(requirements)
             ));
             device.bindBufferMemory(buffer, memory, 0);
         }

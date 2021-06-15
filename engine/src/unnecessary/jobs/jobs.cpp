@@ -1,3 +1,4 @@
+#include <unnecessary/application.h>
 #include <unnecessary/jobs/jobs.h>
 
 #include <utility>
@@ -9,7 +10,7 @@
 #endif
 namespace un {
 
-    LambdaJob::operator void() {
+    void LambdaJob::operator()(un::JobWorker *worker) {
         callback();
     }
 
@@ -20,6 +21,9 @@ namespace un {
     }
 
     u32 JobSystem::enqueue(Job *job, bool alsoMarkForExecution) {
+        if (job == nullptr) {
+            throw std::runtime_error("Unable to enqueue a null job");
+        }
         u32 id;
         {
             std::lock_guard<std::mutex> guard(graphUsage);
@@ -40,8 +44,8 @@ namespace un {
     void JobSystem::addDependency(u32 from, u32 to) {
         {
             std::lock_guard<std::mutex> guard(graphUsage);
-            tasks.connect(to, from, un::JobDependencyType::eRequirement);
-            tasks.connect(from, to, un::JobDependencyType::eRequired);
+            tasks.connect(to, from, un::JobDependencyType::eRequired);
+            tasks.connect(from, to, un::JobDependencyType::eRequirement);
         }
     }
 
@@ -71,7 +75,7 @@ namespace un {
     }
 
     void JobSystem::awakeSomeoneUp() {
-        for (JobWorker &worker : threads) {
+        for (JobWorker &worker : workers) {
             if (!worker.isAwake()) {
                 // Wake up worker
                 worker.awake();
@@ -80,16 +84,15 @@ namespace un {
         }
     }
 
-    JobSystem::JobSystem() : queueUsage(), graphUsage() {
+    JobSystem::JobSystem(un::Application &application) : queueUsage(), graphUsage() {
         size_t nCores = std::thread::hardware_concurrency();
         if (nCores == 0) {
             nCores = 4;
         }
-        nCores = 4;
         LOG(INFO) << "Using " << GREEN(nCores) << " workers for job system.";
-        threads.reserve(nCores);
+        workers.reserve(nCores);
         for (size_t i = 0; i < nCores; ++i) {
-            threads.emplace_back(this, i);
+            workers.emplace_back(application, this, i);
         }
     }
 
@@ -107,32 +110,52 @@ namespace un {
         return nullptr;
     }
 
-    JobSystem::JobWorker::JobWorker(
-            JobSystem::JobWorker &&copy
+    JobWorker::JobWorker(
+            JobWorker &&copy
     ) noexcept: thread(copy.thread),
                 jobSystem(copy.jobSystem),
                 running(copy.running),
                 waiting() {
     }
 
-    JobSystem::JobWorker::JobWorker(JobSystem *jobSystem, size_t index) : thread(
-            new std::thread(&JobWorker::workerThread, this)),
-                                                                          jobSystem(jobSystem),
-                                                                          waiting(),
-                                                                          running(true), index(index) {
-
+    JobWorker::JobWorker(
+            un::Application &application,
+            JobSystem *jobSystem,
+            size_t index
+    ) : thread(new std::thread(&JobWorker::workerThread, this)),
+        jobSystem(jobSystem),
+        waiting(),
+        running(true),
+        index(index) {
+        RenderingDevice &renderingDevice = application.getRenderer().getRenderingDevice();
+        auto device = renderingDevice.getVirtualDevice();
+        commandPool = device.createCommandPool(
+                vk::CommandPoolCreateInfo(
+                        (vk::CommandPoolCreateFlags) 0,
+                        renderingDevice.getGraphics().getIndex()
+                )
+        );
+#ifdef WIN32
+        int affinityMask = 1 << index;
+        auto returnStauts = SetThreadAffinityMask(thread->native_handle(), affinityMask);
+        if (returnStauts == 0) {
+            LOG(INFO) << "Unable to set worker " << index << " affinity mask on Win32 (" << GetLastError() << ")";
+        } else {
+            LOG(INFO) << "Worker " << index << " has affinity mask " << affinityMask << " (Was " << returnStauts << ")";
+        }
+#endif
     }
 
-    JobSystem::JobWorker::~JobWorker() {
+    JobWorker::~JobWorker() {
         LOG(INFO) << "Worker " << thread->get_id() << " marked for shutdown";
         running = false;
     }
 
-    bool JobSystem::JobWorker::isAwake() {
+    bool JobWorker::isAwake() {
         return awaken;
     }
 
-    void JobSystem::JobWorker::awake() {
+    void JobWorker::awake() {
         {
             std::lock_guard<std::mutex> lock(sleepMutex);
             if (!awaken) {
@@ -142,7 +165,7 @@ namespace un {
         }
     }
 
-    void JobSystem::JobWorker::sleep() {
+    void JobWorker::sleep() {
         {
             std::lock_guard<std::mutex> lock(sleepMutex);
             if (awaken) {
@@ -153,12 +176,13 @@ namespace un {
         waiting.wait(lock);
     }
 
-    void JobSystem::JobWorker::workerThread() {
+    void JobWorker::workerThread() {
         do {
             Job *jobPtr;
             u32 id;
+
             while (jobSystem->nextJob(&jobPtr, &id)) {
-                jobPtr->operator void();
+                jobPtr->operator()(this);
                 jobSystem->notifyCompletion(id);
             }
             if (running) {
@@ -172,16 +196,18 @@ namespace un {
         {
             std::lock_guard<std::mutex> guard(graphUsage);
             auto view = tasks.edges_from(id);
-            for (std::tuple<u32, un::JobDependencyType> edge : view) {
-                un::JobDependencyType type = std::get<1>(edge);
-                if (type != un::JobDependencyType::eRequirement) {
+            for (std::pair<u32, un::JobDependencyType> edge : view) {
+                un::JobDependencyType type = edge.second;
+                if (type != un::JobDependencyType::eRequired) {
                     continue;
                 }
-                u32 dependantID = std::get<0>(edge);
+                u32 dependantID = edge.first;
                 bool ready = true;
                 tasks.disconnect(id, dependantID);
-                for (std::tuple<u32, un::JobDependencyType> other : tasks.edges_from(dependantID)) {
-                    un::JobDependencyType otherType = std::get<1>(edge);
+                tasks.disconnect(dependantID, id);
+                for (std::pair<u32, un::JobDependencyType> other : tasks.edges_from(dependantID)) {
+                    u32 otherDependency = edge.first;
+                    un::JobDependencyType otherType = other.second;
                     if (otherType == un::JobDependencyType::eRequirement) {
                         ready = false;
                     }
@@ -193,8 +219,8 @@ namespace un {
             tasks.remove(id);
             auto toAwake = awaitingExecution.size();
             int i = 0;
-            while (i < threads.size() && toAwake > 0) {
-                JobWorker &worker = threads[i++];
+            while (i < workers.size() && toAwake > 0) {
+                JobWorker &worker = workers[i++];
                 if (!worker.isAwake()) {
                     worker.awake();
                     toAwake--;
@@ -204,7 +230,14 @@ namespace un {
     }
 
     void JobSystem::markForExecution(u32 job) {
-        awaitingExecution.push(job);
-        awakeSomeoneUp();
+        {
+            std::lock_guard<std::mutex> lock(queueUsage);
+            awaitingExecution.push(job);
+            awakeSomeoneUp();
+        }
+    }
+
+    int JobSystem::getNumWorkers() {
+        return workers.size();
     }
 }

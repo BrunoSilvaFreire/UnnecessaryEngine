@@ -23,7 +23,7 @@ namespace un {
                 GLFWwindow *window
         );
 
-        u32 selectMemoryTypeFor(vk::Buffer buffer);
+        u32 selectMemoryTypeFor(const vk::MemoryRequirements &requirements);
 
         const vk::Device &getVirtualDevice() const;
 

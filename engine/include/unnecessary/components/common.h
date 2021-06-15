@@ -37,6 +37,11 @@ namespace un {
         glm::vec3 value;
     };
 
+    struct Velocity {
+    public:
+        glm::vec3 value;
+    };
+
     struct Rotation {
     public:
         glm::quat value;

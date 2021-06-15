@@ -15,7 +15,7 @@ namespace un {
 
         RunSystemJob(un::World *world, un::System *system);
 
-        explicit operator void() override;
+        void operator()(un::JobWorker *worker) override;
     };
 }
 #endif

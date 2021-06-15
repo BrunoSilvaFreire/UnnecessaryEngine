@@ -66,7 +66,7 @@ add_executable(
         src/unnecessary/graphics/rendering_device.cpp
         include/unnecessary/graphics/image_view.h
         src/unnecessary/graphics/image_view.cpp
-)
+        include/unnecessary/jobs/job_chain.h include/unnecessary/jobs/parallel_for_job.h src/unnecessary/jobs/parallel_for_job.cpp src/unnecessary/systems/velocity.cpp include/unnecessary/systems/velocity.h include/unnecessary/misc/benchmark.h src/unnecessary/misc/benchmark.cpp)
 target_include_directories(
         unnecessary
         PUBLIC

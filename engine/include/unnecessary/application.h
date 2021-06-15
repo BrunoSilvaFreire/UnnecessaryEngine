@@ -24,7 +24,7 @@ namespace un {
         GLFWmonitor *monitor;
         bool pooling;
         Event<f32> onPool;
-        JobSystem jobSystem;
+        JobSystem * jobSystem;
         u32 width, height;
 
     public:

@@ -21,7 +21,7 @@ namespace un {
     public:
         LoadObjJob(std::filesystem::path path, MeshData *result);
 
-        explicit operator void() override;
+        void operator()(un::JobWorker *worker) override;
 
     };
 
@@ -45,7 +45,7 @@ namespace un {
                 Renderer *renderer
         );
 
-        explicit operator void() override;
+        void operator()(un::JobWorker *worker) override;
 
     };
 }

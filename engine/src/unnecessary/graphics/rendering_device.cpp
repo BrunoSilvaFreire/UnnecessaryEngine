@@ -150,8 +150,7 @@ namespace un {
         memoryProperties = physicalDevice.getMemoryProperties();
     }
 
-    u32 RenderingDevice::selectMemoryTypeFor(vk::Buffer buffer) {
-        vk::MemoryRequirements requirements = virtualDevice.getBufferMemoryRequirements(buffer);
+    u32 RenderingDevice::selectMemoryTypeFor(const vk::MemoryRequirements &requirements) {
         u32 typeFilter = requirements.memoryTypeBits;
         for (u32 i = 0; i < memoryProperties.memoryTypeCount; ++i) {
             vk::MemoryType type = memoryProperties.memoryTypes[i];

@@ -108,7 +108,7 @@ namespace un {
         version(version),
         pooling(true),
         vulkan(loadVulkan(name, version)),
-        renderer(nullptr) {
+        renderer(nullptr), jobSystem(nullptr) {
         LOG(INFO) << "Initializing app " << GREEN(name);
 
         monitor = glfwGetPrimaryMonitor();
@@ -131,7 +131,8 @@ namespace un {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         window = glfwCreateWindow(width, height, name.c_str(), mon, nullptr);
         glfwMakeContextCurrent(window);
-        renderer = new Renderer(vulkan, window);
+        renderer = new un::Renderer(vulkan, window);
+        jobSystem = new un::JobSystem(*this);
     }
 
     void Application::execute() {
@@ -179,7 +180,7 @@ namespace un {
     }
 
     JobSystem &Application::getJobSystem() {
-        return jobSystem;
+        return *jobSystem;
     }
 
     u32 Application::getWidth() const {

@@ -5,12 +5,13 @@
 
 namespace un {
 
-    LoadObjJob::operator void() {
+    void LoadObjJob::operator()(un::JobWorker *worker) {
         std::ifstream stream(path);
         std::string err;
         if (!tinyobj::LoadObj(&result->attrib, &result->shapes, &result->materials, &err, &stream)) {
             return;
         }
+        LOG(INFO) << "Mesh " << path << " fully loaded";
     }
 
     LoadObjJob::LoadObjJob(
@@ -19,7 +20,7 @@ namespace un {
     ) : path(std::move(path)), result(result) {}
 
 
-    UploadMeshJob::operator void() {
+    void UploadMeshJob::operator()(un::JobWorker *worker) {
         vk::Device device = renderer->getVirtualDevice();
         tinyobj::shape_t &shape = data->shapes[0];
 
@@ -44,7 +45,9 @@ namespace un {
                 true
         );
         buf.copyBuffer(stagingBuf.getVulkanBuffer(), vertexBuf.getVulkanBuffer(), {
-
+                vk::BufferCopy(
+                        0, 0, vBufSize
+                )
         });
         un::Buffer indexBuf(*renderer, vk::BufferUsageFlagBits::eIndexBuffer, iBufSize, true);
         *result = MeshInfo(
@@ -53,6 +56,22 @@ namespace un {
                 vertexBuf,
                 indexBuf
         );
+        renderer->getGraphics().getVulkan().submit(
+                {
+                        vk::SubmitInfo(
+                                {
+
+                                }, {
+
+                                }, {
+
+                                }, {
+
+                                }
+                        )
+                }
+        );
+        LOG(INFO) << "Mesh uploaded";
     }
 
     UploadMeshJob::UploadMeshJob(
