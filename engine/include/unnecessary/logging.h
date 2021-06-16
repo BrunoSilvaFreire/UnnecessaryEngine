@@ -26,9 +26,6 @@ namespace un {
 #define WARN "WARN"
 #define FUCK "OH SHIT OH FUCK"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wstring-plus-int"
-
 #if defined(_WIN32)
 #define DEFAULT_COLOR termcolor::white
 #else
@@ -42,6 +39,6 @@ namespace un {
 #define PURPLE(MSG) COLORED(MSG, termcolor::magenta)
 #define YELLOW(MSG) COLORED(MSG, termcolor::yellow)
 #define LOG(LEVEL) Log(LEVEL, __LINE__, __FILENAME__).stream()
-#pragma clang diagnostic pop
+
 
 #endif

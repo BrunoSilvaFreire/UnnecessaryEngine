@@ -1,7 +1,7 @@
 #include <unnecessary/systems/transform.h>
 
 namespace un {
-    void TransformSystem::step(World &world, f32 delta) {
+    void TransformSystem::step(World &world, f32 delta, un::JobWorker *worker) {
         auto &registry = world.getRegistry();
         auto view = registry.view<LocalToWorld>();
         for (entt::entity entity : view) {

@@ -36,7 +36,10 @@ namespace un {
                 renderingDevice,
                 un::Size2D(width, height)
         );
-        vk::CommandPoolCreateInfo poolInfo((vk::CommandPoolCreateFlags) 0, renderingDevice.getGraphics().getIndex());
+        vk::CommandPoolCreateInfo poolInfo(
+                (vk::CommandPoolCreateFlags) vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                renderingDevice.getGraphics().getIndex()
+        );
         vkCall(renderingDevice.getVirtualDevice().createCommandPool(&poolInfo, nullptr, &globalPool));
     }
 

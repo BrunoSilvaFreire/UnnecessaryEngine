@@ -5,6 +5,7 @@
 #include <unnecessary/systems/system.h>
 #include <unnecessary/graphics/drawable.h>
 #include <unnecessary/graphics/renderer.h>
+#include <unnecessary/jobs/jobs.h>
 
 namespace un {
     class DrawingSystem : public System {
@@ -12,13 +13,17 @@ namespace un {
         un::Renderer * renderer;
         glm::vec4 clearColor;
         vk::RenderPass renderPass;
-        vk::SubpassContents contents;
+        u8 currentFramebufferIndex;
+        std::vector<vk::Framebuffer> framebuffers;
         vk::Rect2D renderArea;
-        un::CommandBuffer buffer;
     public:
         DrawingSystem(Renderer &renderer);
 
-        void step(World &world, f32 delta) override;
+        void step(World &world, f32 delta, un::JobWorker *worker) override;
+
+        const vk::RenderPass &getRenderPass() const;
+
+        vk::Framebuffer nextFramebuffer(u32 *framebufferIndexResult);
     };
 }
 

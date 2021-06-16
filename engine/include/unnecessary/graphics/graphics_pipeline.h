@@ -41,7 +41,7 @@ namespace un {
 
         void addStage(const ShaderStage &stage);
 
-        un::Pipeline build(un::Renderer &renderer);
+        un::Pipeline build(un::Renderer &renderer, vk::RenderPass renderPass);
     };
 
 }

@@ -11,10 +11,23 @@
 namespace un {
 
     void LambdaJob::operator()(un::JobWorker *worker) {
-        callback();
+        if (callback != nullptr) {
+            callback(worker);
+        }
+        if (voidCallback != nullptr) {
+            voidCallback();
+        }
     }
 
-    LambdaJob::LambdaJob(LambdaJob::Callback callback) : callback(std::move(callback)) {}
+    LambdaJob::LambdaJob(
+            const Callback &callback
+    ) : callback(callback), voidCallback(nullptr) {}
+
+    LambdaJob::LambdaJob(
+            const VoidCallback &callback
+    ) : voidCallback(callback), callback() {
+
+    }
 
     u32 JobSystem::enqueue(Job *job) {
         return enqueue(job, true);
@@ -49,7 +62,7 @@ namespace un {
         }
     }
 
-    u32 JobSystem::enqueue(u32 dependsOn, un::LambdaJob::Callback callback) {
+    u32 JobSystem::enqueue(u32 dependsOn, const un::LambdaJob::Callback &callback) {
         return enqueue(dependsOn, new LambdaJob(std::move(callback)));
     }
 
@@ -115,7 +128,9 @@ namespace un {
     ) noexcept: thread(copy.thread),
                 jobSystem(copy.jobSystem),
                 running(copy.running),
-                waiting() {
+                waiting(),
+                index(copy.index),
+                commandPool(copy.commandPool) {
     }
 
     JobWorker::JobWorker(
@@ -131,7 +146,7 @@ namespace un {
         auto device = renderingDevice.getVirtualDevice();
         commandPool = device.createCommandPool(
                 vk::CommandPoolCreateInfo(
-                        (vk::CommandPoolCreateFlags) 0,
+                        (vk::CommandPoolCreateFlags) vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
                         renderingDevice.getGraphics().getIndex()
                 )
         );
@@ -143,6 +158,9 @@ namespace un {
         } else {
             LOG(INFO) << "Worker " << index << " has affinity mask " << affinityMask << " (Was " << returnStauts << ")";
         }
+        std::string threadName = "UnnecessaryWorker-";
+        threadName += std::to_string(index);
+        SetThreadDescription(thread->native_handle(), std::wstring(threadName.begin(), threadName.end()).c_str());
 #endif
     }
 
@@ -190,6 +208,10 @@ namespace un {
             }
         } while (running);
         LOG(INFO) << "Worker " << thread->get_id() << " finished execution";
+    }
+
+    vk::CommandPool JobWorker::getCommandBufferPool() const {
+        return commandPool;
     }
 
     void JobSystem::notifyCompletion(u32 id) {

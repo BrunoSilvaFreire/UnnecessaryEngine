@@ -71,7 +71,7 @@ namespace un {
     }
 
 
-    un::Pipeline GraphicsPipelineBuilder::build(un::Renderer &renderer) {
+    un::Pipeline GraphicsPipelineBuilder::build(un::Renderer &renderer, vk::RenderPass renderPass) {
         vk::Device device = renderer.getVirtualDevice();
         vk::PipelineCache cache = device.createPipelineCache(
                 vk::PipelineCacheCreateInfo(
@@ -196,38 +196,7 @@ namespace un {
                 attachments
         );
 
-        vk::AttachmentDescription colorAttachment(
-                (vk::AttachmentDescriptionFlags) 0,
-                renderer.getSwapChain().getFormat()
-        );
-        colorAttachment.setFinalLayout(vk::ImageLayout::eGeneral);
-        colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-        colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 
-        std::vector<vk::AttachmentReference> colorAttachments;
-        std::vector<vk::AttachmentReference> inputAttachments;
-        std::vector<vk::SubpassDescription> subpasses(
-                {
-                        vk::SubpassDescription(
-
-                                (vk::SubpassDescriptionFlags) 0,
-                                vk::PipelineBindPoint::eGraphics,
-                                inputAttachments,
-                                colorAttachments
-                        )
-                }
-        );
-
-        std::array<vk::AttachmentDescription, 1> attachmentDescriptions = {
-                colorAttachment
-        };
-        auto renderPass = device.createRenderPass(
-                vk::RenderPassCreateInfo(
-                        (vk::RenderPassCreateFlags) 0,
-                        attachmentDescriptions,
-                        subpasses
-                )
-        );
         auto pipeline = device.createGraphicsPipeline(
                 cache,
                 vk::GraphicsPipelineCreateInfo(

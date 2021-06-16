@@ -33,7 +33,7 @@ namespace un {
                 vBufSize,
                 true
         );
-        un::CommandBuffer uploadBuffer(*renderer);
+        un::CommandBuffer uploadBuffer(*renderer, worker->getCommandBufferPool());
         vk::CommandBuffer buf = uploadBuffer.getVulkanBuffer();
         buf.begin(vk::CommandBufferBeginInfo(
                 vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -56,6 +56,11 @@ namespace un {
                 vertexBuf,
                 indexBuf
         );
+
+        buf.end();
+        std::array<const vk::CommandBuffer, 1> buffers = {
+                buf
+        };
         renderer->getGraphics().getVulkan().submit(
                 {
                         vk::SubmitInfo(
@@ -63,10 +68,9 @@ namespace un {
 
                                 }, {
 
-                                }, {
-
-                                }, {
-
+                                },
+                                buffers,
+                                {
                                 }
                         )
                 }

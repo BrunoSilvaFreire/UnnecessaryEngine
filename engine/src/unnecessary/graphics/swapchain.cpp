@@ -45,7 +45,17 @@ namespace un {
         swapChainInfo.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
         swapChainInfo.setClipped(true);
         swapChainInfo.setSurface(surface);
-        vkCall(renderingDevice.getVirtualDevice().createSwapchainKHR(&swapChainInfo, nullptr, &swapChain));
+        const vk::Device &device = renderingDevice.getVirtualDevice();
+        vkCall(device.createSwapchainKHR(&swapChainInfo, nullptr, &swapChain));
+        auto images = device.getSwapchainImagesKHR(swapChain);
+        views.reserve(images.size());
+        for (int i = 0; i < images.size(); ++i) {
+            views.emplace_back(
+                    renderingDevice,
+                    images[i],
+                    format
+            );
+        }
     }
 
     vk::Format SwapChain::getFormat() const {

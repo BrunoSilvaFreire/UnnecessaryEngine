@@ -7,7 +7,7 @@ namespace un {
     ) : world(world), system(system), deltaTime(0) {}
 
     void RunSystemJob::operator()(un::JobWorker *worker) {
-        system->step(*world, deltaTime);
+        system->step(*world, deltaTime, worker);
     }
 
     void RunSystemJob::setDeltaTime(f32 deltaTime) {

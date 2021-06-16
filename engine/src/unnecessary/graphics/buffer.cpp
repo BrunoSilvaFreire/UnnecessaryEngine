@@ -45,7 +45,7 @@ namespace un {
 
     }
 
-    CommandBuffer::CommandBuffer(Renderer &renderer, vk::CommandPool pool) {
+    CommandBuffer::CommandBuffer(Renderer &renderer, vk::CommandPool pool) : pool(pool){
         device = renderer.getVirtualDevice();
         vk::CommandBufferAllocateInfo allocInfo(
                 pool,
@@ -59,7 +59,7 @@ namespace un {
     }
 
     CommandBuffer::~CommandBuffer() {
-        device.freeCommandBuffers(pool, 1, &buffer);
+        //device.freeCommandBuffers(pool, 1, &buffer);
     }
 
     vk::CommandBuffer CommandBuffer::getVulkanBuffer() {

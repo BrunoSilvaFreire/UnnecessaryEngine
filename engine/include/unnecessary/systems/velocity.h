@@ -6,11 +6,12 @@
 #define UNNECESSARYENGINE_VELOCITY_H
 
 #include <unnecessary/systems/system.h>
+#include <unnecessary/jobs/jobs.h>
 
 namespace un {
     class VelocitySystem : public un::System {
     public:
-        void step(World &world, f32 delta) override;
+        void step(World &world, f32 delta, un::JobWorker *worker) override;
 
     };
 }

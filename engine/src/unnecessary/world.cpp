@@ -2,6 +2,7 @@
 #include <unnecessary/systems/system.h>
 #include <unnecessary/systems/run_system_job.h>
 #include <unnecessary/systems/parallel_system_data.h>
+#include <unnecessary/misc/benchmark.h>
 #include <unordered_set>
 #include <cmath>
 
@@ -17,7 +18,7 @@ namespace un {
     }
 
     void World::step(f32 delta) {
-        auto start = std::chrono::high_resolution_clock::now();
+        un::Chronometer<> chronometer;
         std::unordered_set<u32> ableToStart;
         for (ParallelSystemData *data : systems) {
             un::RunSystemJob &job = data->getJob();
@@ -39,15 +40,11 @@ namespace un {
         for (u32 job : ableToStart) {
             jobSystem->markForExecution(job);
         }
-        auto end = std::chrono::high_resolution_clock::now();
-        f32 timeLeft = 1.0F / targetFPS;
-        f32 frameTime = (end - start).count() / 1000000000.0F;
-        timeLeft -= frameTime;
-        if (timeLeft > 0) {
-            u64 msToSleep = std::lround(timeLeft * 1000);
-            if (msToSleep > 0) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
-            }
+        u32 cpuFrameTimeMillis = chronometer.stop();
+        u32 totalMSForFrame = static_cast<u32>(1000.0F / targetFPS);
+        u64 msToSleep = totalMSForFrame - cpuFrameTimeMillis;
+        if (msToSleep > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
         }
     }
 

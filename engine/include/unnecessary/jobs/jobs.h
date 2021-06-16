@@ -49,11 +49,15 @@ namespace un {
 
     class LambdaJob : public Job {
     public:
-        typedef std::function<void()> Callback;
+        typedef std::function<void(un::JobWorker *worker)> Callback;
+        typedef std::function<void()> VoidCallback;
     private:
         Callback callback;
+        VoidCallback voidCallback;
     public:
-        LambdaJob(Callback callback);
+        LambdaJob(const Callback &callback);
+
+        LambdaJob(const VoidCallback &callback);
 
         void operator()(un::JobWorker *worker) override;
     };
@@ -85,6 +89,8 @@ namespace un {
         void awake();
 
         void sleep();
+
+        vk::CommandPool getCommandBufferPool() const;
     };
 
     class JobSystem {
@@ -144,7 +150,7 @@ namespace un {
 
         u32 enqueue(un::LambdaJob::Callback callback);
 
-        u32 enqueue(u32 dependsOn, un::LambdaJob::Callback callback);
+        u32 enqueue(u32 dependsOn, const un::LambdaJob::Callback& callback);
 
         int getNumWorkers();
     };

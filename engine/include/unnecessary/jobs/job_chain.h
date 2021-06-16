@@ -97,6 +97,15 @@ namespace un {
             }
             return *this;
         }
+
+        JobChain &onFinished(const un::LambdaJob::VoidCallback &callback) {
+            auto job = new un::LambdaJob(callback);
+            auto jobId = system->enqueue(job, false);
+            for (const u32 item : allJobs) {
+                system->addDependency(jobId, item);
+            }
+            return *this;
+        }
     };
 }
 #endif

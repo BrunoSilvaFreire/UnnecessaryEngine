@@ -5,7 +5,7 @@
 
 namespace un {
 
-    void RenderMeshSystem::step(World &world, f32 delta) {
+    void RenderMeshSystem::step(World &world, f32 delta, un::JobWorker *worker) {
         entt::registry &registry = world.getRegistry();
         auto view = registry.view<un::RenderMesh>();
         for (entt::entity cameraEntity : registry.view<un::Camera>()) {
@@ -96,7 +96,7 @@ namespace un {
     ) : drawingSystem(system), buffer(renderer) {
     }
 
-    void ProjectionSystem::step(World &world, f32 delta) {
+    void ProjectionSystem::step(World &world, f32 delta, un::JobWorker *worker) {
         entt::registry &registry = world.getRegistry();
         auto view = registry.view<un::Camera, un::Projection, un::Perspective>();
         for (entt::entity entity : view) {

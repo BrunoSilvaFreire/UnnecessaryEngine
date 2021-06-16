@@ -33,7 +33,7 @@ namespace un {
 
     class ProjectionSystem : public System {
     public:
-        void step(World &world, f32 delta) override;
+        void step(World &world, f32 delta, un::JobWorker *worker) override;
     };
 
     class RenderMeshSystem : public System {
@@ -43,7 +43,7 @@ namespace un {
     public:
         RenderMeshSystem(un::Renderer &renderer, un::DrawingSystem *system);
 
-        void step(World &world, f32 delta) override;
+        void step(World &world, f32 delta, un::JobWorker *worker) override;
     };
 }
 #endif
