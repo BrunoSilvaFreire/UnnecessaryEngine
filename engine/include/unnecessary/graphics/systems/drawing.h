@@ -16,6 +16,7 @@ namespace un {
         u8 currentFramebufferIndex;
         std::vector<vk::Framebuffer> framebuffers;
         vk::Rect2D renderArea;
+        vk::Semaphore imageAvailableSemaphore;
     public:
         DrawingSystem(Renderer &renderer);
 

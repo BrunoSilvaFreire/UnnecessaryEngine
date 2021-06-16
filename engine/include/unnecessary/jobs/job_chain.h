@@ -30,17 +30,26 @@ namespace un {
         }
 
 
-        JobChain &immediately(Job *job) {
-            u32 id = system->enqueue(job, false);
+        JobChain &enqueue(u32 *id, Job *job) {
+            *id = system->enqueue(job, false);
+            return *this;
+
+        }
+        JobChain &immediately(u32 id) {
             allJobs.push_back(id);
             toStart.push_back(id);
+            return *this;
+        }
+        JobChain &immediately(Job *job) {
+            u32 id;
+            enqueue(&id, job);
+            immediately(id);
             return *this;
         }
 
         JobChain &immediately(u32 *id, Job *job) {
             *id = system->enqueue(job, false);
-            allJobs.push_back(*id);
-            toStart.push_back(*id);
+            immediately(*id);
             return *this;
         }
 
@@ -52,6 +61,11 @@ namespace un {
 
         JobChain &after(u32 dependencyId, const un::LambdaJob::Callback &callback) {
             after(dependencyId, new un::LambdaJob(callback));
+            return *this;
+        }
+        JobChain &after(u32 runAfter, u32 job) {
+            system->addDependency(runAfter, job);
+            allJobs.push_back(job);
             return *this;
         }
 
@@ -90,15 +104,6 @@ namespace un {
         }
 
         JobChain &onFinished(const un::LambdaJob::Callback &callback) {
-            auto job = new un::LambdaJob(callback);
-            auto jobId = system->enqueue(job, false);
-            for (const u32 item : allJobs) {
-                system->addDependency(jobId, item);
-            }
-            return *this;
-        }
-
-        JobChain &onFinished(const un::LambdaJob::VoidCallback &callback) {
             auto job = new un::LambdaJob(callback);
             auto jobId = system->enqueue(job, false);
             for (const u32 item : allJobs) {

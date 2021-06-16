@@ -33,7 +33,7 @@ void un::ParallelForJob::schedule(un::JobSystem *system, size_t numEntries, size
     if (rest > 0) {
         chain.immediately<ParallelizeJob>(this, rest, numEntries);
     }
-    chain.onFinished([chronometer]() {
+    chain.onFinished([chronometer](un::JobWorker*) {
         LOG(INFO) << "Parallel job finished after " << chronometer.stop() << " microsecond";
     });
 

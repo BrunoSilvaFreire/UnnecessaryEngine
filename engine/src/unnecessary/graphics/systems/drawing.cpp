@@ -27,6 +27,8 @@ namespace un {
 
     void DrawingSystem::step(World &world, f32 delta, un::JobWorker *worker) {
         vk::ClearColorValue clearColorValue;
+        const vk::Device &device = renderer->getVirtualDevice();
+        const vk::SwapchainKHR &chain = renderer->getSwapChain().getSwapChain();
         std::array<float, 4> colorArr{};
         colorArr[0] = clearColor.r;
         colorArr[1] = clearColor.g;
@@ -43,6 +45,13 @@ namespace un {
         );
         u32 framebufferIndex;
         auto framebuffer = nextFramebuffer(&framebufferIndex);
+        device.acquireNextImageKHR(
+                chain,
+                std::numeric_limits<u64>::max(),
+                imageAvailableSemaphore,
+                nullptr,
+                &framebufferIndex
+        );
         commandBuffer.beginRenderPass(
                 vk::RenderPassBeginInfo(
                         renderPass,
@@ -66,8 +75,8 @@ namespace un {
         graphicsQueue.waitIdle();
         graphicsQueue.presentKHR(
                 vk::PresentInfoKHR(
-                        0, nullptr,
-                        1, &renderer->getSwapChain().getSwapChain(),
+                        1, &imageAvailableSemaphore,
+                        1, &chain,
                         &framebufferIndex,
                         nullptr
                 )
@@ -77,11 +86,12 @@ namespace un {
     DrawingSystem::DrawingSystem(Renderer &renderer) : renderer(&renderer),
                                                        currentFramebufferIndex(0) {
         un::SwapChain &chain = renderer.getSwapChain();
+        clearColor = glm::vec4(1, 0, 1, 1);
         vk::AttachmentDescription colorAttachment(
                 (vk::AttachmentDescriptionFlags) 0,
                 chain.getFormat()
         );
-        colorAttachment.setFinalLayout(vk::ImageLayout::eGeneral);
+        colorAttachment.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
         colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
         colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 
@@ -110,7 +120,6 @@ namespace un {
                 colorAttachment
         };
         const vk::Device &device = renderer.getVirtualDevice();
-
         renderPass = device.createRenderPass(
                 vk::RenderPassCreateInfo(
                         (vk::RenderPassCreateFlags) 0,
@@ -135,6 +144,11 @@ namespace un {
                     )
             );
         }
+        imageAvailableSemaphore = device.createSemaphore(
+                vk::SemaphoreCreateInfo(
+                        (vk::SemaphoreCreateFlags) 0
+                )
+        );
     }
 
     const vk::RenderPass &DrawingSystem::getRenderPass() const {

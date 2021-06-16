@@ -2,6 +2,7 @@
 #include <unnecessary/systems/system.h>
 #include <unnecessary/systems/run_system_job.h>
 #include <unnecessary/systems/parallel_system_data.h>
+#include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/misc/benchmark.h>
 #include <unordered_set>
 #include <cmath>
@@ -19,31 +20,38 @@ namespace un {
 
     void World::step(f32 delta) {
         un::Chronometer<> chronometer;
-        std::unordered_set<u32> ableToStart;
+        un::JobChain chain(jobSystem, false);
         for (ParallelSystemData *data : systems) {
             un::RunSystemJob &job = data->getJob();
             job.setDeltaTime(delta);
-            u32 id = jobSystem->enqueue(&job, false);
+            u32 id;
+            chain.enqueue(&id, &job);
             jobIds[data->getSystem()] = id;
-            ableToStart.emplace(id);
         }
         for (ParallelSystemData *data : systems) {
             auto &dependencies = data->getDependencies();
+            u32 id = jobIds[data->getSystem()];
             if (!dependencies.empty()) {
-                u32 id = jobIds[data->getSystem()];
-                ableToStart.erase(id);
+
                 for (un::System *dependency : dependencies) {
-                    jobSystem->addDependency(id, jobIds[dependency]);
+                    chain.after(jobIds[dependency], id);
                 }
+            } else {
+                chain.immediately(id);
             }
         }
-        for (u32 job : ableToStart) {
-            jobSystem->markForExecution(job);
-        }
+        std::condition_variable variable;
+        std::mutex mutex;
+        std::unique_lock lock(mutex);
+        chain.onFinished([&variable](un::JobWorker *) {
+            variable.notify_one();
+        });
+        chain.dispatch();
+        variable.wait(lock);
         u32 cpuFrameTimeMillis = chronometer.stop();
         u32 totalMSForFrame = static_cast<u32>(1000.0F / targetFPS);
-        u64 msToSleep = totalMSForFrame - cpuFrameTimeMillis;
-        if (msToSleep > 0) {
+        if (totalMSForFrame > cpuFrameTimeMillis) {
+            u64 msToSleep = totalMSForFrame - cpuFrameTimeMillis;
             std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
         }
     }
