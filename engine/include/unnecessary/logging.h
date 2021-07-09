@@ -33,7 +33,10 @@ namespace un {
 #endif
 #define COLORED(MSG, COLOR) COLOR << MSG << DEFAULT_COLOR
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wstring-plus-int"
 #define __FILENAME__ (__FILE__ + SOURCE_PATH_SIZE)
+#pragma clang diagnostic pop
 #define GREEN(MSG) COLORED(MSG, termcolor::green)
 #define RED(MSG) COLORED(MSG, termcolor::red)
 #define PURPLE(MSG) COLORED(MSG, termcolor::magenta)

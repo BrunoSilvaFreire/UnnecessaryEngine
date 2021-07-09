@@ -8,7 +8,7 @@
 namespace un {
     struct RenderMesh {
         un::Material *material;
-        un::MeshInfo *mesh;
+        un::MeshInfo *meshInfo;
     };
 
 }

@@ -1,109 +1,30 @@
 #include <unnecessary/graphics/systems/drawing.h>
+#include <unnecessary/graphics/lighting.h>
+#include <unnecessary/systems/world.h>
+#include <unnecessary/components/common.h>
 
 namespace un {
-    struct DrawingData {
-    public:
-        DrawingData(const vk::CommandBuffer &buffer, int order) : buffer(buffer), order(order) {}
 
-        vk::CommandBuffer buffer;
-        int order;
+    DrawingSystem::DrawingSystem(
+            Renderer& renderer
+    ) : renderer(&renderer), currentFramebufferIndex(0) {
+        un::SwapChain& chain = renderer.getSwapChain();
+        clearColor = glm::vec4(0.1, 0.1, 0.1, 1);
 
-        friend bool operator<(const DrawingData &lhs, const DrawingData &rhs) {
-            return lhs.order < rhs.order;
-        }
-
-        friend bool operator>(const DrawingData &lhs, const DrawingData &rhs) {
-            return rhs < lhs;
-        }
-
-        friend bool operator<=(const DrawingData &lhs, const DrawingData &rhs) {
-            return !(rhs < lhs);
-        }
-
-        friend bool operator>=(const DrawingData &lhs, const DrawingData &rhs) {
-            return !(lhs < rhs);
-        }
-    };
-
-    void DrawingSystem::step(World &world, f32 delta, un::JobWorker *worker) {
-        vk::ClearColorValue clearColorValue;
-        const vk::Device &device = renderer->getVirtualDevice();
-        const vk::SwapchainKHR &chain = renderer->getSwapChain().getSwapChain();
-        std::array<float, 4> colorArr{};
-        colorArr[0] = clearColor.r;
-        colorArr[1] = clearColor.g;
-        colorArr[2] = clearColor.b;
-        colorArr[3] = clearColor.a;
-        clearColorValue.setFloat32(colorArr);
-        vk::ClearValue clear(clearColorValue);
-        un::CommandBuffer unBuffer(*renderer, worker->getCommandBufferPool());
-        vk::CommandBuffer commandBuffer = unBuffer.getVulkanBuffer();
-        commandBuffer.begin(
-                vk::CommandBufferBeginInfo(
-                        (vk::CommandBufferUsageFlags) vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-                )
+        const vk::Device& device = renderer.getVirtualDevice();
+        std::vector<vk::AttachmentReference> colorAttachments(
+                {
+                        vk::AttachmentReference(
+                                0,
+                                vk::ImageLayout::eColorAttachmentOptimal
+                        )
+                }
         );
-        u32 framebufferIndex;
-        auto framebuffer = nextFramebuffer(&framebufferIndex);
-        device.acquireNextImageKHR(
-                chain,
-                std::numeric_limits<u64>::max(),
-                imageAvailableSemaphore,
-                nullptr,
-                &framebufferIndex
+        std::vector<vk::AttachmentReference> inputAttachments(
+                {
+
+                }
         );
-        commandBuffer.beginRenderPass(
-                vk::RenderPassBeginInfo(
-                        renderPass,
-                        framebuffer,
-                        renderArea,
-                        1,
-                        &clear
-                ),
-                vk::SubpassContents::eInline
-        );
-
-        //buffer.executeCommands(buffers);
-        commandBuffer.endRenderPass();
-        commandBuffer.end();
-
-        vk::SubmitInfo info;
-        info.pCommandBuffers = &commandBuffer;
-        info.commandBufferCount = 1;
-        const vk::Queue &graphicsQueue = renderer->getGraphics().getVulkan();
-        graphicsQueue.submit(1, &info, nullptr);
-        graphicsQueue.waitIdle();
-        graphicsQueue.presentKHR(
-                vk::PresentInfoKHR(
-                        1, &imageAvailableSemaphore,
-                        1, &chain,
-                        &framebufferIndex,
-                        nullptr
-                )
-        );
-    }
-
-    DrawingSystem::DrawingSystem(Renderer &renderer) : renderer(&renderer),
-                                                       currentFramebufferIndex(0) {
-        un::SwapChain &chain = renderer.getSwapChain();
-        clearColor = glm::vec4(1, 0, 1, 1);
-        vk::AttachmentDescription colorAttachment(
-                (vk::AttachmentDescriptionFlags) 0,
-                chain.getFormat()
-        );
-        colorAttachment.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
-        colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-        colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-
-        std::vector<vk::AttachmentReference> colorAttachments({
-                                                                      vk::AttachmentReference(
-                                                                              0,
-                                                                              vk::ImageLayout::eColorAttachmentOptimal
-                                                                      )
-                                                              });
-        std::vector<vk::AttachmentReference> inputAttachments({
-
-                                                              });
         std::vector<vk::SubpassDescription> subpasses(
                 {
                         vk::SubpassDescription(
@@ -116,10 +37,21 @@ namespace un {
                 }
         );
 
+
+        vk::AttachmentDescription colorAttachment(
+                (vk::AttachmentDescriptionFlags) 0,
+                chain.getFormat(),
+                vk::SampleCountFlagBits::e1,
+                vk::AttachmentLoadOp::eClear,
+                vk::AttachmentStoreOp::eStore,
+                vk::AttachmentLoadOp::eDontCare,
+                vk::AttachmentStoreOp::eDontCare,
+                vk::ImageLayout::eUndefined,
+                vk::ImageLayout::ePresentSrcKHR
+        );
         std::array<vk::AttachmentDescription, 1> attachmentDescriptions = {
                 colorAttachment
         };
-        const vk::Device &device = renderer.getVirtualDevice();
         renderPass = device.createRenderPass(
                 vk::RenderPassCreateInfo(
                         (vk::RenderPassCreateFlags) 0,
@@ -127,9 +59,9 @@ namespace un {
                         subpasses
                 )
         );
-        const un::Size2D &resolution = chain.getResolution();
+        const un::Size2D& resolution = chain.getResolution();
         std::vector<vk::ImageView> views;
-        for (const auto &item : chain.getViews()) {
+        for (const auto& item : chain.getViews()) {
             auto view = item.getVulkanView();
             framebuffers.emplace_back(
                     device.createFramebuffer(
@@ -151,11 +83,194 @@ namespace un {
         );
     }
 
-    const vk::RenderPass &DrawingSystem::getRenderPass() const {
+    void DrawingSystem::step(World& world, f32 delta, un::JobWorker* worker) {
+        vk::ClearColorValue clearColorValue;
+        const vk::Device& device = renderer->getVirtualDevice();
+        const vk::SwapchainKHR& chain = renderer->getSwapChain().getSwapChain();
+        std::array<float, 4> colorArr{};
+        colorArr[0] = clearColor.r;
+        colorArr[1] = clearColor.g;
+        colorArr[2] = clearColor.b;
+        colorArr[3] = clearColor.a;
+        clearColorValue.setFloat32(colorArr);
+        vk::ClearValue clear(clearColorValue);
+        un::CommandBuffer unBuffer(*renderer, worker->getGraphicsResources().getCommandPool());
+        vk::CommandBuffer commandBuffer = unBuffer.getVulkanBuffer();
+
+        auto& registry = world.getRegistry();
+
+
+        std::vector<un::PointLightData> pointLights;
+        for (entt::entity entity : registry.view<un::PointLight>()) {
+            un::PointLightData data{};
+            data.light = registry.get<un::PointLight>(entity);
+            glm::vec3 position;
+            un::Translation* translation = registry.try_get<un::Translation>(entity);
+            if (translation != nullptr) {
+                position = translation->value;
+            }
+            data.position = position;
+        }
+        bool resized = lightingBuffer.ensureFits<un::PointLightData>(
+                renderer->getRenderingDevice(),
+                pointLights.size(),
+                sizeof(int)
+        );
+
+        if (resized) {
+            vk::DescriptorBufferInfo bufferInfo;
+            bufferInfo.buffer = lightingBuffer.getVulkanBuffer();
+            bufferInfo.range = VK_WHOLE_SIZE;
+            device.updateDescriptorSets(
+                    {
+                            vk::WriteDescriptorSet(
+
+                                    lightingSet,
+                                    1,
+                                    0,
+                                    1,
+                                    vk::DescriptorType::eUniformBuffer,
+                                    nullptr,
+                                    &bufferInfo,
+                                    nullptr
+                            )
+                    }, {
+
+                    }
+            );
+        }
+        commandBuffer.begin(
+                vk::CommandBufferBeginInfo(
+                        (vk::CommandBufferUsageFlags) vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+                )
+        );
+
+        u32 framebufferIndex;
+        auto framebuffer = nextFramebuffer(&framebufferIndex);
+        vkCall(
+                device.acquireNextImageKHR(
+                        chain,
+                        std::numeric_limits<u64>::max(),
+                        imageAvailableSemaphore,
+                        nullptr,
+                        &framebufferIndex
+                )
+        );
+        un::Size2D size = renderer->getSwapChain().getResolution();
+        const vk::Rect2D& renderArea = vk::Rect2D(
+                vk::Offset2D(0, 0),
+                vk::Extent2D(size.x, size.y)
+        );
+
+        commandBuffer.beginRenderPass(
+                vk::RenderPassBeginInfo(
+                        renderPass,
+                        framebuffer,
+                        renderArea,
+                        1,
+                        &clear
+                ),
+                vk::SubpassContents::eInline
+        );
+        commandBuffer.setViewport(
+                0,
+                {
+                        vk::Viewport(
+                                0, 0,
+                                size.x, size.y,
+                                0, 1
+                        )
+                }
+        );
+
+        commandBuffer.setScissor(
+                0,
+                {
+                        renderArea
+                }
+        );
+        for (entt::entity cameraEntity : world.view<un::Camera, un::Projection>()) {
+            const un::Projection& proj = registry.get<un::Projection>(cameraEntity);
+            const un::Camera& camera = registry.get<un::Camera>(cameraEntity);
+
+            for (entt::entity entity : world.view<un::LocalToWorld, un::RenderMesh>()) {
+                const un::LocalToWorld& ltw = registry.get<un::LocalToWorld>(entity);
+                un::RenderMesh& mesh = registry.get<un::RenderMesh>(entity);
+                un::Pipeline* pPipeline = mesh.material->getShader();
+                commandBuffer.bindPipeline(
+                        vk::PipelineBindPoint::eGraphics,
+                        pPipeline->getPipeline()
+                );
+                const vk::PipelineLayout& layout = pPipeline->getPipelineLayout();
+                commandBuffer.bindDescriptorSets(
+                        vk::PipelineBindPoint::eGraphics,
+                        layout,
+                        0,
+                        {
+                                camera.cameraDescriptorSet
+                        }, {
+
+                        }
+                );
+                un::PerObjectData objectData{};
+                objectData.modelMatrix = ltw.value;
+                commandBuffer.pushConstants<un::PerObjectData>(
+                        layout,
+                        vk::ShaderStageFlagBits::eVertex,
+                        0, {
+                                objectData
+                        }
+                );
+                auto& meshInfo = mesh.meshInfo;
+                commandBuffer.bindVertexBuffers(
+                        0,
+                        {
+                                meshInfo->getVertex().getVulkanBuffer()
+                        }, {
+                                0
+                        }
+                );
+                commandBuffer.bindIndexBuffer(
+                        meshInfo->getIndex(),
+                        0,
+                        vk::IndexType::eUint16
+                );
+                commandBuffer.drawIndexed(
+                        meshInfo->getIndexCount(),
+                        1,
+                        0,
+                        0,
+                        0
+                );
+            }
+        }
+
+        commandBuffer.endRenderPass();
+
+        commandBuffer.end();
+
+
+        vk::SubmitInfo info;
+        info.pCommandBuffers = &commandBuffer;
+        info.commandBufferCount = 1;
+        const vk::Queue& graphicsQueue = renderer->getGraphics().getVulkan();
+        vkCall(graphicsQueue.submit(1, &info, nullptr));
+        graphicsQueue.waitIdle();
+        vkCall(graphicsQueue.presentKHR(
+                vk::PresentInfoKHR(
+                        1, &imageAvailableSemaphore,
+                        1, &chain,
+                        &framebufferIndex,
+                        nullptr
+                )
+        ));
+    }
+
+    const vk::RenderPass& DrawingSystem::getRenderPass() const {
         return renderPass;
     }
 
-    vk::Framebuffer DrawingSystem::nextFramebuffer(u32 *framebufferIndexResult) {
+    vk::Framebuffer DrawingSystem::nextFramebuffer(u32* framebufferIndexResult) {
         *framebufferIndexResult = currentFramebufferIndex;
         auto buffer = framebuffers[currentFramebufferIndex++];
         currentFramebufferIndex %= framebuffers.size();

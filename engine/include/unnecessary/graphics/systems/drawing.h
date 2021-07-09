@@ -15,8 +15,9 @@ namespace un {
         vk::RenderPass renderPass;
         u8 currentFramebufferIndex;
         std::vector<vk::Framebuffer> framebuffers;
-        vk::Rect2D renderArea;
         vk::Semaphore imageAvailableSemaphore;
+        un::ResizableBuffer lightingBuffer;
+        vk::DescriptorSet lightingSet;
     public:
         DrawingSystem(Renderer &renderer);
 

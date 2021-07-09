@@ -1,7 +1,13 @@
 #include <unnecessary/graphics/buffer.h>
 
 namespace un {
-    Buffer::Buffer(Renderer &renderer, vk::BufferUsageFlags usage, u64 size, bool allocate) {
+    Buffer::Buffer(
+            Renderer& renderer,
+            vk::BufferUsageFlags usage,
+            u64 size,
+            bool allocate,
+            vk::MemoryPropertyFlags flags
+    ) : size(size) {
         vk::Device device = renderer.getVirtualDevice();
         un::Queue graphics = renderer.getGraphics();
         u32 index = graphics.getIndex();
@@ -16,24 +22,29 @@ namespace un {
                 )
         );
         if (allocate) {
-            vk::MemoryRequirements requirements = device.getBufferMemoryRequirements(buffer);
-            memory = device.allocateMemory(vk::MemoryAllocateInfo(
-                    requirements.size,
-                    renderer.getRenderingDevice().selectMemoryTypeFor(requirements)
-            ));
-            device.bindBufferMemory(buffer, memory, 0);
+            allocateMemory(renderer.getRenderingDevice(), flags);
         }
     }
 
-    const vk::Buffer &Buffer::getVulkanBuffer() const {
+    void Buffer::allocateMemory(const un::RenderingDevice& renderingDevice, vk::MemoryPropertyFlags flags) {
+        const vk::Device& device = renderingDevice.getVirtualDevice();
+        vk::MemoryRequirements requirements = device.getBufferMemoryRequirements(buffer);
+        memory = device.allocateMemory(vk::MemoryAllocateInfo(
+                requirements.size,
+                renderingDevice.selectMemoryTypeFor(requirements, flags)
+        ));
+        device.bindBufferMemory(buffer, memory, 0);
+    }
+
+    const vk::Buffer& Buffer::getVulkanBuffer() const {
         return buffer;
     }
 
-    const vk::DeviceMemory &Buffer::getMemory() const {
+    const vk::DeviceMemory& Buffer::getMemory() const {
         return memory;
     }
 
-    Buffer::operator vk::Buffer &() {
+    Buffer::operator vk::Buffer&() {
         return buffer;
     }
 
@@ -41,20 +52,69 @@ namespace un {
         return buffer;
     }
 
-    CommandBuffer::CommandBuffer(Renderer &renderer) : CommandBuffer(renderer, renderer.getGlobalPool()) {
+    void Buffer::push(vk::Device device, void* data, bool flush) {
+        void* toWriteTo;
+        vkCall(
+                device.mapMemory(
+                        memory,
+                        0,
+                        size,
+                        (vk::MemoryMapFlags) 0,
+                        &toWriteTo
+                )
+        );
+        std::memcpy(toWriteTo, data, size);
+        if (flush) {
+            device.flushMappedMemoryRanges(
+                    {
+                            vk::MappedMemoryRange(memory, 0, size)
+                    }
+            );
+        }
+        device.unmapMemory(memory);
+    }
+
+
+    vk::DeviceSize Buffer::getOffset() const {
+        return offset;
+    }
+
+    vk::DeviceSize Buffer::getSize() const {
+        return size;
+    }
+
+    CommandBuffer::CommandBuffer(Renderer& renderer) : CommandBuffer(renderer, renderer.getGlobalPool()) {
 
     }
 
-    CommandBuffer::CommandBuffer(Renderer &renderer, vk::CommandPool pool) : pool(pool){
+    CommandBuffer::CommandBuffer(
+            Renderer& renderer,
+            vk::CommandPool pool
+    ) : CommandBuffer(
+            renderer,
+            pool,
+            (vk::CommandBufferUsageFlags) 0
+    ) {
+
+    }
+
+    CommandBuffer::CommandBuffer(
+            Renderer& renderer,
+            vk::CommandPool pool,
+            vk::CommandBufferUsageFlags flags
+    ) : pool(pool) {
         device = renderer.getVirtualDevice();
         vk::CommandBufferAllocateInfo allocInfo(
                 pool,
                 vk::CommandBufferLevel::ePrimary,
                 1
         );
-        device.allocateCommandBuffers(
-                &allocInfo,
-                &buffer
+
+        vkCall(
+                device.allocateCommandBuffers(
+                        &allocInfo,
+                        &buffer
+                )
         );
     }
 

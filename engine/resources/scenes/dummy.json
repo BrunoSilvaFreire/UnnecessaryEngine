@@ -1,0 +1,46 @@
+{
+  "$schema": "../schemas/scene.schema.json",
+  "alias": "Dummy Scene",
+  "entities": [
+    {
+      "components": [
+        {
+          "id": "unnecessary/camera",
+          "meta": {
+          }
+        },
+        {
+          "id": "unnecesary/perspective",
+          "meta": {
+            "fieldOfView": 60,
+            "zNear": 0.1,
+            "zFar": 100,
+            "aspect": 1.77777778
+          }
+        },
+        {
+          "id": "unnecessary/name",
+          "meta": {
+            "value": "Teapot"
+          }
+        },
+        {
+          "id": "unnecessary/translation",
+          "meta": {
+            "value": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          }
+        },
+        {
+          "id": "unnecessary/mesh",
+          "meta": {
+            "path": "teapot.obj"
+          }
+        }
+      ]
+    }
+  ]
+}

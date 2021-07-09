@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BrunoSilvaFreire/UnnecessaryEngine/scene.schema.json",
+  "title": "Scene",
+  "description": "A product in the catalog",
+  "type": "object",
+  "required": [
+    "alias",
+    "entities"
+  ],
+  "properties": {
+    "alias": {
+      "type": "string"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "$ref": "entity.schema.json"
+      }
+    }
+  }
+}

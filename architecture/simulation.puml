@@ -1,0 +1,19 @@
+@startuml
+
+Application -> World : World::step(float deltaTime);
+World --> World : Marcar tempo de inicio do step.
+activate World
+World -> World : Criar Job Chain incluindo \num job para cada sistema\nativo no mundo
+{start} World -> JobSystem : Submeter JobChain
+
+activate JobSystem
+World --> World : Aguardar até que todos\nos jobs sejam completos.
+JobSystem -> JobSystem : Executa os jobs submetidos\nanteriormente em paralelo
+{end} JobSystem -> World : Notificar o cumprimento de\n todos os jobs submetidos 
+deactivate JobSystem
+{start} <-> {end} : Some time
+World --> World : Marcar tempo de fim do step.\nCalcular duração do frame
+deactivate World
+World -> World : Caso a duração do frame for \nmenor que o tempo máximo\npermitido do frame, \naguardar pelo tempo restante
+World -> Application : Finalização do frame
+@enduml

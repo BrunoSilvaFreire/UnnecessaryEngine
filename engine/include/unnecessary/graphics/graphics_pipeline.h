@@ -28,18 +28,17 @@ namespace un {
         std::optional<vk::PipelineRasterizationStateCreateInfo> rasterization;
         std::optional<vk::PipelineMultisampleStateCreateInfo> multisample;
         std::optional<vk::PipelineDepthStencilStateCreateInfo> depthStencil;
-        std::optional<vk::PipelineColorBlendStateCreateInfo> colorBlend;
         std::optional<vk::PipelineDynamicStateCreateInfo> dynamicState;
     public:
         explicit GraphicsPipelineBuilder(BoundVertexLayout layout);
 
-        GraphicsPipelineBuilder(const BoundVertexLayout &layout, std::initializer_list<const ShaderStage> shaders);
+        GraphicsPipelineBuilder(const BoundVertexLayout &layout, std::initializer_list<const ShaderStage*> shaders);
 
         void withStandardRasterization();
 
         void withInputAssembly(vk::PrimitiveTopology topology);
 
-        void addStage(const ShaderStage &stage);
+        void addStage(const ShaderStage* stage);
 
         un::Pipeline build(un::Renderer &renderer, vk::RenderPass renderPass);
     };

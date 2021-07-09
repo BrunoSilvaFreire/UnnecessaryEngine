@@ -97,8 +97,13 @@ namespace un {
         }
     }
 
-    JobSystem::JobSystem(un::Application &application) : queueUsage(), graphUsage() {
-        size_t nCores = std::thread::hardware_concurrency();
+    JobSystem::JobSystem(un::Application &application, int nThreads) : queueUsage(), graphUsage() {
+        size_t nCores;
+        if (nThreads <= 0) {
+            nCores = std::thread::hardware_concurrency();
+        } else {
+            nCores = nThreads;
+        }
         if (nCores == 0) {
             nCores = 4;
         }
@@ -130,7 +135,7 @@ namespace un {
                 running(copy.running),
                 waiting(),
                 index(copy.index),
-                commandPool(copy.commandPool) {
+                graphicsResources(copy.graphicsResources) {
     }
 
     JobWorker::JobWorker(
@@ -141,15 +146,9 @@ namespace un {
         jobSystem(jobSystem),
         waiting(),
         running(true),
-        index(index) {
-        RenderingDevice &renderingDevice = application.getRenderer().getRenderingDevice();
-        auto device = renderingDevice.getVirtualDevice();
-        commandPool = device.createCommandPool(
-                vk::CommandPoolCreateInfo(
-                        (vk::CommandPoolCreateFlags) vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-                        renderingDevice.getGraphics().getIndex()
-                )
-        );
+        awaken(false),
+        index(index),
+        graphicsResources(application.getRenderer().getRenderingDevice()) {
 #ifdef WIN32
         int affinityMask = 1 << index;
         auto returnStauts = SetThreadAffinityMask(thread->native_handle(), affinityMask);
@@ -210,8 +209,8 @@ namespace un {
         LOG(INFO) << "Worker " << thread->get_id() << " finished execution";
     }
 
-    vk::CommandPool JobWorker::getCommandBufferPool() const {
-        return commandPool;
+    const JobWorker::WorkerGraphicsResources &JobWorker::getGraphicsResources() const {
+        return graphicsResources;
     }
 
     void JobSystem::notifyCompletion(u32 id) {
@@ -261,5 +260,21 @@ namespace un {
 
     int JobSystem::getNumWorkers() {
         return workers.size();
+    }
+
+    JobWorker::WorkerGraphicsResources::WorkerGraphicsResources(RenderingDevice &renderingDevice) {
+
+        auto device = renderingDevice.getVirtualDevice();
+        commandPool = device.createCommandPool(
+                vk::CommandPoolCreateInfo(
+                        (vk::CommandPoolCreateFlags) vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                        renderingDevice.getGraphics().getIndex()
+                )
+        );
+
+    }
+
+    const vk::CommandPool &JobWorker::WorkerGraphicsResources::getCommandPool() const {
+        return commandPool;
     }
 }

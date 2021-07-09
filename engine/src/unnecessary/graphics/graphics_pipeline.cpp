@@ -15,12 +15,12 @@ namespace un {
         std::vector<vk::VertexInputBindingDescription> inputBindings;
         std::vector<vk::VertexInputAttributeDescription> inputAttributes;
         u32 stride = vertexLayout.getStride();
-        const std::vector<un::VertexInput> &elements = vertexLayout.getElements();
+        const std::vector<un::VertexInput>& elements = vertexLayout.getElements();
         u32 count = elements.size();
         u32 offset = 0;
         u32 binding = vertexLayout.getBinding();
         for (u32 i = 0; i < count; ++i) {
-            const un::VertexInput &input = elements[i];
+            const un::VertexInput& input = elements[i];
             inputBindings.emplace_back(binding, stride);
             inputAttributes.emplace_back(
                     i,
@@ -63,7 +63,7 @@ namespace un {
     }
 
     template<typename T>
-    T *getOrNull(std::optional<T> &optional) {
+    T* getOrNull(std::optional<T>& optional) {
         if (optional) {
             return optional.operator->();
         }
@@ -71,7 +71,7 @@ namespace un {
     }
 
 
-    un::Pipeline GraphicsPipelineBuilder::build(un::Renderer &renderer, vk::RenderPass renderPass) {
+    un::Pipeline GraphicsPipelineBuilder::build(un::Renderer& renderer, vk::RenderPass renderPass) {
         vk::Device device = renderer.getVirtualDevice();
         vk::PipelineCache cache = device.createPipelineCache(
                 vk::PipelineCacheCreateInfo(
@@ -79,9 +79,16 @@ namespace un {
                 )
         );
         std::vector<vk::DescriptorSetLayout> layouts;
+        for (const un::ShaderStage* stage : stages) {
+            const un::DescriptorLayout& layout = stage->getDescriptorLayout();
+            if(!layout.isEmpty())
+            {
+                layouts.push_back(layout.build(device, stage->getFlags()));
+            }
+        }
         std::vector<vk::PushConstantRange> pushes;
-        for (const un::ShaderStage *stage : stages) {
-            auto &pushConstant = stage->getPushConstantRange();
+        for (const un::ShaderStage* stage : stages) {
+            auto& pushConstant = stage->getPushConstantRange();
             if (pushConstant.has_value()) {
                 auto value = pushConstant.value();
                 pushes.emplace_back(
@@ -99,7 +106,7 @@ namespace un {
                 )
         );
         std::vector<vk::PipelineShaderStageCreateInfo> stageInfos;
-        for (const un::ShaderStage *stage : stages) {
+        for (const un::ShaderStage* stage : stages) {
             stageInfos.emplace_back(
                     (vk::PipelineShaderStageCreateFlags) 0,
                     stage->getFlags(),
@@ -109,7 +116,7 @@ namespace un {
         }
         std::vector<vk::VertexInputBindingDescription> vertexBindings;
         std::vector<vk::VertexInputAttributeDescription> vertexAttributes;
-        const std::vector<un::VertexInput> &vertexElements = vertexLayout.getElements();
+        const std::vector<un::VertexInput>& vertexElements = vertexLayout.getElements();
 
         vertexBindings.emplace_back(
                 0,
@@ -118,7 +125,7 @@ namespace un {
         u32 offset = 0;
         u32 binding = vertexLayout.getBinding();
         for (int i = 0; i < vertexElements.size(); ++i) {
-            const un::VertexInput &input = vertexElements[i];
+            const un::VertexInput& input = vertexElements[i];
             vertexAttributes.emplace_back(
                     i,
                     binding,
@@ -182,41 +189,60 @@ namespace un {
                 (vk::CullModeFlags) vk::CullModeFlagBits::eBack
         );
         rasterization.setLineWidth(1.0F);
-        std::vector<vk::PipelineColorBlendAttachmentState> attachments = {
-                vk::PipelineColorBlendAttachmentState(
-                        VK_TRUE,
-                        vk::BlendFactor::eSrcAlpha,
-                        vk::BlendFactor::eOneMinusSrcAlpha
-                )
-        };
+        std::vector<vk::PipelineColorBlendAttachmentState> attachments(
+                {
+                        vk::PipelineColorBlendAttachmentState(
+                                VK_TRUE,
+                                vk::BlendFactor::eSrcAlpha,
+                                vk::BlendFactor::eOneMinusSrcAlpha,
+                                vk::BlendOp::eAdd,
+                                vk::BlendFactor::eOne,
+                                vk::BlendFactor::eZero,
+                                vk::BlendOp::eAdd,
+                                vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+                                vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
+                        )
+                }
+        );
         vk::PipelineColorBlendStateCreateInfo colorBlend(
                 (vk::PipelineColorBlendStateCreateFlags) 0,
-                0,
-                vk::LogicOp::eClear,
-                attachments
+                false,
+                vk::LogicOp::eCopy,
+                attachments,
+                {
+                        0, 0, 0, 0
+                }
         );
 
 
-        auto pipeline = device.createGraphicsPipeline(
-                cache,
-                vk::GraphicsPipelineCreateInfo(
-                        (vk::PipelineCreateFlags) 0,
-                        stageInfos,
-                        &vertexInput,
-                        &inputAssembly,
-                        nullptr,
-                        &viewportState,
-                        &rasterization,
-                        &multisample,
-                        nullptr,
-                        &colorBlend,
-                        &dynamicState,
-                        pipelineLayout,
-                        renderPass,
-                        0 //TODO: Deferred rendering
-                )
-        ).value;
+        vk::GraphicsPipelineCreateInfo createInfo(
+                (vk::PipelineCreateFlags) 0,
+                stageInfos,
+                &vertexInput,
+                &inputAssembly,
+                nullptr,
+                &viewportState,
+                &rasterization,
+                &multisample,
+                nullptr,
+                &colorBlend,
+                &dynamicState,
+                pipelineLayout,
+                renderPass,
+                0 //TODO: Deferred rendering
+        );
 
+        auto pipelineResult = device.createGraphicsPipeline(
+                cache,
+                createInfo
+        );
+        if (pipelineResult.result != vk::Result::eSuccess) {
+            std::ostringstream str;
+            str << "Unable to create graphics pipeline: '" << vk::to_string(pipelineResult.result)
+                << "' (" << pipelineResult.result << ").";
+            throw std::runtime_error(str.str());
+        }
+        auto pipeline = pipelineResult.value;
         return un::Pipeline(
                 std::string("standart"),
                 un::PipelineData{
@@ -227,8 +253,8 @@ namespace un {
         );
     }
 
-    void GraphicsPipelineBuilder::addStage(const ShaderStage &stage) {
-        stages.push_back(&stage);
+    void GraphicsPipelineBuilder::addStage(const ShaderStage* stage) {
+        stages.push_back(stage);
     }
 
     GraphicsPipelineBuilder::GraphicsPipelineBuilder(BoundVertexLayout layout) : vertexLayout(std::move(layout)) {
@@ -236,10 +262,10 @@ namespace un {
     }
 
     GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-            const BoundVertexLayout &layout,
-            std::initializer_list<const ShaderStage> shaders
+            const BoundVertexLayout& layout,
+            std::initializer_list<const ShaderStage*> shaders
     ) : GraphicsPipelineBuilder(layout) {
-        for (const ShaderStage &stage : shaders) {
+        for (const ShaderStage* stage : shaders) {
             addStage(stage);
         }
     }

@@ -15,6 +15,7 @@ conan_cmake_run(
         entt/3.5.2
         glfw/3.3.2
         tinyobjloader/1.0.6
+        cxxopts/2.2.1
 
         SETTINGS
         compiler.cppstd=20
@@ -27,7 +28,7 @@ conan_cmake_run(
 
 set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
 add_unnecessary_thirdparty_library(grapphs)
-
 add_subdirectory(engine)
+
 
 

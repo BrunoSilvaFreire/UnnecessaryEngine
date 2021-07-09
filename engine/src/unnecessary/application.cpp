@@ -5,29 +5,31 @@
 namespace un {
     template<typename T>
     void assertHasElements(
-            const std::string &name,
+            const std::string& name,
             std::vector<T> elements,
-            std::vector<const char *> &requirements,
-            const std::function<const char *(const T &)> &selector
+            std::vector<const char*>& requirements,
+            const std::function<const char*(const T&)>& selector
     ) {
         std::vector<std::string> notFound;
-        for (const char *&requirement : requirements) {
+        for (const char*& requirement : requirements) {
             bool found = false;
-            for (const T &property : elements) {
+            for (const T& property : elements) {
                 std::string propertyName = std::string(selector(property));
+
 
                 if (propertyName == requirement) {
                     LOG(INFO) << "Found " << name << ' ' << propertyName;
                     found = true;
                     break;
                 }
+
             }
             if (!found) {
                 notFound.emplace_back(requirement);
             }
         }
         if (!notFound.empty()) {
-            for (std::string &layer:notFound) {
+            for (std::string& layer:notFound) {
                 LOG(FUCK) << name << " '" << layer << "' not found.";
             }
             throw std::runtime_error("Unable to find all required elements.");
@@ -35,11 +37,11 @@ namespace un {
     }
 
     vk::Instance loadVulkan(
-            const std::string &name,
-            const Version &appVersion
+            const std::string& name,
+            const Version& appVersion
     ) {
-        std::vector<const char *> instanceExtensions;
-        std::vector<const char *> layers;
+        std::vector<const char*> instanceExtensions;
+        std::vector<const char*> layers;
         if (glfwInit() != GLFW_TRUE) {
             throw std::runtime_error("Unable to initialize GLFW");
         }
@@ -53,7 +55,7 @@ namespace un {
         }
 
         u32 count;
-        const char **requiredExtensions = glfwGetRequiredInstanceExtensions(&count);
+        const char** requiredExtensions = glfwGetRequiredInstanceExtensions(&count);
         for (u32 i = 0; i < count; ++i) {
             instanceExtensions.emplace_back(requiredExtensions[i]);
         }
@@ -65,7 +67,7 @@ namespace un {
                 "extension",
                 vk::enumerateInstanceExtensionProperties(),
                 instanceExtensions,
-                [](const vk::ExtensionProperties &properties) {
+                [](const vk::ExtensionProperties& properties) {
                     return properties.extensionName.data();
                 }
         );
@@ -74,7 +76,7 @@ namespace un {
                 "layer",
                 vk::enumerateInstanceLayerProperties(),
                 layers,
-                [](const vk::LayerProperties &properties) {
+                [](const vk::LayerProperties& properties) {
                     return properties.layerName.data();
                 }
         );
@@ -95,26 +97,25 @@ namespace un {
         try {
             return vk::createInstance(info);
 
-        } catch (vk::LayerNotPresentError &layerNotPresentError) {
+        } catch (vk::LayerNotPresentError& layerNotPresentError) {
             LOG(FUCK) << RED(layerNotPresentError.what() << " (" << layerNotPresentError.code() << ")");
             throw layerNotPresentError;
         }
     }
 
-    Application::Application(
-            const std::string &name,
-            const Version &version
-    ) : name(name),
-        version(version),
-        pooling(true),
-        vulkan(loadVulkan(name, version)),
-        renderer(nullptr), jobSystem(nullptr) {
+    Application::Application(const std::string& name, const Version& version, int nThreads) : name(name),
+                                                                                              version(version),
+                                                                                              pooling(true),
+                                                                                              vulkan(loadVulkan(name,
+                                                                                                                version)),
+                                                                                              renderer(nullptr),
+                                                                                              jobSystem(nullptr) {
         LOG(INFO) << "Initializing app " << GREEN(name);
 
         monitor = glfwGetPrimaryMonitor();
         vidMode = glfwGetVideoMode(monitor);
         bool fullscreen = false;
-        GLFWmonitor *mon;
+        GLFWmonitor* mon;
         if (fullscreen) {
             glfwWindowHint(GLFW_RED_BITS, vidMode->redBits);
             glfwWindowHint(GLFW_BLUE_BITS, vidMode->blueBits);
@@ -132,7 +133,7 @@ namespace un {
         window = glfwCreateWindow(width, height, name.c_str(), mon, nullptr);
         glfwMakeContextCurrent(window);
         renderer = new un::Renderer(vulkan, window);
-        jobSystem = new un::JobSystem(*this);
+        jobSystem = new un::JobSystem(*this, nThreads);
     }
 
     void Application::execute() {
@@ -143,35 +144,35 @@ namespace un {
         }
     }
 
-    const vk::Instance &Application::getVulkan() const {
+    const vk::Instance& Application::getVulkan() const {
         return vulkan;
     }
 
-    Renderer &Application::getRenderer() {
+    Renderer& Application::getRenderer() {
         return *renderer;
     }
 
-    const std::string &Application::getName() const {
+    const std::string& Application::getName() const {
         return name;
     }
 
-    const Version &Application::getVersion() const {
+    const Version& Application::getVersion() const {
         return version;
     }
 
-    GLFWwindow *Application::getWindow() const {
+    GLFWwindow* Application::getWindow() const {
         return window;
     }
 
-    Event<f32> &Application::getOnPool() {
+    Event<f32>& Application::getOnPool() {
         return onPool;
     }
 
-    const GLFWvidmode *const Application::getVidMode() const {
+    const GLFWvidmode* const Application::getVidMode() const {
         return vidMode;
     }
 
-    GLFWmonitor *Application::getMonitor() const {
+    GLFWmonitor* Application::getMonitor() const {
         return monitor;
     }
 
@@ -179,7 +180,7 @@ namespace un {
         delete renderer;
     }
 
-    JobSystem &Application::getJobSystem() {
+    JobSystem& Application::getJobSystem() {
         return *jobSystem;
     }
 

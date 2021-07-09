@@ -3,6 +3,7 @@
 
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/algorithm/layout.h>
+#include <unnecessary/def.h>
 
 namespace un {
     struct DescriptorElement {
@@ -13,7 +14,7 @@ namespace un {
     public:
         DescriptorElement(std::string name, vk::DescriptorType type, size_t size);
 
-        const std::string &getName() const;
+        const std::string& getName() const;
 
         vk::DescriptorType getType() const;
 
@@ -22,12 +23,20 @@ namespace un {
 
     class DescriptorLayout : public Layout<DescriptorElement> {
     public:
+        static DescriptorLayout EMPTY_LAYOUT;
         void withStandardCameraMatrices();
 
         template<typename T>
-        void push(const std::string &name, vk::DescriptorType type = vk::DescriptorType::eUniformBufferDynamic) {
+        void push(const std::string& name, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer) {
             elements.emplace_back(name, type, sizeof(T));
         }
+
+        vk::DescriptorSetLayout build(
+                vk::Device owningDevice,
+                vk::ShaderStageFlags shaderStageFlags
+        ) const;
+
+        bool isEmpty() const;
     };
 }
 #endif

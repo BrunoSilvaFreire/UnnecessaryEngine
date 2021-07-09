@@ -66,7 +66,22 @@ add_executable(
         src/unnecessary/graphics/rendering_device.cpp
         include/unnecessary/graphics/image_view.h
         src/unnecessary/graphics/image_view.cpp
-        include/unnecessary/jobs/job_chain.h include/unnecessary/jobs/parallel_for_job.h src/unnecessary/jobs/parallel_for_job.cpp src/unnecessary/systems/velocity.cpp include/unnecessary/systems/velocity.h include/unnecessary/misc/benchmark.h src/unnecessary/misc/benchmark.cpp)
+        include/unnecessary/jobs/job_chain.h
+        include/unnecessary/jobs/parallel_for_job.h
+        src/unnecessary/jobs/parallel_for_job.cpp
+        src/unnecessary/systems/velocity.cpp
+        include/unnecessary/systems/velocity.h
+        include/unnecessary/misc/benchmark.h
+        src/unnecessary/misc/benchmark.cpp
+        include/unnecessary/graphics/render_group.h
+        include/unnecessary/graphics/descriptor_set.h
+        include/unnecessary/graphics/descriptor_allocator.h
+        src/unnecessary/graphics/descriptor_allocator.cpp
+        include/unnecessary/systems/cameras.h
+        src/unnecessary/systems/cameras.cpp
+        include/unnecessary/graphics/lighting.h
+        include/unnecessary/components/dummy.h)
+
 target_include_directories(
         unnecessary
         PUBLIC
@@ -84,8 +99,9 @@ target_compile_definitions(
 )
 set(
         SHADERS
-        resources/shaders/standart.frag
-        resources/shaders/standart.vert
+        resources/shaders/standart.frag.hlsl
+        resources/shaders/standart.vert.hlsl
+        resources/shaders/standart.geom.hlsl
 )
 set(resources_output ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources)
 set(shader_output_dir ${resources_output}/shaders)
@@ -118,5 +134,6 @@ target_link_libraries(
         CONAN_PKG::termcolor
         CONAN_PKG::glfw
         CONAN_PKG::tinyobjloader
+        CONAN_PKG::cxxopts
         grapphs
 )

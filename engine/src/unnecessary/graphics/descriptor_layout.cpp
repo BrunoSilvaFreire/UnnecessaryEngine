@@ -4,9 +4,36 @@
 #include <utility>
 
 namespace un {
+    DescriptorLayout DescriptorLayout::EMPTY_LAYOUT = DescriptorLayout();
 
     void DescriptorLayout::withStandardCameraMatrices() {
         push<un::Matrices>("matrices");
+    }
+
+    vk::DescriptorSetLayout DescriptorLayout::build(
+            vk::Device owningDevice,
+            vk::ShaderStageFlags shaderStageFlags
+    ) const {
+        std::vector<vk::DescriptorSetLayoutBinding> bindings(elements.size());
+        for (u32 i = 0; i < elements.size(); ++i) {
+            const DescriptorElement& element = elements[i];
+            bindings[i] = vk::DescriptorSetLayoutBinding(
+                    i,
+                    element.getType(),
+                    1,
+                    shaderStageFlags
+            );
+        }
+        return owningDevice.createDescriptorSetLayout(
+                vk::DescriptorSetLayoutCreateInfo(
+                        (vk::DescriptorSetLayoutCreateFlags) 0,
+                        bindings
+                )
+        );
+    }
+
+    bool DescriptorLayout::isEmpty() const {
+        return elements.empty();
     }
 
     DescriptorElement::DescriptorElement(
@@ -17,7 +44,7 @@ namespace un {
         type(type),
         size(size) {}
 
-    const std::string &DescriptorElement::getName() const {
+    const std::string& DescriptorElement::getName() const {
         return name;
     }
 

@@ -24,11 +24,11 @@ namespace un {
         GLFWmonitor *monitor;
         bool pooling;
         Event<f32> onPool;
-        JobSystem * jobSystem;
+        JobSystem *jobSystem;
         u32 width, height;
 
     public:
-        Application(const std::string &name, const Version &version);
+        Application(const std::string &name, const Version &version, int nThreads = -1);
 
         virtual ~Application();
 

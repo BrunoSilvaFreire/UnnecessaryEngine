@@ -49,7 +49,7 @@ namespace un {
                 for (entt::entity entity : batch.getBatched()) {
                     un::RenderMesh &renderMesh = registry.get<un::RenderMesh>(entity);
                     //TODO: Batch meshes
-                    un::MeshInfo *mesh = renderMesh.mesh;
+                    un::MeshInfo *mesh = renderMesh.meshInfo;
                     commandBuffer.bindVertexBuffers(
                             0,
                             1,

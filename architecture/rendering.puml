@@ -1,0 +1,39 @@
+@startuml
+participant Application
+[o-> World : Uma entidade que contém um \ncomponente **LocalToWorld** e um\ncomponente que seja\n"//renderizável//" é adicionada\n ao mundo
+Application -> World : World::step(f32 deltaTime)
+World -> JobSystem : Adiciona um job\npara executar os sistema
+
+activate JobWorker
+JobWorker -> JobSystem : Solicia um job para executar
+JobSystem --> JobWorker : Returna um job de acordo\ncom a fila de jobs preparados
+
+JobWorker -> DrawingSystem : RunSystemJob
+participant RenderingDevice
+
+loop foreach Camera
+    DrawingSystem -> DrawingSystem : Criar CommandBuffer
+    DrawingSystem -> RenderingDevice : Solicitar RenderGroups
+    RenderingDevice --> DrawingSystem
+    loop foreach RenderGroup
+        DrawingSystem -> RenderGroup : RenderGroup::draw
+        entity CommandBuffer
+        RenderGroup -> CommandBuffer : Adicionar draw call
+    end
+    CommandBuffer --> DrawingSystem : Incluir comando na lista á serem submetidos á GraphicsQueue
+end
+queue GraphicsQueue
+DrawingSystem -> GraphicsQueue : Submeter CommandBuffer's e comando //present// \ná GraphicsQueue
+activate DrawingSystem
+activate GraphicsQueue
+GraphicsQueue -> GraphicsQueue : Renderiza e apresenta\n o frame
+GraphicsQueue --> DrawingSystem
+DrawingSystem --> JobWorker
+
+deactivate GraphicsQueue
+deactivate DrawingSystem
+JobWorker -> JobSystem : JobSystem::notifyCompletion(JobHandle job)
+JobSystem -> World : Notifica término do job
+deactivate JobWorker
+World --> Application
+@enduml

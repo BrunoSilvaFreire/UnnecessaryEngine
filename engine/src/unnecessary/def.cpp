@@ -7,6 +7,6 @@ void assertVkCall(vk::Result result, std::string method) {
         str += " (";
         str += vk::to_string(result);
         str += ")";
-        throw new std::runtime_error(str);
+        throw std::runtime_error(str);
     }
 }

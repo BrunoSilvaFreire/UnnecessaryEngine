@@ -4,6 +4,7 @@
 #include <queue>
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
+#include <unnecessary/graphics/rendering_device.h>
 #include <grapphs/adjacency_list.h>
 #include <utility>
 #include <chrono>
@@ -64,6 +65,19 @@ namespace un {
 
 
     class JobWorker {
+    public:
+        struct WorkerGraphicsResources {
+        private:
+            vk::CommandPool commandPool;
+        public:
+            WorkerGraphicsResources() = default;
+
+            WorkerGraphicsResources(un::RenderingDevice &device);
+
+            const vk::CommandPool &getCommandPool() const;
+
+        };
+
     private:
         size_t index;
         std::thread *thread;
@@ -73,7 +87,7 @@ namespace un {
         std::mutex handbrakeMutex;
         std::mutex sleepMutex;
         std::condition_variable waiting;
-        vk::CommandPool commandPool;
+        WorkerGraphicsResources graphicsResources;
 
         void workerThread();
 
@@ -90,7 +104,7 @@ namespace un {
 
         void sleep();
 
-        vk::CommandPool getCommandBufferPool() const;
+        const WorkerGraphicsResources &getGraphicsResources() const;
     };
 
     class JobSystem {
@@ -118,7 +132,7 @@ namespace un {
 
         void markForExecution(u32 job);
 
-        JobSystem(un::Application &application);
+        JobSystem(un::Application &application, int nThreads = -1);
 
         ~JobSystem();
 
@@ -150,7 +164,7 @@ namespace un {
 
         u32 enqueue(un::LambdaJob::Callback callback);
 
-        u32 enqueue(u32 dependsOn, const un::LambdaJob::Callback& callback);
+        u32 enqueue(u32 dependsOn, const un::LambdaJob::Callback &callback);
 
         int getNumWorkers();
     };

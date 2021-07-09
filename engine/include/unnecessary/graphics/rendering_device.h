@@ -19,21 +19,24 @@ namespace un {
         RenderingDevice();
 
         RenderingDevice(
-                const vk::Instance &vulkanInstance,
-                GLFWwindow *window
+                const vk::Instance& vulkanInstance,
+                GLFWwindow* window
         );
 
-        u32 selectMemoryTypeFor(const vk::MemoryRequirements &requirements);
+        u32 selectMemoryTypeFor(
+                const vk::MemoryRequirements& requirements,
+                vk::MemoryPropertyFlags flags = static_cast<vk::MemoryPropertyFlags>(0)
+        ) const;
 
-        const vk::Device &getVirtualDevice() const;
+        const vk::Device& getVirtualDevice() const;
 
-        const vk::PhysicalDevice &getPhysicalDevice() const;
+        const vk::PhysicalDevice& getPhysicalDevice() const;
 
-        const vk::SurfaceKHR &getSurface() const;
+        const vk::SurfaceKHR& getSurface() const;
 
-        Queue &getGraphics();
+        Queue& getGraphics();
 
-        Queue &getPresent();
+        Queue& getPresent();
     };
 }
 #endif

@@ -2,7 +2,7 @@
 
 namespace un {
 
-    Material::Material(un::Pipeline *shader) : shader(std::move(shader)), floats(), ints() {
+    Material::Material(un::Pipeline *shader) : shader(shader), floats(), ints() {
 
     }
 

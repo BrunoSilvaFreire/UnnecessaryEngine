@@ -17,7 +17,9 @@ namespace un {
         std::vector<vk::PresentModeKHR> presentModes;
     public:
         SwapChainSupportDetails(
-                const un::RenderingDevice &renderingDevice
+                const un::RenderingDevice& renderingDevice,
+                vk::ImageUsageFlags usageFlags,
+                vk::ImageCreateFlags createFlags
         );
 
         const vk::SurfaceCapabilitiesKHR &getCapabilities() const;
@@ -34,6 +36,7 @@ namespace un {
         vk::Format format;
         vk::SwapchainKHR swapChain;
         un::Size2D resolution;
+        std::vector<vk::Image> images;
         std::vector<un::ImageView> views;
     public:
         SwapChain() = default;
