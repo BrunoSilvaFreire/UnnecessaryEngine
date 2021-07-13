@@ -14,20 +14,23 @@ namespace un {
     public:
         DescriptorElement(std::string name, vk::DescriptorType type, size_t size);
 
-        const std::string& getName() const;
+        const std::string &getName() const;
 
         vk::DescriptorType getType() const;
 
         size_t getSize() const;
     };
 
-    class DescriptorLayout : public Layout<DescriptorElement> {
+    class DescriptorSetLayout : public Layout<DescriptorElement> {
     public:
-        static DescriptorLayout EMPTY_LAYOUT;
+        static DescriptorSetLayout EMPTY_LAYOUT;
+
         void withStandardCameraMatrices();
 
+        void withGlobalSceneLighting();
+
         template<typename T>
-        void push(const std::string& name, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer) {
+        void push(const std::string &name, vk::DescriptorType type = vk::DescriptorType::eUniformBuffer) {
             elements.emplace_back(name, type, sizeof(T));
         }
 

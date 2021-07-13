@@ -6,26 +6,26 @@
 #include <unnecessary/graphics/image.h>
 
 namespace un {
-    const vk::Device& RenderingDevice::getVirtualDevice() const {
+    const vk::Device &RenderingDevice::getVirtualDevice() const {
         return virtualDevice;
     }
 
-    const vk::PhysicalDevice& RenderingDevice::getPhysicalDevice() const {
+    const vk::PhysicalDevice &RenderingDevice::getPhysicalDevice() const {
         return physicalDevice;
     }
 
-    const vk::SurfaceKHR& RenderingDevice::getSurface() const {
+    const vk::SurfaceKHR &RenderingDevice::getSurface() const {
         return surface;
     }
 
     std::vector<vk::QueueFamilyProperties> selectQueueFamily(
-            const vk::PhysicalDevice& device
+            const vk::PhysicalDevice &device
     ) {
         return device.getQueueFamilyProperties();
     }
 
     vk::PhysicalDeviceProperties selectDeviceProperties(
-            const vk::PhysicalDevice& device
+            const vk::PhysicalDevice &device
     ) {
         return device.getProperties();
     }
@@ -37,7 +37,7 @@ namespace un {
 
     vk::DeviceQueueCreateInfo makeQueueCreateInfoFor(
             vk::QueueFlags flags,
-            std::vector<vk::QueueFamilyProperties>& queueProperties
+            std::vector<vk::QueueFamilyProperties> &queueProperties
     ) {
         float priority = 1.0;
 
@@ -54,8 +54,8 @@ namespace un {
     RenderingDevice::RenderingDevice() = default;
 
     RenderingDevice::RenderingDevice(
-            const vk::Instance& instance,
-            GLFWwindow* window
+            const vk::Instance &instance,
+            GLFWwindow *window
     ) {
 
         VkSurfaceKHR tempSurface;
@@ -70,25 +70,25 @@ namespace un {
         auto devices = instance.enumeratePhysicalDevices();
         un::CompositeRequirement<vk::PhysicalDevice> deviceRequirements;
 
-        auto& queueRequirements = deviceRequirements.emplace<un::DeviceQueueRequirements>();
+        auto &queueRequirements = deviceRequirements.emplace<un::DeviceQueueRequirements>();
 
         queueRequirements.emplace<un::VulkanQueueAvailableRequirement>(vk::QueueFlagBits::eGraphics);
         queueRequirements.emplace<un::VulkanQueueAvailableRequirement>(vk::QueueFlagBits::eTransfer);
 
-        auto& propertiesRequirements = deviceRequirements.emplace<un::DevicePropertiesRequirements>();
+        auto &propertiesRequirements = deviceRequirements.emplace<un::DevicePropertiesRequirements>();
         propertiesRequirements.emplace<VulkanDeviceTypeRequirement>(vk::PhysicalDeviceType::eDiscreteGpu);
 
 
         std::unordered_map<u32, u32> scores;
         for (u32 i = 0; i < devices.size(); ++i) {
-            const vk::PhysicalDevice& device = devices[i];
+            const vk::PhysicalDevice &device = devices[i];
             vk::PhysicalDeviceProperties properties = device.getProperties();
             if (!deviceRequirements.isMet(device)) {
                 LOG(INFO) << "Device " << RED(properties.deviceName) << " is not suitable.";
                 //Not suitable
                 continue;
             }
-            LOG(INFO) << "Found candidate device " << GREEN(properties.deviceName) << ".";
+            LOG(INFO) << "Found candidate renderer " << GREEN(properties.deviceName) << ".";
             std::vector<vk::QueueFamilyProperties> queueProperties = device.getQueueFamilyProperties();
             u32 score = 0;
             //TODO: Scoring
@@ -97,7 +97,7 @@ namespace un {
         typedef typename std::unordered_map<u32, u32>::value_type pair_type;
         auto electedIndex = std::max_element(
                 std::begin(scores), std::end(scores),
-                [](const pair_type& p1, const pair_type& p2) {
+                [](const pair_type &p1, const pair_type &p2) {
                     return p1.second < p2.second;
                 }
         );
@@ -131,9 +131,12 @@ namespace un {
             queuesToCreate.emplace_back((vk::DeviceQueueCreateFlags) 0, presentQueue.value(), 1, &priority);
         }
         deviceCreateInfo.setQueueCreateInfos(queuesToCreate);
-        std::vector<const char*> deviceExtensions;
+        std::vector<const char *> deviceExtensions;
         deviceExtensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         deviceCreateInfo.setPEnabledExtensionNames(deviceExtensions);
+        vk::PhysicalDeviceFeatures features;
+        features.geometryShader = true;
+        deviceCreateInfo.setPEnabledFeatures(&features);
         virtualDevice = physicalDevice.createDevice(deviceCreateInfo);
         graphics = Queue(
                 graphicsInfo.queueFamilyIndex,
@@ -152,7 +155,7 @@ namespace un {
     }
 
     u32 RenderingDevice::selectMemoryTypeFor(
-            const vk::MemoryRequirements& requirements,
+            const vk::MemoryRequirements &requirements,
             vk::MemoryPropertyFlags flags
     ) const {
         u32 typeFilter = requirements.memoryTypeBits;
@@ -168,11 +171,15 @@ namespace un {
         return -1;
     }
 
-    Queue& RenderingDevice::getGraphics() {
+    Queue &RenderingDevice::getGraphics() {
         return graphics;
     }
 
-    Queue& RenderingDevice::getPresent() {
+    const Queue &RenderingDevice::getGraphics() const {
+        return graphics;
+    }
+
+    Queue &RenderingDevice::getPresent() {
         return present;
     }
 }

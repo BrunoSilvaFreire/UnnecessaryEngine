@@ -2,7 +2,7 @@
 
 [[vk::push_constant]]
 cbuffer pushConstants {
-PerObjectData data;
+    PerObjectData data;
 };
 
 [[vk::binding(0, 0)]]

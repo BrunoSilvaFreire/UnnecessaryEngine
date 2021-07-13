@@ -17,7 +17,7 @@ namespace un {
         std::vector<vk::Framebuffer> framebuffers;
         vk::Semaphore imageAvailableSemaphore;
         un::ResizableBuffer lightingBuffer;
-        vk::DescriptorSet lightingSet;
+        vk::DescriptorSet globalSet;
     public:
         DrawingSystem(Renderer &renderer);
 

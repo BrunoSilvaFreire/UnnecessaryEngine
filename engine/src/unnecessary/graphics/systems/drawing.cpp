@@ -112,7 +112,7 @@ namespace un {
             data.position = position;
         }
         bool resized = lightingBuffer.ensureFits<un::PointLightData>(
-                renderer->getRenderingDevice(),
+                *renderer,
                 pointLights.size(),
                 sizeof(int)
         );
@@ -125,7 +125,7 @@ namespace un {
                     {
                             vk::WriteDescriptorSet(
 
-                                    lightingSet,
+                                    globalSet,
                                     1,
                                     0,
                                     1,

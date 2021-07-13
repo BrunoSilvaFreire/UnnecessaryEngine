@@ -22,7 +22,7 @@ namespace un {
     public:
         DescriptorPool(
                 vk::Device device,
-                un::DescriptorLayout &layout,
+                un::DescriptorSetLayout &layout,
                 size_t numSetsToReserve
         );
 
@@ -48,7 +48,7 @@ namespace un {
     class DescriptorAllocator {
     private:
         std::stack<un::DescriptorPool> freePools;
-        un::DescriptorLayout layout;
+        un::DescriptorSetLayout layout;
         vk::DescriptorSetLayout vulkanLayout;
         /**
          * How many sets each pool holds
@@ -59,7 +59,7 @@ namespace un {
 
     public:
         DescriptorAllocator(
-                DescriptorLayout&& oldLayout,
+                DescriptorSetLayout&& oldLayout,
                 vk::Device owningDevice,
                 size_t numSetsPerPool,
                 vk::ShaderStageFlagBits shaderStageFlags

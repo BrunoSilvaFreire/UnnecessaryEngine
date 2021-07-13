@@ -32,5 +32,7 @@ struct ObjectLightingData
 
 struct SceneLightingData
 {
-	PointLight pointLights[MAX_NUM_LIGHTS];
+    uint nPointLights;
+    uint _unusedA, _unusedB, _unusedC;
+	PointLight pointLights[];
 };

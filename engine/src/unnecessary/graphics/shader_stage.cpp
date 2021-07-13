@@ -38,7 +38,7 @@ namespace un {
     ShaderStage::ShaderStage(
             std::string name,
             const vk::ShaderStageFlagBits &flags,
-            DescriptorLayout descriptorLayout,
+            DescriptorSetLayout descriptorLayout,
             std::optional<un::PushConstants> pushConstantRange
     ) : name(std::move(name)),
         flags(flags),
@@ -50,7 +50,7 @@ namespace un {
     ShaderStage::ShaderStage(
             const std::string &name,
             const vk::ShaderStageFlagBits &flags,
-            const DescriptorLayout &descriptorLayout,
+            const DescriptorSetLayout &descriptorLayout,
             vk::Device &device,
             std::optional<un::PushConstants> pushConstantRange,
             const std::filesystem::path &root
@@ -62,7 +62,7 @@ namespace un {
         return flags;
     }
 
-    const DescriptorLayout &ShaderStage::getDescriptorLayout() const {
+    const DescriptorSetLayout &ShaderStage::getDescriptorLayout() const {
         return descriptorLayout;
     }
 

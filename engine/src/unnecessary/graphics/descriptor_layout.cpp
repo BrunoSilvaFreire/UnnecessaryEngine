@@ -2,15 +2,16 @@
 #include <unnecessary/graphics/matrices.h>
 
 #include <utility>
+#include <unnecessary/graphics/lighting.h>
 
 namespace un {
-    DescriptorLayout DescriptorLayout::EMPTY_LAYOUT = DescriptorLayout();
+    DescriptorSetLayout DescriptorSetLayout::EMPTY_LAYOUT = DescriptorSetLayout();
 
-    void DescriptorLayout::withStandardCameraMatrices() {
+    void DescriptorSetLayout::withStandardCameraMatrices() {
         push<un::Matrices>("matrices");
     }
 
-    vk::DescriptorSetLayout DescriptorLayout::build(
+    vk::DescriptorSetLayout DescriptorSetLayout::build(
             vk::Device owningDevice,
             vk::ShaderStageFlags shaderStageFlags
     ) const {
@@ -32,8 +33,12 @@ namespace un {
         );
     }
 
-    bool DescriptorLayout::isEmpty() const {
+    bool DescriptorSetLayout::isEmpty() const {
         return elements.empty();
+    }
+
+    void DescriptorSetLayout::withGlobalSceneLighting() {
+        push<un::SceneLightingData>("sceneLighting");
     }
 
     DescriptorElement::DescriptorElement(

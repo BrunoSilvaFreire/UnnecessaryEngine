@@ -30,20 +30,20 @@ namespace un {
          */
         vk::ShaderModule loadedModule;
         vk::ShaderStageFlagBits flags;
-        un::DescriptorLayout descriptorLayout;
+        un::DescriptorSetLayout descriptorLayout;
         std::optional<un::PushConstants> pushConstantRange;
     public:
         ShaderStage(
                 std::string name,
                 const vk::ShaderStageFlagBits &flags,
-                DescriptorLayout descriptorLayout,
+                DescriptorSetLayout descriptorLayout,
                 std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>()
         );
 
         ShaderStage(
                 const std::string &name,
                 const vk::ShaderStageFlagBits &flags,
-                const un::DescriptorLayout &descriptorLayout,
+                const un::DescriptorSetLayout &descriptorLayout,
                 vk::Device &device,
                 std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>(),
                 const std::filesystem::path &root = std::filesystem::current_path()
@@ -62,7 +62,7 @@ namespace un {
 
         const vk::ShaderStageFlagBits &getFlags() const;
 
-        const DescriptorLayout &getDescriptorLayout() const;
+        const DescriptorSetLayout &getDescriptorLayout() const;
 
         const std::optional<un::PushConstants> &getPushConstantRange() const;
     };

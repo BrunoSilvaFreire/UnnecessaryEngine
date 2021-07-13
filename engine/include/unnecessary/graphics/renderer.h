@@ -33,6 +33,8 @@ namespace un {
         un::SwapChain &getSwapChain();
 
         RenderingDevice &getRenderingDevice();
+
+        const Queue &getGraphics() const;
     };
 }
 

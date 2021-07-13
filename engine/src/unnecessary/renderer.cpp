@@ -23,6 +23,9 @@ namespace un {
     Queue &Renderer::getGraphics() {
         return renderingDevice.getGraphics();
     }
+    const Queue &Renderer::getGraphics() const {
+        return renderingDevice.getGraphics();
+    }
 
 
     Renderer::Renderer(

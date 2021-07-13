@@ -21,6 +21,7 @@ namespace un {
     private:
         BoundVertexLayout vertexLayout;
         std::vector<const un::ShaderStage *> stages;
+        std::vector<std::pair<un::DescriptorSetLayout, vk::ShaderStageFlags>> sharedDescriptorSets;
         std::optional<vk::PipelineVertexInputStateCreateInfo> vertexInput;
         std::optional<vk::PipelineInputAssemblyStateCreateInfo> inputAssembly;
         std::optional<vk::PipelineTessellationStateCreateInfo> tesselation;
@@ -32,13 +33,18 @@ namespace un {
     public:
         explicit GraphicsPipelineBuilder(BoundVertexLayout layout);
 
-        GraphicsPipelineBuilder(const BoundVertexLayout &layout, std::initializer_list<const ShaderStage*> shaders);
+        GraphicsPipelineBuilder(const BoundVertexLayout &layout, std::initializer_list<const ShaderStage *> shaders);
 
         void withStandardRasterization();
 
         void withInputAssembly(vk::PrimitiveTopology topology);
 
-        void addStage(const ShaderStage* stage);
+        void addStage(const ShaderStage *stage);
+
+        void addSharedDescriptorSet(
+                un::DescriptorSetLayout &&layout,
+                vk::ShaderStageFlags accessibleTo
+        );
 
         un::Pipeline build(un::Renderer &renderer, vk::RenderPass renderPass);
     };

@@ -30,7 +30,8 @@ namespace un {
         u32 pointLightsIndices[MAX_NUM_LIGHTS];
     };
     struct SceneLightingData {
-        PointLightData pointLights[MAX_NUM_LIGHTS];
+        u32 numPointLights;
+        PointLightData* pointLights;
     };
 }
 #endif

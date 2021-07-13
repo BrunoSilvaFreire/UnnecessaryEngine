@@ -80,7 +80,7 @@ add_executable(
         include/unnecessary/systems/cameras.h
         src/unnecessary/systems/cameras.cpp
         include/unnecessary/graphics/lighting.h
-        include/unnecessary/components/dummy.h)
+        include/unnecessary/components/dummy.h include/unnecessary/graphics/renderdoc_app.h include/unnecessary/platform.h src/unnecessary/platform.cpp include/unnecessary/systems/lighting.cpp include/unnecessary/systems/lighting.h)
 
 target_include_directories(
         unnecessary

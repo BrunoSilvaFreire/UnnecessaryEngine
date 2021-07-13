@@ -1,5 +1,5 @@
 #include <unnecessary/graphics/graphics_pipeline.h>
-#include <unnecessary/graphics/vertex_layout.h>
+#include <unnecessary/graphics/lighting.h>
 #include <unnecessary/application.h>
 
 namespace un {
@@ -15,12 +15,12 @@ namespace un {
         std::vector<vk::VertexInputBindingDescription> inputBindings;
         std::vector<vk::VertexInputAttributeDescription> inputAttributes;
         u32 stride = vertexLayout.getStride();
-        const std::vector<un::VertexInput>& elements = vertexLayout.getElements();
+        const std::vector<un::VertexInput> &elements = vertexLayout.getElements();
         u32 count = elements.size();
         u32 offset = 0;
         u32 binding = vertexLayout.getBinding();
         for (u32 i = 0; i < count; ++i) {
-            const un::VertexInput& input = elements[i];
+            const un::VertexInput &input = elements[i];
             inputBindings.emplace_back(binding, stride);
             inputAttributes.emplace_back(
                     i,
@@ -48,22 +48,14 @@ namespace un {
                 0.0,
                 1.0
         );
-        std::vector<vk::PipelineColorBlendAttachmentState> states;
-        states.emplace_back(
-                true,
-                vk::BlendFactor::eSrcAlpha,
-                vk::BlendFactor::eOneMinusSrcAlpha
-        );
-        vk::PipelineColorBlendStateCreateInfo colorBlend(
-                (vk::PipelineColorBlendStateCreateFlags) 0,
-                true,
-                vk::LogicOp::eClear,
-                states
-        );
+        un::DescriptorSetLayout globalLayout;
+        globalLayout.withStandardCameraMatrices();
+        globalLayout.withGlobalSceneLighting();
+        addSharedDescriptorSet(std::move(globalLayout), vk::ShaderStageFlagBits::eAllGraphics);
     }
 
     template<typename T>
-    T* getOrNull(std::optional<T>& optional) {
+    T *getOrNull(std::optional<T> &optional) {
         if (optional) {
             return optional.operator->();
         }
@@ -71,7 +63,7 @@ namespace un {
     }
 
 
-    un::Pipeline GraphicsPipelineBuilder::build(un::Renderer& renderer, vk::RenderPass renderPass) {
+    un::Pipeline GraphicsPipelineBuilder::build(un::Renderer &renderer, vk::RenderPass renderPass) {
         vk::Device device = renderer.getVirtualDevice();
         vk::PipelineCache cache = device.createPipelineCache(
                 vk::PipelineCacheCreateInfo(
@@ -79,16 +71,21 @@ namespace un {
                 )
         );
         std::vector<vk::DescriptorSetLayout> layouts;
-        for (const un::ShaderStage* stage : stages) {
-            const un::DescriptorLayout& layout = stage->getDescriptorLayout();
-            if(!layout.isEmpty())
-            {
+        for (const std::pair<un::DescriptorSetLayout, vk::ShaderStageFlags> &shared : sharedDescriptorSets) {
+            const un::DescriptorSetLayout &layout = shared.first;
+            if (!layout.isEmpty()) {
+                layouts.push_back(layout.build(device, shared.second));
+            }
+        }
+        for (const un::ShaderStage *stage : stages) {
+            const un::DescriptorSetLayout &layout = stage->getDescriptorLayout();
+            if (!layout.isEmpty()) {
                 layouts.push_back(layout.build(device, stage->getFlags()));
             }
         }
         std::vector<vk::PushConstantRange> pushes;
-        for (const un::ShaderStage* stage : stages) {
-            auto& pushConstant = stage->getPushConstantRange();
+        for (const un::ShaderStage *stage : stages) {
+            auto &pushConstant = stage->getPushConstantRange();
             if (pushConstant.has_value()) {
                 auto value = pushConstant.value();
                 pushes.emplace_back(
@@ -106,7 +103,7 @@ namespace un {
                 )
         );
         std::vector<vk::PipelineShaderStageCreateInfo> stageInfos;
-        for (const un::ShaderStage* stage : stages) {
+        for (const un::ShaderStage *stage : stages) {
             stageInfos.emplace_back(
                     (vk::PipelineShaderStageCreateFlags) 0,
                     stage->getFlags(),
@@ -116,7 +113,7 @@ namespace un {
         }
         std::vector<vk::VertexInputBindingDescription> vertexBindings;
         std::vector<vk::VertexInputAttributeDescription> vertexAttributes;
-        const std::vector<un::VertexInput>& vertexElements = vertexLayout.getElements();
+        const std::vector<un::VertexInput> &vertexElements = vertexLayout.getElements();
 
         vertexBindings.emplace_back(
                 0,
@@ -125,7 +122,7 @@ namespace un {
         u32 offset = 0;
         u32 binding = vertexLayout.getBinding();
         for (int i = 0; i < vertexElements.size(); ++i) {
-            const un::VertexInput& input = vertexElements[i];
+            const un::VertexInput &input = vertexElements[i];
             vertexAttributes.emplace_back(
                     i,
                     binding,
@@ -253,7 +250,7 @@ namespace un {
         );
     }
 
-    void GraphicsPipelineBuilder::addStage(const ShaderStage* stage) {
+    void GraphicsPipelineBuilder::addStage(const ShaderStage *stage) {
         stages.push_back(stage);
     }
 
@@ -262,12 +259,22 @@ namespace un {
     }
 
     GraphicsPipelineBuilder::GraphicsPipelineBuilder(
-            const BoundVertexLayout& layout,
-            std::initializer_list<const ShaderStage*> shaders
+            const BoundVertexLayout &layout,
+            std::initializer_list<const ShaderStage *> shaders
     ) : GraphicsPipelineBuilder(layout) {
-        for (const ShaderStage* stage : shaders) {
+        for (const ShaderStage *stage : shaders) {
             addStage(stage);
         }
+    }
+
+    void GraphicsPipelineBuilder::addSharedDescriptorSet(
+            DescriptorSetLayout &&layout,
+            vk::ShaderStageFlags accessibleTo
+    ) {
+        sharedDescriptorSets.emplace_back(
+                std::move(layout),
+                accessibleTo
+        );
     }
 
 

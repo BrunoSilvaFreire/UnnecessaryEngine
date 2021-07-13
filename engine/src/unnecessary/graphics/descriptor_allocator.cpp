@@ -2,7 +2,7 @@
 
 namespace un {
 
-    DescriptorPool::DescriptorPool(vk::Device device, DescriptorLayout& layout, size_t numSetsToReserve) : numSets(
+    DescriptorPool::DescriptorPool(vk::Device device, DescriptorSetLayout& layout, size_t numSetsToReserve) : numSets(
             numSetsToReserve), freeSets(numSetsToReserve) {
         std::vector<vk::DescriptorPoolSize> descriptorSizes;
         for (un::DescriptorElement& element : layout.getElements()) {
@@ -118,7 +118,7 @@ namespace un {
     }
 
     DescriptorAllocator::DescriptorAllocator(
-            DescriptorLayout&& oldLayout,
+            DescriptorSetLayout&& oldLayout,
             vk::Device owningDevice,
             size_t numSetsPerPool,
             vk::ShaderStageFlagBits shaderStageFlags

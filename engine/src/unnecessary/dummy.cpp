@@ -2,6 +2,7 @@
 #include <unnecessary/systems/world.h>
 #include <unnecessary/systems/transform.h>
 #include <unnecessary/systems/cameras.h>
+#include <unnecessary/systems/lighting.h>
 #include <unnecessary/graphics/systems/rendering.h>
 #include <unnecessary/graphics/graphics_pipeline.h>
 #include <unnecessary/graphics/descriptor_allocator.h>
@@ -74,36 +75,30 @@ int main(int argc, char** argv) {
     */
     auto transformSystem = world.addSystem<un::TransformSystem>();
     auto projectionSystem = world.addSystem<un::ProjectionSystem>();
-    auto drawingSystem = new un::DrawingSystem(app.getRenderer());
+    un::Renderer &renderer = app.getRenderer();
+    auto drawingSystem = new un::DrawingSystem(renderer);
     auto drawingSystemId = world.addSystem(drawingSystem);
     u32 load, upload;
+    vk::Device device = renderer.getVirtualDevice();
     un::JobChain(&jobs)
             .immediately<un::LoadObjJob>(&load, "resources/teapot.obj", &data)
-            .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &app.getRenderer())
+            .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
             .after(upload, [&](un::JobWorker* worker) {
-                vk::Device device = app.getRenderer().getVirtualDevice();
-
                 un::BoundVertexLayout boundLayout(vertexLayout);
                 un::PushConstants objDataConstants(0, sizeof(un::PerObjectData));
 
-                un::DescriptorLayout vertexDescriptorLayout;
-                vertexDescriptorLayout.withStandardCameraMatrices();
                 un::ShaderStage* vertex = new un::ShaderStage(
                         "standart.vert",
                         vk::ShaderStageFlagBits::eVertex,
-                        vertexDescriptorLayout,
+                        un::DescriptorSetLayout::EMPTY_LAYOUT,
                         device,
                         objDataConstants
                 );
 
 
-                un::DescriptorLayout fragmentDescriptorLayout;
+                un::DescriptorSetLayout fragmentDescriptorLayout;
                 fragmentDescriptorLayout.push<un::ObjectLightingData>(
                         "objectLighting",
-                        vk::DescriptorType::eUniformBuffer
-                );
-                fragmentDescriptorLayout.push<un::SceneLightingData>(
-                        "sceneLighting",
                         vk::DescriptorType::eUniformBuffer
                 );
                 auto* fragment = new un::ShaderStage(
@@ -115,13 +110,13 @@ int main(int argc, char** argv) {
                 auto* geometry = new un::ShaderStage(
                         "standart.geom",
                         vk::ShaderStageFlagBits::eGeometry,
-                        un::DescriptorLayout::EMPTY_LAYOUT,
+                        un::DescriptorSetLayout::EMPTY_LAYOUT,
                         device
                 );
                 un::GraphicsPipelineBuilder pipeline(boundLayout, {vertex, geometry, fragment});
                 pipeline.withStandardRasterization();
                 auto* shader = new un::Pipeline(
-                        pipeline.build(app.getRenderer(), drawingSystem->getRenderPass())
+                        pipeline.build(renderer, drawingSystem->getRenderPass())
                 );
                 for (int i = 0; i < 3; ++i) {
                     entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh>();
@@ -134,11 +129,12 @@ int main(int argc, char** argv) {
             });
 
 
-    un::DescriptorLayout cameraLayout;
+    un::DescriptorSetLayout cameraLayout;
     cameraLayout.withStandardCameraMatrices();
+    cameraLayout.withGlobalSceneLighting();
     un::DescriptorAllocator cameraDescriptorAllocator(
             std::move(cameraLayout),
-            app.getRenderer().getVirtualDevice(),
+            device,
             1,
             vk::ShaderStageFlagBits::eVertex
     );
@@ -154,7 +150,7 @@ int main(int argc, char** argv) {
     perspective.zFar = 1000.0F;
     auto cDescriptorSet = camera.cameraDescriptorSet = cameraDescriptorAllocator.allocate();
     auto cDescriptorBuffer = camera.cameraDescriptorBuffer = un::Buffer(
-            app.getRenderer(),
+            renderer,
             vk::BufferUsageFlagBits::eUniformBuffer,
             sizeof(un::Matrices),
             true,
@@ -165,7 +161,7 @@ int main(int argc, char** argv) {
             0,
             cDescriptorBuffer.getSize()
     );
-    app.getRenderer().getVirtualDevice().updateDescriptorSets(
+    device.updateDescriptorSets(
             {
                     vk::WriteDescriptorSet(
                             cDescriptorSet,
@@ -179,7 +175,8 @@ int main(int argc, char** argv) {
             },
             {}
     );
-    world.addSystem<un::CameraSystem>(&app.getRenderer());
+    world.addSystem<un::LightingSystem>(4, &renderer);
+    world.addSystem<un::CameraSystem>(&renderer);
     //auto renderMeshSystem = world.addSystem<un::RenderMeshSystem>(app.getRenderer(), drawingSystem);
     world.systemMustRunAfter(transformSystem, projectionSystem);
 //    world.systemMustRunAfter(renderMeshSystem, transformSystem);

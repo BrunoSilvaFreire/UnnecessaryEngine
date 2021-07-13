@@ -7,9 +7,13 @@
 
 namespace un {
     struct RenderMesh {
-        un::Material *material;
-        un::MeshInfo *meshInfo;
+        un::Material* material;
+        un::MeshInfo* meshInfo;
     };
 
+    struct ObjectLights {
+        vk::DescriptorSet descriptorSet;
+        std::vector<u32> lights;
+    };
 }
 #endif

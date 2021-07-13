@@ -14,15 +14,21 @@ namespace un {
 
     typedef gpp::AdjacencyList<ParallelSystemData, bool> SystemGraph;
 
+    class LightRegistry {
+    private:
+        std::vector<entt::entity> pointLights;
+    public:
+    };
+
     class World {
     private:
         u32 targetFPS = 165;
         un::SystemGraph systems;
-        std::unordered_map<System *, u32> jobIds;
+        std::unordered_map<System*, u32> jobIds;
         entt::registry registry;
-        un::JobSystem *jobSystem;
+        un::JobSystem* jobSystem;
     public:
-        entt::registry &getRegistry();
+        entt::registry& getRegistry();
 
         template<typename... Component, typename... Exclude>
         entt::basic_view<
@@ -38,11 +44,11 @@ namespace un {
             return addSystem(new T(args...));
         };
 
-        u32 addSystem(System *system);
+        u32 addSystem(System* system);
 
         void systemMustRunAfter(u32 system, u32 after);
 
-        explicit World(un::Application &application);
+        explicit World(un::Application& application);
 
         void step(f32 delta);
 

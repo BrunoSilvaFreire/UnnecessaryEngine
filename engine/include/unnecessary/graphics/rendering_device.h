@@ -37,6 +37,8 @@ namespace un {
         Queue& getGraphics();
 
         Queue& getPresent();
+
+        const Queue &getGraphics() const;
     };
 }
 #endif
