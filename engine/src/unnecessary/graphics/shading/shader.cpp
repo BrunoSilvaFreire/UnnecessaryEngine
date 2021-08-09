@@ -1,5 +1,5 @@
 #include <unnecessary/def.h>
-#include <unnecessary/graphics/shader.h>
+#include <unnecessary/graphics/shading/shader.h>
 
 #include <utility>
 

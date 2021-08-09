@@ -1,7 +1,7 @@
 #ifndef UNNECESSARYENGINE_CAMERAS_H
 #define UNNECESSARYENGINE_CAMERAS_H
 
-#include <unnecessary/systems/world.h>
+#include <unnecessary/systems/system.h>
 
 namespace un {
     class CameraSystem : public un::System {

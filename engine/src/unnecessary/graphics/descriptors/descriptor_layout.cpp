@@ -1,4 +1,4 @@
-#include <unnecessary/graphics/descriptor_layout.h>
+#include <unnecessary/graphics/descriptors/descriptor_layout.h>
 #include <unnecessary/graphics/matrices.h>
 
 #include <utility>
@@ -17,7 +17,7 @@ namespace un {
     ) const {
         std::vector<vk::DescriptorSetLayoutBinding> bindings(elements.size());
         for (u32 i = 0; i < elements.size(); ++i) {
-            const DescriptorElement& element = elements[i];
+            const DescriptorElement &element = elements[i];
             bindings[i] = vk::DescriptorSetLayoutBinding(
                     i,
                     element.getType(),
@@ -41,6 +41,10 @@ namespace un {
         push<un::SceneLightingData>("sceneLighting");
     }
 
+    const un::DescriptorElement &DescriptorSetLayout::getDescriptor(size_t index) const {
+        return elements[index];
+    }
+
     DescriptorElement::DescriptorElement(
             std::string name,
             vk::DescriptorType type,
@@ -49,7 +53,7 @@ namespace un {
         type(type),
         size(size) {}
 
-    const std::string& DescriptorElement::getName() const {
+    const std::string &DescriptorElement::getName() const {
         return name;
     }
 
@@ -59,5 +63,41 @@ namespace un {
 
     size_t DescriptorElement::getSize() const {
         return size;
+    }
+
+    bool DescriptorReference::operator<(const DescriptorReference &rhs) const {
+        if (set < rhs.set)
+            return true;
+        if (rhs.set < set)
+            return false;
+        return binding < rhs.binding;
+    }
+
+    bool DescriptorReference::operator>(const DescriptorReference &rhs) const {
+        return rhs < *this;
+    }
+
+    bool DescriptorReference::operator<=(const DescriptorReference &rhs) const {
+        return !(rhs < *this);
+    }
+
+    bool DescriptorReference::operator>=(const DescriptorReference &rhs) const {
+        return !(*this < rhs);
+    }
+
+    DescriptorReference::DescriptorReference(u32 set, u32 binding) : set(set), binding(binding) {}
+
+    bool DescriptorReference::operator==(const DescriptorReference &rhs) const {
+        return set == rhs.set &&
+               binding == rhs.binding;
+    }
+
+    bool DescriptorReference::operator!=(const DescriptorReference &rhs) const {
+        return !(rhs == *this);
+    }
+}
+namespace std {
+    std::size_t hash<un::DescriptorReference>::operator()(const un::DescriptorReference &reference) const noexcept {
+        return reference.set ^ (reference.binding << 1);
     }
 }

@@ -12,7 +12,6 @@ namespace un {
 
     class ParallelSystemData {
     private:
-        un::System *system;
         un::RunSystemJob job;
         std::vector<un::System *> dependencies;
     public:

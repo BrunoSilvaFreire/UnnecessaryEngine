@@ -63,7 +63,6 @@ namespace un {
                 lightsDirty = false;
                 delete[] buf;
             }
-
         }
     }
 
@@ -90,6 +89,18 @@ namespace un {
               ) {
         lightsDirty = true;
 
+    }
+
+    u32 LightingSystem::getMaxNumLightsPerObject() const {
+        return maxNumLightsPerObject;
+    }
+
+    const std::vector<un::PointLightData> &LightingSystem::getRuntimeScenePointLights() const {
+        return runtimeScenePointLights;
+    }
+
+    const ResizableBuffer &LightingSystem::getSceneLightingBuffer() const {
+        return sceneLightingBuffer;
     }
 
 }

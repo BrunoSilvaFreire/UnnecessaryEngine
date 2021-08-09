@@ -7,7 +7,7 @@
 #include <unnecessary/def.h>
 #include <unnecessary/graphics/queue.h>
 #include <unnecessary/graphics/swapchain.h>
-#include <unnecessary/graphics/shader.h>
+#include <unnecessary/graphics/shading/shader.h>
 
 namespace un {
     class Renderer {

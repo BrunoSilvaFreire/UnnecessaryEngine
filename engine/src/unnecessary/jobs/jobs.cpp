@@ -149,9 +149,10 @@ namespace un {
         awaken(false),
         index(index),
         graphicsResources(application.getRenderer().getRenderingDevice()) {
-#ifdef WIN32
+#ifdef MSVC
         int affinityMask = 1 << index;
-        auto returnStauts = SetThreadAffinityMask(thread->native_handle(), affinityMask);
+        HANDLE hThread = reinterpret_cast<HANDLE>(thread->native_handle());
+        auto returnStauts = SetThreadAffinityMask(hThread, affinityMask);
         if (returnStauts == 0) {
             LOG(INFO) << "Unable to set worker " << index << " affinity mask on Win32 (" << GetLastError() << ")";
         } else {
@@ -159,7 +160,7 @@ namespace un {
         }
         std::string threadName = "UnnecessaryWorker-";
         threadName += std::to_string(index);
-        SetThreadDescription(thread->native_handle(), std::wstring(threadName.begin(), threadName.end()).c_str());
+        SetThreadDescription(hThread, std::wstring(threadName.begin(), threadName.end()).c_str());
 #endif
     }
 

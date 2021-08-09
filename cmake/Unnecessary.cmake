@@ -10,10 +10,15 @@ function(add_shader SHADER)
     string(REGEX MATCHALL "([a-zA-Z]+).([a-zA-Z]+).([a-zA-Z]+)" SHADER_TYPE "${shader_filename}")
     set(SHADER_TYPE ${CMAKE_MATCH_2})
     set(shader_output ${shader_output_dir}/${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.spv)
+    message("${shader_abs}")
+    set_source_files_properties("${shader_abs}" PROPERTIES VS_TOOL_OVERRIDE "None")
+    get_source_file_property("${shader_abs}" found VS_TOOL_OVERRIDE)
+    message("${found}")
     add_custom_target(
             ${target_name}
             COMMENT "Compiling ${shader_abs} to SPIR_V (${shader_output})"
             BYPRODUCTS ${shader_output}
+            SOURCES "${shader_abs}"
             COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
             COMMAND glslc -fshader-stage=${SHADER_TYPE} ${shader_abs} -o ${shader_output}
     )
@@ -23,6 +28,7 @@ function(add_shader SHADER)
             "assembleUnnecessaryShader-${shader_filename}"
             COMMENT "Assembling ${shader_abs} to SPIR_V (${shader_output_asm})"
             BYPRODUCTS ${shader_output}
+            SOURCES "${shader_abs}"
             COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
             COMMAND glslc -fshader-stage=${SHADER_TYPE} ${shader_abs} -S -g -o ${shader_output_asm}
     )
@@ -31,6 +37,7 @@ function(add_shader SHADER)
             "convertUnnecessaryShaderToGlsl-${shader_filename}"
             COMMENT "Convert SPIR-V ${shader_abs} to GLSL (${shader_output_asm})"
             DEPENDS ${target_name}
+            SOURCES "${shader_abs}"
             COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
             COMMAND spirv-cross ${shader_output} -V --output ${shader_output_glsl}
     )

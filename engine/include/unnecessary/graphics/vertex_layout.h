@@ -34,21 +34,22 @@ namespace un {
         template<typename T>
         void push(u8 count, vk::Format format);
 
-        template<>
-        void push<f32>(u8 count, vk::Format format);
-
-        template<>
-        void push<u8>(u8 count, vk::Format format);
-
         u32 getStride();
 
     };
+
+    template<>
+    void VertexLayout::push<f32>(u8 count, vk::Format format);
+
+    template<>
+    void VertexLayout::push<u8>(u8 count, vk::Format format);
 
     class BoundVertexLayout : public VertexLayout {
     private:
         u32 binding;
     public:
         explicit BoundVertexLayout(u32 binding = 0);
+
         explicit BoundVertexLayout(VertexLayout other, u32 binding = 0);
 
 

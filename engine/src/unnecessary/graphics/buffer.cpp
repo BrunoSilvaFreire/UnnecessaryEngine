@@ -151,7 +151,7 @@ namespace un {
 
     void ResizableBuffer::createBuffer(const Renderer &renderer) {
         vk::Device device = renderer.getVirtualDevice();
-        if (buffer != nullptr) {
+        if (buffer.operator!=(nullptr)) {
             device.destroyBuffer(buffer);
         }
         Queue graphics = renderer.getGraphics();

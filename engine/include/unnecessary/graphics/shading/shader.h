@@ -4,7 +4,7 @@
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/def.h>
 #include <unnecessary/algorithm/layout.h>
-#include <unnecessary/graphics/shader_stage.h>
+#include <unnecessary/graphics/shading/shader_stage.h>
 
 namespace un {
 

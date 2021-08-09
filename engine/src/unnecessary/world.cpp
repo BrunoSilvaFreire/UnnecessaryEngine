@@ -1,11 +1,7 @@
 #include <unnecessary/systems/world.h>
 #include <unnecessary/systems/system.h>
-#include <unnecessary/systems/run_system_job.h>
-#include <unnecessary/systems/parallel_system_data.h>
 #include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/misc/benchmark.h>
-#include <unordered_set>
-#include <cmath>
 
 namespace un {
     World::World(un::Application &app) : registry(), jobSystem(&app.getJobSystem()) {

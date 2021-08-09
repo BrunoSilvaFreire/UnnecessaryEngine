@@ -6,12 +6,12 @@
 namespace un {
 
     DrawingSystem::DrawingSystem(
-            Renderer& renderer
+            Renderer &renderer
     ) : renderer(&renderer), currentFramebufferIndex(0) {
-        un::SwapChain& chain = renderer.getSwapChain();
+        un::SwapChain &chain = renderer.getSwapChain();
         clearColor = glm::vec4(0.1, 0.1, 0.1, 1);
 
-        const vk::Device& device = renderer.getVirtualDevice();
+        const vk::Device &device = renderer.getVirtualDevice();
         std::vector<vk::AttachmentReference> colorAttachments(
                 {
                         vk::AttachmentReference(
@@ -59,9 +59,9 @@ namespace un {
                         subpasses
                 )
         );
-        const un::Size2D& resolution = chain.getResolution();
+        const un::Size2D &resolution = chain.getResolution();
         std::vector<vk::ImageView> views;
-        for (const auto& item : chain.getViews()) {
+        for (const auto &item : chain.getViews()) {
             auto view = item.getVulkanView();
             framebuffers.emplace_back(
                     device.createFramebuffer(
@@ -83,10 +83,10 @@ namespace un {
         );
     }
 
-    void DrawingSystem::step(World& world, f32 delta, un::JobWorker* worker) {
+    void DrawingSystem::step(World &world, f32 delta, un::JobWorker *worker) {
         vk::ClearColorValue clearColorValue;
-        const vk::Device& device = renderer->getVirtualDevice();
-        const vk::SwapchainKHR& chain = renderer->getSwapChain().getSwapChain();
+        const vk::Device &device = renderer->getVirtualDevice();
+        const vk::SwapchainKHR &chain = renderer->getSwapChain().getSwapChain();
         std::array<float, 4> colorArr{};
         colorArr[0] = clearColor.r;
         colorArr[1] = clearColor.g;
@@ -97,48 +97,37 @@ namespace un {
         un::CommandBuffer unBuffer(*renderer, worker->getGraphicsResources().getCommandPool());
         vk::CommandBuffer commandBuffer = unBuffer.getVulkanBuffer();
 
-        auto& registry = world.getRegistry();
+        auto &registry = world.getRegistry();
 
 
-        std::vector<un::PointLightData> pointLights;
-        for (entt::entity entity : registry.view<un::PointLight>()) {
-            un::PointLightData data{};
-            data.light = registry.get<un::PointLight>(entity);
-            glm::vec3 position;
-            un::Translation* translation = registry.try_get<un::Translation>(entity);
-            if (translation != nullptr) {
-                position = translation->value;
-            }
-            data.position = position;
-        }
-        bool resized = lightingBuffer.ensureFits<un::PointLightData>(
-                *renderer,
-                pointLights.size(),
-                sizeof(int)
-        );
+        /* bool resized = lightingSystem->getSceneLightingBuffer.ensureFits<un::PointLightData>(
+                 *renderer,
+                 pointLights.size(),
+                 sizeof(int)
+         );
 
-        if (resized) {
-            vk::DescriptorBufferInfo bufferInfo;
-            bufferInfo.buffer = lightingBuffer.getVulkanBuffer();
-            bufferInfo.range = VK_WHOLE_SIZE;
-            device.updateDescriptorSets(
-                    {
-                            vk::WriteDescriptorSet(
+         if (resized) {
+             vk::DescriptorBufferInfo bufferInfo;
+             bufferInfo.buffer = lightingBuffer.getVulkanBuffer();
+             bufferInfo.range = VK_WHOLE_SIZE;
+             device.updateDescriptorSets(
+                     {
+                             vk::WriteDescriptorSet(
 
-                                    globalSet,
-                                    1,
-                                    0,
-                                    1,
-                                    vk::DescriptorType::eUniformBuffer,
-                                    nullptr,
-                                    &bufferInfo,
-                                    nullptr
-                            )
-                    }, {
+                                     globalSet,
+                                     1,
+                                     0,
+                                     1,
+                                     vk::DescriptorType::eUniformBuffer,
+                                     nullptr,
+                                     &bufferInfo,
+                                     nullptr
+                             )
+                     }, {
 
-                    }
-            );
-        }
+                     }
+             );
+         }*/
         commandBuffer.begin(
                 vk::CommandBufferBeginInfo(
                         (vk::CommandBufferUsageFlags) vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -157,7 +146,7 @@ namespace un {
                 )
         );
         un::Size2D size = renderer->getSwapChain().getResolution();
-        const vk::Rect2D& renderArea = vk::Rect2D(
+        const vk::Rect2D &renderArea = vk::Rect2D(
                 vk::Offset2D(0, 0),
                 vk::Extent2D(size.x, size.y)
         );
@@ -190,24 +179,26 @@ namespace un {
                 }
         );
         for (entt::entity cameraEntity : world.view<un::Camera, un::Projection>()) {
-            const un::Projection& proj = registry.get<un::Projection>(cameraEntity);
-            const un::Camera& camera = registry.get<un::Camera>(cameraEntity);
+            const un::Projection &proj = registry.get<un::Projection>(cameraEntity);
+            const un::Camera &camera = registry.get<un::Camera>(cameraEntity);
 
-            for (entt::entity entity : world.view<un::LocalToWorld, un::RenderMesh>()) {
-                const un::LocalToWorld& ltw = registry.get<un::LocalToWorld>(entity);
-                un::RenderMesh& mesh = registry.get<un::RenderMesh>(entity);
-                un::Pipeline* pPipeline = mesh.material->getShader();
+            for (entt::entity entity : world.view<un::LocalToWorld, un::RenderMesh, un::ObjectLights>()) {
+                const un::LocalToWorld &ltw = registry.get<un::LocalToWorld>(entity);
+                un::RenderMesh &mesh = registry.get<un::RenderMesh>(entity);
+                const un::ObjectLights &lights = registry.get<un::ObjectLights>(entity);
+                un::Pipeline *pPipeline = mesh.material->getShader();
                 commandBuffer.bindPipeline(
                         vk::PipelineBindPoint::eGraphics,
                         pPipeline->getPipeline()
                 );
-                const vk::PipelineLayout& layout = pPipeline->getPipelineLayout();
+                const vk::PipelineLayout &layout = pPipeline->getPipelineLayout();
                 commandBuffer.bindDescriptorSets(
                         vk::PipelineBindPoint::eGraphics,
                         layout,
                         0,
                         {
-                                camera.cameraDescriptorSet
+                                camera.cameraDescriptorSet,
+                                lights.descriptorSet
                         }, {
 
                         }
@@ -221,7 +212,7 @@ namespace un {
                                 objectData
                         }
                 );
-                auto& meshInfo = mesh.meshInfo;
+                auto &meshInfo = mesh.meshInfo;
                 commandBuffer.bindVertexBuffers(
                         0,
                         {
@@ -253,7 +244,7 @@ namespace un {
         vk::SubmitInfo info;
         info.pCommandBuffers = &commandBuffer;
         info.commandBufferCount = 1;
-        const vk::Queue& graphicsQueue = renderer->getGraphics().getVulkan();
+        const vk::Queue &graphicsQueue = renderer->getGraphics().getVulkan();
         vkCall(graphicsQueue.submit(1, &info, nullptr));
         graphicsQueue.waitIdle();
         vkCall(graphicsQueue.presentKHR(
@@ -266,14 +257,18 @@ namespace un {
         ));
     }
 
-    const vk::RenderPass& DrawingSystem::getRenderPass() const {
+    const vk::RenderPass &DrawingSystem::getRenderPass() const {
         return renderPass;
     }
 
-    vk::Framebuffer DrawingSystem::nextFramebuffer(u32* framebufferIndexResult) {
+    vk::Framebuffer DrawingSystem::nextFramebuffer(u32 *framebufferIndexResult) {
         *framebufferIndexResult = currentFramebufferIndex;
         auto buffer = framebuffers[currentFramebufferIndex++];
         currentFramebufferIndex %= framebuffers.size();
         return buffer;
+    }
+
+    void DrawingSystem::describe(SystemDescriptor &descriptor) {
+        lightingSystem = descriptor.dependsOn<un::LightingSystem>();
     }
 }

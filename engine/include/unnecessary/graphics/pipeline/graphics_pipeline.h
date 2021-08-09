@@ -6,10 +6,11 @@
 #define UNNECESSARYENGINE_GRAPHICS_PIPELINE_H
 
 #include <vulkan/vulkan.hpp>
-#include <unnecessary/graphics/shader_stage.h>
-#include <unnecessary/graphics/shader.h>
+#include <unnecessary/graphics/shading/shader_stage.h>
+#include <unnecessary/graphics/shading/shader.h>
 #include <unnecessary/graphics/vertex_layout.h>
 #include <unnecessary/graphics/renderer.h>
+#include <unnecessary/graphics/pipeline/graphics_pipeline_layout.h>
 #include <optional>
 
 namespace un {
@@ -19,9 +20,10 @@ namespace un {
      */
     class GraphicsPipelineBuilder {
     private:
+        std::unordered_map<u32, vk::ShaderStageFlags> descriptorAccessFlags;
         BoundVertexLayout vertexLayout;
+        GraphicsPipelineLayout pipelineLayout;
         std::vector<const un::ShaderStage *> stages;
-        std::vector<std::pair<un::DescriptorSetLayout, vk::ShaderStageFlags>> sharedDescriptorSets;
         std::optional<vk::PipelineVertexInputStateCreateInfo> vertexInput;
         std::optional<vk::PipelineInputAssemblyStateCreateInfo> inputAssembly;
         std::optional<vk::PipelineTessellationStateCreateInfo> tesselation;
@@ -41,12 +43,9 @@ namespace un {
 
         void addStage(const ShaderStage *stage);
 
-        void addSharedDescriptorSet(
-                un::DescriptorSetLayout &&layout,
-                vk::ShaderStageFlags accessibleTo
-        );
-
         un::Pipeline build(un::Renderer &renderer, vk::RenderPass renderPass);
+
+        void addDescriptorSet(un::DescriptorSetLayout &&layout);
     };
 
 }

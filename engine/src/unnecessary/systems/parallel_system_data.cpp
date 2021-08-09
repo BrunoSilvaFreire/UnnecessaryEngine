@@ -1,14 +1,15 @@
 #include <unnecessary/systems/parallel_system_data.h>
+#include <unnecessary/systems/run_system_job.h>
 
 namespace un {
 
     ParallelSystemData::ParallelSystemData(
             un::System *system,
             un::World *world
-    ) : system(system), job(world, system) {}
+    ) : job(world, system) {}
 
     un::System *ParallelSystemData::getSystem() const {
-        return system;
+        return job.getSystem();
     }
 
     un::RunSystemJob &ParallelSystemData::getJob() {

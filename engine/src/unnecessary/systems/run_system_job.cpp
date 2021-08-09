@@ -1,4 +1,5 @@
 #include <unnecessary/systems/run_system_job.h>
+#include <unnecessary/systems/system.h>
 
 namespace un {
     RunSystemJob::RunSystemJob(
@@ -12,5 +13,9 @@ namespace un {
 
     void RunSystemJob::setDeltaTime(f32 deltaTime) {
         RunSystemJob::deltaTime = deltaTime;
+    }
+
+    System *RunSystemJob::getSystem() const {
+        return system;
     }
 }

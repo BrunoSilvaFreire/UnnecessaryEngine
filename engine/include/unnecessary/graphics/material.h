@@ -2,7 +2,7 @@
 #define UNNECESSARYENGINE_MATERIAL_H
 
 #include <unnecessary/algorithm/layout.h>
-#include <unnecessary/graphics/shader.h>
+#include <unnecessary/graphics/shading/shader.h>
 
 #include <unordered_map>
 #include <utility>

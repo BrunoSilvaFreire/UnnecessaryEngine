@@ -1,4 +1,4 @@
-#include <unnecessary/graphics/graphics_pipeline.h>
+#include <unnecessary/graphics/pipeline/graphics_pipeline.h>
 #include <unnecessary/graphics/lighting.h>
 #include <unnecessary/application.h>
 
@@ -51,7 +51,7 @@ namespace un {
         un::DescriptorSetLayout globalLayout;
         globalLayout.withStandardCameraMatrices();
         globalLayout.withGlobalSceneLighting();
-        addSharedDescriptorSet(std::move(globalLayout), vk::ShaderStageFlagBits::eAllGraphics);
+        addDescriptorSet(std::move(globalLayout));
     }
 
     template<typename T>
@@ -71,18 +71,25 @@ namespace un {
                 )
         );
         std::vector<vk::DescriptorSetLayout> layouts;
+        /*
         for (const std::pair<un::DescriptorSetLayout, vk::ShaderStageFlags> &shared : sharedDescriptorSets) {
             const un::DescriptorSetLayout &layout = shared.first;
             if (!layout.isEmpty()) {
                 layouts.push_back(layout.build(device, shared.second));
             }
         }
-        for (const un::ShaderStage *stage : stages) {
-            const un::DescriptorSetLayout &layout = stage->getDescriptorLayout();
-            if (!layout.isEmpty()) {
-                layouts.push_back(layout.build(device, stage->getFlags()));
+        */
+
+        const auto &descriptors = pipelineLayout.getDescriptorLayouts();
+        for (u32 i = 0; i < descriptors.size(); ++i) {
+            const auto &layout = descriptors[i];
+            if (layout.isEmpty()) {
+                continue;
             }
+            std::vector<vk::DescriptorSetLayoutBinding> bindings;
+            layouts.push_back(layout.build(device, descriptorAccessFlags[i]));
         }
+
         std::vector<vk::PushConstantRange> pushes;
         for (const un::ShaderStage *stage : stages) {
             auto &pushConstant = stage->getPushConstantRange();
@@ -252,6 +259,9 @@ namespace un {
 
     void GraphicsPipelineBuilder::addStage(const ShaderStage *stage) {
         stages.push_back(stage);
+        for (const auto &item : stage->getUsedResources().getDescriptors()) {
+            descriptorAccessFlags[item.set] |= stage->getFlags();
+        }
     }
 
     GraphicsPipelineBuilder::GraphicsPipelineBuilder(BoundVertexLayout layout) : vertexLayout(std::move(layout)) {
@@ -267,15 +277,7 @@ namespace un {
         }
     }
 
-    void GraphicsPipelineBuilder::addSharedDescriptorSet(
-            DescriptorSetLayout &&layout,
-            vk::ShaderStageFlags accessibleTo
-    ) {
-        sharedDescriptorSets.emplace_back(
-                std::move(layout),
-                accessibleTo
-        );
+    void GraphicsPipelineBuilder::addDescriptorSet(DescriptorSetLayout &&layout) {
+        pipelineLayout.push(std::move(layout));
     }
-
-
 }

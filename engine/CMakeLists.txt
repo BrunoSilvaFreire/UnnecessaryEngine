@@ -27,14 +27,14 @@ add_executable(
         include/unnecessary/systems/system.h
         src/unnecessary/systems/transform.cpp
         include/unnecessary/algorithm/event.h
-        include/unnecessary/graphics/shader_stage.h
-        src/unnecessary/graphics/shader_stage.cpp
-        include/unnecessary/graphics/shader.h
-        src/unnecessary/graphics/shader.cpp
+        include/unnecessary/graphics/shading/shader_stage.h
+        src/unnecessary/graphics/shading/shader_stage.cpp
+        include/unnecessary/graphics/shading/shader.h
+        src/unnecessary/graphics/shading/shader.cpp
         include/unnecessary/algorithm/layout.h
         include/unnecessary/graphics/systems/rendering.h
-        include/unnecessary/graphics/graphics_pipeline.h
-        src/unnecessary/graphics/graphics_pipeline.cpp
+        include/unnecessary/graphics/pipeline/graphics_pipeline.h
+        src/unnecessary/graphics/pipeline/graphics_pipeline.cpp
         include/unnecessary/graphics/queue.h
         src/unnecessary/graphics/queue.cpp
         include/unnecessary/render_target.h
@@ -43,8 +43,8 @@ add_executable(
         include/unnecessary/graphics/vertex_layout.h
         src/unnecessary/graphics/vertex_layout.cpp
         include/unnecessary/graphics/matrices.h
-        include/unnecessary/graphics/descriptor_layout.h
-        src/unnecessary/graphics/descriptor_layout.cpp
+        include/unnecessary/graphics/descriptors/descriptor_layout.h
+        src/unnecessary/graphics/descriptors/descriptor_layout.cpp
         include/unnecessary/graphics/drawable.h
         src/unnecessary/graphics/systems/rendering.cpp
         src/unnecessary/jobs/loading_jobs.cpp
@@ -74,13 +74,17 @@ add_executable(
         include/unnecessary/misc/benchmark.h
         src/unnecessary/misc/benchmark.cpp
         include/unnecessary/graphics/render_group.h
-        include/unnecessary/graphics/descriptor_set.h
-        include/unnecessary/graphics/descriptor_allocator.h
-        src/unnecessary/graphics/descriptor_allocator.cpp
+        include/unnecessary/graphics/descriptors/descriptor_allocator.h
+        src/unnecessary/graphics/descriptors/descriptor_allocator.cpp
         include/unnecessary/systems/cameras.h
         src/unnecessary/systems/cameras.cpp
         include/unnecessary/graphics/lighting.h
-        include/unnecessary/components/dummy.h include/unnecessary/graphics/renderdoc_app.h include/unnecessary/platform.h src/unnecessary/platform.cpp include/unnecessary/systems/lighting.cpp include/unnecessary/systems/lighting.h)
+        include/unnecessary/components/dummy.h
+        include/unnecessary/platform.h
+        src/unnecessary/platform.cpp
+        include/unnecessary/systems/lighting.h
+        src/unnecessary/systems/lighting.cpp
+        include/unnecessary/graphics/shading/render_graph.h include/unnecessary/graphics/pipeline/graphics_pipeline_layout.h src/unnecessary/graphics/pipeline/graphics_pipeline_layout.cpp)
 
 target_include_directories(
         unnecessary
@@ -95,6 +99,7 @@ target_compile_definitions(
         DEBUG
         NOMINMAX
         VULKAN_HPP_TYPESAFE_CONVERSION
+        VULKAN_HPP_NO_SPACESHIP_OPERATOR
         SOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}
 )
 set(

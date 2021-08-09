@@ -8,7 +8,7 @@ namespace un {
         struct {
             float r, g, b, w;
         };
-        struct {
+        struct AsVector3 {
             glm::vec3 color;
             float intensity;
         };
@@ -31,7 +31,7 @@ namespace un {
     };
     struct SceneLightingData {
         u32 numPointLights;
-        PointLightData* pointLights;
+        PointLightData *pointLights;
     };
 }
 #endif

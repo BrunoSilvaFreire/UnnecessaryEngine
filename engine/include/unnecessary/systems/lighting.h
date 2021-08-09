@@ -24,6 +24,12 @@ namespace un {
         void step(World &world, f32 delta, un::JobWorker *worker) override;
 
         size_t findSceneBufferSize();
+
+        u32 getMaxNumLightsPerObject() const;
+
+        const std::vector<un::PointLightData> &getRuntimeScenePointLights() const;
+
+        const ResizableBuffer &getSceneLightingBuffer() const;
     };
 }
 

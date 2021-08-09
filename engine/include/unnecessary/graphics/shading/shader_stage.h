@@ -9,7 +9,7 @@
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
-#include <unnecessary/graphics/descriptor_layout.h>
+#include <unnecessary/graphics/descriptors/descriptor_layout.h>
 
 namespace un {
     struct PushConstants {
@@ -21,6 +21,18 @@ namespace un {
         PushConstants(u32 offset, u32 size);
     };
 
+    class ShaderResources {
+    private:
+        std::vector<DescriptorReference> descriptors;
+
+
+    public:
+        friend class ShaderStage;
+
+        const std::vector<DescriptorReference> &getDescriptors() const;
+
+    };
+
     class ShaderStage {
     private:
         std::string name;
@@ -30,20 +42,18 @@ namespace un {
          */
         vk::ShaderModule loadedModule;
         vk::ShaderStageFlagBits flags;
-        un::DescriptorSetLayout descriptorLayout;
         std::optional<un::PushConstants> pushConstantRange;
+        ShaderResources usedResources;
     public:
         ShaderStage(
                 std::string name,
                 const vk::ShaderStageFlagBits &flags,
-                DescriptorSetLayout descriptorLayout,
                 std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>()
         );
 
         ShaderStage(
                 const std::string &name,
                 const vk::ShaderStageFlagBits &flags,
-                const un::DescriptorSetLayout &descriptorLayout,
                 vk::Device &device,
                 std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>(),
                 const std::filesystem::path &root = std::filesystem::current_path()
@@ -56,15 +66,19 @@ namespace un {
                 const std::filesystem::path &root = std::filesystem::current_path()
         );
 
+        void usesDescriptor(u32 set, u32 binding);
+
         const std::string &getName() const;
 
         const vk::ShaderModule &getUnsafeModule() const;
 
         const vk::ShaderStageFlagBits &getFlags() const;
 
-        const DescriptorSetLayout &getDescriptorLayout() const;
-
         const std::optional<un::PushConstants> &getPushConstantRange() const;
+
+        const ShaderResources &getUsedResources() const;
     };
+
+
 }
 #endif

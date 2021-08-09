@@ -1,4 +1,4 @@
-#include <unnecessary/graphics/shader_stage.h>
+#include <unnecessary/graphics/shading/shader_stage.h>
 
 #include <utility>
 
@@ -35,26 +35,17 @@ namespace un {
     }
 
 
-    ShaderStage::ShaderStage(
-            std::string name,
-            const vk::ShaderStageFlagBits &flags,
-            DescriptorSetLayout descriptorLayout,
-            std::optional<un::PushConstants> pushConstantRange
-    ) : name(std::move(name)),
-        flags(flags),
-        descriptorLayout(std::move(descriptorLayout)),
-        pushConstantRange(pushConstantRange) {
+    ShaderStage::ShaderStage(std::string name, const vk::ShaderStageFlagBits &flags,
+                             std::optional<un::PushConstants> pushConstantRange) : name(std::move(name)),
+                                                                                   flags(flags),
+                                                                                   pushConstantRange(
+                                                                                           pushConstantRange) {
 
     }
 
-    ShaderStage::ShaderStage(
-            const std::string &name,
-            const vk::ShaderStageFlagBits &flags,
-            const DescriptorSetLayout &descriptorLayout,
-            vk::Device &device,
-            std::optional<un::PushConstants> pushConstantRange,
-            const std::filesystem::path &root
-    ) : ShaderStage(name, flags, descriptorLayout, pushConstantRange) {
+    ShaderStage::ShaderStage(const std::string &name, const vk::ShaderStageFlagBits &flags, vk::Device &device,
+                             std::optional<un::PushConstants> pushConstantRange, const std::filesystem::path &root)
+            : ShaderStage(name, flags, pushConstantRange) {
         load(device, root);
     }
 
@@ -62,15 +53,24 @@ namespace un {
         return flags;
     }
 
-    const DescriptorSetLayout &ShaderStage::getDescriptorLayout() const {
-        return descriptorLayout;
-    }
-
     const std::optional<un::PushConstants> &ShaderStage::getPushConstantRange() const {
         return pushConstantRange;
+    }
+
+    const ShaderResources &ShaderStage::getUsedResources() const {
+        return usedResources;
+    }
+
+    void ShaderStage::usesDescriptor(u32 set, u32 binding) {
+        usedResources.descriptors.emplace_back(set, binding);
     }
 
     PushConstants::PushConstants(u32 offset, u32 size) : offset(offset), size(size) {}
 
     PushConstants::PushConstants() {}
+
+    const std::vector<un::DescriptorReference> &ShaderResources::getDescriptors() const {
+        return descriptors;
+    }
+
 }
