@@ -13,17 +13,17 @@ namespace un {
     }
 
     MeshInfo::MeshInfo(
-            u32 indexCount,
-            const BoundVertexLayout &layout,
-            const Buffer &vertex,
-            const Buffer &index
+        u32 indexCount,
+        const BoundVertexLayout& layout,
+        const Buffer& vertex,
+        const Buffer& index
     ) : indexCount(indexCount), layout(layout), vertex(vertex), index(index) {}
 
-    Buffer &MeshInfo::getVertex()  {
+    Buffer& MeshInfo::getVertex() {
         return vertex;
     }
 
-    Buffer &MeshInfo::getIndex()  {
+    Buffer& MeshInfo::getIndex() {
         return index;
     }
 

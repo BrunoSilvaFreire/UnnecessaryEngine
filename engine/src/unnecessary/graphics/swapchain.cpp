@@ -5,12 +5,17 @@
 namespace un {
 
     SwapChain::SwapChain(
-            un::RenderingDevice& renderingDevice,
-            const un::Size2D& targetSize
+        un::RenderingDevice& renderingDevice,
+        const un::Size2D& targetSize
     ) {
-        vk::ImageUsageFlags swapChainUsageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage;
+        vk::ImageUsageFlags swapChainUsageFlags =
+            vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage;
         auto swapChainCreationFlags = static_cast<vk::ImageCreateFlags>(0);
-        SwapChainSupportDetails details(renderingDevice, swapChainUsageFlags, swapChainCreationFlags);
+        SwapChainSupportDetails details(
+            renderingDevice,
+            swapChainUsageFlags,
+            swapChainCreationFlags
+        );
         auto selectedFormat = details.selectFormat();
         format = selectedFormat.format;
         vk::Extent2D extent = details.selectExtent(targetSize);
@@ -24,14 +29,14 @@ namespace un {
 
         const vk::SurfaceKHR& surface = renderingDevice.getSurface();
         vk::SwapchainCreateInfoKHR swapChainInfo(
-                (vk::SwapchainCreateFlagsKHR) 0,
-                surface,
-                imageCount,
-                format,
-                selectedFormat.colorSpace,
-                extent,
-                1,
-                swapChainUsageFlags
+            (vk::SwapchainCreateFlagsKHR) 0,
+            surface,
+            imageCount,
+            format,
+            selectedFormat.colorSpace,
+            extent,
+            1,
+            swapChainUsageFlags
         );
         swapChainInfo.setPresentMode(details.selectPresentMode());
 
@@ -56,9 +61,9 @@ namespace un {
         views.reserve(images.size());
         for (int i = 0; i < images.size(); ++i) {
             views.emplace_back(
-                    renderingDevice,
-                    images[i],
-                    format
+                renderingDevice,
+                images[i],
+                format
             );
         }
     }
@@ -81,7 +86,10 @@ namespace un {
 
     vk::SurfaceFormatKHR SwapChainSupportDetails::selectFormat() {
         std::vector<vk::SurfaceFormatKHR> preferences;
-        preferences.emplace_back(vk::Format::eB8G8R8A8Srgb, vk::ColorSpaceKHR::eSrgbNonlinear);
+        preferences.emplace_back(
+            vk::Format::eB8G8R8A8Srgb,
+            vk::ColorSpaceKHR::eSrgbNonlinear
+        );
         for (const vk::SurfaceFormatKHR preference : preferences) {
             for (const auto& availableFormat : formats) {
                 if (availableFormat.format == preference.format &&
@@ -98,9 +106,9 @@ namespace un {
     }
 
     SwapChainSupportDetails::SwapChainSupportDetails(
-            const un::RenderingDevice& renderingDevice,
-            vk::ImageUsageFlags usageFlags,
-            vk::ImageCreateFlags createFlags
+        const un::RenderingDevice& renderingDevice,
+        vk::ImageUsageFlags usageFlags,
+        vk::ImageCreateFlags createFlags
     ) {
         auto& device = renderingDevice.getPhysicalDevice();
         auto& surface = renderingDevice.getSurface();
@@ -109,12 +117,12 @@ namespace un {
         for (const auto& item : device.getSurfaceFormatsKHR(surface)) {
             vk::ImageFormatProperties properties;
             auto result = device.getImageFormatProperties(
-                    item.format,
-                    vk::ImageType::e2D,
-                    vk::ImageTiling::eOptimal,
-                    usageFlags,
-                    createFlags,
-                    &properties
+                item.format,
+                vk::ImageType::e2D,
+                vk::ImageTiling::eOptimal,
+                usageFlags,
+                createFlags,
+                &properties
             );
             if (result == vk::Result::eSuccess) {
                 formats.push_back(item);
@@ -128,14 +136,16 @@ namespace un {
             return capabilities.currentExtent;
         } else {
             VkExtent2D actualExtent = {
-                    static_cast<uint32_t>(targetSize.x),
-                    static_cast<uint32_t>(targetSize.y)
+                static_cast<uint32_t>(targetSize.x),
+                static_cast<uint32_t>(targetSize.y)
             };
 
-            actualExtent.width = std::max(capabilities.minImageExtent.width,
-                                          std::min(capabilities.maxImageExtent.width, actualExtent.width));
-            actualExtent.height = std::max(capabilities.minImageExtent.height,
-                                           std::min(capabilities.maxImageExtent.height, actualExtent.height));
+            actualExtent.width = std::max(
+                capabilities.minImageExtent.width,
+                std::min(capabilities.maxImageExtent.width, actualExtent.width));
+            actualExtent.height = std::max(
+                capabilities.minImageExtent.height,
+                std::min(capabilities.maxImageExtent.height, actualExtent.height));
 
             return actualExtent;
         }

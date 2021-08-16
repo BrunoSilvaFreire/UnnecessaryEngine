@@ -15,8 +15,8 @@ add_executable(
         src/unnecessary/renderer.cpp
         include/unnecessary/graphics/mesh.h
         src/unnecessary/graphics/mesh.cpp
-        include/unnecessary/graphics/buffer.h
-        src/unnecessary/graphics/buffer.cpp
+        include/unnecessary/graphics/buffers/buffer.h
+        src/unnecessary/graphics/buffers/buffer.cpp
         include/unnecessary/graphics/renderer.h
         include/unnecessary/algorithm/requirements.h
         src/unnecessary/algorithm/requirements.cpp
@@ -25,6 +25,7 @@ add_executable(
         include/unnecessary/components/common.h
         include/unnecessary/systems/transform.h
         include/unnecessary/systems/system.h
+        src/unnecessary/systems/system.cpp
         src/unnecessary/systems/transform.cpp
         include/unnecessary/algorithm/event.h
         include/unnecessary/graphics/shading/shader_stage.h
@@ -84,7 +85,16 @@ add_executable(
         src/unnecessary/platform.cpp
         include/unnecessary/systems/lighting.h
         src/unnecessary/systems/lighting.cpp
-        include/unnecessary/graphics/shading/render_graph.h include/unnecessary/graphics/pipeline/graphics_pipeline_layout.h src/unnecessary/graphics/pipeline/graphics_pipeline_layout.cpp)
+        include/unnecessary/graphics/shading/render_graph.h
+        include/unnecessary/graphics/pipeline/graphics_pipeline_layout.h
+        src/unnecessary/graphics/pipeline/graphics_pipeline_layout.cpp
+        include/unnecessary/graphics/descriptors/descriptor_set.h
+        src/unnecessary/graphics/descriptors/descriptor_set.cpp
+        include/unnecessary/graphics/buffers/buffer_writer.h
+        src/unnecessary/graphics/buffers/buffer_writer.cpp
+        include/unnecessary/graphics/buffers/command_buffer.h
+        src/unnecessary/graphics/buffers/command_buffer.cpp
+        src/unnecessary/jobs/job_chain.cpp include/unnecessary/misc/historic.h src/unnecessary/misc/historic.cpp)
 
 target_include_directories(
         unnecessary

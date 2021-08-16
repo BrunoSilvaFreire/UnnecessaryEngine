@@ -20,13 +20,13 @@ namespace un {
 
     class Material {
     private:
-        un::Pipeline *shader;
+        un::Pipeline* shader;
         MaterialProperties<float> floats;
         MaterialProperties<int> ints;
     public:
-        explicit Material(un::Pipeline *shader);
+        explicit Material(un::Pipeline* shader);
 
-        un::Pipeline *getShader() const;
+        un::Pipeline* getShader() const;
     };
 }
 #endif

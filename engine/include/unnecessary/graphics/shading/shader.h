@@ -27,9 +27,9 @@ namespace un {
 
         un::PipelineId getId() const;
 
-        const vk::PipelineLayout &getPipelineLayout() const;
+        const vk::PipelineLayout& getPipelineLayout() const;
 
-        const vk::Pipeline &getPipeline() const;
+        const vk::Pipeline& getPipeline() const;
 
         int getOrder() const;
 

@@ -1,8 +1,10 @@
 
 #ifndef UNNECESSARYENGINE_PARALLEL_SYSTEM_DATA_H
 #define UNNECESSARYENGINE_PARALLEL_SYSTEM_DATA_H
+
 #include <vector>
 #include <unnecessary/systems/run_system_job.h>
+
 namespace un {
     class System;
 
@@ -13,21 +15,29 @@ namespace un {
     class ParallelSystemData {
     private:
         un::RunSystemJob job;
-        std::vector<un::System *> dependencies;
+        std::vector<un::System*> dependencies;
     public:
-        ParallelSystemData(un::System *system, un::World *world);
+        ParallelSystemData(un::World* world, un::System* system) : job(world, system) {
 
-        un::System *getSystem() const;
+        }
 
-        un::RunSystemJob &getJob();
+        un::System* getSystem() const {
+            return job.getSystem();
+        }
 
-        const un::RunSystemJob &getJob() const;
+        un::System* getSystem() {
+            return job.getSystem();
+        }
 
-        const std::vector<un::System *> &getDependencies();
+        un::RunSystemJob& getJob();
 
-        void mustRunAfter(System *other);
+        const un::RunSystemJob& getJob() const;
 
-        void mustRunAfter(ParallelSystemData &other);
+        const std::vector<un::System*>& getDependencies();
+
+        void mustRunAfter(un::System* other);
+
+        void mustRunAfter(un::ParallelSystemData& other);
     };
 }
 #endif

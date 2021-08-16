@@ -2,21 +2,28 @@
 
 #include <utility>
 #include <fstream>
+#include <unnecessary/graphics/buffers/command_buffer.h>
 
 namespace un {
 
     void LoadObjJob::operator()(un::JobWorker* worker) {
         std::ifstream stream(path);
         std::string err;
-        if (!tinyobj::LoadObj(&result->attrib, &result->shapes, &result->materials, &err, &stream)) {
+        if (!tinyobj::LoadObj(
+            &result->attrib,
+            &result->shapes,
+            &result->materials,
+            &err,
+            &stream
+        )) {
             return;
         }
         LOG(INFO) << "Mesh " << path << " fully loaded";
     }
 
     LoadObjJob::LoadObjJob(
-            std::filesystem::path path,
-            MeshData* result
+        std::filesystem::path path,
+        MeshData* result
     ) : path(std::move(path)), result(result) {}
 
 
@@ -35,85 +42,92 @@ namespace un {
         u64 iBufSize = sizeof(u16) * numIndices;
 
         un::Buffer vertexStagingBuffer(
-                *renderer,
-                vk::BufferUsageFlagBits::eTransferSrc,
-                vBufSize,
-                true,
-                vk::MemoryPropertyFlagBits::eHostVisible
+            *renderer,
+            vk::BufferUsageFlagBits::eTransferSrc,
+            vBufSize,
+            true,
+            vk::MemoryPropertyFlagBits::eHostVisible
         );
         auto& vertices = attrib.vertices;
         vertexStagingBuffer.push(device, vertices.data());
         un::Buffer indexStagingBuffer(
-                *renderer,
-                vk::BufferUsageFlagBits::eTransferSrc,
-                iBufSize,
-                true,
-                vk::MemoryPropertyFlagBits::eHostVisible
+            *renderer,
+            vk::BufferUsageFlagBits::eTransferSrc,
+            iBufSize,
+            true,
+            vk::MemoryPropertyFlagBits::eHostVisible
         );
         indexStagingBuffer.push(device, indices.data());
-        un::CommandBuffer uploadBuffer(*renderer, worker->getGraphicsResources().getCommandPool());
-        vk::CommandBuffer buf = uploadBuffer.getVulkanBuffer();
-        buf.begin(vk::CommandBufferBeginInfo(
+        un::CommandBuffer uploadBuffer(
+            *renderer,
+            worker->getGraphicsResources().getCommandPool());
+        uploadBuffer->begin(
+            vk::CommandBufferBeginInfo(
                 vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-        ));
+            ));
         un::Buffer vertexBuf(
-                *renderer,
-                vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-                vBufSize,
-                true
+            *renderer,
+            vk::BufferUsageFlagBits::eVertexBuffer |
+            vk::BufferUsageFlagBits::eTransferDst,
+            vBufSize,
+            true
         );
         un::Buffer indexBuf(
-                *renderer,
-                vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-                iBufSize,
-                true
+            *renderer,
+            vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+            iBufSize,
+            true
         );
-        buf.copyBuffer(vertexStagingBuffer.getVulkanBuffer(), vertexBuf.getVulkanBuffer(), {
+        uploadBuffer->copyBuffer(
+            vertexStagingBuffer.getVulkanBuffer(), vertexBuf.getVulkanBuffer(), {
                 vk::BufferCopy(
-                        0, 0, vBufSize
+                    0, 0, vBufSize
                 )
-        });
+            }
+        );
 
-        buf.copyBuffer(indexStagingBuffer.getVulkanBuffer(), indexBuf.getVulkanBuffer(), {
+        uploadBuffer->copyBuffer(
+            indexStagingBuffer.getVulkanBuffer(), indexBuf.getVulkanBuffer(), {
                 vk::BufferCopy(
-                        0, 0, iBufSize
+                    0, 0, iBufSize
                 )
-        });
+            }
+        );
         *result = MeshInfo(
-                numIndices,
-                un::BoundVertexLayout(vertexLayout, vertexLayoutBinding),
-                vertexBuf,
-                indexBuf
+            numIndices,
+            un::BoundVertexLayout(vertexLayout, vertexLayoutBinding),
+            vertexBuf,
+            indexBuf
         );
 
-        buf.end();
+        uploadBuffer->end();
         std::array<const vk::CommandBuffer, 1> buffers = {
-                buf
+            *uploadBuffer
         };
         renderer->getGraphics().getVulkan().submit(
-                {
-                        vk::SubmitInfo(
-                                {
+            {
+                vk::SubmitInfo(
+                    {
 
-                                },
-                                {
+                    },
+                    {
 
-                                },
-                                buffers,
-                                {
-                                }
-                        )
-                }
+                    },
+                    buffers,
+                    {
+                    }
+                )
+            }
         );
         LOG(INFO) << "Mesh uploaded";
     }
 
     UploadMeshJob::UploadMeshJob(
-            VertexLayout vertexLayout,
-            u32 vertexLayoutBinding,
-            MeshData* data,
-            MeshInfo* result,
-            Renderer* renderer
+        VertexLayout vertexLayout,
+        u32 vertexLayoutBinding,
+        MeshData* data,
+        MeshInfo* result,
+        Renderer* renderer
     ) : vertexLayout(std::move(vertexLayout)),
         vertexLayoutBinding(vertexLayoutBinding),
         data(data), result(result),

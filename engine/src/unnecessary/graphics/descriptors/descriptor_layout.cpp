@@ -12,24 +12,24 @@ namespace un {
     }
 
     vk::DescriptorSetLayout DescriptorSetLayout::build(
-            vk::Device owningDevice,
-            vk::ShaderStageFlags shaderStageFlags
+        vk::Device owningDevice,
+        vk::ShaderStageFlags shaderStageFlags
     ) const {
         std::vector<vk::DescriptorSetLayoutBinding> bindings(elements.size());
         for (u32 i = 0; i < elements.size(); ++i) {
-            const DescriptorElement &element = elements[i];
+            const DescriptorElement& element = elements[i];
             bindings[i] = vk::DescriptorSetLayoutBinding(
-                    i,
-                    element.getType(),
-                    1,
-                    shaderStageFlags
+                i,
+                element.getType(),
+                1,
+                shaderStageFlags
             );
         }
         return owningDevice.createDescriptorSetLayout(
-                vk::DescriptorSetLayoutCreateInfo(
-                        (vk::DescriptorSetLayoutCreateFlags) 0,
-                        bindings
-                )
+            vk::DescriptorSetLayoutCreateInfo(
+                (vk::DescriptorSetLayoutCreateFlags) 0,
+                bindings
+            )
         );
     }
 
@@ -41,19 +41,19 @@ namespace un {
         push<un::SceneLightingData>("sceneLighting");
     }
 
-    const un::DescriptorElement &DescriptorSetLayout::getDescriptor(size_t index) const {
+    const un::DescriptorElement& DescriptorSetLayout::getDescriptor(size_t index) const {
         return elements[index];
     }
 
     DescriptorElement::DescriptorElement(
-            std::string name,
-            vk::DescriptorType type,
-            size_t size
+        std::string name,
+        vk::DescriptorType type,
+        size_t size
     ) : name(std::move(name)),
         type(type),
         size(size) {}
 
-    const std::string &DescriptorElement::getName() const {
+    const std::string& DescriptorElement::getName() const {
         return name;
     }
 
@@ -65,7 +65,7 @@ namespace un {
         return size;
     }
 
-    bool DescriptorReference::operator<(const DescriptorReference &rhs) const {
+    bool DescriptorReference::operator<(const DescriptorReference& rhs) const {
         if (set < rhs.set)
             return true;
         if (rhs.set < set)
@@ -73,31 +73,33 @@ namespace un {
         return binding < rhs.binding;
     }
 
-    bool DescriptorReference::operator>(const DescriptorReference &rhs) const {
+    bool DescriptorReference::operator>(const DescriptorReference& rhs) const {
         return rhs < *this;
     }
 
-    bool DescriptorReference::operator<=(const DescriptorReference &rhs) const {
+    bool DescriptorReference::operator<=(const DescriptorReference& rhs) const {
         return !(rhs < *this);
     }
 
-    bool DescriptorReference::operator>=(const DescriptorReference &rhs) const {
+    bool DescriptorReference::operator>=(const DescriptorReference& rhs) const {
         return !(*this < rhs);
     }
 
-    DescriptorReference::DescriptorReference(u32 set, u32 binding) : set(set), binding(binding) {}
+    DescriptorReference::DescriptorReference(u32 set, u32 binding) : set(set),
+                                                                     binding(binding) {}
 
-    bool DescriptorReference::operator==(const DescriptorReference &rhs) const {
+    bool DescriptorReference::operator==(const DescriptorReference& rhs) const {
         return set == rhs.set &&
                binding == rhs.binding;
     }
 
-    bool DescriptorReference::operator!=(const DescriptorReference &rhs) const {
+    bool DescriptorReference::operator!=(const DescriptorReference& rhs) const {
         return !(rhs == *this);
     }
 }
 namespace std {
-    std::size_t hash<un::DescriptorReference>::operator()(const un::DescriptorReference &reference) const noexcept {
+    std::size_t
+    hash<un::DescriptorReference>::operator()(const un::DescriptorReference& reference) const noexcept {
         return reference.set ^ (reference.binding << 1);
     }
 }

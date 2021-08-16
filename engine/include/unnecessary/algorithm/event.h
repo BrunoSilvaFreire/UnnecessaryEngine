@@ -25,7 +25,7 @@ namespace un {
         }
 
         void operator()(T... args) {
-            for (EventListener &listener : listeners) {
+            for (EventListener& listener : listeners) {
                 listener(args...);
             }
         }

@@ -19,7 +19,7 @@ namespace un {
     };
 
     template<>
-    std::string to_string(const Version &ver);
+    std::string to_string(const Version& ver);
 
 }
 #endif

@@ -12,6 +12,18 @@ namespace un {
             glm::vec3 color;
             float intensity;
         };
+
+        Lighting(
+            float r = 1,
+            float g = 1,
+            float b = 1,
+            float w = 1
+        ) : r(r),
+            g(g),
+            b(b),
+            w(w) {
+
+        }
     };
 
     struct PointLight {
@@ -31,7 +43,7 @@ namespace un {
     };
     struct SceneLightingData {
         u32 numPointLights;
-        PointLightData *pointLights;
+        PointLightData* pointLights;
     };
 }
 #endif

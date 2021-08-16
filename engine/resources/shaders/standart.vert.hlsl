@@ -5,7 +5,7 @@ cbuffer pushConstants {
     PerObjectData data;
 };
 
-[[vk::binding(0, 0)]]
+[[vk::binding(0, 1)]]
 cbuffer cameraData {
 	Matrices matrices;
 };

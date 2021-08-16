@@ -10,7 +10,7 @@
 #endif
 namespace un {
 
-    void LambdaJob::operator()(un::JobWorker *worker) {
+    void LambdaJob::operator()(un::JobWorker* worker) {
         if (callback != nullptr) {
             callback(worker);
         }
@@ -20,20 +20,20 @@ namespace un {
     }
 
     LambdaJob::LambdaJob(
-            const Callback &callback
+        const Callback& callback
     ) : callback(callback), voidCallback(nullptr) {}
 
     LambdaJob::LambdaJob(
-            const VoidCallback &callback
+        const VoidCallback& callback
     ) : voidCallback(callback), callback() {
 
     }
 
-    u32 JobSystem::enqueue(Job *job) {
+    u32 JobSystem::enqueue(Job* job) {
         return enqueue(job, true);
     }
 
-    u32 JobSystem::enqueue(Job *job, bool alsoMarkForExecution) {
+    u32 JobSystem::enqueue(Job* job, bool alsoMarkForExecution) {
         if (job == nullptr) {
             throw std::runtime_error("Unable to enqueue a null job");
         }
@@ -48,7 +48,7 @@ namespace un {
         return id;
     }
 
-    u32 JobSystem::enqueue(u32 dependsOn, Job *job) {
+    u32 JobSystem::enqueue(u32 dependsOn, Job* job) {
         u32 id = enqueue(job, false);
         addDependency(id, dependsOn);
         return id;
@@ -62,13 +62,13 @@ namespace un {
         }
     }
 
-    u32 JobSystem::enqueue(u32 dependsOn, const un::LambdaJob::Callback &callback) {
+    u32 JobSystem::enqueue(u32 dependsOn, const un::LambdaJob::Callback& callback) {
         return enqueue(dependsOn, new LambdaJob(std::move(callback)));
     }
 
 #define N_JOBS_WARNING 32
 
-    bool JobSystem::nextJob(Job **result, u32 *id) {
+    bool JobSystem::nextJob(Job** result, u32* id) {
         u32 next;
         {
             std::lock_guard<std::mutex> guard(queueUsage);
@@ -81,14 +81,15 @@ namespace un {
             awaitingExecution.pop();
         }
         if (awaitingExecution.size() > N_JOBS_WARNING) {
-            LOG(WARN) << "There are " << YELLOW(awaitingExecution.size()) << " jobs awaiting execution.";
+            LOG(WARN) << "There are " << YELLOW(awaitingExecution.size())
+                      << " jobs awaiting execution.";
         }
         *result = getJob(next);
         return true;
     }
 
     void JobSystem::awakeSomeoneUp() {
-        for (JobWorker &worker : workers) {
+        for (JobWorker& worker : workers) {
             if (!worker.isAwake()) {
                 // Wake up worker
                 worker.awake();
@@ -97,7 +98,8 @@ namespace un {
         }
     }
 
-    JobSystem::JobSystem(un::Application &application, int nThreads) : queueUsage(), graphUsage() {
+    JobSystem::JobSystem(un::Application& application, int nThreads) : queueUsage(),
+                                                                       graphUsage() {
         size_t nCores;
         if (nThreads <= 0) {
             nCores = std::thread::hardware_concurrency();
@@ -120,8 +122,8 @@ namespace un {
         return enqueue(new LambdaJob(std::move(callback)));
     }
 
-    Job *JobSystem::getJob(u32 id) {
-        Job *job;
+    Job* JobSystem::getJob(u32 id) {
+        Job* job;
         if (tasks.try_get_vertex(id, job)) {
             return job;
         }
@@ -129,7 +131,7 @@ namespace un {
     }
 
     JobWorker::JobWorker(
-            JobWorker &&copy
+        JobWorker&& copy
     ) noexcept: thread(copy.thread),
                 jobSystem(copy.jobSystem),
                 running(copy.running),
@@ -139,9 +141,9 @@ namespace un {
     }
 
     JobWorker::JobWorker(
-            un::Application &application,
-            JobSystem *jobSystem,
-            size_t index
+        un::Application& application,
+        JobSystem* jobSystem,
+        size_t index
     ) : thread(new std::thread(&JobWorker::workerThread, this)),
         jobSystem(jobSystem),
         waiting(),
@@ -196,7 +198,7 @@ namespace un {
 
     void JobWorker::workerThread() {
         do {
-            Job *jobPtr;
+            Job* jobPtr;
             u32 id;
 
             while (jobSystem->nextJob(&jobPtr, &id)) {
@@ -210,7 +212,7 @@ namespace un {
         LOG(INFO) << "Worker " << thread->get_id() << " finished execution";
     }
 
-    const JobWorker::WorkerGraphicsResources &JobWorker::getGraphicsResources() const {
+    const JobWorker::WorkerGraphicsResources& JobWorker::getGraphicsResources() const {
         return graphicsResources;
     }
 
@@ -227,7 +229,9 @@ namespace un {
                 bool ready = true;
                 tasks.disconnect(id, dependantID);
                 tasks.disconnect(dependantID, id);
-                for (std::pair<u32, un::JobDependencyType> other : tasks.edges_from(dependantID)) {
+                for (std::pair<u32, un::JobDependencyType> other : tasks.edges_from(
+                    dependantID
+                )) {
                     u32 otherDependency = edge.first;
                     un::JobDependencyType otherType = other.second;
                     if (otherType == un::JobDependencyType::eRequirement) {
@@ -242,7 +246,7 @@ namespace un {
             auto toAwake = awaitingExecution.size();
             int i = 0;
             while (i < workers.size() && toAwake > 0) {
-                JobWorker &worker = workers[i++];
+                JobWorker& worker = workers[i++];
                 if (!worker.isAwake()) {
                     worker.awake();
                     toAwake--;
@@ -263,19 +267,19 @@ namespace un {
         return workers.size();
     }
 
-    JobWorker::WorkerGraphicsResources::WorkerGraphicsResources(RenderingDevice &renderingDevice) {
+    JobWorker::WorkerGraphicsResources::WorkerGraphicsResources(RenderingDevice& renderingDevice) {
 
         auto device = renderingDevice.getVirtualDevice();
         commandPool = device.createCommandPool(
-                vk::CommandPoolCreateInfo(
-                        (vk::CommandPoolCreateFlags) vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-                        renderingDevice.getGraphics().getIndex()
-                )
+            vk::CommandPoolCreateInfo(
+                (vk::CommandPoolCreateFlags) vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                renderingDevice.getGraphics().getIndex()
+            )
         );
 
     }
 
-    const vk::CommandPool &JobWorker::WorkerGraphicsResources::getCommandPool() const {
+    const vk::CommandPool& JobWorker::WorkerGraphicsResources::getCommandPool() const {
         return commandPool;
     }
 }

@@ -17,7 +17,7 @@ struct type_wrapper {
 };
 
 template<typename... Ts, typename TF>
-void for_types(TF &&f) {
+void for_types(TF&& f) {
     (f(type_wrapper<Ts>{}), ...);
 }
 

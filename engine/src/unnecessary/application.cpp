@@ -5,10 +5,10 @@
 namespace un {
     template<typename T>
     void assertHasElements(
-            const std::string& name,
-            std::vector<T> elements,
-            std::vector<const char*>& requirements,
-            const std::function<const char*(const T&)>& selector
+        const std::string& name,
+        std::vector<T> elements,
+        std::vector<const char*>& requirements,
+        const std::function<const char*(const T&)>& selector
     ) {
         std::vector<std::string> notFound;
         for (const char*& requirement : requirements) {
@@ -37,8 +37,8 @@ namespace un {
     }
 
     vk::Instance loadVulkan(
-            const std::string& name,
-            const Version& appVersion
+        const std::string& name,
+        const Version& appVersion
     ) {
         std::vector<const char*> instanceExtensions;
         std::vector<const char*> layers;
@@ -64,52 +64,63 @@ namespace un {
         layers.emplace_back("VK_LAYER_KHRONOS_validation");
 #endif
         assertHasElements<vk::ExtensionProperties>(
-                "extension",
-                vk::enumerateInstanceExtensionProperties(),
-                instanceExtensions,
-                [](const vk::ExtensionProperties& properties) {
-                    return properties.extensionName.data();
-                }
+            "extension",
+            vk::enumerateInstanceExtensionProperties(),
+            instanceExtensions,
+            [](const vk::ExtensionProperties& properties) {
+                return properties.extensionName.data();
+            }
         );
 
         assertHasElements<vk::LayerProperties>(
-                "layer",
-                vk::enumerateInstanceLayerProperties(),
-                layers,
-                [](const vk::LayerProperties& properties) {
-                    return properties.layerName.data();
-                }
+            "layer",
+            vk::enumerateInstanceLayerProperties(),
+            layers,
+            [](const vk::LayerProperties& properties) {
+                return properties.layerName.data();
+            }
         );
 
         vk::ApplicationInfo appInfo(
-                name.c_str(),
-                VK_MAKE_VERSION(appVersion.getMajor(), appVersion.getMinor(), appVersion.getMinor()),
-                "Unnecessary Engine",
-                VK_MAKE_VERSION(0, 1, 0),
-                VK_MAKE_VERSION(1, 0, 0)
+            name.c_str(),
+            VK_MAKE_VERSION(appVersion.getMajor(),
+                            appVersion.getMinor(),
+                            appVersion.getMinor()),
+            "Unnecessary Engine",
+            VK_MAKE_VERSION(0, 1, 0),
+            VK_MAKE_VERSION(1, 0, 0)
         );
         vk::InstanceCreateInfo info(
-                (vk::InstanceCreateFlags) 0,
-                &appInfo,
-                layers,
-                instanceExtensions
+            (vk::InstanceCreateFlags) 0,
+            &appInfo,
+            layers,
+            instanceExtensions
         );
         try {
             return vk::createInstance(info);
 
         } catch (vk::LayerNotPresentError& layerNotPresentError) {
-            LOG(FUCK) << RED(layerNotPresentError.what() << " (" << layerNotPresentError.code() << ")");
+            LOG(FUCK) << RED(
+                layerNotPresentError.what() << " (" << layerNotPresentError.code()
+                                            << ")");
             throw layerNotPresentError;
         }
     }
 
-    Application::Application(const std::string& name, const Version& version, int nThreads) : name(name),
-                                                                                              version(version),
-                                                                                              pooling(true),
-                                                                                              vulkan(loadVulkan(name,
-                                                                                                                version)),
-                                                                                              renderer(nullptr),
-                                                                                              jobSystem(nullptr) {
+    Application::Application(
+        const std::string& name,
+        const Version& version,
+        int nThreads
+    ) : name(name),
+        version(version),
+        pooling(true),
+        vulkan(
+            loadVulkan(
+                name,
+                version
+            )),
+        renderer(nullptr),
+        jobSystem(nullptr) {
         LOG(INFO) << "Initializing app " << GREEN(name);
 
         monitor = glfwGetPrimaryMonitor();

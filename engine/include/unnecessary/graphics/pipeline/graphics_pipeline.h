@@ -23,7 +23,7 @@ namespace un {
         std::unordered_map<u32, vk::ShaderStageFlags> descriptorAccessFlags;
         BoundVertexLayout vertexLayout;
         GraphicsPipelineLayout pipelineLayout;
-        std::vector<const un::ShaderStage *> stages;
+        std::vector<const un::ShaderStage*> stages;
         std::optional<vk::PipelineVertexInputStateCreateInfo> vertexInput;
         std::optional<vk::PipelineInputAssemblyStateCreateInfo> inputAssembly;
         std::optional<vk::PipelineTessellationStateCreateInfo> tesselation;
@@ -35,17 +35,24 @@ namespace un {
     public:
         explicit GraphicsPipelineBuilder(BoundVertexLayout layout);
 
-        GraphicsPipelineBuilder(const BoundVertexLayout &layout, std::initializer_list<const ShaderStage *> shaders);
+        GraphicsPipelineBuilder(
+            const BoundVertexLayout& layout,
+            std::initializer_list<const ShaderStage*> shaders
+        );
 
         void withStandardRasterization();
 
         void withInputAssembly(vk::PrimitiveTopology topology);
 
-        void addStage(const ShaderStage *stage);
+        void addStage(const ShaderStage* stage);
 
-        un::Pipeline build(un::Renderer &renderer, vk::RenderPass renderPass);
+        un::Pipeline build(un::Renderer& renderer, vk::RenderPass renderPass);
 
-        void addDescriptorSet(un::DescriptorSetLayout &&layout);
+        void addDescriptorResource(un::DescriptorSetLayout&& layout);
+
+        void addDescriptorResource(vk::DescriptorSetLayout layout);
+
+        void addDescriptorResource(un::DescriptorResource&& resource);
     };
 
 }

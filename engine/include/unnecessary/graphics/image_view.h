@@ -12,17 +12,17 @@ namespace un {
         vk::ImageView vulkanView;
     public:
         ImageView(
-                un::RenderingDevice &renderer,
-                vk::Image image,
-                vk::Format format,
-                vk::ImageViewType type = vk::ImageViewType::e2D
+            un::RenderingDevice& renderer,
+            vk::Image image,
+            vk::Format format,
+            vk::ImageViewType type = vk::ImageViewType::e2D
         );
 
-        const vk::ImageView &getVulkanView() const;
+        const vk::ImageView& getVulkanView() const;
 
         operator vk::ImageView();
 
-        void dispose(vk::Device &device) override;
+        void dispose(vk::Device& device) override;
     };
 
 }

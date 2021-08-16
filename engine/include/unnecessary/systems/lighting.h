@@ -9,6 +9,7 @@
 #include <unnecessary/systems/world.h>
 #include <unnecessary/graphics/drawable.h>
 #include <unnecessary/graphics/lighting.h>
+#include <unnecessary/misc/historic.h>
 
 namespace un {
     class LightingSystem : public un::System {
@@ -17,19 +18,22 @@ namespace un {
         std::vector<un::PointLightData> runtimeScenePointLights;
         un::ResizableBuffer sceneLightingBuffer;
         un::Renderer* renderer;
+        un::BooleanHistoric lightsRewritten;
         bool lightsDirty;
     public:
         LightingSystem(u32 maxNumLightsPerObject, un::Renderer* device);
 
-        void step(World &world, f32 delta, un::JobWorker *worker) override;
+        void step(World& world, f32 delta, un::JobWorker* worker) override;
 
         size_t findSceneBufferSize();
 
         u32 getMaxNumLightsPerObject() const;
 
-        const std::vector<un::PointLightData> &getRuntimeScenePointLights() const;
+        const std::vector<un::PointLightData>& getRuntimeScenePointLights() const;
 
-        const ResizableBuffer &getSceneLightingBuffer() const;
+        const ResizableBuffer& getSceneLightingBuffer() const;
+
+        const BooleanHistoric& getLightsRewritten() const;
     };
 }
 

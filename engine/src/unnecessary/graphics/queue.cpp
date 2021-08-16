@@ -3,16 +3,20 @@
 namespace un {
 
     Queue::Queue(
-            u32 index,
-            const vk::Queue &vulkan
+        u32 index,
+        const vk::Queue& vulkan
     ) : index(index), vulkan(vulkan) {}
 
     u32 Queue::getIndex() const {
         return index;
     }
 
-    const vk::Queue &Queue::getVulkan() const {
+    const vk::Queue& Queue::getVulkan() const {
         return vulkan;
+    }
+
+    vk::Queue* Queue::operator->() {
+        return &vulkan;
     }
 
     Queue::Queue() = default;

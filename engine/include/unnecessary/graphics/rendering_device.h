@@ -15,22 +15,27 @@ namespace un {
         vk::SurfaceKHR surface;
         un::Queue graphics, present;
         vk::PhysicalDeviceMemoryProperties memoryProperties;
+        vk::PhysicalDeviceProperties deviceProperties;
     public:
         RenderingDevice();
 
         RenderingDevice(
-                const vk::Instance& vulkanInstance,
-                GLFWwindow* window
+            const vk::Instance& vulkanInstance,
+            GLFWwindow* window
         );
 
         u32 selectMemoryTypeFor(
-                const vk::MemoryRequirements& requirements,
-                vk::MemoryPropertyFlags flags = static_cast<vk::MemoryPropertyFlags>(0)
+            const vk::MemoryRequirements& requirements,
+            vk::MemoryPropertyFlags flags = static_cast<vk::MemoryPropertyFlags>(0)
         ) const;
 
         const vk::Device& getVirtualDevice() const;
 
         const vk::PhysicalDevice& getPhysicalDevice() const;
+
+        const vk::PhysicalDeviceMemoryProperties& getMemoryProperties() const;
+
+        const vk::PhysicalDeviceProperties& getDeviceProperties() const;
 
         const vk::SurfaceKHR& getSurface() const;
 
@@ -38,7 +43,7 @@ namespace un {
 
         Queue& getPresent();
 
-        const Queue &getGraphics() const;
+        const Queue& getGraphics() const;
     };
 }
 #endif

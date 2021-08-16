@@ -5,7 +5,9 @@
 #include <string>
 
 #ifdef WIN32
+
 #include <windows.h>
+
 #endif
 namespace un {
     void* loadDynamicModule(const std::string& moduleName);

@@ -17,16 +17,16 @@ namespace un {
         std::vector<vk::PresentModeKHR> presentModes;
     public:
         SwapChainSupportDetails(
-                const un::RenderingDevice& renderingDevice,
-                vk::ImageUsageFlags usageFlags,
-                vk::ImageCreateFlags createFlags
+            const un::RenderingDevice& renderingDevice,
+            vk::ImageUsageFlags usageFlags,
+            vk::ImageCreateFlags createFlags
         );
 
-        const vk::SurfaceCapabilitiesKHR &getCapabilities() const;
+        const vk::SurfaceCapabilitiesKHR& getCapabilities() const;
 
         vk::SurfaceFormatKHR selectFormat();
 
-        vk::Extent2D selectExtent(const un::Size2D &application);
+        vk::Extent2D selectExtent(const un::Size2D& application);
 
         vk::PresentModeKHR selectPresentMode();
     };
@@ -42,17 +42,17 @@ namespace un {
         SwapChain() = default;
 
         SwapChain(
-                un::RenderingDevice &renderingDevice,
-                const un::Size2D &targetSize
+            un::RenderingDevice& renderingDevice,
+            const un::Size2D& targetSize
         );
 
         vk::Format getFormat() const;
 
-        const vk::SwapchainKHR &getSwapChain() const;
+        const vk::SwapchainKHR& getSwapChain() const;
 
-        const Size2D &getResolution() const;
+        const Size2D& getResolution() const;
 
-        const std::vector<un::ImageView> &getViews() const;
+        const std::vector<un::ImageView>& getViews() const;
     };
 }
 #endif

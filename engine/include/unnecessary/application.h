@@ -16,19 +16,19 @@ namespace un {
     class Application {
     private:
         vk::Instance vulkan;
-        Renderer *renderer;
+        Renderer* renderer;
         std::string name;
         Version version;
-        GLFWwindow *window;
-        const GLFWvidmode *vidMode;
-        GLFWmonitor *monitor;
+        GLFWwindow* window;
+        const GLFWvidmode* vidMode;
+        GLFWmonitor* monitor;
         bool pooling;
         Event<f32> onPool;
-        JobSystem *jobSystem;
+        JobSystem* jobSystem;
         u32 width, height;
 
     public:
-        Application(const std::string &name, const Version &version, int nThreads = -1);
+        Application(const std::string& name, const Version& version, int nThreads = -1);
 
         virtual ~Application();
 
@@ -38,23 +38,23 @@ namespace un {
 
         u32 getHeight() const;
 
-        const vk::Instance &getVulkan() const;
+        const vk::Instance& getVulkan() const;
 
-        Renderer &getRenderer();
+        Renderer& getRenderer();
 
-        const std::string &getName() const;
+        const std::string& getName() const;
 
-        const Version &getVersion() const;
+        const Version& getVersion() const;
 
-        GLFWwindow *getWindow() const;
+        GLFWwindow* getWindow() const;
 
-        const GLFWvidmode *const getVidMode() const;
+        const GLFWvidmode* const getVidMode() const;
 
-        GLFWmonitor *getMonitor() const;
+        GLFWmonitor* getMonitor() const;
 
-        Event<f32> &getOnPool();
+        Event<f32>& getOnPool();
 
-        JobSystem &getJobSystem();
+        JobSystem& getJobSystem();
     };
 };
 #endif

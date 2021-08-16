@@ -17,11 +17,11 @@ namespace un {
     private:
         std::filesystem::path path;
         WRITE_ONLY()
-        MeshData *result;
+        MeshData* result;
     public:
-        LoadObjJob(std::filesystem::path path, MeshData *result);
+        LoadObjJob(std::filesystem::path path, MeshData* result);
 
-        void operator()(un::JobWorker *worker) override;
+        void operator()(un::JobWorker* worker) override;
 
     };
 
@@ -31,21 +31,21 @@ namespace un {
         u32 vertexLayoutBinding;
 
         READ_ONLY()
-        MeshData *data;
+        MeshData* data;
 
         WRITE_ONLY()
-        MeshInfo *result;
-        un::Renderer *renderer;
+        MeshInfo* result;
+        un::Renderer* renderer;
     public:
         UploadMeshJob(
-                VertexLayout vertexLayout,
-                u32 vertexLayoutBinding,
-                MeshData *data,
-                MeshInfo *result,
-                Renderer *renderer
+            VertexLayout vertexLayout,
+            u32 vertexLayoutBinding,
+            MeshData* data,
+            MeshInfo* result,
+            Renderer* renderer
         );
 
-        void operator()(un::JobWorker *worker) override;
+        void operator()(un::JobWorker* worker) override;
 
     };
 }

@@ -6,7 +6,7 @@
 namespace un {
     class CameraSystem : public un::System {
     private:
-        un::Renderer * renderer;
+        un::Renderer* renderer;
     public:
         CameraSystem(Renderer* renderer);
 

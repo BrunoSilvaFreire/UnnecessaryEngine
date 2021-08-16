@@ -12,11 +12,14 @@ namespace un {
     public:
         Queue();
 
-        Queue(u32 index, const vk::Queue &vulkan);
+        Queue(u32 index, const vk::Queue& vulkan);
 
         u32 getIndex() const;
 
-        const vk::Queue &getVulkan() const;
+        const vk::Queue& getVulkan() const;
+
+        vk::Queue* operator->();
+
         operator vk::Queue() {
             return vulkan;
         }

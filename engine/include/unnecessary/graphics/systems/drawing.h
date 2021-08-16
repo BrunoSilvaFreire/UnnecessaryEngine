@@ -5,31 +5,51 @@
 #include <unnecessary/systems/system.h>
 #include <unnecessary/graphics/drawable.h>
 #include <unnecessary/graphics/renderer.h>
+#include <unnecessary/graphics/descriptors/descriptor_set.h>
+#include <unnecessary/graphics/descriptors/descriptor_allocator.h>
 #include <unnecessary/jobs/jobs.h>
 #include <unnecessary/systems/lighting.h>
 
 namespace un {
     class DrawingSystem : public System {
     private:
-        un::Renderer *renderer;
+        un::Renderer* renderer;
+        un::LightingSystem* lightingSystem;
         glm::vec4 clearColor;
         vk::RenderPass renderPass;
         u8 currentFramebufferIndex;
         std::vector<vk::Framebuffer> framebuffers;
         vk::Semaphore imageAvailableSemaphore;
-        vk::DescriptorSet globalSet;
 
-        un::LightingSystem *lightingSystem;
+        un::DescriptorAllocator* objectSetLayout;
+        un::DescriptorAllocator* cameraSetLayout;
+        un::DescriptorAllocator* sceneSetLayout;
+        vk::DescriptorSet sceneDescriptorSet;
     public:
-        DrawingSystem(Renderer &renderer);
+        DrawingSystem(Renderer& renderer);
 
-        void describe(SystemDescriptor &descriptor) override;
+        void describe(SystemDescriptor& descriptor) override;
 
-        void step(World &world, f32 delta, un::JobWorker *worker) override;
+        void step(World& world, f32 delta, un::JobWorker* worker) override;
 
-        const vk::RenderPass &getRenderPass() const;
+        const un::DescriptorAllocator* getSceneDescriptorAllocator() const;
 
-        vk::Framebuffer nextFramebuffer(u32 *framebufferIndexResult);
+        const un::DescriptorAllocator* getCameraDescriptorSetAllocator() const;
+
+        const un::DescriptorAllocator* getObjectDescriptorAllocator() const;
+
+
+        un::DescriptorAllocator* getSceneDescriptorAllocator();
+
+        un::DescriptorAllocator* getCameraDescriptorSetAllocator();
+
+        un::DescriptorAllocator* getObjectDescriptorAllocator();
+
+        const vk::RenderPass& getRenderPass() const;
+
+        vk::Framebuffer nextFramebuffer(u32* framebufferIndexResult);
+
+        const vk::DescriptorSet& getSceneDescriptorSet() const;
 
     };
 }

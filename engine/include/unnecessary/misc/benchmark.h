@@ -9,8 +9,8 @@ namespace un {
     class Chronometer {
     public:
         using Clock = std::conditional_t<std::chrono::high_resolution_clock::is_steady,
-                std::chrono::high_resolution_clock,
-                std::chrono::steady_clock>;
+            std::chrono::high_resolution_clock,
+            std::chrono::steady_clock>;
 
     private:
         const Clock::time_point start = Clock::now();

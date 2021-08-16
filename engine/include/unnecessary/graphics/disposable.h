@@ -5,7 +5,7 @@
 
 namespace un {
     class IDisposable {
-        virtual void dispose(vk::Device &device) = 0;
+        virtual void dispose(vk::Device& device) = 0;
     };
 }
 #endif

@@ -10,17 +10,19 @@ namespace un {
 
     class RunSystemJob : public Job {
     private:
-        un::World *world;
-        un::System *system;
+        un::World* world;
+        un::System* system;
         f32 deltaTime;
     public:
-        System *getSystem() const;
+        un::System* getSystem() const {
+            return system;
+        }
 
         void setDeltaTime(f32 deltaTime);
 
-        RunSystemJob(un::World *world, un::System *system);
+        RunSystemJob(un::World* world, un::System* system);
 
-        void operator()(un::JobWorker *worker) override;
+        void operator()(un::JobWorker* worker) override;
     };
 }
 #endif

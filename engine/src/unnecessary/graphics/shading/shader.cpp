@@ -6,8 +6,8 @@
 namespace un {
 
     Pipeline::Pipeline(
-            std::string name,
-            un::PipelineData data
+        std::string name,
+        un::PipelineData data
     ) : id(std::move(name)),
         pipelineData(data) {
 
@@ -17,11 +17,11 @@ namespace un {
         return id;
     }
 
-    const vk::PipelineLayout &Pipeline::getPipelineLayout() const {
+    const vk::PipelineLayout& Pipeline::getPipelineLayout() const {
         return pipelineData.layout;
     }
 
-    const vk::Pipeline &Pipeline::getPipeline() const {
+    const vk::Pipeline& Pipeline::getPipeline() const {
         return pipelineData.pipeline;
     }
 

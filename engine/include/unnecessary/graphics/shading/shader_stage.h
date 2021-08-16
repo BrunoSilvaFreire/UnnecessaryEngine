@@ -29,7 +29,7 @@ namespace un {
     public:
         friend class ShaderStage;
 
-        const std::vector<DescriptorReference> &getDescriptors() const;
+        const std::vector<DescriptorReference>& getDescriptors() const;
 
     };
 
@@ -46,37 +46,37 @@ namespace un {
         ShaderResources usedResources;
     public:
         ShaderStage(
-                std::string name,
-                const vk::ShaderStageFlagBits &flags,
-                std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>()
+            std::string name,
+            const vk::ShaderStageFlagBits& flags,
+            std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>()
         );
 
         ShaderStage(
-                const std::string &name,
-                const vk::ShaderStageFlagBits &flags,
-                vk::Device &device,
-                std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>(),
-                const std::filesystem::path &root = std::filesystem::current_path()
+            const std::string& name,
+            const vk::ShaderStageFlagBits& flags,
+            vk::Device& device,
+            std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>(),
+            const std::filesystem::path& root = std::filesystem::current_path()
         );
 
-        void dispose(vk::Device &device);
+        void dispose(vk::Device& device);
 
         void load(
-                vk::Device &device,
-                const std::filesystem::path &root = std::filesystem::current_path()
+            vk::Device& device,
+            const std::filesystem::path& root = std::filesystem::current_path()
         );
 
         void usesDescriptor(u32 set, u32 binding);
 
-        const std::string &getName() const;
+        const std::string& getName() const;
 
-        const vk::ShaderModule &getUnsafeModule() const;
+        const vk::ShaderModule& getUnsafeModule() const;
 
-        const vk::ShaderStageFlagBits &getFlags() const;
+        const vk::ShaderStageFlagBits& getFlags() const;
 
-        const std::optional<un::PushConstants> &getPushConstantRange() const;
+        const std::optional<un::PushConstants>& getPushConstantRange() const;
 
-        const ShaderResources &getUsedResources() const;
+        const ShaderResources& getUsedResources() const;
     };
 
 

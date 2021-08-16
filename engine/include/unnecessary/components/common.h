@@ -7,12 +7,12 @@
 #include <entt/entt.hpp>
 #include <unnecessary/def.h>
 #include <unnecessary/graphics/matrices.h>
-#include <unnecessary/graphics/buffer.h>
+#include <unnecessary/graphics/buffers/buffer.h>
 
 #define COMPONENT(...)
 #define PROPERTY(...)
 namespace un {
-    COMPONENT(REQUIRES = [Projection])
+    COMPONENT(REQUIRES =[Projection])
     struct Camera {
     public:
         vk::RenderPass renderPass;

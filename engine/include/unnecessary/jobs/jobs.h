@@ -29,7 +29,7 @@ namespace un {
 
     class Job {
     public:
-        virtual void operator()(un::JobWorker *worker) = 0;
+        virtual void operator()(un::JobWorker* worker) = 0;
     };
 
     enum JobDependencyType : u8 {
@@ -46,21 +46,21 @@ namespace un {
         eRequired = 2
     };
 
-    typedef gpp::AdjacencyList<Job *, JobDependencyType, u32> JobGraph;
+    typedef gpp::AdjacencyList<Job*, JobDependencyType, u32> JobGraph;
 
     class LambdaJob : public Job {
     public:
-        typedef std::function<void(un::JobWorker *worker)> Callback;
+        typedef std::function<void(un::JobWorker* worker)> Callback;
         typedef std::function<void()> VoidCallback;
     private:
         Callback callback;
         VoidCallback voidCallback;
     public:
-        LambdaJob(const Callback &callback);
+        LambdaJob(const Callback& callback);
 
-        LambdaJob(const VoidCallback &callback);
+        LambdaJob(const VoidCallback& callback);
 
-        void operator()(un::JobWorker *worker) override;
+        void operator()(un::JobWorker* worker) override;
     };
 
 
@@ -72,16 +72,16 @@ namespace un {
         public:
             WorkerGraphicsResources() = default;
 
-            WorkerGraphicsResources(un::RenderingDevice &device);
+            WorkerGraphicsResources(un::RenderingDevice& device);
 
-            const vk::CommandPool &getCommandPool() const;
+            const vk::CommandPool& getCommandPool() const;
 
         };
 
     private:
         size_t index;
-        std::thread *thread;
-        JobSystem *jobSystem;
+        std::thread* thread;
+        JobSystem* jobSystem;
         bool running = true;
         bool awaken;
         std::mutex handbrakeMutex;
@@ -92,9 +92,13 @@ namespace un {
         void workerThread();
 
     public:
-        explicit JobWorker(un::Application &application, JobSystem *jobSystem, size_t index);
+        explicit JobWorker(
+            un::Application& application,
+            JobSystem* jobSystem,
+            size_t index
+        );
 
-        JobWorker(JobWorker &&copy) noexcept;
+        JobWorker(JobWorker&& copy) noexcept;
 
         ~JobWorker();
 
@@ -104,7 +108,7 @@ namespace un {
 
         void sleep();
 
-        const WorkerGraphicsResources &getGraphicsResources() const;
+        const WorkerGraphicsResources& getGraphicsResources() const;
     };
 
     class JobSystem {
@@ -118,7 +122,7 @@ namespace un {
         std::queue<u32> awaitingExecution;
         std::mutex queueUsage, graphUsage;
 
-        bool nextJob(Job **result, u32 *id);
+        bool nextJob(Job** result, u32* id);
 
         void awakeSomeoneUp();
 
@@ -126,13 +130,13 @@ namespace un {
 
 
     public:
-        u32 enqueue(Job *job, bool markForExecution);
+        u32 enqueue(Job* job, bool markForExecution);
 
         void addDependency(u32 from, u32 to);
 
         void markForExecution(u32 job);
 
-        JobSystem(un::Application &application, int nThreads = -1);
+        JobSystem(un::Application& application, int nThreads = -1);
 
         ~JobSystem();
 
@@ -147,24 +151,26 @@ namespace un {
         }
 
         template<typename T>
-        u32 then(u32 dependsOn, std::function<void(T &)> callback) {
-            return enqueue(dependsOn, [&]() {
-                T *dependency = dynamic_cast<T *>(getJob(dependsOn));
-                if (dependency != nullptr) {
-                    callback(dependency);
+        u32 then(u32 dependsOn, std::function<void(T&)> callback) {
+            return enqueue(
+                dependsOn, [&]() {
+                    T* dependency = dynamic_cast<T*>(getJob(dependsOn));
+                    if (dependency != nullptr) {
+                        callback(dependency);
+                    }
                 }
-            });
+            );
         }
 
-        Job *getJob(u32 id);
+        Job* getJob(u32 id);
 
-        u32 enqueue(Job *job);
+        u32 enqueue(Job* job);
 
-        u32 enqueue(u32 dependsOn, Job *job);
+        u32 enqueue(u32 dependsOn, Job* job);
 
         u32 enqueue(un::LambdaJob::Callback callback);
 
-        u32 enqueue(u32 dependsOn, const un::LambdaJob::Callback &callback);
+        u32 enqueue(u32 dependsOn, const un::LambdaJob::Callback& callback);
 
         int getNumWorkers();
     };

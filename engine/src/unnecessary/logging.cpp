@@ -12,7 +12,7 @@ namespace un {
         globalMutex.unlock();
     }
 
-    std::ostream &Log::stream() {
+    std::ostream& Log::stream() {
         return std::cout;
     }
 
@@ -20,7 +20,11 @@ namespace un {
         flush();
     }
 
-    Log::Log(const std::string &header, u32 line, const std::string &file) : flushed(false) {
+    Log::Log(
+        const std::string& header,
+        u32 line,
+        const std::string& file
+    ) : flushed(false) {
         globalMutex.lock();
         stream() <<
                  DEFAULT_COLOR << '[' <<

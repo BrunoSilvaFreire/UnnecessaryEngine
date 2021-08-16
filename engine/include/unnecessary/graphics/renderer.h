@@ -17,24 +17,24 @@ namespace un {
         un::SwapChain swapChain;
     public:
         explicit Renderer(
-                const vk::Instance &instance,
-                GLFWwindow *window
+            const vk::Instance& instance,
+            GLFWwindow* window
         );
 
 
-        const vk::PhysicalDevice &getPhysicalDevice() const;
+        const vk::PhysicalDevice& getPhysicalDevice() const;
 
-        const vk::Device &getVirtualDevice() const;
+        const vk::Device& getVirtualDevice() const;
 
-        Queue &getGraphics();
+        Queue& getGraphics();
 
-        vk::CommandPool &getGlobalPool();
+        vk::CommandPool& getGlobalPool();
 
-        un::SwapChain &getSwapChain();
+        un::SwapChain& getSwapChain();
 
-        RenderingDevice &getRenderingDevice();
+        RenderingDevice& getRenderingDevice();
 
-        const Queue &getGraphics() const;
+        const Queue& getGraphics() const;
     };
 }
 

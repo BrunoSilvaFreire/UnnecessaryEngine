@@ -11,51 +11,53 @@
 
 namespace un {
 
-    const vk::PhysicalDevice &Renderer::getPhysicalDevice() const {
+    const vk::PhysicalDevice& Renderer::getPhysicalDevice() const {
         return renderingDevice.getPhysicalDevice();
     }
 
-    const vk::Device &Renderer::getVirtualDevice() const {
+    const vk::Device& Renderer::getVirtualDevice() const {
         return renderingDevice.getVirtualDevice();
     }
 
 
-    Queue &Renderer::getGraphics() {
+    Queue& Renderer::getGraphics() {
         return renderingDevice.getGraphics();
     }
-    const Queue &Renderer::getGraphics() const {
+
+    const Queue& Renderer::getGraphics() const {
         return renderingDevice.getGraphics();
     }
 
 
     Renderer::Renderer(
-            const vk::Instance &instance,
-            GLFWwindow *window
+        const vk::Instance& instance,
+        GLFWwindow* window
     ) : renderingDevice(instance, window) {
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
 
         swapChain = un::SwapChain(
-                renderingDevice,
-                un::Size2D(width, height)
+            renderingDevice,
+            un::Size2D(width, height)
         );
         vk::CommandPoolCreateInfo poolInfo(
-                (vk::CommandPoolCreateFlags) vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-                renderingDevice.getGraphics().getIndex()
+            (vk::CommandPoolCreateFlags) vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+            renderingDevice.getGraphics().getIndex()
         );
-        vkCall(renderingDevice.getVirtualDevice().createCommandPool(&poolInfo, nullptr, &globalPool));
+        vkCall(renderingDevice.getVirtualDevice()
+                              .createCommandPool(&poolInfo, nullptr, &globalPool));
     }
 
 
-    vk::CommandPool &Renderer::getGlobalPool() {
+    vk::CommandPool& Renderer::getGlobalPool() {
         return globalPool;
     }
 
-    un::SwapChain &Renderer::getSwapChain() {
+    un::SwapChain& Renderer::getSwapChain() {
         return swapChain;
     }
 
-    RenderingDevice &Renderer::getRenderingDevice() {
+    RenderingDevice& Renderer::getRenderingDevice() {
         return renderingDevice;
     }
 }

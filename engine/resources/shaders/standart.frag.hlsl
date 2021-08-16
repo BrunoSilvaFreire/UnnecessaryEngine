@@ -11,14 +11,14 @@ struct FragmentOutput
 	float3 color : COLOR;
 };
 
-[[vk::binding(0, 1)]]
+[[vk::binding(0, 2)]]
 cbuffer objectLighting
 {
    ObjectLightingData objectLighting;
 }
 
-[[vk::binding(1, 0)]]
-cbuffer sceneLighting
+[[vk::binding(0, 0)]]
+tbuffer sceneLighting
 {
 	SceneLightingData sceneLighting;
 }

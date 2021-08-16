@@ -20,24 +20,14 @@ namespace un {
     public:
     };
 
-    class World {
+    class World : public entt::registry {
     private:
         u32 targetFPS = 165;
         un::SystemGraph systems;
         std::unordered_map<System*, u32> jobIds;
-        entt::registry registry;
         un::JobSystem* jobSystem;
     public:
         entt::registry& getRegistry();
-
-        template<typename... Component, typename... Exclude>
-        entt::basic_view<
-                entt::entity,
-                entt::exclude_t<Exclude...>,
-                Component...
-        > view(entt::exclude_t<Exclude...> = {}) {
-            return registry.view<Component..., Exclude...>();
-        }
 
         template<typename T, typename ...Args>
         u32 addSystem(Args... args) {
@@ -54,13 +44,19 @@ namespace un {
 
         virtual ~World();
 
+        const un::SystemGraph& getSystems() const;
+
+        un::SystemGraph& getSystems();
+
         template<typename ...T>
         entt::entity createEntity() {
-            entt::entity entity = registry.create();
-            for_types<T...>([&](auto t) {
-                using t_type = typename decltype(t)::type;
-                registry.emplace<t_type>(entity);
-            });
+            entt::entity entity = create();
+            for_types<T...>(
+                [&](auto t) {
+                    using t_type = typename decltype(t)::type;
+                    emplace<t_type>(entity);
+                }
+            );
             return entity;
         }
     };

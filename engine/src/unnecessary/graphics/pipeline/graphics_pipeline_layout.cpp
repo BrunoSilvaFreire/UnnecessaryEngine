@@ -2,15 +2,16 @@
 
 namespace un {
 
-    void GraphicsPipelineLayout::push(DescriptorSetLayout &&layout) {
+    void GraphicsPipelineLayout::push(un::DescriptorResource&& layout) {
         elements.push_back(std::move(layout));
     }
 
-    const un::DescriptorSetLayout &GraphicsPipelineLayout::getSet(size_t index) const {
+    const un::DescriptorResource& GraphicsPipelineLayout::getSet(size_t index) const {
         return elements[index];
     }
 
-    const std::vector<un::DescriptorSetLayout> &GraphicsPipelineLayout::getDescriptorLayouts() const {
+    const std::vector<un::DescriptorResource>&
+    GraphicsPipelineLayout::getDescriptorLayouts() const {
         return elements;
     }
 }

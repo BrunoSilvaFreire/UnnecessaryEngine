@@ -8,7 +8,7 @@
 namespace un {
     class TransformSystem : public System {
     public:
-        void step(World &world, f32 delta, un::JobWorker *worker) override;
+        void step(World& world, f32 delta, un::JobWorker* worker) override;
     };
 }
 #endif

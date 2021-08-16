@@ -10,12 +10,12 @@ namespace un {
     protected:
         std::vector<entt::entity> entitiesToRender;
     public:
-        virtual void configure(vk::CommandBuffer &buffer) = 0;
+        virtual void configure(vk::CommandBuffer& buffer) = 0;
     };
 
     class IndexedRenderGroup : public RenderGroup {
     public:
-        void configure(vk::CommandBuffer &buffer) override {
+        void configure(vk::CommandBuffer& buffer) override {
         }
     };
 }

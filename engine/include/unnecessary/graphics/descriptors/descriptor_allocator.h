@@ -21,14 +21,14 @@ namespace un {
 
     public:
         DescriptorPool(
-                vk::Device device,
-                un::DescriptorSetLayout &layout,
-                size_t numSetsToReserve
+            vk::Device device,
+            un::DescriptorSetLayout& layout,
+            size_t numSetsToReserve
         );
 
         bool isFull();
 
-        const vk::DescriptorPool &getPool() const;
+        const vk::DescriptorPool& getPool() const;
 
         size_t getFreeSets() const;
 
@@ -38,10 +38,10 @@ namespace un {
 
 
         void allocate(
-                size_t count,
-                vk::DescriptorSet *setPtr,
-                vk::Device device,
-                vk::DescriptorSetLayout layout
+            size_t count,
+            vk::DescriptorSet* setPtr,
+            vk::Device device,
+            vk::DescriptorSetLayout layout
         );
     };
 
@@ -55,14 +55,15 @@ namespace un {
          */
         size_t poolReserveCount;
         vk::Device owningDevice;
+
         un::DescriptorPool create();
 
     public:
         DescriptorAllocator(
-                DescriptorSetLayout&& oldLayout,
-                vk::Device owningDevice,
-                size_t numSetsPerPool,
-                vk::ShaderStageFlagBits shaderStageFlags
+            DescriptorSetLayout&& oldLayout,
+            vk::Device owningDevice,
+            size_t numSetsPerPool,
+            vk::ShaderStageFlagBits shaderStageFlags
         );
 
         ~DescriptorAllocator();
@@ -70,6 +71,8 @@ namespace un {
         vk::DescriptorSet allocate();
 
         std::vector<vk::DescriptorSet> allocate(size_t count);
+
+        const vk::DescriptorSetLayout& getVulkanLayout() const;
     };
 }
 #endif //UNNECESSARYENGINE_DESCRIPTOR_ALLOCATOR_H

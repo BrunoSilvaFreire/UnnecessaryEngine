@@ -2,7 +2,7 @@
 #define UNNECESSARYENGINE_MESH_H
 
 #include <unnecessary/def.h>
-#include <unnecessary/graphics/buffer.h>
+#include <unnecessary/graphics/buffers/buffer.h>
 #include <unnecessary/graphics/vertex_layout.h>
 #include <tiny_obj_loader.h>
 
@@ -15,13 +15,18 @@ namespace un {
     public:
         MeshInfo();
 
-        MeshInfo(u32 indexCount, const BoundVertexLayout &layout, const Buffer &vertex, const Buffer &index);
+        MeshInfo(
+            u32 indexCount,
+            const BoundVertexLayout& layout,
+            const Buffer& vertex,
+            const Buffer& index
+        );
 
         u32 getIndexCount() const;
 
-        un::Buffer &getVertex();
+        un::Buffer& getVertex();
 
-        un::Buffer &getIndex();
+        un::Buffer& getIndex();
     };
 
     struct MeshData {

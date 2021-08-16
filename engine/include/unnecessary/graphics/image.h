@@ -21,15 +21,15 @@ namespace un {
         vk::Image image;
     public:
         Image(
-                un::RenderingDevice &renderer,
-                vk::Format format,
-                vk::Extent3D size,
-                vk::ImageLayout layout,
-                un::ImageDetails details,
-                vk::ImageUsageFlagBits usage,
-                vk::ImageType type,
-                vk::SharingMode mode = vk::SharingMode::eExclusive,
-                vk::ImageCreateFlags flags = (vk::ImageCreateFlags) 0
+            un::RenderingDevice& renderer,
+            vk::Format format,
+            vk::Extent3D size,
+            vk::ImageLayout layout,
+            un::ImageDetails details,
+            vk::ImageUsageFlagBits usage,
+            vk::ImageType type,
+            vk::SharingMode mode = vk::SharingMode::eExclusive,
+            vk::ImageCreateFlags flags = (vk::ImageCreateFlags) 0
         );
 //
 //        Image(

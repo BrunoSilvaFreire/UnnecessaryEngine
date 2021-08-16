@@ -9,7 +9,7 @@ namespace un {
     protected:
         std::vector<T> elements;
     public:
-        std::vector<T> &getElements() {
+        std::vector<T>& getElements() {
             return elements;
         }
     };

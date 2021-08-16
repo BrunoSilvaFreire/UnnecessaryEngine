@@ -2,21 +2,30 @@
 
 namespace un {
 
-    DescriptorPool::DescriptorPool(vk::Device device, DescriptorSetLayout& layout, size_t numSetsToReserve) : numSets(
-            numSetsToReserve), freeSets(numSetsToReserve) {
+    DescriptorPool::DescriptorPool(
+        vk::Device device,
+        DescriptorSetLayout& layout,
+        size_t numSetsToReserve
+    ) : numSets(numSetsToReserve),
+        freeSets(numSetsToReserve) {
         std::vector<vk::DescriptorPoolSize> descriptorSizes;
         for (un::DescriptorElement& element : layout.getElements()) {
             descriptorSizes.emplace_back(
-                    element.getType(),
-                    1
+                element.getType(),
+                1
             );
         }
-        pool = device.createDescriptorPool(
-                vk::DescriptorPoolCreateInfo(
-                        (vk::DescriptorPoolCreateFlags) 0,
-                        numSetsToReserve,
-                        descriptorSizes
-                )
+        vk::DescriptorPoolCreateInfo info(
+            (vk::DescriptorPoolCreateFlags) 0,
+            numSetsToReserve,
+            descriptorSizes
+        );
+        vkCall(
+            device.createDescriptorPool(
+                &info,
+                nullptr,
+                &pool
+            )
         );
 
     }
@@ -46,7 +55,7 @@ namespace un {
     }
 
     vk::DescriptorSet DescriptorAllocator::allocate() {
-        un::DescriptorPool top = freePools.top();
+        un::DescriptorPool& top = freePools.top();
         vk::DescriptorSet set;
         if (top.isFull()) {
             top = create();
@@ -90,17 +99,18 @@ namespace un {
     void DescriptorPool::assertCanAllocate(size_t count) const {
         if (count > freeSets) {
             std::ostringstream str;
-            str << "Pool is unable to allocate " << count << " descriptor sets, has " << freeSets;
+            str << "Pool is unable to allocate " << count << " descriptor sets, has "
+                << freeSets;
             str << " free out of " << numSets;
             throw std::runtime_error(str.str());
         }
     }
 
     void DescriptorPool::allocate(
-            size_t count,
-            vk::DescriptorSet* setPtr,
-            vk::Device device,
-            vk::DescriptorSetLayout layout
+        size_t count,
+        vk::DescriptorSet* setPtr,
+        vk::Device device,
+        vk::DescriptorSetLayout layout
     ) {
         assertCanAllocate(count);
         freeSets -= count;
@@ -109,21 +119,28 @@ namespace un {
             layouts[i] = layout;
         }
         vk::DescriptorSetAllocateInfo info(
-                pool,
-                count,
-                layouts.data()
+            pool,
+            count,
+            layouts.data()
         );
         vkCall(device.allocateDescriptorSets(&info, setPtr));
 
     }
 
     DescriptorAllocator::DescriptorAllocator(
-            DescriptorSetLayout&& oldLayout,
-            vk::Device owningDevice,
-            size_t numSetsPerPool,
-            vk::ShaderStageFlagBits shaderStageFlags
-    ) : layout(std::move(oldLayout)), poolReserveCount(numSetsPerPool), owningDevice(owningDevice) {
+        DescriptorSetLayout&& oldLayout,
+        vk::Device owningDevice,
+        size_t numSetsPerPool,
+        vk::ShaderStageFlagBits shaderStageFlags
+    ) : layout(std::move(oldLayout)),
+        poolReserveCount(numSetsPerPool),
+        owningDevice(owningDevice) {
         create();
         vulkanLayout = layout.build(owningDevice, shaderStageFlags);
     }
+
+    const vk::DescriptorSetLayout& DescriptorAllocator::getVulkanLayout() const {
+        return vulkanLayout;
+    }
+
 }
