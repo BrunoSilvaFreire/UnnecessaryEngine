@@ -3,22 +3,21 @@
 namespace un {
     BufferWriter::~BufferWriter() {
         cmd->end();
-        std::array<vk::CommandBuffer, 1> arr{*cmd};
-        renderer->getGraphics()->submit({vk::SubmitInfo({}, {}, arr)});
+        if (autoSubmit) {
+            std::array<vk::CommandBuffer, 1> arr{*cmd};
+            renderer->getGraphics()->submit({vk::SubmitInfo({}, {}, arr)});
+        }
     }
 
     BufferWriter::BufferWriter(
         un::Renderer* renderer,
-        vk::CommandPool pool
+        vk::CommandPool pool,
+        bool autoSubmit
     ) : renderer(renderer),
         cmd(
             *renderer,
-            pool
-            ? pool
-            : renderer
-                ->getGlobalPool(),
-            vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-        ) {
+            pool ? pool : renderer->getGlobalPool()
+        ), autoSubmit(autoSubmit) {
         cmd->begin(
             vk::CommandBufferBeginInfo(
                 vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -50,6 +49,10 @@ namespace un {
 
     void BufferWriter::overwrite(Buffer& buffer, void* ptr) {
         buffer.push(renderer->getVirtualDevice(), ptr);
+    }
+
+    const un::CommandBuffer& BufferWriter::getCommandBuffer() {
+        return cmd;
     }
 
 }

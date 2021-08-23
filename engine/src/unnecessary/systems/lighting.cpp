@@ -1,11 +1,8 @@
-//
-// Created by bruno on 12/07/2021.
-//
-
 #include <unnecessary/systems/lighting.h>
 #include <unnecessary/components/common.h>
 #include <unnecessary/graphics/buffers/command_buffer.h>
 #include <unnecessary/graphics/buffers/buffer_writer.h>
+#include <unnecessary/misc/binary_writer.h>
 
 namespace un {
     LightingSystem::LightingSystem(
@@ -19,7 +16,8 @@ namespace un {
             vk::BufferUsageFlagBits::eTransferDst,
             sizeof(un::SceneLightingData),
             false,
-            vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eHostVisible
+            vk::MemoryPropertyFlagBits::eHostCoherent |
+            vk::MemoryPropertyFlagBits::eHostVisible
         ),
         lightsRewritten() {
         lightsDirty = true;
@@ -42,73 +40,34 @@ namespace un {
         lightsRewritten.set(lightsDirty);
         if (lightsDirty) {
             size_t bufSize = findSceneBufferSize();
-            u8* buf = new u8[bufSize];
-            *reinterpret_cast<u32*>(buf) = numLights;
+            un::BinaryWriter buf(bufSize);
+            buf.write<u32>(numLights);
             const size_t ssboHeader = 16;
-            std::memcpy(
-                buf + ssboHeader,
-                runtimeScenePointLights.data(),
-                bufSize - ssboHeader
-            );
+            buf.skip(ssboHeader - sizeof(u32));
+            for (const auto& item : runtimeScenePointLights) {
+                buf.write(item);
+            }
             sceneLightingBuffer.ensureLargeEnough(*renderer, bufSize);
             {
                 un::BufferWriter writer(
                     renderer,
-                    worker->getGraphicsResources().getCommandPool()
+                    worker->getGraphicsResources().getCommandPool(),
+                    false
                 );
-                writer.overwrite(sceneLightingBuffer, buf);
+                writer.overwrite(sceneLightingBuffer, buf.getBuffer());
+                updateGPULightingDataCommandIndex = frameGraphSystem->enqueuePreparationPhase(
+                    *writer.getCommandBuffer(),
+                    vk::PipelineStageFlagBits::eTopOfPipe
+                );
             }
             lightsDirty = false;
-            delete[] buf;
         }
         un::SceneLightingData sceneLightingData{};
         sceneLightingData.numPointLights = runtimeScenePointLights.size();
         sceneLightingData.pointLights = runtimeScenePointLights.data();
-        un::BufferWriter objectBufferWriter(renderer);
-        for (entt::entity entity : registry.view<un::ObjectLights, un::Translation>()) {
-            auto& lights = registry.get<un::ObjectLights>(entity);
-            glm::vec3 position = registry.get<un::Translation>(entity).value;
-            std::vector<u32>& pointLights = lights.lights;
-            std::vector<float> distances(
-                maxNumLightsPerObject,
-                std::numeric_limits<float>::max()
-            );
-            size_t objectNumLights = 0;
-            if (pointLights.size() != maxNumLightsPerObject) {
-                pointLights.resize(maxNumLightsPerObject);
-            }
-            for (size_t i = 0; i < runtimeScenePointLights.size(); i++) {
-                un::PointLightData& candidate = runtimeScenePointLights[i];
-                for (size_t j = maxNumLightsPerObject - 1; j >= 0; --j) {
-                    un::PointLightData& holder = runtimeScenePointLights[pointLights[j]];
-                    float toBeat = distances[j];
-                    float attempt = glm::distance(
-                        candidate.position,
-                        position
-                    );
-                    if (attempt > toBeat) {
-                        break;
-                    }
-                    distances[j] = attempt;
-                    pointLights[j] = i;
-                    if (objectNumLights < maxNumLightsPerObject) {
-                        objectNumLights++;
-                    }
-                }
-            }
-            pointLights.resize(objectNumLights);
-            un::ObjectLightingData data{};
-            data.nPointLights = pointLights.size();
-            std::memcpy(
-                data.pointLightsIndices,
-                pointLights.data(),
-                sizeof(u32) * MAX_NUM_LIGHTS
-            );
-            objectBufferWriter.overwrite(
-                lights.buffer,
-                &data
-            );
-        }
+        un::BufferWriter objectBufferWriter(renderer, vk::CommandPool(), false);
+        std::vector<float> distances;
+        distances.resize(maxNumLightsPerObject);
     }
 
     size_t LightingSystem::findSceneBufferSize() {
@@ -134,6 +93,15 @@ namespace un {
 
     const BooleanHistoric& LightingSystem::getLightsRewritten() const {
         return lightsRewritten;
+    }
+
+    void LightingSystem::describe(SystemDescriptor& descriptor) {
+        ExplicitSystem::describe(descriptor);
+        frameGraphSystem = descriptor.dependsOn<un::PrepareFrameGraphSystem>();
+    }
+
+    u32 LightingSystem::getUpdateGpuLightingDataCommandIndex() const {
+        return updateGPULightingDataCommandIndex;
     }
 
 }

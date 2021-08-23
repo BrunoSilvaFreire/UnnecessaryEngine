@@ -155,6 +155,9 @@ namespace un {
         deviceCreateInfo.setQueueCreateInfos(queuesToCreate);
         std::vector<const char*> deviceExtensions;
         deviceExtensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        for (const char* extension :deviceExtensions) {
+            LOG(INFO) << "Using device extension: " << GREEN(extension);
+        }
         deviceCreateInfo.setPEnabledExtensionNames(deviceExtensions);
         vk::PhysicalDeviceFeatures features;
         features.geometryShader = true;

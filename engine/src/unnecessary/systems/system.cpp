@@ -10,7 +10,7 @@ namespace un {
 
     SystemDescriptor::SystemDescriptor(World* world) : world(world) {
         auto& systems = world->getSystems();
-        for (auto[vertex, index] : systems.allVerticesWithIndex()) {
+        for (auto[vertex, index] : systems.all_vertices()) {
             existingSystems.emplace_back(vertex->getSystem(), index);
         }
     }

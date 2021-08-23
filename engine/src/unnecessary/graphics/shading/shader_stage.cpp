@@ -7,6 +7,11 @@ namespace un {
     void ShaderStage::load(vk::Device& device, const std::filesystem::path& root) {
         std::filesystem::path shaderPath =
             root / "resources" / "shaders" / (name + ".spv");
+        if (!std::filesystem::exists(shaderPath)) {
+            std::string msg = "Unable to find shader @ ";
+            msg += shaderPath;
+            throw std::runtime_error(msg);
+        }
         std::ifstream file(shaderPath, std::ios::ate | std::ios::binary);
         size_t size = file.tellg();
         LOG(INFO) << "Loading " << PURPLE(shaderPath.string()) << " ("

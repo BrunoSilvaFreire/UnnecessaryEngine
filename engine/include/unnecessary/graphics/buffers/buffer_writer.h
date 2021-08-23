@@ -11,10 +11,12 @@ namespace un {
         un::Renderer* renderer;
         vk::CommandPool pool;
         un::CommandBuffer cmd;
+        bool autoSubmit;
     public:
         BufferWriter(
             un::Renderer* renderer,
-            vk::CommandPool pool = nullptr
+            vk::CommandPool pool = nullptr,
+            bool autoSubmit = true
         );
 
         ~BufferWriter();
@@ -22,6 +24,8 @@ namespace un {
         void overwriteWithStaging(const un::Buffer& buffer, void* ptr);
 
         void overwrite(un::Buffer& buffer, void* ptr);
+
+        const un::CommandBuffer& getCommandBuffer();
     };
 }
 

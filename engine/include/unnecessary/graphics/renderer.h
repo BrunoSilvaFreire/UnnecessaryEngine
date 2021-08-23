@@ -8,6 +8,7 @@
 #include <unnecessary/graphics/queue.h>
 #include <unnecessary/graphics/swapchain.h>
 #include <unnecessary/graphics/shading/shader.h>
+#include <unnecessary/graphics/rendering/rendering_pipeline.h>
 
 namespace un {
     class Renderer {
@@ -15,6 +16,7 @@ namespace un {
         un::RenderingDevice renderingDevice;
         vk::CommandPool globalPool;
         un::SwapChain swapChain;
+        un::RenderingPipeline* currentPipeline;
     public:
         explicit Renderer(
             const vk::Instance& instance,
@@ -26,7 +28,7 @@ namespace un {
 
         const vk::Device& getVirtualDevice() const;
 
-        Queue& getGraphics();
+        un::Queue& getGraphics();
 
         vk::CommandPool& getGlobalPool();
 
@@ -35,6 +37,15 @@ namespace un {
         RenderingDevice& getRenderingDevice();
 
         const Queue& getGraphics() const;
+
+        template<typename T>
+        T* createPipeline() {
+            auto value = new T(this);
+            currentPipeline = value;
+            return value;
+        }
+
+        RenderingPipeline* getCurrentPipeline() const;
     };
 }
 

@@ -3,6 +3,7 @@
 #include <unnecessary/systems/transform.h>
 #include <unnecessary/systems/cameras.h>
 #include <unnecessary/systems/lighting.h>
+#include <unnecessary/systems/graphics_systems.h>
 #include <unnecessary/graphics/systems/rendering.h>
 #include <unnecessary/graphics/pipeline/graphics_pipeline.h>
 #include <unnecessary/graphics/descriptors/descriptor_allocator.h>
@@ -13,6 +14,8 @@
 #include <unnecessary/jobs/parallel_for_job.h>
 #include <cxxopts.hpp>
 #include <unnecessary/graphics/lighting.h>
+#include <random>
+#include <unnecessary/graphics/frame_graph.h>
 
 float randomFloat() {
     return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -64,7 +67,7 @@ int main(int argc, char** argv) {
     }
     un::Application app("Demo", un::Version(0, 1, 0), nThreads);
     un::World world(app);
-
+    un::Renderer& renderer = app.getRenderer();
     entt::registry& registry = world.getRegistry();
     un::JobSystem& jobs = app.getJobSystem();
     un::MeshData data;
@@ -77,9 +80,10 @@ int main(int argc, char** argv) {
     //Color
     vertexLayout.push<f32>(3, vk::Format::eR32G32B32Sfloat);
     */
+    auto renderingPipeline = renderer.createPipeline<un::DummyRenderingPipeline>();
     auto transformSystem = world.addSystem<un::TransformSystem>();
     auto projectionSystem = world.addSystem<un::ProjectionSystem>();
-    un::Renderer& renderer = app.getRenderer();
+    world.addSystem<un::PrepareFrameGraphSystem>(&renderer);
     world.addSystem<un::LightingSystem>(4, &renderer);
     auto drawingSystem = new un::DrawingSystem(renderer);
     auto drawingSystemId = world.addSystem(drawingSystem);
@@ -130,7 +134,7 @@ int main(int argc, char** argv) {
                 auto* shader = new un::Pipeline(
                     pipeline.build(
                         renderer,
-                        drawingSystem->getRenderPass()
+                        renderingPipeline->getRenderPass()
                     )
                 );
                 for (int i = 0; i < 1; ++i) {
@@ -205,8 +209,12 @@ int main(int argc, char** argv) {
         );
     }
     world.addSystem<un::CameraSystem>(&renderer);
+
+    //world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
     //auto renderMeshSystem = world.addSystem<un::RenderMeshSystem>(app.getRenderer(), drawingSystem);
     world.systemMustRunAfter(transformSystem, projectionSystem);
+
+
     for (int i = 0; i < 8; ++i) {
         entt::entity lightEntity = world.createEntity<un::Translation, un::PointLight, un::LocalToWorld>();
         world.get<un::Translation>(lightEntity).value = glm::vec3(i, i, i);

@@ -41,5 +41,5 @@ function(add_shader SHADER)
             COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
             COMMAND spirv-cross ${shader_output} -V --output ${shader_output_glsl}
     )
-#    add_dependencies(unnecessary ${target_name})
+    add_dependencies(unnecessary ${target_name})
 endfunction()

@@ -95,7 +95,8 @@ namespace un {
         explicit JobWorker(
             un::Application& application,
             JobSystem* jobSystem,
-            size_t index
+            size_t index,
+            bool start
         );
 
         JobWorker(JobWorker&& copy) noexcept;
@@ -109,6 +110,8 @@ namespace un {
         void sleep();
 
         const WorkerGraphicsResources& getGraphicsResources() const;
+
+        void start();
     };
 
     class JobSystem {
@@ -139,6 +142,8 @@ namespace un {
         JobSystem(un::Application& application, int nThreads = -1);
 
         ~JobSystem();
+
+        void start();
 
         template<typename T, typename ...Args>
         u32 enqueue(Args ...args) {

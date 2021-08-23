@@ -11,7 +11,7 @@ namespace un {
         vk::ImageUsageFlags swapChainUsageFlags =
             vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage;
         auto swapChainCreationFlags = static_cast<vk::ImageCreateFlags>(0);
-        SwapChainSupportDetails details(
+        un::SwapChainSupportDetails details(
             renderingDevice,
             swapChainUsageFlags,
             swapChainCreationFlags
@@ -28,8 +28,15 @@ namespace un {
         }
 
         const vk::SurfaceKHR& surface = renderingDevice.getSurface();
-        vk::SwapchainCreateInfoKHR swapChainInfo(
-            (vk::SwapchainCreateFlagsKHR) 0,
+        vk::SwapchainCreateInfoKHR swapChainInfo{};
+        swapChainInfo.setSurface(surface);
+        swapChainInfo.setMinImageCount(imageCount);
+        swapChainInfo.setImageFormat(format);
+        swapChainInfo.setImageColorSpace(selectedFormat.colorSpace);
+        swapChainInfo.setImageExtent(extent);
+        swapChainInfo.setImageArrayLayers(1);
+        swapChainInfo.setImageUsage(swapChainUsageFlags);
+        /*    (vk::SwapchainCreateFlagsKHR) vk::SwapchainCreateFlagBitsKHR::eMutableFormat,
             surface,
             imageCount,
             format,
@@ -37,21 +44,22 @@ namespace un {
             extent,
             1,
             swapChainUsageFlags
-        );
+        );*/
         swapChainInfo.setPresentMode(details.selectPresentMode());
 
         u32 graphicsQueueIndex = renderingDevice.getGraphics().getIndex();
         u32 presentQueueIndex = renderingDevice.getPresent().getIndex();
 
+        std::vector<u32> indices;
         if (graphicsQueueIndex != presentQueueIndex) {
             swapChainInfo.setImageSharingMode(vk::SharingMode::eConcurrent);
-            std::array<u32, 2> indices({graphicsQueueIndex, presentQueueIndex});
-            swapChainInfo.setQueueFamilyIndices(indices);
+            indices.push_back(graphicsQueueIndex);
+            indices.push_back(presentQueueIndex);
         } else {
             swapChainInfo.setImageSharingMode(vk::SharingMode::eExclusive);
-            std::array<u32, 1> indices({graphicsQueueIndex});
-            swapChainInfo.setQueueFamilyIndices(indices);
+            indices.push_back(graphicsQueueIndex);
         }
+        swapChainInfo.setQueueFamilyIndices(indices);
         swapChainInfo.setPreTransform(capabilities.currentTransform);
         swapChainInfo.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
         swapChainInfo.setClipped(true);

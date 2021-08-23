@@ -15,17 +15,13 @@ namespace un {
     private:
         un::Renderer* renderer;
         un::LightingSystem* lightingSystem;
-        glm::vec4 clearColor;
-        vk::RenderPass renderPass;
-        u8 currentFramebufferIndex;
-        std::vector<vk::Framebuffer> framebuffers;
-        vk::Semaphore imageAvailableSemaphore;
-
+        un::PrepareFrameGraphSystem* frameGraphSystem;
         un::DescriptorAllocator* objectSetLayout;
         un::DescriptorAllocator* cameraSetLayout;
         un::DescriptorAllocator* sceneSetLayout;
         vk::DescriptorSet sceneDescriptorSet;
-    public:
+        DummyRenderingPipeline* renderingPipeline;
+   public:
         DrawingSystem(Renderer& renderer);
 
         void describe(SystemDescriptor& descriptor) override;
@@ -45,9 +41,6 @@ namespace un {
 
         un::DescriptorAllocator* getObjectDescriptorAllocator();
 
-        const vk::RenderPass& getRenderPass() const;
-
-        vk::Framebuffer nextFramebuffer(u32* framebufferIndexResult);
 
         const vk::DescriptorSet& getSceneDescriptorSet() const;
 

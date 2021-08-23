@@ -60,4 +60,8 @@ namespace un {
     RenderingDevice& Renderer::getRenderingDevice() {
         return renderingDevice;
     }
+
+    RenderingPipeline* Renderer::getCurrentPipeline() const {
+        return currentPipeline;
+    }
 }

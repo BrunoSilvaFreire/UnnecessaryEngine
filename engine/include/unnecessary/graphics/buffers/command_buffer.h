@@ -5,9 +5,10 @@
 #ifndef UNNECESSARYENGINE_COMMAND_BUFFER_H
 #define UNNECESSARYENGINE_COMMAND_BUFFER_H
 
-#include <unnecessary/graphics/renderer.h>
+#include <vulkan/vulkan.hpp>
 
 namespace un {
+    class Renderer;
 
     class CommandBuffer {
     private:
@@ -24,19 +25,15 @@ namespace un {
             vk::CommandPool pool
         );
 
-        CommandBuffer(
-            un::Renderer& renderer,
-            vk::CommandPool pool,
-            vk::CommandBufferUsageFlags usage
-        );
-
         virtual ~CommandBuffer();
 
         vk::CommandBuffer getVulkanBuffer();
 
-        vk::CommandBuffer* operator->();
+        const vk::CommandBuffer* operator->() const;
 
         vk::CommandBuffer& operator*();
+
+        const vk::CommandBuffer& operator*() const;
     };
 
 }

@@ -1,4 +1,5 @@
 #include <unnecessary/graphics/buffers/command_buffer.h>
+#include <unnecessary/graphics/renderer.h>
 
 namespace un {
 
@@ -11,18 +12,6 @@ namespace un {
     CommandBuffer::CommandBuffer(
         Renderer& renderer,
         vk::CommandPool pool
-    ) : CommandBuffer(
-        renderer,
-        pool,
-        (vk::CommandBufferUsageFlags) 0
-    ) {
-
-    }
-
-    CommandBuffer::CommandBuffer(
-        Renderer& renderer,
-        vk::CommandPool pool,
-        vk::CommandBufferUsageFlags flags
     ) : pool(pool) {
         device = renderer.getVirtualDevice();
         vk::CommandBufferAllocateInfo allocInfo(
@@ -47,11 +36,15 @@ namespace un {
         return buffer;
     }
 
-    vk::CommandBuffer* CommandBuffer::operator->() {
+    const vk::CommandBuffer* CommandBuffer::operator->() const {
         return &buffer;
     }
 
     vk::CommandBuffer& CommandBuffer::operator*() {
+        return buffer;
+    }
+
+    const vk::CommandBuffer& CommandBuffer::operator*() const {
         return buffer;
     }
 

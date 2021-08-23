@@ -112,7 +112,7 @@ namespace un {
         LOG(INFO) << "Using " << GREEN(nCores) << " workers for job system.";
         workers.reserve(nCores);
         for (size_t i = 0; i < nCores; ++i) {
-            workers.emplace_back(application, this, i);
+            workers.emplace_back(application, this, i, false);
         }
     }
 
@@ -143,14 +143,18 @@ namespace un {
     JobWorker::JobWorker(
         un::Application& application,
         JobSystem* jobSystem,
-        size_t index
-    ) : thread(new std::thread(&JobWorker::workerThread, this)),
+        size_t index,
+        bool autostart
+    ) : thread(),
         jobSystem(jobSystem),
         waiting(),
         running(true),
         awaken(false),
         index(index),
         graphicsResources(application.getRenderer().getRenderingDevice()) {
+        if (autostart) {
+            start();
+        }
 #ifdef MSVC
         int affinityMask = 1 << index;
         HANDLE hThread = reinterpret_cast<HANDLE>(thread->native_handle());
@@ -165,6 +169,8 @@ namespace un {
         SetThreadDescription(hThread, std::wstring(threadName.begin(), threadName.end()).c_str());
 #endif
     }
+
+    void JobWorker::start() { thread = new std::thread(&JobWorker::workerThread, this); }
 
     JobWorker::~JobWorker() {
         LOG(INFO) << "Worker " << thread->get_id() << " marked for shutdown";
@@ -198,7 +204,7 @@ namespace un {
 
     void JobWorker::workerThread() {
         do {
-            Job* jobPtr;
+            un::Job* jobPtr;
             u32 id;
 
             while (jobSystem->nextJob(&jobPtr, &id)) {
@@ -265,6 +271,12 @@ namespace un {
 
     int JobSystem::getNumWorkers() {
         return workers.size();
+    }
+
+    void JobSystem::start() {
+        for (auto& item : workers) {
+            item.start();
+        }
     }
 
     JobWorker::WorkerGraphicsResources::WorkerGraphicsResources(RenderingDevice& renderingDevice) {

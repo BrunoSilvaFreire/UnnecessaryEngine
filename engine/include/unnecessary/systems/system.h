@@ -33,6 +33,25 @@ namespace un {
         T* dependsOn();
 
         const std::vector<Problem>& getProblems() const;
+
+        template<typename T>
+        T* renderer(un::Renderer* renderer) {
+            auto pipeline = renderer->getCurrentPipeline();
+            if (pipeline == nullptr) {
+                problems.emplace_back(
+                    "There is no rendering pipeline created in the renderer."
+                );
+            }
+            T* cast = dynamic_cast<T*>(pipeline);
+            if (cast == nullptr) {
+                std::string msg = "Current rending pipeline is not of type '";
+                msg += typeid(T).name();
+                msg += "'.";
+                problems.emplace_back(msg);
+                return nullptr;
+            }
+            return cast;
+        }
     };
 
     template<typename T>

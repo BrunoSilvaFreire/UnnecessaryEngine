@@ -10,6 +10,7 @@
 #include <unnecessary/graphics/drawable.h>
 #include <unnecessary/graphics/lighting.h>
 #include <unnecessary/misc/historic.h>
+#include "graphics_systems.h"
 
 namespace un {
     class LightingSystem : public un::System {
@@ -20,8 +21,12 @@ namespace un {
         un::Renderer* renderer;
         un::BooleanHistoric lightsRewritten;
         bool lightsDirty;
-    public:
+        un::PrepareFrameGraphSystem* frameGraphSystem;
+        u32 updateGPULightingDataCommandIndex;
+ public:
         LightingSystem(u32 maxNumLightsPerObject, un::Renderer* device);
+
+        void describe(SystemDescriptor& descriptor) override;
 
         void step(World& world, f32 delta, un::JobWorker* worker) override;
 
@@ -34,6 +39,8 @@ namespace un {
         const ResizableBuffer& getSceneLightingBuffer() const;
 
         const BooleanHistoric& getLightsRewritten() const;
+
+        u32 getUpdateGpuLightingDataCommandIndex() const;
     };
 }
 
