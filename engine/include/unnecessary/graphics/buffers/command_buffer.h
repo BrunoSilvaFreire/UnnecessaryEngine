@@ -22,7 +22,8 @@ namespace un {
 
         CommandBuffer(
             un::Renderer& renderer,
-            vk::CommandPool pool
+            vk::CommandPool pool,
+            vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary
         );
 
         virtual ~CommandBuffer();

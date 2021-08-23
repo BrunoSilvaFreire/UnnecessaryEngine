@@ -81,15 +81,13 @@ namespace un {
             *renderer,
             worker->getGraphicsResources().getCommandPool()
         );
-        std::array<float, 4> colorArr{};
-        colorArr[0] = clearColor.r;
-        colorArr[1] = clearColor.g;
-        colorArr[2] = clearColor.b;
-        colorArr[3] = clearColor.a;
 
-        vk::ClearColorValue clearColorValue;
-        vk::ClearValue clear(clearColorValue);
-        clearColorValue.setFloat32(colorArr);
+        std::vector<vk::ClearValue> clears;
+        for (const auto& item : renderingPipeline->getBakedGraph()
+                                                 ->getFrameGraph()
+                                                 .getAttachments()) {
+            clears.emplace_back(item.getClear());
+        }
         un::BakedFrameGraph* bakedGraph = renderingPipeline->getBakedGraph();
         primaryBuffer->begin(
             vk::CommandBufferBeginInfo(
@@ -97,15 +95,15 @@ namespace un {
                 vk::CommandBufferUsageFlagBits::eRenderPassContinue
             )
         );
+        u32 framebufferIndex;
         primaryBuffer->beginRenderPass(
             vk::RenderPassBeginInfo(
                 bakedGraph->getRenderPass(),
-                graphSystem->getCurrentFramebuffer(),
+                graphSystem->getCurrentFramebuffer(&framebufferIndex),
                 renderArea,
-                1,
-                &clear
+                clears
             ),
-            vk::SubpassContents::eInline
+            vk::SubpassContents::eSecondaryCommandBuffers
         );
         std::vector<vk::CommandBuffer> buffers;
         for (auto[first, second] : bakedGraph->getFrameGraph().all_vertices()) {
@@ -122,16 +120,16 @@ namespace un {
         for (u32 preparationCommand : graphSystem->preparationCommands) {
             commandGraph.addDependency(renderSceneCommand, preparationCommand);
         }
+
         un::Queue& graphics = renderer->getGraphics();
         auto chain = renderer->getSwapChain().getSwapChain();
         commandGraph.submit(renderer->getVirtualDevice(), graphics);
-        u32 currentFramebuffer = graphSystem->currentFramebufferIndex;
         vkCall(
             graphics->presentKHR(
                 vk::PresentInfoKHR(
                     1, &graphSystem->imageAvailableSemaphore,
                     1, &chain,
-                    &currentFramebuffer,
+                    &framebufferIndex,
                     nullptr
                 )
             )
@@ -151,10 +149,16 @@ namespace un {
 
     }
 
-    vk::Framebuffer PrepareFrameGraphSystem::nextFramebuffer(u32* framebufferIndexResult) {
-        *framebufferIndexResult = currentFramebufferIndex;
+    vk::Framebuffer
+    PrepareFrameGraphSystem::nextFramebuffer(u32* framebufferIndexResult) {
+        *framebufferIndexResult = latestFramebufferIndex = currentFramebufferIndex;
         auto buffer = framebuffers[currentFramebufferIndex++];
         currentFramebufferIndex %= framebuffers.size();
         return buffer;
+    }
+
+    vk::Framebuffer PrepareFrameGraphSystem::getCurrentFramebuffer(u32* pIndex) {
+        *pIndex = latestFramebufferIndex;
+        return framebuffers[latestFramebufferIndex];
     }
 }

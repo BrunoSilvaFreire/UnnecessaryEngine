@@ -210,7 +210,7 @@ int main(int argc, char** argv) {
     }
     world.addSystem<un::CameraSystem>(&renderer);
 
-    //world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
+    world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
     //auto renderMeshSystem = world.addSystem<un::RenderMeshSystem>(app.getRenderer(), drawingSystem);
     world.systemMustRunAfter(transformSystem, projectionSystem);
 

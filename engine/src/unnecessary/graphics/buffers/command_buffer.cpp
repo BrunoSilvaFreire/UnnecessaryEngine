@@ -5,18 +5,20 @@ namespace un {
 
     CommandBuffer::CommandBuffer(Renderer& renderer) : CommandBuffer(
         renderer,
-        renderer.getGlobalPool()) {
+        renderer.getGlobalPool()
+    ) {
 
     }
 
     CommandBuffer::CommandBuffer(
         Renderer& renderer,
-        vk::CommandPool pool
+        vk::CommandPool pool,
+        vk::CommandBufferLevel level
     ) : pool(pool) {
         device = renderer.getVirtualDevice();
         vk::CommandBufferAllocateInfo allocInfo(
             pool,
-            vk::CommandBufferLevel::ePrimary,
+            level,
             1
         );
 

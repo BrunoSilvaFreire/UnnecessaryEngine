@@ -118,7 +118,13 @@ namespace un {
         un::Renderer& renderer,
         std::string name,
         vk::PipelineStageFlags stageFlags
-    ) : name(std::move(name)), stageFlags(stageFlags), commandBuffer(renderer) {}
+    ) : name(std::move(name)),
+        stageFlags(stageFlags),
+        commandBuffer(
+            renderer,
+            renderer.getGlobalPool(),
+            vk::CommandBufferLevel::eSecondary
+        ) {}
 
     const std::string& RenderPass::getName() const {
         return name;
@@ -126,7 +132,7 @@ namespace un {
 
 
     void RenderPass::end() {
-        commandBuffer->endRenderPass();
+        /*commandBuffer->endRenderPass();*/
         commandBuffer->end();
     }
 
@@ -138,15 +144,16 @@ namespace un {
     ) const {
         commandBuffer->begin(
             vk::CommandBufferBeginInfo(
-                (vk::CommandBufferUsageFlags) vk::CommandBufferUsageFlagBits::eOneTimeSubmit,
+                (vk::CommandBufferUsageFlags) vk::CommandBufferUsageFlagBits::eOneTimeSubmit |
+                vk::CommandBufferUsageFlagBits::eRenderPassContinue,
                 info
             )
         );
-        std::vector<vk::ClearValue> clears;
+        /* std::vector<vk::ClearValue> clears;
         for (const auto& item : frameGraph.getFrameGraph().getAttachments()) {
             clears.emplace_back(item.getClear());
         }
-        commandBuffer->beginRenderPass(
+       commandBuffer->beginRenderPass(
             vk::RenderPassBeginInfo(
                 frameGraph.getRenderPass(),
                 framebuffer,
@@ -154,7 +161,7 @@ namespace un {
                 clears
             ),
             vk::SubpassContents::eSecondaryCommandBuffers
-        );
+        );*/
         return *commandBuffer;
     }
 

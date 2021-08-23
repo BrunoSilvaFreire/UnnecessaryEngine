@@ -18,6 +18,7 @@ namespace un {
         std::set<u32> preparationCommands;
 
         u8 currentFramebufferIndex{};
+        u8 latestFramebufferIndex{};
         std::vector<vk::Framebuffer> framebuffers;
         vk::Semaphore imageAvailableSemaphore;
 
@@ -33,6 +34,8 @@ namespace un {
         CommandBufferGraph& getCommandGraph();
 
         vk::Framebuffer getCurrentFramebuffer();
+
+        vk::Framebuffer getCurrentFramebuffer(u32* pIndex);
 
         u32 enqueuePreparationPhase(
             const vk::CommandBuffer& buffer,
