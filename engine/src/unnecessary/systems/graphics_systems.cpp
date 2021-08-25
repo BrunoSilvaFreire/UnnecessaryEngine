@@ -15,6 +15,7 @@ namespace un {
     }
 
     void PrepareFrameGraphSystem::step(World& world, f32 delta, un::JobWorker* worker) {
+        preparationCommands.clear();
         const vk::Device& device = renderer->getVirtualDevice();
         const vk::SwapchainKHR& chain = renderer->getSwapChain().getSwapChain();
         vkCall(
@@ -28,7 +29,7 @@ namespace un {
         );
         auto currentFramebuffer = framebuffers[currentFramebufferIndex];
         commandGraph.clear();
-        renderer->getCurrentPipeline()->begin(nullptr, currentFramebuffer);
+        renderingPipeline->begin(renderer, currentFramebuffer);
     }
 
     CommandBufferGraph& PrepareFrameGraphSystem::getCommandGraph() {
@@ -137,7 +138,6 @@ namespace un {
     }
 
     void DispatchFrameGraphSystem::describe(SystemDescriptor& descriptor) {
-        un::System::describe(descriptor);
         graphSystem = descriptor.dependsOn<un::PrepareFrameGraphSystem>();
         renderingPipeline = descriptor.renderer<un::DummyRenderingPipeline>(renderer);
     }

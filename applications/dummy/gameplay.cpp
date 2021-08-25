@@ -43,6 +43,9 @@ namespace un {
             float newPos = path.position + (delta * path.speed);
             auto& positions = path.positions;
             int nPoints = positions.size();
+            if (nPoints == 0) {
+                continue;
+            }
             if (newPos > nPoints) {
                 newPos -= nPoints;
             }

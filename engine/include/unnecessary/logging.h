@@ -15,11 +15,11 @@ namespace un {
     public:
         void flush();
 
-        Log(const std::string& header, u32 line, const std::string& file);
+        Log(const std::string &header, u32 line, const std::string &file);
 
         ~Log();
 
-        std::ostream& stream();
+        std::ostream &stream();
     };
 }
 #define INFO "INFO"
@@ -33,10 +33,14 @@ namespace un {
 #endif
 #define COLORED(MSG, COLOR) COLOR << MSG << DEFAULT_COLOR
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wstring-plus-int"
+#endif
 #define __FILENAME__ (__FILE__ + SOURCE_PATH_SIZE)
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 #define GREEN(MSG) COLORED(MSG, termcolor::green)
 #define RED(MSG) COLORED(MSG, termcolor::red)
 #define PURPLE(MSG) COLORED(MSG, termcolor::magenta)

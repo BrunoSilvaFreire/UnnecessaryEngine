@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
     un::Camera& camera = registry.get<un::Camera>(cameraEntity);
     un::Perspective& perspective = registry.get<un::Perspective>(cameraEntity);
     un::Translation& translation = registry.get<un::Translation>(cameraEntity);
-    translation.value.z = -5;
+    translation.value.z = -15;
     perspective.aspect = 16.0F / 9.0F;
     perspective.fieldOfView = 100.0F;
     perspective.zNear = 0.1F;

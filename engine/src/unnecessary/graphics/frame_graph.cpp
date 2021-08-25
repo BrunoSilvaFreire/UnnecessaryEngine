@@ -183,6 +183,7 @@ namespace un {
         std::vector<vk::SubpassDependency> subPassesDependencies;
         subPasses.reserve(frameGraph.size());
         for (auto[vertex, index] : frameGraph.all_vertices()) {
+            bakedPasses.emplace_back(&renderer);
             subPasses.emplace_back(
                 (vk::SubpassDescriptionFlags) 0,
                 vk::PipelineBindPoint::eGraphics,

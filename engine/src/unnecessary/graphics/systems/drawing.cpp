@@ -182,7 +182,6 @@ namespace un {
                 );
             }
         }
-        commandBuffer.end();
     }
 
 

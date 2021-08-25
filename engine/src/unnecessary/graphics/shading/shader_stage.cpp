@@ -9,7 +9,7 @@ namespace un {
             root / "resources" / "shaders" / (name + ".spv");
         if (!std::filesystem::exists(shaderPath)) {
             std::string msg = "Unable to find shader @ ";
-            msg += shaderPath;
+            msg += shaderPath.string();
             throw std::runtime_error(msg);
         }
         std::ifstream file(shaderPath, std::ios::ate | std::ios::binary);
