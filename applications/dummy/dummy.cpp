@@ -190,7 +190,10 @@ int main(int argc, char** argv) {
             }
         );
 
-    auto cameraEntity = world.createEntity<un::LocalToWorld, un::Camera, un::Projection, un::Perspective, un::Translation>();
+    auto cameraEntity = world.createEntity<un::LocalToWorld, un::Camera, un::Projection, un::Perspective, un::Translation,un::Rotation, un::FreeFlight>();
+    un::FreeFlight& freeFlight = registry.get<un::FreeFlight>(cameraEntity);
+    freeFlight.speed = 1;
+    freeFlight.angularSpeed = 0.05F;
     un::Camera& camera = registry.get<un::Camera>(cameraEntity);
     un::Perspective& perspective = registry.get<un::Perspective>(cameraEntity);
     un::Translation& translation = registry.get<un::Translation>(cameraEntity);
@@ -219,6 +222,7 @@ int main(int argc, char** argv) {
         );
     }
     world.addSystem<un::CameraSystem>(&renderer);
+    world.addSystem<un::FreeFlightSystem>(app.getWindow());
 
     world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
     //world.addSystem<un::PathRunningSystem>();
