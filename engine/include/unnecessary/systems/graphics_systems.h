@@ -17,12 +17,9 @@ namespace un {
         un::DummyRenderingPipeline* renderingPipeline;
         std::set<u32> preparationCommands;
 
-        u8 currentFramebufferIndex{};
-        u8 latestFramebufferIndex{};
+        u32 currentFramebufferIndex{};
         std::vector<vk::Framebuffer> framebuffers;
         vk::Semaphore imageAvailableSemaphore;
-
-        vk::Framebuffer nextFramebuffer(u32* framebufferIndexResult);
 
     public:
         PrepareFrameGraphSystem(Renderer* renderer);

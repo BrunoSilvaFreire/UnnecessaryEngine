@@ -40,7 +40,8 @@ namespace un {
 
         template<typename T>
         T* createPipeline() {
-            auto value = new T(this);
+            auto value = new T();
+            value->bake(this);
             currentPipeline = value;
             return value;
         }

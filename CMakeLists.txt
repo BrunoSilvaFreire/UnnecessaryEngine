@@ -30,6 +30,7 @@ conan_cmake_run(
 set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
 add_unnecessary_thirdparty_library(grapphs)
 add_subdirectory(engine)
+add_subdirectory(applications/dummy)
 add_compile_options(
         $<$<CXX_COMPILER_ID:MSVC>:/MP>
 )

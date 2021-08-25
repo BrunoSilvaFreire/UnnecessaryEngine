@@ -15,8 +15,6 @@ namespace un {
     }
 
     void PrepareFrameGraphSystem::step(World& world, f32 delta, un::JobWorker* worker) {
-        u32 framebufferIndex;
-        auto currentFramebuffer = nextFramebuffer(&framebufferIndex);
         const vk::Device& device = renderer->getVirtualDevice();
         const vk::SwapchainKHR& chain = renderer->getSwapChain().getSwapChain();
         vkCall(
@@ -25,11 +23,12 @@ namespace un {
                 std::numeric_limits<u64>::max(),
                 imageAvailableSemaphore,
                 nullptr,
-                &framebufferIndex
+                &currentFramebufferIndex
             )
         );
+        auto currentFramebuffer = framebuffers[currentFramebufferIndex];
         commandGraph.clear();
-        renderer->getCurrentPipeline()->begin(currentFramebuffer);
+        renderer->getCurrentPipeline()->begin(nullptr, currentFramebuffer);
     }
 
     CommandBufferGraph& PrepareFrameGraphSystem::getCommandGraph() {
@@ -53,7 +52,7 @@ namespace un {
                     device.createFramebuffer(
                         vk::FramebufferCreateInfo(
                             (vk::FramebufferCreateFlags) 0,
-                            renderingPipeline->getBakedGraph()->getRenderPass(),
+                            renderingPipeline->unsafeGetFrameGraph().getVulkanPass(),
                             1, &view,
                             resolution.x,
                             resolution.y,
@@ -83,12 +82,10 @@ namespace un {
         );
 
         std::vector<vk::ClearValue> clears;
-        for (const auto& item : renderingPipeline->getBakedGraph()
-                                                 ->getFrameGraph()
-                                                 .getAttachments()) {
+        un::BakedFrameGraph& bakedGraph = renderingPipeline->unsafeGetFrameGraph();
+        for (const auto& item : bakedGraph.getFrameGraph().getAttachments()) {
             clears.emplace_back(item.getClear());
         }
-        un::BakedFrameGraph* bakedGraph = renderingPipeline->getBakedGraph();
         primaryBuffer->begin(
             vk::CommandBufferBeginInfo(
                 vk::CommandBufferUsageFlagBits::eOneTimeSubmit |
@@ -98,7 +95,7 @@ namespace un {
         u32 framebufferIndex;
         primaryBuffer->beginRenderPass(
             vk::RenderPassBeginInfo(
-                bakedGraph->getRenderPass(),
+                bakedGraph.getVulkanPass(),
                 graphSystem->getCurrentFramebuffer(&framebufferIndex),
                 renderArea,
                 clears
@@ -106,8 +103,11 @@ namespace un {
             vk::SubpassContents::eSecondaryCommandBuffers
         );
         std::vector<vk::CommandBuffer> buffers;
-        for (auto[first, second] : bakedGraph->getFrameGraph().all_vertices()) {
-            buffers.emplace_back(first->getCommandBuffer());
+        for (auto[first, second] : bakedGraph.getFrameGraph().all_vertices()) {
+
+            un::RenderPass& pass = bakedGraph.getRenderPass(second);
+            pass.end();
+            buffers.emplace_back(pass.getCommandBuffer());
         }
         primaryBuffer->executeCommands(buffers);
         primaryBuffer->endRenderPass();
@@ -149,16 +149,8 @@ namespace un {
 
     }
 
-    vk::Framebuffer
-    PrepareFrameGraphSystem::nextFramebuffer(u32* framebufferIndexResult) {
-        *framebufferIndexResult = latestFramebufferIndex = currentFramebufferIndex;
-        auto buffer = framebuffers[currentFramebufferIndex++];
-        currentFramebufferIndex %= framebuffers.size();
-        return buffer;
-    }
-
     vk::Framebuffer PrepareFrameGraphSystem::getCurrentFramebuffer(u32* pIndex) {
-        *pIndex = latestFramebufferIndex;
-        return framebuffers[latestFramebufferIndex];
+        *pIndex = currentFramebufferIndex;
+        return framebuffers[currentFramebufferIndex];
     }
 }

@@ -8,10 +8,19 @@
 
 #define COMPONENT(...)
 #define PROPERTY(...)
+
+#include <vector>
+#include <glm/glm.hpp>
+
 namespace un {
     COMPONENT()
     struct Player {
         unsigned int id;
+    };
+    struct Path {
+        float speed;
+        float position;
+        std::vector<glm::vec3> positions;
     };
 }
 #endif //UNNECESSARYENGINE_DUMMY_H

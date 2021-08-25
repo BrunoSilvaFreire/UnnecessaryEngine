@@ -105,7 +105,7 @@ namespace un {
             vk::Offset2D(0, 0),
             vk::Extent2D(size.x, size.y)
         );
-        auto commandBuffer = renderingPipeline->getDrawOpaquePass()->getCommandBuffer();
+        auto commandBuffer = renderingPipeline->getDrawOpaquePass()->record();
         commandBuffer.setViewport(
             0,
             {

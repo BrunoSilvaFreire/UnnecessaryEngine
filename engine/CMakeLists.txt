@@ -1,10 +1,10 @@
 find_package(Vulkan REQUIRED)
-add_executable(
+add_library(
     unnecessary
+    STATIC
     include/unnecessary/application.h
     include/unnecessary/systems/world.h
     src/unnecessary/world.cpp
-    src/unnecessary/dummy.cpp
     include/unnecessary/version.h
     include/unnecessary/def.h
     src/unnecessary/version.cpp
@@ -101,7 +101,7 @@ add_executable(
     include/unnecessary/systems/graphics_systems.h
     include/unnecessary/graphics/buffers/command_buffer_graph.h
     src/unnecessary/graphics/buffers/command_buffer_graph.cpp
-    include/unnecessary/graphics/frame_graph.h src/unnecessary/graphics/frame_graph.cpp include/unnecessary/graphics/rendering/rendering_pipeline.h include/unnecessary/misc/aggregator.h src/unnecessary/systems/graphics_systems.cpp src/unnecessary/graphics/rendering_pipeline.cpp)
+    include/unnecessary/graphics/frame_graph.h src/unnecessary/graphics/frame_graph.cpp include/unnecessary/graphics/rendering/rendering_pipeline.h include/unnecessary/misc/aggregator.h src/unnecessary/systems/graphics_systems.cpp src/unnecessary/graphics/rendering_pipeline.cpp include/unnecessary/systems/group.h)
 
 target_include_directories(
     unnecessary

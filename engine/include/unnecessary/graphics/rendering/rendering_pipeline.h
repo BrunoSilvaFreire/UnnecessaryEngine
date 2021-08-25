@@ -3,30 +3,29 @@
 
 #include <unnecessary/graphics/frame_graph.h>
 #include <unnecessary/jobs/jobs.h>
+#include <optional>
 
 namespace un {
     class RenderingPipeline {
+    private:
+        std::optional<un::BakedFrameGraph> frameGraph;
+        std::vector<std::pair<u32, un::RenderPass**>> imports;
     protected:
-        un::BakedFrameGraph* frameGraph;
-        Renderer* renderer;
+        virtual void configureGraph(un::FrameGraph& graph) = 0;
 
-        virtual void configureInheritance(
-            vk::CommandBufferInheritanceInfo& inheritance
-        ) {}
+        void storePassInto(
+            const un::RenderPassDescriptor& descriptor,
+            un::RenderPass** into
+        );
 
     public:
-        RenderingPipeline(un::Renderer* renderer) : frameGraph(nullptr),
-                                                    renderer(renderer) {
+        virtual ~RenderingPipeline();
 
-        }
+        void bake(un::Renderer* renderer);
 
-        virtual ~RenderingPipeline() {
-            delete frameGraph;
-        };
+        void begin(un::Renderer* renderer, vk::Framebuffer framebuffer);
 
-        void begin(vk::Framebuffer framebuffer);
-
-        BakedFrameGraph* getFrameGraph() const;
+        BakedFrameGraph& unsafeGetFrameGraph();
     };
 
 
@@ -36,70 +35,15 @@ namespace un {
         un::RenderPass* depthPass{};
         un::FrameResource* depthBuffer{};
         std::size_t colorAttachmentHandle{};
+    protected:
+        void configureGraph(FrameGraph& graph) override;
 
     public:
-        DummyRenderingPipeline(un::Renderer* renderer) : un::RenderingPipeline(renderer) {
-            un::FrameGraph graph;
-            colorAttachmentHandle = graph.addAttachment(
-                vk::ClearColorValue(
-                    std::array<float, 4>(
-                        {
-                            0.1F, 0.1F, 0.1F, 1.0F
-                        }
-                    )
-                ),
-                (vk::AttachmentDescriptionFlags) 0,
-                vk::Format::eB8G8R8A8Unorm,
-                vk::SampleCountFlagBits::e1,
-                vk::AttachmentLoadOp::eClear,
-                vk::AttachmentStoreOp::eStore,
-                vk::AttachmentLoadOp::eDontCare,
-                vk::AttachmentStoreOp::eDontCare,
-                vk::ImageLayout::eUndefined,
-                vk::ImageLayout::ePresentSrcKHR
-            );
-            auto drawOpaque = graph.addPass(
-                *renderer,
-                "drawOpaquePass",
-                vk::PipelineStageFlagBits::eFragmentShader |
-                vk::PipelineStageFlagBits::eVertexShader |
-                vk::PipelineStageFlagBits::eComputeShader,
-                &drawOpaquePass
-            );
-            drawOpaque.usesColorAttachment(
-                colorAttachmentHandle,
-                vk::ImageLayout::eColorAttachmentOptimal
-            );
-            frameGraph = new un::BakedFrameGraph(std::move(graph), *renderer);
-        }
+        un::RenderPass* getDepthPass() const;
 
-        un::RenderPass* getDepthPass() const {
-            return depthPass;
-        }
+        un::RenderPass* getDrawOpaquePass() const;
 
-        un::RenderPass* getDrawOpaquePass() const {
-            return drawOpaquePass;
-        }
-
-        un::FrameResource* getDepthBuffer() const {
-            return depthBuffer;
-        }
-
-        BakedFrameGraph* getBakedGraph() const {
-            return frameGraph;
-        }
-
-        vk::RenderPass getRenderPass() const {
-            return frameGraph->getRenderPass();
-        }
-
-    protected:
-
-        void configureInheritance(
-            vk::CommandBufferInheritanceInfo& inheritance
-        ) override {
-            inheritance.setRenderPass(frameGraph->getRenderPass());
-        }
+        un::FrameResource* getDepthBuffer() const;
     };
 }
 #endif

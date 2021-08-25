@@ -10,6 +10,7 @@
 
 namespace un {
     class FrameGraph;
+
     class BakedFrameGraph;
 
     class Renderer;
@@ -24,7 +25,7 @@ namespace un {
         friend class RenderPassDescriptor;
     };
 
-    class RenderPass {
+    class RenderPassInfo {
     private:
         std::string name;
         vk::PipelineStageFlags stageFlags;
@@ -32,13 +33,8 @@ namespace un {
         std::vector<vk::AttachmentReference> colorAttachments;
         std::vector<vk::AttachmentReference> resolveAttachments;
         std::vector<vk::AttachmentReference> depthAttachments;
-        un::CommandBuffer commandBuffer;
     public:
-        RenderPass(
-            Renderer& renderer,
-            std::string name,
-            vk::PipelineStageFlags stageFlags
-        );
+        RenderPassInfo(std::string name, vk::PipelineStageFlags stageFlags);
 
         const std::string& getName() const;
 
@@ -53,18 +49,7 @@ namespace un {
 
         const vk::PipelineStageFlags& getStageFlags() const;
 
-        vk::CommandBuffer begin(
-            const vk::CommandBufferInheritanceInfo* info,
-            const un::BakedFrameGraph& frameGraph,
-            vk::Rect2D renderArea,
-            vk::Framebuffer framebuffer
-        ) const;
-
-        void end();
-
         friend class RenderPassDescriptor;
-
-        vk::CommandBuffer getCommandBuffer() const;
     };
 
     class RenderPassDependency {
@@ -109,7 +94,7 @@ namespace un {
     /**
      *  This is just a helper class to correctly configure a FrameGraph.
      *  If you wanna check out the actual class used as a vertex
-     *  @see un::RenderPass
+     *  @see un::RenderPassInfo
      */
     class RenderPassDescriptor {
     private:
@@ -124,6 +109,8 @@ namespace un {
     public:
 
         RenderPassDescriptor(u32 passIndex, FrameGraph* frameGraph);
+
+        u32 getPassIndex() const;
 
         void writesTo(const un::FrameResourceReference& reference);
 
@@ -143,7 +130,7 @@ namespace un {
             vk::DependencyFlags flags
         );
 
-        un::RenderPass* getPass();
+        un::RenderPassInfo* getPass();
 
         void usesAttachment(std::size_t attachmentIndex, vk::ImageLayout layout);
 
@@ -166,19 +153,20 @@ namespace un {
     };
 
     class FrameGraph : public gpp::AdjacencyList<
-        un::RenderPass,
+        un::RenderPassInfo,
         un::RenderPassDependency,
         u32
     > {
     private:
+
         std::vector<FrameResource> resources;
         std::set<u32> independent;
         std::vector<un::Attachment> attachments;
     public:
-        using VertexType = un::RenderPass;
+        using VertexType = un::RenderPassInfo;
         using EdgeType = un::RenderPassDependency;
         using IndexType = u32;
-        using EdgeView = gpp::AdjacencyList<un::RenderPass, un::RenderPassDependency, u32>::EdgeView;
+        using EdgeView = gpp::AdjacencyList<un::RenderPassInfo, un::RenderPassDependency, u32>::EdgeView;
 
         friend class RenderPassDescriptor;
 
@@ -187,16 +175,14 @@ namespace un {
         un::FrameResourceReference addResource(const std::string& resourceName);
 
         un::RenderPassDescriptor addPass(
-            un::Renderer& renderer,
             const std::string& passName,
             vk::PipelineStageFlags flags
         );
 
         un::RenderPassDescriptor addPass(
-            un::Renderer& renderer,
             const std::string& passName,
             vk::PipelineStageFlags flags,
-            un::RenderPass** result
+            un::RenderPassInfo** result
         );
 
         std::size_t addAttachment(
@@ -241,18 +227,67 @@ namespace un {
         const std::vector<un::Attachment>& getAttachments() const;
     };
 
+    class RenderPass {
+    private:
+        un::CommandBuffer buffer;
+        bool initialized;
+
+        void checkInitialized() const {
+            if (!initialized) {
+                throw std::runtime_error("Buffer is not yet ready for recording.");
+            }
+        }
+
+    public:
+        explicit RenderPass(un::Renderer* renderer);
+
+        void end() {
+            checkInitialized();
+            initialized = false;
+            buffer->end();
+        }
+
+        void begin(
+            const vk::CommandBufferInheritanceInfo* info
+        ) {
+            initialized = true;
+            buffer->begin(
+                vk::CommandBufferBeginInfo(
+                    (vk::CommandBufferUsageFlags) vk::CommandBufferUsageFlagBits::eOneTimeSubmit |
+                    vk::CommandBufferUsageFlagBits::eRenderPassContinue,
+                    info
+                )
+            );
+        }
+
+        vk::CommandBuffer record() {
+            checkInitialized();
+            return getCommandBuffer();
+        }
+
+
+        vk::CommandBuffer getCommandBuffer() {
+            return *buffer;
+        }
+    };
+
     class BakedFrameGraph {
     private:
         FrameGraph frameGraph;
         vk::RenderPass renderPass;
+        std::vector<un::RenderPass> bakedPasses;
     public:
         BakedFrameGraph(un::FrameGraph&& graph, un::Renderer& renderer);
 
-        const vk::RenderPass& getRenderPass() const;
+        const vk::RenderPass& getVulkanPass() const;
 
         un::FrameGraph& getFrameGraph();
 
         const un::FrameGraph& getFrameGraph() const;
+
+        un::RenderPass& getRenderPass(u32 passIndex);
+
+        un::RenderPass& getRenderPass(const un::RenderPassDescriptor& descriptor);
     };
 
 

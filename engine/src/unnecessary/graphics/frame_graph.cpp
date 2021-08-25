@@ -11,7 +11,7 @@ namespace un {
     void RenderPassDescriptor::writesTo(const FrameResourceReference& reference) {
         un::FrameResource* resource;
         if (!tryFindResource(reference, &resource)) {
-            un::RenderPass* pPass = frameGraph->vertex(passIndex);
+            un::RenderPassInfo* pPass = frameGraph->vertex(passIndex);
             LOG(FUCK) << "Render pass '" << GREEN(pPass->getName())
                       << "' tried to write to resource " <<
                       reference.getIndex()
@@ -27,7 +27,7 @@ namespace un {
     void RenderPassDescriptor::readsFrom(const FrameResourceReference& reference) {
         un::FrameResource* resource;
         if (!tryFindResource(reference, &resource)) {
-            un::RenderPass* pPass = frameGraph->vertex(passIndex);
+            un::RenderPassInfo* pPass = frameGraph->vertex(passIndex);
             LOG(FUCK) << "Render pass '" << GREEN(pPass->getName())
                       << "' tried to read from resource " <<
                       reference.getIndex()
@@ -69,7 +69,7 @@ namespace un {
         }
     }
 
-    un::RenderPass* RenderPassDescriptor::getPass() {
+    un::RenderPassInfo* RenderPassDescriptor::getPass() {
         return frameGraph->vertex(passIndex);
     }
 
@@ -112,60 +112,25 @@ namespace un {
         getPass()->colorAttachments.emplace_back(attachmentIndex, layout);
     }
 
+    u32 RenderPassDescriptor::getPassIndex() const {
+        return passIndex;
+    }
+
     FrameResource::FrameResource(std::string name) : name(std::move(name)) {}
 
-    RenderPass::RenderPass(
-        un::Renderer& renderer,
+    RenderPassInfo::RenderPassInfo(
         std::string name,
         vk::PipelineStageFlags stageFlags
     ) : name(std::move(name)),
-        stageFlags(stageFlags),
-        commandBuffer(
-            renderer,
-            renderer.getGlobalPool(),
-            vk::CommandBufferLevel::eSecondary
-        ) {}
+        stageFlags(stageFlags) {}
 
-    const std::string& RenderPass::getName() const {
+    const std::string& RenderPassInfo::getName() const {
         return name;
     }
 
 
-    void RenderPass::end() {
-        /*commandBuffer->endRenderPass();*/
-        commandBuffer->end();
-    }
-
-    vk::CommandBuffer RenderPass::begin(
-        const vk::CommandBufferInheritanceInfo* info,
-        const BakedFrameGraph& frameGraph,
-        vk::Rect2D renderArea,
-        vk::Framebuffer framebuffer
-    ) const {
-        commandBuffer->begin(
-            vk::CommandBufferBeginInfo(
-                (vk::CommandBufferUsageFlags) vk::CommandBufferUsageFlagBits::eOneTimeSubmit |
-                vk::CommandBufferUsageFlagBits::eRenderPassContinue,
-                info
-            )
-        );
-        /* std::vector<vk::ClearValue> clears;
-        for (const auto& item : frameGraph.getFrameGraph().getAttachments()) {
-            clears.emplace_back(item.getClear());
-        }
-       commandBuffer->beginRenderPass(
-            vk::RenderPassBeginInfo(
-                frameGraph.getRenderPass(),
-                framebuffer,
-                renderArea,
-                clears
-            ),
-            vk::SubpassContents::eSecondaryCommandBuffers
-        );*/
-        return *commandBuffer;
-    }
-
-    const std::vector<vk::AttachmentReference>& RenderPass::getUsedAttachments() const {
+    const std::vector<vk::AttachmentReference>&
+    RenderPassInfo::getUsedAttachments() const {
         return usedAttachments;
     }
 
@@ -177,24 +142,20 @@ namespace un {
         return resource;
     }
 
-    un::RenderPassDescriptor FrameGraph::addPass(
-        un::Renderer& renderer,
-        const std::string& passName,
-        vk::PipelineStageFlags flags
-    ) {
-        un::RenderPass pass(renderer, passName, flags);
+    un::RenderPassDescriptor
+    FrameGraph::addPass(const std::string& passName, vk::PipelineStageFlags flags) {
+        un::RenderPassInfo pass(passName, flags);
         u32 index = push(std::move(pass));
         independent.emplace(index);
         return {index, this};
     }
 
     un::RenderPassDescriptor FrameGraph::addPass(
-        un::Renderer& renderer,
         const std::string& passName,
         vk::PipelineStageFlags flags,
-        un::RenderPass** result
+        un::RenderPassInfo** result
     ) {
-        auto descriptor = addPass(renderer, passName, flags);
+        auto descriptor = addPass(passName, flags);
         *result = descriptor.getPass();
         return descriptor;
     }
@@ -229,7 +190,7 @@ namespace un {
                 vertex->getColorAttachments(),
                 vertex->getResolveAttachments()
             );
-            for (auto[neighborIndex, edge]:frameGraph.edges_from(index)) {
+            for (auto[neighborIndex, edge] : frameGraph.edges_from(index)) {
                 if (edge.getType() != un::RenderPassDependency::Type::eUses) {
                     continue;
                 }
@@ -261,7 +222,7 @@ namespace un {
     }
 
 
-    const vk::RenderPass& BakedFrameGraph::getRenderPass() const {
+    const vk::RenderPass& BakedFrameGraph::getVulkanPass() const {
         return renderPass;
     }
 
@@ -273,26 +234,33 @@ namespace un {
         return frameGraph;
     }
 
-    const std::vector<vk::AttachmentReference>& RenderPass::getColorAttachments() const {
+    un::RenderPass& BakedFrameGraph::getRenderPass(u32 passIndex) {
+        return bakedPasses[passIndex];
+    }
+
+    un::RenderPass& BakedFrameGraph::getRenderPass(const RenderPassDescriptor& descriptor) {
+        return getRenderPass(descriptor.getPassIndex());
+    }
+
+    const std::vector<vk::AttachmentReference>&
+    RenderPassInfo::getColorAttachments() const {
         return colorAttachments;
     }
 
     const std::vector<vk::AttachmentReference>&
-    RenderPass::getResolveAttachments() const {
+    RenderPassInfo::getResolveAttachments() const {
         return resolveAttachments;
     }
 
-    const std::vector<vk::AttachmentReference>& RenderPass::getDepthAttachments() const {
+    const std::vector<vk::AttachmentReference>&
+    RenderPassInfo::getDepthAttachments() const {
         return depthAttachments;
     }
 
-    const vk::PipelineStageFlags& RenderPass::getStageFlags() const {
+    const vk::PipelineStageFlags& RenderPassInfo::getStageFlags() const {
         return stageFlags;
     }
 
-    vk::CommandBuffer RenderPass::getCommandBuffer() const {
-        return *commandBuffer;
-    }
 
     RenderPassDependency::Type RenderPassDependency::getType() const {
         return type;
@@ -332,5 +300,11 @@ namespace un {
 
     const vk::ClearValue& Attachment::getClear() const {
         return clear;
+    }
+
+    RenderPass::RenderPass(
+        un::Renderer* renderer
+    ) : buffer(*renderer, renderer->getGlobalPool(), vk::CommandBufferLevel::eSecondary) {
+
     }
 }

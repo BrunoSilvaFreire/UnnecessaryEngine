@@ -21,7 +21,7 @@ namespace un {
         vk::Extent2D extent = details.selectExtent(targetSize);
         resolution = un::Size2D(extent.width, extent.height);
         auto& capabilities = details.getCapabilities();
-        u32 imageCount = capabilities.minImageCount + 1;
+        u32 imageCount = std::min<u32>(capabilities.minImageCount + 1, 3);
         u32 maxImageCount = capabilities.maxImageCount;
         if (maxImageCount > 0 && imageCount > maxImageCount) {
             imageCount = maxImageCount;

@@ -16,6 +16,8 @@
 #include <unnecessary/graphics/lighting.h>
 #include <random>
 #include <unnecessary/graphics/frame_graph.h>
+#include <unnecessary/components/dummy.h>
+#include "gameplay.h"
 
 float randomFloat() {
     return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -39,7 +41,7 @@ void testParallelism(un::JobSystem& jobs) {
             pair.position += pair.velocity;
         }
     };
-    for (size_t i = 0; i < numEntries; ++i) {
+    for (size_t i = 0 ; i < numEntries ; ++i) {
         auto& vel = incrementPairs[i];
         vel.velocity = glm::vec3(
             randomFloat(),
@@ -134,17 +136,25 @@ int main(int argc, char** argv) {
                 auto* shader = new un::Pipeline(
                     pipeline.build(
                         renderer,
-                        renderingPipeline->getRenderPass()
-                    )
+                        renderingPipeline->unsafeGetFrameGraph().getVulkanPass()                    )
                 );
-                for (int i = 0; i < 1; ++i) {
-                    entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights>();
-                    un::Translation& pos = registry.get<un::Translation>(entity);
-                    pos.value.x = i * 5;
-                    un::RenderMesh& mesh = registry.get<un::RenderMesh>(entity);
-                    un::ObjectLights& objectLights = registry.get<un::ObjectLights>(
+                for (int i = 0 ; i < 1 ; ++i) {
+
+
+                    entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights, un::Path>();
+                    auto[pos, mesh, objectLights] = world.get<un::Translation, un::RenderMesh, un::ObjectLights>(
                         entity
                     );
+                /*    path.speed = 1;
+                    path.positions = std::vector<glm::vec3>(
+                        {
+                            glm::vec3(0, 0, 0),
+                            glm::vec3(0, 0, -10),
+                            glm::vec3(0, 0, 0)
+                        }
+                    );*/
+                    pos.value.x = i * 5;
+
                     objectLights.descriptorSet = drawingSystem->getObjectDescriptorAllocator()
                                                               ->allocate();
                     objectLights.buffer = un::ResizableBuffer(
@@ -211,16 +221,12 @@ int main(int argc, char** argv) {
     world.addSystem<un::CameraSystem>(&renderer);
 
     world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
+    //world.addSystem<un::PathRunningSystem>();
     //auto renderMeshSystem = world.addSystem<un::RenderMeshSystem>(app.getRenderer(), drawingSystem);
     world.systemMustRunAfter(transformSystem, projectionSystem);
 
 
-    for (int i = 0; i < 8; ++i) {
-        entt::entity lightEntity = world.createEntity<un::Translation, un::PointLight, un::LocalToWorld>();
-        world.get<un::Translation>(lightEntity).value = glm::vec3(i, i, i);
-        un::PointLight& light = world.get<un::PointLight>(lightEntity);
-        light.lighting = un::Lighting(1, 0, 0, 1);
-    }
+
 //    world.systemMustRunAfter(renderMeshSystem, transformSystem);
 //    world.systemMustRunAfter(drawingSystemId, renderMeshSystem);
     app.execute();
