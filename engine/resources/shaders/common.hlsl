@@ -16,8 +16,8 @@ struct Lighting
 
 struct PointLight
 {
-	float3 position;
 	Lighting lighting;
+	float3 position;
 };
 
 #ifndef MAX_NUM_LIGHTS
@@ -33,6 +33,6 @@ struct ObjectLightingData
 struct SceneLightingData
 {
     uint nPointLights;
-    uint _unusedA, _unusedB, _unusedC;
+    uint _padding[3];
 	PointLight pointLights[];
 };

@@ -31,8 +31,8 @@ namespace un {
     };
 
     struct PointLightData {
-        glm::vec3 position;
         PointLight light;
+        glm::vec3 position;
     };
 #ifndef MAX_NUM_LIGHTS
 #define MAX_NUM_LIGHTS 4

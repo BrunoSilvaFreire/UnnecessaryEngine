@@ -16,8 +16,7 @@ namespace un {
             vk::BufferUsageFlagBits::eTransferDst,
             sizeof(un::SceneLightingData),
             false,
-            vk::MemoryPropertyFlagBits::eHostCoherent |
-            vk::MemoryPropertyFlagBits::eHostVisible
+            vk::MemoryPropertyFlagBits::eDeviceLocal
         ),
         lightsRewritten() {
         lightsDirty = true;
@@ -54,7 +53,7 @@ namespace un {
                     worker->getGraphicsResources().getCommandPool(),
                     false
                 );
-                writer.overwrite(sceneLightingBuffer, buf.getBuffer());
+                writer.overwriteWithStaging(sceneLightingBuffer, buf.getBuffer());
                 updateGPULightingDataCommandIndex = frameGraphSystem->enqueuePreparationPhase(
                     *writer.getCommandBuffer(),
                     vk::PipelineStageFlagBits::eTopOfPipe

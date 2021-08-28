@@ -25,10 +25,12 @@ namespace un {
     class CommandBufferGraph : public gpp::AdjacencyList<CommandBufferOperation, CommandBufferDependency, u32> {
     private:
         static std::size_t hashDependencies(const std::set<u32> &dependencies);
+        std::set<u32> initializers;
     public:
-
-        u32
-        enqueueCommandBuffer(vk::CommandBuffer buffer, vk::PipelineStageFlags waitMask);
+        using VertexType = un::CommandBufferOperation;
+        using EdgeType = un::CommandBufferDependency;
+        using IndexType = u32;
+        u32 enqueueCommandBuffer(vk::CommandBuffer buffer, vk::PipelineStageFlags waitMask);
 
         void addDependency(u32 from, u32 to);
 

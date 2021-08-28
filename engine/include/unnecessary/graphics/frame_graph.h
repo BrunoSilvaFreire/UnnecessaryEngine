@@ -251,6 +251,7 @@ namespace un {
             const vk::CommandBufferInheritanceInfo* info
         ) {
             initialized = true;
+            buffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
             buffer->begin(
                 vk::CommandBufferBeginInfo(
                     (vk::CommandBufferUsageFlags) vk::CommandBufferUsageFlagBits::eOneTimeSubmit |
