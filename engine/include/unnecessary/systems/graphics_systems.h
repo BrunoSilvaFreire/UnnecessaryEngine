@@ -36,7 +36,7 @@ namespace un {
 
         u32 enqueuePreparationPhase(
             const vk::CommandBuffer& buffer,
-            vk::PipelineStageFlagBits bits
+            vk::PipelineStageFlagBits bits = vk::PipelineStageFlagBits::eTopOfPipe
         );
 
         friend class DispatchFrameGraphSystem;
@@ -45,7 +45,6 @@ namespace un {
 
     class DispatchFrameGraphSystem : public un::System {
     private:
-        glm::vec4 clearColor;
         un::PrepareFrameGraphSystem* graphSystem{};
         un::DummyRenderingPipeline* renderingPipeline{};
         un::Renderer* renderer;

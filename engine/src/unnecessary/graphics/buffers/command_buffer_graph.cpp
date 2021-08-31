@@ -31,7 +31,7 @@ namespace un {
 
     void CommandBufferGraph::submit(vk::Device device, vk::Queue graphicsQueue) {
         std::vector<vk::SubmitInfo> submitInfos;
-        std::unordered_map<std::size_t, std::vector<u32>> cmdBuffersGroupedByDependencies;
+        std::unordered_map<std::size_t, std::set<u32>> cmdBuffersGroupedByDependencies;
         std::unordered_map<std::size_t, std::set<u32>> groupHash2Dependencies;
         std::unordered_map<u32, vk::Semaphore> commandBuffer2Semaphore;
         for (u32 index : initializers) {
@@ -46,7 +46,7 @@ namespace un {
                 }
             }
             groupHash2Dependencies[0] = dependencies;
-            cmdBuffersGroupedByDependencies[0].emplace_back(index);
+            cmdBuffersGroupedByDependencies[0].emplace(index);
             if (anyoneDependsOnMe) {
                 vk::Semaphore semaphore = device.createSemaphore(
                     vk::SemaphoreCreateInfo(
@@ -77,7 +77,7 @@ namespace un {
                 }
                 std::size_t hash = hashDependencies(dependencies);
                 groupHash2Dependencies[hash] = dependencies;
-                cmdBuffersGroupedByDependencies[hash].emplace_back(index);
+                cmdBuffersGroupedByDependencies[hash].emplace(index);
                 if (anyoneDependsOnMe) {
                     vk::Semaphore semaphore = device.createSemaphore(
                         vk::SemaphoreCreateInfo(

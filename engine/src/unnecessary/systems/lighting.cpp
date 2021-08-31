@@ -55,8 +55,7 @@ namespace un {
                 );
                 writer.overwriteWithStaging(sceneLightingBuffer, buf.getBuffer());
                 updateGPULightingDataCommandIndex = frameGraphSystem->enqueuePreparationPhase(
-                    *writer.getCommandBuffer(),
-                    vk::PipelineStageFlagBits::eTopOfPipe
+                    *writer.getCommandBuffer()
                 );
             }
             lightsDirty = false;

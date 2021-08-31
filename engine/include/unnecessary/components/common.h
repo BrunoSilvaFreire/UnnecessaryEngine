@@ -12,10 +12,9 @@
 #define COMPONENT(...)
 #define PROPERTY(...)
 namespace un {
-    COMPONENT(REQUIRES =[Projection])
+    COMPONENT(REQUIRES = [Projection])
     struct Camera {
     public:
-        vk::RenderPass renderPass;
         vk::DescriptorSet cameraDescriptorSet;
         un::Buffer cameraDescriptorBuffer;
     };

@@ -33,7 +33,7 @@ add_library(
         include/unnecessary/graphics/shading/shader.h
         src/unnecessary/graphics/shading/shader.cpp
         include/unnecessary/algorithm/layout.h
-        include/unnecessary/graphics/systems/rendering.h
+        include/unnecessary/graphics/systems/projection.h
         include/unnecessary/graphics/pipeline/graphics_pipeline.h
         src/unnecessary/graphics/pipeline/graphics_pipeline.cpp
         include/unnecessary/graphics/queue.h
@@ -47,7 +47,7 @@ add_library(
         include/unnecessary/graphics/descriptors/descriptor_layout.h
         src/unnecessary/graphics/descriptors/descriptor_layout.cpp
         include/unnecessary/graphics/drawable.h
-        src/unnecessary/graphics/systems/rendering.cpp
+        src/unnecessary/graphics/systems/projection.cpp
         src/unnecessary/jobs/loading_jobs.cpp
         include/unnecessary/jobs/loading_jobs.h
         src/unnecessary/jobs/jobs.cpp

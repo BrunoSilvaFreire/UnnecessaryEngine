@@ -144,8 +144,7 @@ namespace un {
 
     DispatchFrameGraphSystem::DispatchFrameGraphSystem(
         Renderer* renderer
-    ) : renderer(renderer),
-        clearColor(0.1, 0.1, 0.1, 1) {
+    ) : renderer(renderer) {
 
     }
 
