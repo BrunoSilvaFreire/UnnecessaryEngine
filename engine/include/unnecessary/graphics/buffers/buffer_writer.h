@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/graphics/buffers/buffer.h>
 #include <unnecessary/graphics/buffers/command_buffer.h>
+#include <unnecessary/graphics/dispose_tracker.h>
 
 namespace un {
     class BufferWriter {
@@ -12,6 +13,7 @@ namespace un {
         vk::CommandPool pool;
         un::CommandBuffer cmd;
         bool autoSubmit;
+        un::DisposeTracker toDispose;
     public:
         BufferWriter(
             un::Renderer* renderer,

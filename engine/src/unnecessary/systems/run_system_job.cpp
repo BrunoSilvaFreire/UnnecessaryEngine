@@ -4,15 +4,13 @@
 namespace un {
     RunSystemJob::RunSystemJob(
         un::World* world,
-        un::System* system
-    ) : world(world), system(system), deltaTime(0) {}
+        un::System* system,
+        f32 deltaTime
+    ) : world(world), system(system), deltaTime(deltaTime) {}
 
     void RunSystemJob::operator()(un::JobWorker* worker) {
         system->step(*world, deltaTime, worker);
-    }
-
-    void RunSystemJob::setDeltaTime(f32 deltaTime) {
-        RunSystemJob::deltaTime = deltaTime;
+        LOG(INFO) << "Finished running system " << system;
     }
 
 /*    un::System* RunSystemJob::getSystem() const {

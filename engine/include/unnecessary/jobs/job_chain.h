@@ -6,6 +6,7 @@
 #define UNNECESSARYENGINE_JOB_CHAIN_H
 
 #include <unordered_map>
+#include <set>
 #include <unnecessary/jobs/jobs.h>
 #include <utility>
 
@@ -14,16 +15,24 @@ namespace un {
     private:
         std::unordered_map<Job*, u32> jobIds;
         un::JobSystem* system;
-        std::vector<u32> toStart;
-        std::vector<u32> allJobs;
+        std::set<u32> toStart;
+        std::set<u32> allJobs;
+        std::set<u32> recentlyAdded;
         bool dispatchOnDestruct;
     public:
+
         JobChain(
             un::JobSystem* system,
             bool dispatchOnDestruct = true
         );
 
+        void separate() {
+            recentlyAdded.clear();
+        }
+
         virtual ~JobChain();
+
+        const std::set<u32>& getRecentlyAdded() const;
 
         JobChain& enqueue(u32* id, Job* job);
 

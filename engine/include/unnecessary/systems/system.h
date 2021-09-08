@@ -5,6 +5,7 @@
 #include <unnecessary/jobs/jobs.h>
 #include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/systems/world.h>
+#include <unnecessary/systems/run_system_job.h>
 
 namespace un {
 
@@ -19,27 +20,46 @@ namespace un {
         const std::string& getDescription() const;
     };
 
+    class Simulation;
 
     class SystemDescriptor {
     private:
-        std::vector<std::pair<un::System*, u32>> existingSystems;
         u32 id;
+        un::Simulation* simulation;
         std::vector<Problem> problems;
-        un::World* world;
     public:
-        SystemDescriptor(World* world);
+        SystemDescriptor(u32 id, Simulation* simulation);
 
         template<typename T>
-        T* dependsOn();
+        T* dependsOn() {
+
+            for (auto[system, other] : simulation->system2Id) {
+                T* candidate = dynamic_cast<T*>(system);
+                if (candidate != nullptr) {
+                    simulation->simulationGraph.addDependency(id, other);
+                    return candidate;
+                }
+            }
+
+            std::string str = "Missing system dependency of type '";
+            str += typeid(T).name();
+            str += "'.";
+            problems.emplace_back(str);
+            return nullptr;
+        }
+
+        void runsAfterStage(const std::string& stageName);
+
+        void runsOnStage(const std::string& stageName);
 
         const std::vector<Problem>& getProblems() const;
 
         template<typename T>
-        T* renderer(un::Renderer* renderer) {
+        T* usesPipeline(un::Renderer* renderer) {
             auto pipeline = renderer->getCurrentPipeline();
             if (pipeline == nullptr) {
                 problems.emplace_back(
-                    "There is no rendering pipeline created in the renderer."
+                    "There is no rendering pipeline created in the usesPipeline."
                 );
             }
             T* cast = dynamic_cast<T*>(pipeline);
@@ -54,23 +74,6 @@ namespace un {
         }
     };
 
-    template<typename T>
-    T* SystemDescriptor::dependsOn() {
-        for (auto[system, other] :existingSystems) {
-            T* candidate = dynamic_cast<T*>(system);
-            if (candidate != nullptr) {
-                world->systemMustRunAfter(id, other);
-                return candidate;
-            }
-        }
-
-        std::string str = "Missing system dependency of type '";
-        str += typeid(T).name();
-        str += "'.";
-        problems.emplace_back(str);
-        return nullptr;
-    }
-
     struct ExplicitSystem {
         virtual void scheduleJobs(World& world, float deltaTime, JobChain& chain) = 0;
 
@@ -80,15 +83,12 @@ namespace un {
     struct System : public ExplicitSystem {
     public:
         void scheduleJobs(World& world, float deltaTime, JobChain& chain) override {
-            chain.immediately<LambdaJob>(
-                [this, &world, deltaTime](un::JobWorker* worker) {
-                    step(world, deltaTime, worker);
-                }
-            );
+            chain.immediately<un::RunSystemJob>(&world, this, deltaTime);
         }
 
         virtual void step(World& world, f32 delta, un::JobWorker* worker) = 0;
     };
+
 
 }
 #endif

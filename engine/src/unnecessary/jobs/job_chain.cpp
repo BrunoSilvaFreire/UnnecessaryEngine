@@ -23,8 +23,9 @@ namespace un {
     }
 
     JobChain& JobChain::immediately(u32 id) {
-        allJobs.push_back(id);
-        toStart.push_back(id);
+        allJobs.emplace(id);
+        toStart.emplace(id);
+        recentlyAdded.emplace(id);
         return *this;
     }
 
@@ -43,7 +44,7 @@ namespace un {
 
     JobChain& JobChain::after(u32 dependencyId, Job* job) {
         auto id = system->enqueue(dependencyId, job);
-        allJobs.push_back(id);
+        allJobs.emplace(id);
         return *this;
     }
 
@@ -54,13 +55,14 @@ namespace un {
 
     JobChain& JobChain::after(u32 runAfter, u32 job) {
         system->addDependency(runAfter, job);
-        allJobs.push_back(job);
+        toStart.erase(runAfter);
         return *this;
     }
 
     JobChain& JobChain::after(u32 after, u32* id, Job* job) {
         *id = system->enqueue(after, job);
-        allJobs.push_back(*id);
+        allJobs.emplace(*id);
+        recentlyAdded.emplace(*id);
         return *this;
     }
 
@@ -78,5 +80,9 @@ namespace un {
             system->addDependency(jobId, item);
         }
         return *this;
+    }
+
+    const std::set<u32>& JobChain::getRecentlyAdded() const {
+        return recentlyAdded;
     }
 }

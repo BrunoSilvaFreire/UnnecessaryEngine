@@ -6,6 +6,7 @@ namespace un {
         if (autoSubmit) {
             std::array<vk::CommandBuffer, 1> arr{*cmd};
             renderer->getGraphics()->submit({vk::SubmitInfo({}, {}, arr)});
+            toDispose.dispose(renderer->getVirtualDevice());
         }
     }
 
@@ -34,6 +35,8 @@ namespace un {
             true,
             vk::MemoryPropertyFlagBits::eHostVisible
         );
+        toDispose.include(stagingBuffer);
+        toDispose.include(stagingBuffer.getMemory());
         stagingBuffer.push(renderer->getVirtualDevice(), ptr);
         cmd->copyBuffer(
             stagingBuffer, buffer,

@@ -28,6 +28,8 @@ namespace un {
         FreeFlightSystem(GLFWwindow *window);
 
         void step(World &world, f32 delta, un::JobWorker *worker) override;
+
+        void describe(SystemDescriptor& descriptor) override;
     };
 }
 

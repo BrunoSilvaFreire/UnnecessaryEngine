@@ -31,7 +31,7 @@ namespace un {
     }
 
     CommandBuffer::~CommandBuffer() {
-        //renderer.freeCommandBuffers(pool, 1, &buffer);
+        //usesPipeline.freeCommandBuffers(pool, 1, &buffer);
     }
 
     vk::CommandBuffer CommandBuffer::getVulkanBuffer() {

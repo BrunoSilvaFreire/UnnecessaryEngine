@@ -21,4 +21,8 @@ namespace un {
             );
         }
     }
+
+    void ProjectionSystem::describe(SystemDescriptor& descriptor) {
+        descriptor.runsOnStage(un::kPrepareFrame);
+    }
 }

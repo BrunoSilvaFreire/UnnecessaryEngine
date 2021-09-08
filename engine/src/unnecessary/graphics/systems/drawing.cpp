@@ -4,6 +4,7 @@
 #include <unnecessary/graphics/buffers/command_buffer.h>
 #include <unnecessary/graphics/descriptors/descriptor_allocator.h>
 #include <unnecessary/graphics/descriptors/descriptor_writer.h>
+#include <unnecessary/systems/cameras.h>
 
 
 namespace un {
@@ -60,38 +61,7 @@ namespace un {
 
 
         auto& registry = world.getRegistry();
-
-        /*       bool resized = lightingSystem->getSceneLightingBuffer()
-                                            .ensureFits<un::PointLightData>(
-                                                *renderer,
-                                                pointLights.size(),
-                                                sizeof(int)
-                                            );
-
-               if (resized) {
-                   vk::DescriptorBufferInfo bufferInfo;
-                   bufferInfo.buffer = lightingBuffer.getVulkanBuffer();
-                   bufferInfo.range = VK_WHOLE_SIZE;
-                   device.updateDescriptorSets(
-                       {
-                           vk::WriteDescriptorSet(
-
-                               sceneDescriptorSet,
-                               1,
-                               0,
-                               1,
-                               vk::DescriptorType::eUniformBuffer,
-                               nullptr,
-                               &bufferInfo,
-                               nullptr
-                           )
-                       }, {
-
-                       }
-                   );
-               }*/
-
-        if (lightingSystem->getLightsRewritten().wasJustActivated()) {
+/*        if (lightingSystem->getLightsRewritten().wasJustActivated()) {
             un::DescriptorWriter writer(renderer);
             writer.updateUniformDescriptor(
                 sceneDescriptorSet,
@@ -99,7 +69,7 @@ namespace un {
                 lightingSystem->getSceneLightingBuffer(),
                 vk::DescriptorType::eStorageBuffer
             );
-        }
+        }*/
         un::Size2D size = renderer->getSwapChain().getResolution();
         const vk::Rect2D& renderArea = vk::Rect2D(
             vk::Offset2D(0, 0),
@@ -186,9 +156,10 @@ namespace un {
 
 
     void DrawingSystem::describe(SystemDescriptor& descriptor) {
+        descriptor.runsOnStage(un::kRecordFrame);
         lightingSystem = descriptor.dependsOn<un::LightingSystem>();
         frameGraphSystem = descriptor.dependsOn<un::PrepareFrameGraphSystem>();
-        renderingPipeline = descriptor.renderer<un::DummyRenderingPipeline>(renderer);
+        renderingPipeline = descriptor.usesPipeline<un::DummyRenderingPipeline>(renderer);
     }
 
     const vk::DescriptorSet& DrawingSystem::getSceneDescriptorSet() const {

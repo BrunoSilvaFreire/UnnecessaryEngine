@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <unnecessary/misc/aggregator.h>
+#include <unnecessary/graphics/dispose_tracker.h>
 
 namespace un {
     struct CommandBufferOperation {
@@ -22,19 +23,29 @@ namespace un {
         Type type;
     };
 
-    class CommandBufferGraph : public gpp::AdjacencyList<CommandBufferOperation, CommandBufferDependency, u32> {
+    class CommandBufferGraph
+        : public gpp::AdjacencyList<CommandBufferOperation, CommandBufferDependency, u32> {
     private:
-        static std::size_t hashDependencies(const std::set<u32> &dependencies);
+        static std::size_t hashDependencies(const std::set<u32>& dependencies);
+
         std::set<u32> initializers;
+        un::DisposeTracker toDispose;
     public:
         using VertexType = un::CommandBufferOperation;
         using EdgeType = un::CommandBufferDependency;
         using IndexType = u32;
-        u32 enqueueCommandBuffer(vk::CommandBuffer buffer, vk::PipelineStageFlags waitMask);
+
+        u32
+        enqueueCommandBuffer(vk::CommandBuffer buffer, vk::PipelineStageFlags waitMask);
 
         void addDependency(u32 from, u32 to);
 
         void submit(vk::Device device, vk::Queue graphicsQueue);
+
+        template<typename T>
+        void disposeOnFinish(T disposable) {
+            toDispose.include(disposable);
+        }
     };
 }
 #endif

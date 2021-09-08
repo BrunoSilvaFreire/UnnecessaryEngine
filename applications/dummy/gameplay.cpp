@@ -115,5 +115,9 @@ namespace un {
         }
     }
 
+    void FreeFlightSystem::describe(SystemDescriptor& descriptor) {
+        descriptor.runsOnStage(un::kEarlyGameplay);
+    }
+
     FreeFlightSystem::FreeFlightSystem(GLFWwindow *window) : wnd(window) {}
 }

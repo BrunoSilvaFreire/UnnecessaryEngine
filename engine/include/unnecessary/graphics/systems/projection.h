@@ -12,6 +12,8 @@ namespace un {
     class ProjectionSystem : public System {
     public:
         void step(World& world, f32 delta, un::JobWorker* worker) override;
+
+        void describe(SystemDescriptor& descriptor) override;
     };
 }
 #endif

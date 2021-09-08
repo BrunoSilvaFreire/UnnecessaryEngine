@@ -3,6 +3,7 @@
 
 #include <unnecessary/def.h>
 #include <unnecessary/graphics/buffers/command_buffer.h>
+#include <unnecessary/logging.h>
 #include <grapphs/adjacency_list.h>
 #include <set>
 #include <string>
@@ -242,6 +243,7 @@ namespace un {
         explicit RenderPass(un::Renderer* renderer);
 
         void end() {
+            LOG(INFO) << "Finished thing.";
             checkInitialized();
             initialized = false;
             buffer->end();

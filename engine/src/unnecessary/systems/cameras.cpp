@@ -17,7 +17,8 @@ namespace un {
             matrices.vp = projection.value * viewMat;
             camera.cameraDescriptorBuffer.push(
                 renderer->getVirtualDevice(),
-                &matrices
+                &matrices,
+                false
             );
 
         }
@@ -29,6 +30,6 @@ namespace un {
     }
 
     void CameraSystem::describe(SystemDescriptor& descriptor) {
-        preparation = descriptor.dependsOn<un::PrepareFrameGraphSystem>();
+        descriptor.runsOnStage(un::kUploadFrameData);
     }
 }

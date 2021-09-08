@@ -55,6 +55,11 @@ namespace un {
     }
 
     void JobSystem::addDependency(u32 from, u32 to) {
+#ifdef DEBUG
+        if (from == to){
+            throw std::runtime_error("A job cannot depent on itself!");
+        }
+#endif
         {
             std::lock_guard<std::mutex> guard(graphUsage);
             tasks.connect(to, from, un::JobDependencyType::eRequired);

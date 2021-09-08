@@ -33,7 +33,7 @@ namespace un {
         );
 //
 //        Image(
-//                un::Renderer &renderer,
+//                un::Renderer &usesPipeline,
 //                vk::Format format,
 //                un::Size2D size,
 //                vk::ImageLayout layout,
@@ -42,7 +42,7 @@ namespace un {
 //
 //                :
 //                Image(
-//                        renderer,
+//                        usesPipeline,
 //                        format,
 //                        vk::Extent3D(size.x, size.y, 0),
 //                        layout,

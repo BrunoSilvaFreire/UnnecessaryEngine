@@ -71,10 +71,13 @@ namespace un {
         );
         std::memcpy(toWriteTo, data, size);
         if (flush) {
-            device.flushMappedMemoryRanges(
-                {
-                    vk::MappedMemoryRange(memory, 0, VK_WHOLE_SIZE)
-                }
+            std::array<vk::MappedMemoryRange, 1> ranges;
+            ranges.front() = vk::MappedMemoryRange(memory, 0, VK_WHOLE_SIZE);
+            vkCall(
+                device.flushMappedMemoryRanges(
+                    ranges.size(),
+                    ranges.data()
+                )
             );
         }
         device.unmapMemory(memory);

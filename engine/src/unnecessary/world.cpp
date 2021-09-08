@@ -7,6 +7,17 @@ namespace un {
         app.getOnPool() += [this](f32 delta) {
             step(delta);
         };
+        u32 upload = simulation.addStage(un::kUploadFrameData);
+        u32 prepare = simulation.addStage(un::kPrepareFrame);
+        u32 record = simulation.addStage(un::kRecordFrame);
+        u32 dispatch = simulation.addStage(un::kDispatchFrame);
+        u32 earlyGameplay = simulation.addStage(un::kEarlyGameplay);
+        u32 lateGameplay = simulation.addStage(un::kLateGameplay);
+        simulation.addDependency(dispatch, record);
+        simulation.addDependency(upload, prepare);
+        simulation.addDependency(record, upload);
+        simulation.addDependency(lateGameplay, earlyGameplay);
+        simulation.addDependency(prepare, lateGameplay);
     }
 
     World::~World() {
@@ -16,25 +27,7 @@ namespace un {
     void World::step(f32 delta) {
         un::Chronometer<std::chrono::milliseconds> chronometer;
         un::JobChain chain(jobSystem, false);
-        for (ParallelSystemData* data : systems) {
-            un::RunSystemJob& job = data->getJob();
-            job.setDeltaTime(delta);
-            u32 id;
-            chain.enqueue(&id, &job);
-            jobIds[data->getSystem()] = id;
-        }
-        for (ParallelSystemData* data : systems) {
-            auto& dependencies = data->getDependencies();
-            u32 id = jobIds[data->getSystem()];
-            if (!dependencies.empty()) {
-
-                for (un::System* dependency : dependencies) {
-                    chain.after(jobIds[dependency], id);
-                }
-            } else {
-                chain.immediately(id);
-            }
-        }
+        simulation.step(*this, delta, chain);
         std::condition_variable variable;
         std::mutex mutex;
         std::unique_lock lock(mutex);
@@ -57,30 +50,7 @@ namespace un {
         return *this;
     }
 
-    u32 World::addSystem(System* system) {
-        un::SystemDescriptor descriptor(this);
-        system->describe(descriptor);
-        const auto& problems = descriptor.getProblems();
-        if (!problems.empty()) {
-            LOG(FUCK)
-                << "Unable to add system to world because of the following problems:";
-            for (const un::Problem& problem : problems) {
-                LOG(FUCK) << problem.getDescription();
-            }
-            return -1;
-        }
-        return systems.push(un::ParallelSystemData(this, system));
-    }
-
-    void World::systemMustRunAfter(u32 system, u32 after) {
-        systems.connect(after, system, true);
-    }
-
-    const SystemGraph& World::getSystems() const {
-        return systems;
-    }
-
-    un::SystemGraph& World::getSystems() {
-        return systems;
+    const Simulation& World::getSimulation() const {
+        return simulation;
     }
 }

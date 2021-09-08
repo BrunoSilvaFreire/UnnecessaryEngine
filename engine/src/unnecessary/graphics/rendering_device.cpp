@@ -41,7 +41,7 @@ namespace un {
     ) {
         float priority = 1.0;
 
-        for (u32 i = 0; i < queueProperties.size(); ++i) {
+        for (u32 i = 0 ; i < queueProperties.size() ; ++i) {
             auto property = queueProperties[i];
             if ((property.queueFlags & flags) != flags) {
                 continue;
@@ -84,7 +84,7 @@ namespace un {
 
 
         std::unordered_map<u32, u32> scores;
-        for (u32 i = 0; i < devices.size(); ++i) {
+        for (u32 i = 0 ; i < devices.size() ; ++i) {
             const vk::PhysicalDevice& device = devices[i];
             vk::PhysicalDeviceProperties properties = device.getProperties();
             if (!deviceRequirements.isMet(device)) {
@@ -93,7 +93,8 @@ namespace un {
                 //Not suitable
                 continue;
             }
-            LOG(INFO) << "Found candidate renderer " << GREEN(properties.deviceName)
+            LOG(INFO) << "Found candidate renderer "
+                      << GREEN(properties.deviceName)
                       << ".";
             std::vector<vk::QueueFamilyProperties> queueProperties = device.getQueueFamilyProperties();
             u32 score = 0;
@@ -124,7 +125,7 @@ namespace un {
 
         std::optional<u32> graphicsQueue, presentQueue;
 
-        for (u32 i = 0; i < queueProperties.size(); ++i) {
+        for (u32 i = 0 ; i < queueProperties.size() ; ++i) {
             auto property = queueProperties[i];
             if ((property.queueFlags & vk::QueueFlagBits::eGraphics) !=
                 vk::QueueFlagBits::eGraphics) {
@@ -155,7 +156,7 @@ namespace un {
         deviceCreateInfo.setQueueCreateInfos(queuesToCreate);
         std::vector<const char*> deviceExtensions;
         deviceExtensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-        for (const char* extension :deviceExtensions) {
+        for (const char* extension : deviceExtensions) {
             LOG(INFO) << "Using device extension: " << GREEN(extension);
         }
         deviceCreateInfo.setPEnabledExtensionNames(deviceExtensions);
@@ -184,7 +185,7 @@ namespace un {
         vk::MemoryPropertyFlags flags
     ) const {
         u32 typeFilter = requirements.memoryTypeBits;
-        for (u32 i = 0; i < memoryProperties.memoryTypeCount; ++i) {
+        for (u32 i = 0 ; i < memoryProperties.memoryTypeCount ; ++i) {
             vk::MemoryType type = memoryProperties.memoryTypes[i];
             if ((type.propertyFlags & flags) != flags) {
                 continue;

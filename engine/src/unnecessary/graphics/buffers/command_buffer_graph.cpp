@@ -155,6 +155,7 @@ namespace un {
             for (auto[_, semaphore] : commandBuffer2Semaphore) {
                 device.destroy(semaphore);
             }
+            toDispose.dispose(device);
         }
     }
 
@@ -166,4 +167,6 @@ namespace un {
         }
         return hc;
     }
+
+
 }

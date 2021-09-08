@@ -18,9 +18,7 @@ namespace un {
             return system;
         }
 
-        void setDeltaTime(f32 deltaTime);
-
-        RunSystemJob(un::World* world, un::System* system);
+        RunSystemJob(un::World* world, un::System* system, f32 deltaTime);
 
         void operator()(un::JobWorker* worker) override;
     };

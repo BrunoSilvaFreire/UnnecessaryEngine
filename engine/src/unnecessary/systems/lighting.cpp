@@ -94,7 +94,7 @@ namespace un {
     }
 
     void LightingSystem::describe(SystemDescriptor& descriptor) {
-        ExplicitSystem::describe(descriptor);
+        descriptor.runsOnStage(un::kUploadFrameData);
         frameGraphSystem = descriptor.dependsOn<un::PrepareFrameGraphSystem>();
     }
 

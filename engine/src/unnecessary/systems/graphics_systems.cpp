@@ -41,7 +41,8 @@ namespace un {
     }
 
     void PrepareFrameGraphSystem::describe(SystemDescriptor& descriptor) {
-        renderingPipeline = descriptor.renderer<un::DummyRenderingPipeline>(renderer);
+        descriptor.runsOnStage(un::kUploadFrameData);
+        renderingPipeline = descriptor.usesPipeline<un::DummyRenderingPipeline>(renderer);
         if (renderingPipeline != nullptr) {
             auto& chain = renderer->getSwapChain();
             auto device = renderer->getVirtualDevice();
@@ -71,7 +72,7 @@ namespace un {
     }
 
     void DispatchFrameGraphSystem::step(World& world, f32 delta, un::JobWorker* worker) {
-
+        LOG(INFO) << "Dispatching frame.";
         un::Size2D size = renderer->getSwapChain().getResolution();
         const vk::Rect2D& renderArea = vk::Rect2D(
             vk::Offset2D(0, 0),
@@ -138,8 +139,9 @@ namespace un {
     }
 
     void DispatchFrameGraphSystem::describe(SystemDescriptor& descriptor) {
+        descriptor.runsOnStage(un::kDispatchFrame);
         graphSystem = descriptor.dependsOn<un::PrepareFrameGraphSystem>();
-        renderingPipeline = descriptor.renderer<un::DummyRenderingPipeline>(renderer);
+        renderingPipeline = descriptor.usesPipeline<un::DummyRenderingPipeline>(renderer);
     }
 
     DispatchFrameGraphSystem::DispatchFrameGraphSystem(

@@ -19,4 +19,8 @@ namespace un {
             ltw.value = matrix;
         }
     }
+
+    void TransformSystem::describe(SystemDescriptor& descriptor) {
+        descriptor.runsOnStage(un::kPrepareFrame);
+    }
 }

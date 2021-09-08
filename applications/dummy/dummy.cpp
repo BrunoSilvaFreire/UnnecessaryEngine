@@ -84,12 +84,12 @@ int main(int argc, char** argv) {
     vertexLayout.push<f32>(3, vk::Format::eR32G32B32Sfloat);
     */
     auto renderingPipeline = renderer.createPipeline<un::DummyRenderingPipeline>();
-    auto transformSystem = world.addSystem<un::TransformSystem>();
-    auto projectionSystem = world.addSystem<un::ProjectionSystem>();
+    world.addSystem<un::TransformSystem>();
+    world.addSystem<un::ProjectionSystem>();
     world.addSystem<un::PrepareFrameGraphSystem>(&renderer);
     world.addSystem<un::LightingSystem>(4, &renderer);
-    auto drawingSystem = new un::DrawingSystem(renderer);
-    auto drawingSystemId = world.addSystem(drawingSystem);
+    world.addSystem<un::CameraSystem>(&renderer);
+    auto drawingSystem = world.addSystem<un::DrawingSystem>(renderer);
     u32 load, upload;
     vk::Device device = renderer.getVirtualDevice();
     un::JobChain(&jobs)
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
                 auto* shader = new un::Pipeline(
                     pipeline.build(
                         renderer,
-                        renderingPipeline->unsafeGetFrameGraph().getVulkanPass()                    )
+                        renderingPipeline->unsafeGetFrameGraph().getVulkanPass())
                 );
                 for (int i = 0 ; i < 1 ; ++i) {
 
@@ -146,14 +146,14 @@ int main(int argc, char** argv) {
                     auto[pos, mesh, objectLights] = world.get<un::Translation, un::RenderMesh, un::ObjectLights>(
                         entity
                     );
-                /*    path.speed = 1;
-                    path.positions = std::vector<glm::vec3>(
-                        {
-                            glm::vec3(0, 0, 0),
-                            glm::vec3(0, 0, -10),
-                            glm::vec3(0, 0, 0)
-                        }
-                    );*/
+                    /*    path.speed = 1;
+                        path.positions = std::vector<glm::vec3>(
+                            {
+                                glm::vec3(0, 0, 0),
+                                glm::vec3(0, 0, -10),
+                                glm::vec3(0, 0, 0)
+                            }
+                        );*/
                     pos.value.x = i * 5;
 
                     objectLights.descriptorSet = drawingSystem->getObjectDescriptorAllocator()
@@ -191,7 +191,7 @@ int main(int argc, char** argv) {
             }
         );
 
-    auto cameraEntity = world.createEntity<un::LocalToWorld, un::Camera, un::Projection, un::Perspective, un::Translation,un::Rotation, un::FreeFlight>();
+    auto cameraEntity = world.createEntity<un::LocalToWorld, un::Camera, un::Projection, un::Perspective, un::Translation, un::Rotation, un::FreeFlight>();
     un::FreeFlight& freeFlight = registry.get<un::FreeFlight>(cameraEntity);
     freeFlight.speed = 1;
     freeFlight.angularSpeed = 0.05F;
@@ -222,17 +222,8 @@ int main(int argc, char** argv) {
             vk::DescriptorType::eUniformBuffer
         );
     }
-    world.addSystem<un::CameraSystem>(&renderer);
     world.addSystem<un::FreeFlightSystem>(app.getWindow());
-
     world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
-    //world.addSystem<un::PathRunningSystem>();
-    //auto renderMeshSystem = world.addSystem<un::RenderMeshSystem>(app.getRenderer(), drawingSystem);
-    world.systemMustRunAfter(transformSystem, projectionSystem);
-
-
-
-//    world.systemMustRunAfter(renderMeshSystem, transformSystem);
-//    world.systemMustRunAfter(drawingSystemId, renderMeshSystem);
+    world.getSimulation().getSimulationGraph().saveToDot("simulation.dot");
     app.execute();
 }
