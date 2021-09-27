@@ -18,8 +18,9 @@ namespace un {
         for (const DescriptorWriteOperation& operation : writes) {
             vk::DescriptorBufferInfo* pBufInfo = &bufferInfos.emplace_back(
                 operation.buffer,
-                0,
-                VK_WHOLE_SIZE);
+                operation.offset,
+                operation.range
+            );
             vulkanWrites.emplace_back(
                 operation.set,
                 operation.binding,
@@ -57,8 +58,15 @@ namespace un {
         const vk::DescriptorSet& set,
         vk::DescriptorType type,
         u32 binding,
-        const vk::Buffer& buffer
-    ) : set(set), binding(binding), buffer(buffer), type(type) {}
+        const vk::Buffer& buffer,
+        vk::DeviceSize offset,
+        vk::DeviceSize range
+    ) : set(set),
+        binding(binding),
+        buffer(buffer),
+        type(type),
+        offset(offset),
+        range(range) {}
 
     DescriptorResource::DescriptorResource(
         const vk::DescriptorSetLayout& sharedSetLayout

@@ -16,12 +16,15 @@ namespace un {
             vk::DescriptorType type;
             u32 binding{};
             vk::Buffer buffer;
+            vk::DeviceSize offset, range;
 
             DescriptorWriteOperation(
                 const vk::DescriptorSet& set,
                 vk::DescriptorType type,
                 u32 binding,
-                const vk::Buffer& buffer
+                const vk::Buffer& buffer,
+                vk::DeviceSize offset = 0,
+                vk::DeviceSize range = VK_WHOLE_SIZE
             );
         };
 

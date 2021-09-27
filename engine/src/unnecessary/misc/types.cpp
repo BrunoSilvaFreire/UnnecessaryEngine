@@ -1,6 +1,7 @@
 #include <unnecessary/misc/types.h>
 
 namespace un {
+#ifdef __GNUG__
 
     std::string demangle(const char* value) {
         //https://stackoverflow.com/questions/281818/unmangling-the-result-of-stdtype-infoname
@@ -12,4 +13,12 @@ namespace un {
 
         return (status == 0) ? res.get() : value;
     }
+#else
+
+    std::string demangle(const char* value) {
+        return value;
+    }
+
+#endif
+
 }

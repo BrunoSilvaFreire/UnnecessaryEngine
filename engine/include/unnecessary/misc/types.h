@@ -1,5 +1,6 @@
 #ifndef UNNECESSARYENGINE_TYPES_H
 #define UNNECESSARYENGINE_TYPES_H
+#include <string>
 #ifdef __GNUG__
 
 #include <cstdlib>
@@ -32,9 +33,7 @@ namespace un {
         return typeid(T).name();
     }
 
-    std::string demangle(const char* value) {
-        return value;
-    }
+    std::string demangle(const char* value);
 #endif
 }
 #endif

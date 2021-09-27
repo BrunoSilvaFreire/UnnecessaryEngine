@@ -61,7 +61,7 @@ namespace un {
 
 
         auto& registry = world.getRegistry();
-/*        if (lightingSystem->getLightsRewritten().wasJustActivated()) {
+        if (lightingSystem->getLightsRewritten().wasJustActivated()) {
             un::DescriptorWriter writer(renderer);
             writer.updateUniformDescriptor(
                 sceneDescriptorSet,
@@ -69,7 +69,7 @@ namespace un {
                 lightingSystem->getSceneLightingBuffer(),
                 vk::DescriptorType::eStorageBuffer
             );
-        }*/
+        }
         un::Size2D size = renderer->getSwapChain().getResolution();
         const vk::Rect2D& renderArea = vk::Rect2D(
             vk::Offset2D(0, 0),

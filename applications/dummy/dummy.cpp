@@ -191,6 +191,13 @@ int main(int argc, char** argv) {
             }
         );
 
+    for (int j = 0 ; j < 7 ; ++j) {
+        auto light = world.createEntity<un::LocalToWorld, un::PointLight, un::Translation>();
+        auto& pointLight = world.get<un::PointLight>(light);
+        pointLight.lighting = un::Lighting(
+            1, 0, 0, 1
+        );
+    }
     auto cameraEntity = world.createEntity<un::LocalToWorld, un::Camera, un::Projection, un::Perspective, un::Translation, un::Rotation, un::FreeFlight>();
     un::FreeFlight& freeFlight = registry.get<un::FreeFlight>(cameraEntity);
     freeFlight.speed = 1;
