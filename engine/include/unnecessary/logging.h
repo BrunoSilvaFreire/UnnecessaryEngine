@@ -37,8 +37,15 @@ namespace un {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wstring-plus-int"
 #endif
+
+#ifdef UN_USE_ABS_PATH_FOR_LOGGING
+#define __FILENAME__ __FILE__
+#else
 #define __FILENAME__ (__FILE__ + SOURCE_PATH_SIZE)
+#endif
+
 #ifdef __clang__
+
 #pragma clang diagnostic pop
 #endif
 #define GREEN(MSG) COLORED(MSG, termcolor::green)

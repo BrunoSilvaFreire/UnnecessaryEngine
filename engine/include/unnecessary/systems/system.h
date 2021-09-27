@@ -82,9 +82,7 @@ namespace un {
 
     struct System : public ExplicitSystem {
     public:
-        void scheduleJobs(World& world, float deltaTime, JobChain& chain) override {
-            chain.immediately<un::RunSystemJob>(&world, this, deltaTime);
-        }
+        void scheduleJobs(World& world, float deltaTime, JobChain& chain) override;
 
         virtual void step(World& world, f32 delta, un::JobWorker* worker) = 0;
     };

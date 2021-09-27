@@ -36,6 +36,7 @@ namespace un {
                 variable.notify_one();
             }
         );
+        jobSystem->tasks.saveToDot("jobs.dot");
         chain.dispatch();
         variable.wait(lock);
         u32 cpuFrameTimeMillis = chronometer.stop();

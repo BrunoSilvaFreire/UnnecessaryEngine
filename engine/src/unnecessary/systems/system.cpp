@@ -46,4 +46,12 @@ namespace un {
 
     }
 
+    void System::scheduleJobs(World& world, float deltaTime, JobChain& chain) {
+        u32 scheduledId;
+        chain.immediately<un::RunSystemJob>(&scheduledId, &world, this, deltaTime);
+        std::string name;
+        name += "Run system ";
+        name += un::demangle(typeid(*this).name());
+        chain.getJob(scheduledId)->setName(name);
+    }
 }

@@ -50,23 +50,62 @@ namespace un {
 
                 }
                 LOG(INFO) << "Scheduled jobs" << jobsNames << " for " << group.name
-                          << ".";
+                          << " ("
+                          << index << ").";
                 systemToJobs[index] = scheduledJobs;
-                for (auto[neighbor, dependency] : simulationGraph.dependenciesOf(index)) {
-                    auto neighborJobs = systemToJobs.find(neighbor);
-                    if (neighborJobs == systemToJobs.end()) {
-                        continue;
-                    }
-                    const std::set<u32>& otherJobs = neighborJobs->second;
-                    for (u32 job : scheduledJobs) {
-                        for (u32 mustWait : otherJobs) {
-                            chain.after(job, mustWait);
-                        }
-                    }
-                }
+
                 chain.separate();
             }
         );
+
+        simulationGraph.each(
+            [&](u32 index, const un::SimulationNode& node) {
+                if (node.type != un::SimulationNode::Type::eSystem) {
+                    return;
+                }
+                auto view = simulationGraph.allConnectionsOf(index);
+
+                for (auto[neighbor, dependency] : view) {
+                    auto dependencyType = simulationGraph.dependency(index, neighbor);
+                    switch (dependencyType) {
+                        case eUses:
+                            runJobsAfter(systemToJobs, index, neighbor, chain);
+                            break;
+                        case eProvides:
+                            // We run on this stage, gotta add dependencies of it
+                            if (dependency->type != un::SimulationNode::Type::eStage) {
+                                continue;
+                            }
+                            for (auto[otherDependencyIndex, otherDependency] : simulationGraph
+                                .dependenciesOf(
+                                    neighbor
+                                )) {
+                                if (otherDependency->type !=
+                                    un::SimulationNode::Type::eStage) {
+                                    continue;
+                                }
+                                for (auto[cousin, cousinType] : simulationGraph.dependenciesOf(
+                                    otherDependencyIndex
+                                )) {
+                                    if (cousinType->type !=
+                                        un::SimulationNode::Type::eSystem) {
+                                        continue;
+                                    }
+                                    runJobsAfter(
+                                        systemToJobs,
+                                        index,
+                                        cousin,
+                                        chain
+                                    );
+                                }
+
+                            }
+                            break;
+                    }
+                }
+            }
+        );
+
     }
 
     bool Simulation::findStage(const std::string& stageName, u32* pInt) {
@@ -100,6 +139,22 @@ namespace un {
 
     const DependencyGraph<un::SimulationNode>& Simulation::getSimulationGraph() const {
         return simulationGraph;
+    }
+
+    void Simulation::runJobsAfter(
+        const std::unordered_map<u32, std::set<u32>>& map,
+        u32 index,
+        u32 neighbor,
+        JobChain& chain
+    ) {
+        for (u32 from : map.at(index)) {
+            for (u32 to : map.at(neighbor)) {
+                if (from == to) {
+                    continue;
+                }
+                chain.after(from, to);
+            }
+        }
     }
 
     template<>

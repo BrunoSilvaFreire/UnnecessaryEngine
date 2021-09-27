@@ -23,12 +23,18 @@ namespace un {
 
         return (status == 0) ? res.get() : typeid(T).name();
     }
+
+    std::string demangle(const char* value);
+
 #else
     template<typename T>
     std::string typeNameOf() {
         return typeid(T).name();
     }
 
+    std::string demangle(const char* value) {
+        return value;
+    }
 #endif
 }
 #endif

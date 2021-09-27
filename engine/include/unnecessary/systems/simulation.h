@@ -65,7 +65,12 @@ namespace un {
         );
 
         bool tryDescribe(u32 index, un::System* system);
-
+        void runJobsAfter(
+            const std::unordered_map<u32, std::set<u32>>& map,
+            u32 index,
+            u32 neighbor,
+            JobChain& chain
+        );
     public:
         void addDependency(u32 from, u32 to);
 

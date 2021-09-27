@@ -36,24 +36,43 @@ namespace un {
             const Explorer& explorer
         ) const {
             for (auto[neighbor, edge] : DependencyGraph<VertexType>::edges_from(index)) {
-                if (visited.contains(neighbor) || currentlyEnqueued.contains(neighbor)) {
+                if (visited.contains(neighbor)) {
                     continue;
                 }
                 if (edge == un::DependencyType::eUses) {
                     //Did not visit dependency yet
                     visit(neighbor, open, visited, currentlyEnqueued, explorer);
                 } else {
-                    currentlyEnqueued.emplace(neighbor);
-                    open.push(neighbor);
+                    if (!currentlyEnqueued.contains(neighbor)) {
+                        currentlyEnqueued.emplace(neighbor);
+                        open.push(neighbor);
+                    }
                 }
             }
-            explorer(index, *DependencyGraph<VertexType>::vertex(index));
-            visited.emplace(index);
+            // Check if we were recursively checked by someone else
+            if (!visited.contains(index)) {
+                explorer(index, *DependencyGraph<VertexType>::vertex(index));
+                visited.emplace(index);
+            }
         }
 
     protected:
         virtual std::string getProperties(const VertexType* vertexType) const {
             return "";
+        }
+
+        std::vector<u32> findDependencies(
+            u32 index,
+            un::DependencyType expected
+        ) {
+            std::vector<u32> dependencies;
+            for (auto[dependency, edge] : this->node(index).connections()) {
+                if (edge != expected) {
+                    continue;
+                }
+                dependencies.emplace_back(dependency);
+            }
+            return dependencies;
         }
 
     public:
@@ -94,61 +113,57 @@ namespace un {
             class DependencyIterator {
             private:
                 u32 ptr;
-                std::vector<u32> dependencies;
-                DependencyGraph<VertexType>* owner;
+                DependencyView* owner;
             public:
                 DependencyIterator(
                     u32 index,
-                    DependencyGraph<VertexType>* owner
-                ) : ptr(0), dependencies(), owner(owner) {
-                    for (auto[dependency, edge] : owner->node(index).connections()) {
-                        dependencies.emplace_back(dependency);
-                    }
+                    DependencyView* owner
+                ) : ptr(index), owner(owner) {
                 }
 
-                u32 numEntries() {
-                    return dependencies.size();
-                }
-
-                std::pair<u32, VertexType*> operator*() {
-                    u32 dependency = dependencies[ptr];
-                    return std::pair(dependency, owner->vertex(dependency));
-                }
+                std::pair<u32, VertexType*> operator*();
 
                 void operator++() {
                     ptr++;
                 }
 
-                bool operator==(u32 other) {
-                    return ptr == other;
+                bool operator==(DependencyIterator other) {
+                    return ptr == other.ptr;
                 }
 
-                bool operator!=(u32 other) {
-                    return ptr != other;
+                bool operator!=(DependencyIterator other) {
+                    return ptr != other.ptr;
                 }
             };
 
         private:
-            DependencyIterator iterator;
-            u32 last;
+            DependencyIterator first, last;
+            std::vector<u32> dependencies;
+            DependencyGraph<VertexType>* owner;
+
+
         public:
             DependencyView(
-                u32 index,
-                DependencyGraph<VertexType>* owner
-            ) : iterator(index, owner) {
-                last = iterator.numEntries();
+                DependencyGraph<VertexType>* owner,
+                std::vector<u32> dependencies
+            ) : owner(owner),
+                dependencies(dependencies),
+                first(0, this),
+                last(dependencies.size(), this) {
             }
 
             DependencyIterator begin() {
-                return iterator;
+                return first;
             }
 
-            u32 end() {
+            DependencyIterator end() {
                 return last;
             }
-
-
         };
+
+        un::DependencyType dependency(u32 from, u32 to) {
+            return *this->edge(from, to);
+        }
 
         void addDependency(u32 from, u32 to) {
             independent.erase(from);
@@ -158,6 +173,16 @@ namespace un {
 
         void remove(u32 index) {
             gpp::AdjacencyList<VertexType, DependencyType, u32>::remove(index);
+        }
+
+        bool disconnect(
+            u32 from,
+            u32 to
+        ) override {
+            return gpp::AdjacencyList<VertexType, DependencyType, u32>::disconnect(
+                from,
+                to
+            );
         }
 
         template<typename ...Args>
@@ -172,8 +197,29 @@ namespace un {
             return id;
         };
 
+        DependencyView allConnectionsOf(u32 index) {
+            std::vector<u32> all;
+            for (auto[dependency, edge] : this->node(index).connections()) {
+                all.emplace_back(dependency);
+            }
+            return DependencyView(
+                this,
+                all
+            );
+        }
+
         DependencyView dependenciesOf(u32 index) {
-            return DependencyView(index, this);
+            return DependencyView(
+                this,
+                findDependencies(index, un::DependencyType::eUses)
+            );
+        }
+
+        DependencyView dependantsOn(u32 index) {
+            return DependencyView(
+                this,
+                findDependencies(index, un::DependencyType::eProvides)
+            );
         }
 
         void each(
@@ -192,8 +238,30 @@ namespace un {
             }
         }
 
+#ifdef __GCC__
+        __attribute__((noinline))
+#endif
 
+        VertexType* operator[](u32 index) {
+            return this->vertex(index);
+        }
+
+        const VertexType* operator[](u32 index) const {
+            return this->vertex(index);
+        }
+
+        bool tryGetVertex(u32 index, VertexType& output) {
+            return this->try_get_vertex(index, output);
+        }
     };
+
+    template<typename VertexType>
+    std::pair<u32, VertexType*>
+    DependencyGraph<VertexType>::DependencyView::DependencyIterator::operator*() {
+        u32 dependency = owner->dependencies[ptr];
+        return std::pair(dependency, owner->owner->vertex(dependency));
+    }
+
 
 }
 #endif

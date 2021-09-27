@@ -85,4 +85,8 @@ namespace un {
     const std::set<u32>& JobChain::getRecentlyAdded() const {
         return recentlyAdded;
     }
+
+    un::Job* JobChain::getJob(u32 i) {
+        return system->getJob(i);
+    }
 }

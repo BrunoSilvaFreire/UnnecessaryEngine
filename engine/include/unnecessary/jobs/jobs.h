@@ -5,7 +5,8 @@
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
 #include <unnecessary/graphics/rendering_device.h>
-#include <grapphs/adjacency_list.h>
+#include <unnecessary/algorithm/dependency_graph.h>
+#include <unnecessary/misc/types.h>
 #include <utility>
 #include <chrono>
 #include <thread>
@@ -28,25 +29,19 @@ namespace un {
 
 
     class Job {
+    private:
+        std::string name = "Unnamed Job";
     public:
         virtual void operator()(un::JobWorker* worker) = 0;
+
+        const std::string& getName() const;
+
+        void setName(const std::string& name);
     };
 
-    enum JobDependencyType : u8 {
-        eNone = 0,
-        /**
-         * Marks that the OTHER JOB is a requirement of THIS JOB
-         * (Used to check whether all dependency of this job have been solved)
-         */
-        eRequirement = 1,
-        /**
-         * Marks that the THIS JOB is required by the OTHER JOB
-         * (Used to find all jobs that may be started by the completion on this job)
-         */
-        eRequired = 2
-    };
+    class JobGraph : public un::DependencyGraph<un::Job*> {
 
-    typedef gpp::AdjacencyList<Job*, JobDependencyType, u32> JobGraph;
+    };
 
     class LambdaJob : public Job {
     public:
@@ -178,6 +173,11 @@ namespace un {
         u32 enqueue(u32 dependsOn, const un::LambdaJob::Callback& callback);
 
         int getNumWorkers();
+
+        friend class World;
     };
+
+    template<>
+    std::string to_string<un::Job*>(un::Job* const& job);
 }
 #endif

@@ -75,6 +75,8 @@ namespace un {
         void dispatch();
 
         JobChain& onFinished(const un::LambdaJob::Callback& callback);
+
+        un::Job* getJob(u32 i);
     };
 }
 #endif

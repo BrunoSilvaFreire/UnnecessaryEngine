@@ -40,7 +40,7 @@ namespace un {
         u32 id;
         {
             std::lock_guard<std::mutex> guard(graphUsage);
-            id = tasks.push(job);
+            id = tasks.add(job);
         }
         if (alsoMarkForExecution) {
             markForExecution(id);
@@ -56,19 +56,18 @@ namespace un {
 
     void JobSystem::addDependency(u32 from, u32 to) {
 #ifdef DEBUG
-        if (from == to){
-            throw std::runtime_error("A job cannot depent on itself!");
+        if (from == to) {
+            throw std::runtime_error("A job cannot depend on itself!");
         }
 #endif
         {
             std::lock_guard<std::mutex> guard(graphUsage);
-            tasks.connect(to, from, un::JobDependencyType::eRequired);
-            tasks.connect(from, to, un::JobDependencyType::eRequirement);
+            tasks.addDependency(from, to);
         }
     }
 
     u32 JobSystem::enqueue(u32 dependsOn, const un::LambdaJob::Callback& callback) {
-        return enqueue(dependsOn, new LambdaJob(std::move(callback)));
+        return enqueue(dependsOn, new LambdaJob(callback));
     }
 
 #define N_JOBS_WARNING 32
@@ -116,7 +115,7 @@ namespace un {
         }
         LOG(INFO) << "Using " << GREEN(nCores) << " workers for job system.";
         workers.reserve(nCores);
-        for (size_t i = 0; i < nCores; ++i) {
+        for (size_t i = 0 ; i < nCores ; ++i) {
             workers.emplace_back(application, this, i, false);
         }
     }
@@ -129,7 +128,7 @@ namespace un {
 
     Job* JobSystem::getJob(u32 id) {
         Job* job;
-        if (tasks.try_get_vertex(id, job)) {
+        if (tasks.tryGetVertex(id, job)) {
             return job;
         }
         return nullptr;
@@ -230,22 +229,15 @@ namespace un {
     void JobSystem::notifyCompletion(u32 id) {
         {
             std::lock_guard<std::mutex> guard(graphUsage);
-            auto view = tasks.edges_from(id);
-            for (std::pair<u32, un::JobDependencyType> edge : view) {
-                un::JobDependencyType type = edge.second;
-                if (type != un::JobDependencyType::eRequired) {
-                    continue;
-                }
-                u32 dependantID = edge.first;
+            // Notify job who depends on this that it's done
+            for (auto[dependantID, _unused] : tasks.dependantsOn(id)) {
                 bool ready = true;
                 tasks.disconnect(id, dependantID);
                 tasks.disconnect(dependantID, id);
-                for (std::pair<u32, un::JobDependencyType> other : tasks.edges_from(
-                    dependantID
-                )) {
-                    u32 otherDependency = edge.first;
-                    un::JobDependencyType otherType = other.second;
-                    if (otherType == un::JobDependencyType::eRequirement) {
+                // Check whether we can add this to the awaiting execution queue
+                for (auto[otherDependency, otherVertex] : tasks.dependenciesOf(dependantID)) {
+                    if (otherDependency != id) {
+                        // There is another dependency we need to wait for
                         ready = false;
                     }
                 }
@@ -298,5 +290,18 @@ namespace un {
 
     const vk::CommandPool& JobWorker::WorkerGraphicsResources::getCommandPool() const {
         return commandPool;
+    }
+
+    template<>
+    std::string un::to_string<Job*>(Job* const& job) {
+        return job->getName();
+    }
+
+    const std::string& Job::getName() const {
+        return name;
+    }
+
+    void Job::setName(const std::string& name) {
+        Job::name = name;
     }
 }
