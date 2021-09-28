@@ -1,4 +1,5 @@
 #include "common.hlsl"
+#pragma pack_matrix(column_major)
 
 [[vk::push_constant]]
 cbuffer pushConstants {

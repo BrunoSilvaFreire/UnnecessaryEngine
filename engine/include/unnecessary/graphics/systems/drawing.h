@@ -20,7 +20,7 @@ namespace un {
 
         un::LightingSystem* lightingSystem{};
         un::PrepareFrameGraphSystem* frameGraphSystem{};
-        DummyRenderingPipeline* renderingPipeline{};
+        un::DummyRenderingPipeline* renderingPipeline{};
     public:
         DrawingSystem(Renderer* renderer);
 

@@ -10,9 +10,17 @@ namespace un {
         freeSets(numSetsToReserve) {
         std::vector<vk::DescriptorPoolSize> descriptorSizes;
         for (un::DescriptorElement& element : layout.getElements()) {
+            u32 count;
+
+            vk::DescriptorType type = element.getType();
+            if (type == vk::DescriptorType::eUniformBuffer) {
+                count = element.getSize() * numSets;
+            } else {
+                count = numSets;
+            }
             descriptorSizes.emplace_back(
-                element.getType(),
-                1
+                type,
+                count
             );
         }
         vk::DescriptorPoolCreateInfo info(
@@ -115,7 +123,7 @@ namespace un {
         assertCanAllocate(count);
         freeSets -= count;
         std::vector<vk::DescriptorSetLayout> layouts(count);
-        for (size_t i = 0; i < count; ++i) {
+        for (size_t i = 0 ; i < count ; ++i) {
             layouts[i] = layout;
         }
         vk::DescriptorSetAllocateInfo info(

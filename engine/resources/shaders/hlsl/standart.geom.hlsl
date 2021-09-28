@@ -1,3 +1,5 @@
+#pragma pack_matrix(column_major)
+
 struct GeometryInput
 {
 	float3 position;

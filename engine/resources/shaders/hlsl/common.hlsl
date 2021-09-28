@@ -1,11 +1,13 @@
+#pragma pack_matrix(column_major)
+
 struct PerObjectData
 {
-	float4x4 model;
+	column_major float4x4 model;
 };
 
 struct Matrices
 {
-	float4x4 vp;
+	column_major float4x4 vp;
 };
 
 struct Lighting

@@ -105,11 +105,11 @@ int main(int argc, char** argv) {
                     device,
                     un::PushConstants(0, sizeof(un::PerObjectData))
                 );
-                auto* geometry = new un::ShaderStage(
+                /*auto* geometry = new un::ShaderStage(
                     "standart.geom",
                     vk::ShaderStageFlagBits::eGeometry,
                     device
-                );
+                );*/
                 auto* fragment = new un::ShaderStage(
                     "standart.frag",
                     vk::ShaderStageFlagBits::eFragment,
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
                 fragment->usesDescriptor(2, 0);
                 un::GraphicsPipelineBuilder pipeline(
                     boundLayout,
-                    {vertex, geometry, fragment}
+                    {vertex, fragment}
                 );
                 pipeline.withStandardRasterization();
 
@@ -139,54 +139,54 @@ int main(int argc, char** argv) {
                         renderer,
                         renderingPipeline->unsafeGetFrameGraph().getVulkanPass())
                 );
-                for (int i = 0 ; i < 1 ; ++i) {
+                int numSidePots = 0;
+                int distance = 3;
+                for (int x = -numSidePots ; x <= numSidePots ; ++x) {
+                    for (int y = -numSidePots ; y <= numSidePots ; ++y) {
 
 
-                    entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights, un::Path>();
-                    auto[pos, mesh, objectLights, path] = world.get<un::Translation, un::RenderMesh, un::ObjectLights, un::Path>(
-                        entity
-                    );
-                    path.speed = 5;
-                    path.positions = std::vector<glm::vec3>(
-                        {
-                            glm::vec3(0, 0, 0),
-                            glm::vec3(-5, 0, -10),
-                            glm::vec3(5, 0, -15),
-                            glm::vec3(0, 0, 5),
-                            glm::vec3(-5, 0, 15)
-                        }
-                    );
-                    objectLights.descriptorSet = drawingSystem->getObjectDescriptorAllocator()
-                                                              ->allocate();
-                    objectLights.buffer = un::ResizableBuffer(
-                        renderer,
-                        vk::BufferUsageFlagBits::eUniformBuffer,
-                        sizeof(un::ObjectLightingData),
-                        true,
-                        vk::MemoryPropertyFlagBits::eHostCoherent |
-                        vk::MemoryPropertyFlagBits::eHostVisible
-                    );
-                    vk::DescriptorBufferInfo bufferInfo(
-                        objectLights.buffer,
-                        objectLights.buffer.getOffset(),
-                        VK_WHOLE_SIZE
-                    );
-                    device.updateDescriptorSets(
-                        {
-                            vk::WriteDescriptorSet(
-                                objectLights.descriptorSet,
-                                0, 0,
-                                1,
-                                vk::DescriptorType::eUniformBuffer,
-                                nullptr,
-                                &bufferInfo
-                            )
-                        }, {
+                        entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights, un::Path>();
+                        auto[pos, mesh, objectLights, path] = world.get<un::Translation, un::RenderMesh, un::ObjectLights, un::Path>(
+                            entity
+                        );
+                        path.speed = 5;
+                        pos.value = glm::vec3(
+                            x * distance,
+                            0,
+                            y * distance
+                        );
+                        objectLights.descriptorSet = drawingSystem->getObjectDescriptorAllocator()
+                                                                  ->allocate();
+                        objectLights.buffer = un::ResizableBuffer(
+                            renderer,
+                            vk::BufferUsageFlagBits::eUniformBuffer,
+                            sizeof(un::ObjectLightingData),
+                            true,
+                            vk::MemoryPropertyFlagBits::eHostCoherent |
+                            vk::MemoryPropertyFlagBits::eHostVisible
+                        );
+                        vk::DescriptorBufferInfo bufferInfo(
+                            objectLights.buffer,
+                            objectLights.buffer.getOffset(),
+                            VK_WHOLE_SIZE
+                        );
+                        device.updateDescriptorSets(
+                            {
+                                vk::WriteDescriptorSet(
+                                    objectLights.descriptorSet,
+                                    0, 0,
+                                    1,
+                                    vk::DescriptorType::eUniformBuffer,
+                                    nullptr,
+                                    &bufferInfo
+                                )
+                            }, {
 
-                        }
-                    );
-                    mesh.material = new un::Material(shader);
-                    mesh.meshInfo = &info;
+                            }
+                        );
+                        mesh.material = new un::Material(shader);
+                        mesh.meshInfo = &info;
+                    }
                 }
             }
         );
@@ -207,9 +207,9 @@ int main(int argc, char** argv) {
     un::Translation& translation = registry.get<un::Translation>(cameraEntity);
     translation.value.z = -15;
     translation.value.x = 0;
-    translation.value.y = 0;
+    translation.value.y = 5;
     perspective.aspect = 16.0F / 9.0F;
-    perspective.fieldOfView = 100.0F;
+    perspective.fieldOfView = 60.0F;
     perspective.zNear = 0.1F;
     perspective.zFar = 1000.0F;
     auto cDescriptorSet = camera.cameraDescriptorSet = drawingSystem->getCameraDescriptorSetAllocator()

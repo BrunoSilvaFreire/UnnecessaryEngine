@@ -39,9 +39,6 @@ namespace un {
             64,
             vk::ShaderStageFlagBits::eAllGraphics
         );
-
-
-
     }
 
     void DrawingSystem::step(World& world, f32 delta, un::JobWorker* worker) {

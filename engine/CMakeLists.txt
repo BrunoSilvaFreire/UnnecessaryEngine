@@ -119,9 +119,9 @@ target_compile_definitions(
 )
 set(
         SHADERS
-        resources/shaders/standart.frag.hlsl
-        resources/shaders/standart.vert.hlsl
-        resources/shaders/standart.geom.hlsl
+        resources/shaders/glsl/standart.frag.glsl
+        resources/shaders/glsl/standart.vert.glsl
+        resources/shaders/glsl/standart.geom.glsl
 )
 set(resources_output ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources)
 set(shader_output_dir ${resources_output}/shaders)
