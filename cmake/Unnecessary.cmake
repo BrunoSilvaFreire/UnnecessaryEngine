@@ -41,5 +41,14 @@ function(add_shader SHADER)
             COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
             COMMAND spirv-cross ${shader_output} -V --output ${shader_output_glsl}
     )
+    set(shader_output_json ${shader_output_dir}/${shader_filename}.json)
+    add_custom_target(
+        "convertShaderToJson-${shader_identifier}"
+        COMMENT "Convert SPIR-V ${shader_abs} to Json (${shader_output_json})"
+        DEPENDS ${target_name}
+        SOURCES "${shader_abs}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
+        COMMAND spirv-cross ${shader_output} --reflect --dump-resources --output ${shader_output_json}
+    )
     add_dependencies(unnecessary ${target_name})
 endfunction()

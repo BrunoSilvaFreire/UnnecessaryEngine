@@ -32,7 +32,6 @@ struct ObjectLightingData
 
 struct SceneLightingData
 {
-    uint nPointLights;
-    uint _padding[3];
-	PointLight pointLights[];
+    uint nLights;
+	PointLight pointLights[32];
 };

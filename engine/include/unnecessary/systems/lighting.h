@@ -7,9 +7,10 @@
 
 #include <unnecessary/systems/system.h>
 #include <unnecessary/systems/world.h>
+#include <unnecessary/misc/historic.h>
 #include <unnecessary/graphics/drawable.h>
 #include <unnecessary/graphics/lighting.h>
-#include <unnecessary/misc/historic.h>
+#include <unnecessary/graphics/descriptors/descriptor_allocator.h>
 #include "graphics_systems.h"
 
 namespace un {
@@ -17,13 +18,16 @@ namespace un {
     private:
         u32 maxNumLightsPerObject;
         std::vector<un::PointLightData> runtimeScenePointLights;
-        un::ResizableBuffer sceneLightingBuffer;
         un::Renderer* renderer;
-        un::BooleanHistoric lightsRewritten;
         bool lightsDirty;
         un::PrepareFrameGraphSystem* frameGraphSystem;
         u32 updateGPULightingDataCommandIndex;
- public:
+        // GPU lighting data
+        vk::DescriptorSet lightsDescriptorSet;
+        un::ResizableBuffer lightsBuffer;
+        un::DescriptorAllocator* lightsSetLayout;
+
+    public:
         LightingSystem(u32 maxNumLightsPerObject, un::Renderer* device);
 
         void describe(SystemDescriptor& descriptor) override;
@@ -38,9 +42,11 @@ namespace un {
 
         const ResizableBuffer& getSceneLightingBuffer() const;
 
-        const BooleanHistoric& getLightsRewritten() const;
-
         u32 getUpdateGpuLightingDataCommandIndex() const;
+
+        const vk::DescriptorSet& getLightsDescriptorSet() const;
+
+        DescriptorAllocator* getLightsSetLayout() const;
     };
 }
 

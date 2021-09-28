@@ -1,0 +1,1 @@
+valgrind --tool=cachegrind /home/brunorbsf/CLionProjects/UnnecessaryEngine/cmake-build-debug/bin/dummy --nThreads 1

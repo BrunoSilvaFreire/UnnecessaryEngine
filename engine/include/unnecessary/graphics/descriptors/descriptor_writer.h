@@ -39,7 +39,9 @@ namespace un {
             vk::DescriptorSet set,
             u32 binding,
             vk::Buffer buffer,
-            vk::DescriptorType type
+            vk::DescriptorType type,
+            vk::DeviceSize offset = 0,
+            vk::DeviceSize range = VK_WHOLE_SIZE
         );
     };
 

@@ -39,7 +39,9 @@ namespace un {
         vk::DescriptorSet set,
         u32 binding,
         vk::Buffer buffer,
-        vk::DescriptorType type
+        vk::DescriptorType type,
+        vk::DeviceSize offset,
+        vk::DeviceSize range
     ) {
         if (!set) {
             LOG(WARN) << "Invalid set provided @ binding: " << binding << ", buffer: "
@@ -50,7 +52,9 @@ namespace un {
             set,
             type,
             binding,
-            buffer
+            buffer,
+            offset,
+            range
         );
     }
 

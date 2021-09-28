@@ -243,7 +243,6 @@ namespace un {
         explicit RenderPass(un::Renderer* renderer);
 
         void end() {
-            LOG(INFO) << "Finished thing.";
             checkInitialized();
             initialized = false;
             buffer->end();

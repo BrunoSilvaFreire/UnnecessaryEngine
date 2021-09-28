@@ -87,9 +87,9 @@ int main(int argc, char** argv) {
     world.addSystem<un::TransformSystem>();
     world.addSystem<un::ProjectionSystem>();
     world.addSystem<un::PrepareFrameGraphSystem>(&renderer);
-    world.addSystem<un::LightingSystem>(4, &renderer);
     world.addSystem<un::CameraSystem>(&renderer);
-    auto drawingSystem = world.addSystem<un::DrawingSystem>(renderer);
+    auto lightingSystem = world.addSystem<un::LightingSystem>(4, &renderer);
+    auto drawingSystem = world.addSystem<un::DrawingSystem>(&renderer);
     u32 load, upload;
     vk::Device device = renderer.getVirtualDevice();
     un::JobChain(&jobs)
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
                 pipeline.withStandardRasterization();
 
                 pipeline.addDescriptorResource(
-                    drawingSystem->getSceneDescriptorAllocator()->getVulkanLayout()
+                    lightingSystem->getLightsSetLayout()->getVulkanLayout()
                 );
                 pipeline.addDescriptorResource(
                     drawingSystem->getCameraDescriptorSetAllocator()->getVulkanLayout()
@@ -143,19 +143,19 @@ int main(int argc, char** argv) {
 
 
                     entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights, un::Path>();
-                    auto[pos, mesh, objectLights] = world.get<un::Translation, un::RenderMesh, un::ObjectLights>(
+                    auto[pos, mesh, objectLights, path] = world.get<un::Translation, un::RenderMesh, un::ObjectLights, un::Path>(
                         entity
                     );
-                    /*    path.speed = 1;
-                        path.positions = std::vector<glm::vec3>(
-                            {
-                                glm::vec3(0, 0, 0),
-                                glm::vec3(0, 0, -10),
-                                glm::vec3(0, 0, 0)
-                            }
-                        );*/
-                    pos.value.x = i * 5;
-
+                    path.speed = 5;
+                    path.positions = std::vector<glm::vec3>(
+                        {
+                            glm::vec3(0, 0, 0),
+                            glm::vec3(-5, 0, -10),
+                            glm::vec3(5, 0, -15),
+                            glm::vec3(0, 0, 5),
+                            glm::vec3(-5, 0, 15)
+                        }
+                    );
                     objectLights.descriptorSet = drawingSystem->getObjectDescriptorAllocator()
                                                               ->allocate();
                     objectLights.buffer = un::ResizableBuffer(
@@ -206,6 +206,8 @@ int main(int argc, char** argv) {
     un::Perspective& perspective = registry.get<un::Perspective>(cameraEntity);
     un::Translation& translation = registry.get<un::Translation>(cameraEntity);
     translation.value.z = -15;
+    translation.value.x = 0;
+    translation.value.y = 0;
     perspective.aspect = 16.0F / 9.0F;
     perspective.fieldOfView = 100.0F;
     perspective.zNear = 0.1F;
@@ -229,8 +231,9 @@ int main(int argc, char** argv) {
             vk::DescriptorType::eUniformBuffer
         );
     }
-    world.addSystem<un::FreeFlightSystem>(app.getWindow());
+    //world.addSystem<un::FreeFlightSystem>(app.getWindow());
     world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
+    //world.addSystem<un::PathRunningSystem>();
     world.getSimulation().getSimulationGraph().saveToDot("simulation.dot");
     app.execute();
 }

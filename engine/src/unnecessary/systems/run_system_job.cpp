@@ -10,7 +10,6 @@ namespace un {
 
     void RunSystemJob::operator()(un::JobWorker* worker) {
         system->step(*world, deltaTime, worker);
-        LOG(INFO) << "Finished running system " << system;
     }
 
 /*    un::System* RunSystemJob::getSystem() const {

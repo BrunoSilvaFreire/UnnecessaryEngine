@@ -11,17 +11,17 @@ struct FragmentOutput
 	float3 color : COLOR;
 };
 
-[[vk::binding(0, 2)]]
+/* [[vk::binding(0, 2)]]
 cbuffer objectLighting
 {
    ObjectLightingData objectLighting;
 }
 
 [[vk::binding(0, 0)]]
-tbuffer sceneLighting
+cbuffer sceneLighting
 {
 	SceneLightingData sceneLighting;
-}
+} */
 
 float3 diffuse(float3 lightDir, float3 normal, Lighting light)
 {
@@ -31,16 +31,16 @@ float3 diffuse(float3 lightDir, float3 normal, Lighting light)
 
 FragmentOutput main(FragmentInput input)
 {
-	float3 color = float3(0, 0, 0);
+/* 	float3 color = float3(0, 0, 0);
 	for (uint i = 0; i < objectLighting.nLights; ++i)
 	{
 		uint lightIndex = objectLighting.pointLightsIndices[i];
 		PointLight light = sceneLighting.pointLights[lightIndex];
 		float3 lightDir = normalize(input.position - light.position);
 		color += diffuse(lightDir, input.normal, light.lighting);
-	}
+	} */
 	FragmentOutput output;
-	output.color = color;
+	output.color = float3(1,0,0);
 
 	return output;
 }

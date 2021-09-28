@@ -14,35 +14,30 @@ namespace un {
     class DrawingSystem : public System {
     private:
         un::Renderer* renderer;
-        un::LightingSystem* lightingSystem;
-        un::PrepareFrameGraphSystem* frameGraphSystem;
+
         un::DescriptorAllocator* objectSetLayout;
         un::DescriptorAllocator* cameraSetLayout;
-        un::DescriptorAllocator* sceneSetLayout;
-        vk::DescriptorSet sceneDescriptorSet;
-        DummyRenderingPipeline* renderingPipeline;
-   public:
-        DrawingSystem(Renderer& renderer);
+
+        un::LightingSystem* lightingSystem{};
+        un::PrepareFrameGraphSystem* frameGraphSystem{};
+        DummyRenderingPipeline* renderingPipeline{};
+    public:
+        DrawingSystem(Renderer* renderer);
 
         void describe(SystemDescriptor& descriptor) override;
 
         void step(World& world, f32 delta, un::JobWorker* worker) override;
 
-        const un::DescriptorAllocator* getSceneDescriptorAllocator() const;
 
         const un::DescriptorAllocator* getCameraDescriptorSetAllocator() const;
 
         const un::DescriptorAllocator* getObjectDescriptorAllocator() const;
 
 
-        un::DescriptorAllocator* getSceneDescriptorAllocator();
-
         un::DescriptorAllocator* getCameraDescriptorSetAllocator();
 
         un::DescriptorAllocator* getObjectDescriptorAllocator();
 
-
-        const vk::DescriptorSet& getSceneDescriptorSet() const;
 
     };
 }

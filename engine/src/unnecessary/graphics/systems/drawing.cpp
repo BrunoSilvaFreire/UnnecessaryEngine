@@ -10,19 +10,14 @@
 namespace un {
 
     DrawingSystem::DrawingSystem(
-        Renderer& renderer
-    ) : renderer(&renderer) {
-        un::SwapChain& chain = renderer.getSwapChain();
-        const vk::Device& device = renderer.getVirtualDevice();
+        Renderer* renderer
+    ) : renderer(renderer) {
+        un::SwapChain& chain = renderer->getSwapChain();
+        const vk::Device& device = renderer->getVirtualDevice();
 
-        un::DescriptorSetLayout sceneDescriptorLayout,
-            perCameraDescriptorLayout,
+        un::DescriptorSetLayout perCameraDescriptorLayout,
             perObjectDescriptorLayout;
 
-        sceneDescriptorLayout.push<un::ObjectLightingData>(
-            "sceneLighting",
-            vk::DescriptorType::eStorageBuffer
-        );
         perCameraDescriptorLayout.push<un::Matrices>(
             "matrices",
             vk::DescriptorType::eUniformBuffer
@@ -31,12 +26,7 @@ namespace un {
             "objectLighting",
             vk::DescriptorType::eUniformBuffer
         );
-        sceneSetLayout = new un::DescriptorAllocator(
-            std::move(sceneDescriptorLayout),
-            device,
-            1,
-            vk::ShaderStageFlagBits::eAllGraphics
-        );
+
         cameraSetLayout = new un::DescriptorAllocator(
             std::move(perCameraDescriptorLayout),
             device,
@@ -50,7 +40,6 @@ namespace un {
             vk::ShaderStageFlagBits::eAllGraphics
         );
 
-        sceneDescriptorSet = sceneSetLayout->allocate();
 
 
     }
@@ -61,15 +50,6 @@ namespace un {
 
 
         auto& registry = world.getRegistry();
-        if (lightingSystem->getLightsRewritten().wasJustActivated()) {
-            un::DescriptorWriter writer(renderer);
-            writer.updateUniformDescriptor(
-                sceneDescriptorSet,
-                0,
-                lightingSystem->getSceneLightingBuffer(),
-                vk::DescriptorType::eStorageBuffer
-            );
-        }
         un::Size2D size = renderer->getSwapChain().getResolution();
         const vk::Rect2D& renderArea = vk::Rect2D(
             vk::Offset2D(0, 0),
@@ -113,7 +93,7 @@ namespace un {
                     layout,
                     0,
                     {
-                        sceneDescriptorSet,
+                        lightingSystem->getLightsDescriptorSet(),
                         camera.cameraDescriptorSet,
                         lights.descriptorSet
                     }, {
@@ -162,13 +142,6 @@ namespace un {
         renderingPipeline = descriptor.usesPipeline<un::DummyRenderingPipeline>(renderer);
     }
 
-    const vk::DescriptorSet& DrawingSystem::getSceneDescriptorSet() const {
-        return sceneDescriptorSet;
-    }
-
-    const un::DescriptorAllocator* DrawingSystem::getSceneDescriptorAllocator() const {
-        return sceneSetLayout;
-    }
 
     const un::DescriptorAllocator*
     DrawingSystem::getCameraDescriptorSetAllocator() const {
@@ -179,9 +152,6 @@ namespace un {
         return objectSetLayout;
     }
 
-    un::DescriptorAllocator* DrawingSystem::getSceneDescriptorAllocator() {
-        return sceneSetLayout;
-    }
 
     un::DescriptorAllocator* DrawingSystem::getCameraDescriptorSetAllocator() {
         return cameraSetLayout;

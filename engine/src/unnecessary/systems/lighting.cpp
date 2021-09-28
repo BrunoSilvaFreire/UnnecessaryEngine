@@ -3,6 +3,7 @@
 #include <unnecessary/graphics/buffers/command_buffer.h>
 #include <unnecessary/graphics/buffers/buffer_writer.h>
 #include <unnecessary/misc/binary_writer.h>
+#include "unnecessary/graphics/descriptors/descriptor_writer.h"
 
 namespace un {
     LightingSystem::LightingSystem(
@@ -10,16 +11,27 @@ namespace un {
         un::Renderer* device
     ) : maxNumLightsPerObject(maxNumLightsPerObject),
         renderer(device),
-        sceneLightingBuffer(
+        lightsBuffer(
             *device,
-            vk::BufferUsageFlagBits::eStorageBuffer |
+            vk::BufferUsageFlagBits::eUniformBuffer |
             vk::BufferUsageFlagBits::eTransferDst,
             sizeof(un::SceneLightingData),
             false,
-            vk::MemoryPropertyFlagBits::eDeviceLocal
-        ),
-        lightsRewritten() {
+            vk::MemoryPropertyFlagBits::eHostVisible
+        ) {
         lightsDirty = true;
+        un::DescriptorSetLayout sceneDescriptorLayout;
+        sceneDescriptorLayout.push<un::ObjectLightingData>(
+            "sceneLighting",
+            vk::DescriptorType::eUniformBuffer
+        );
+        lightsSetLayout = new un::DescriptorAllocator(
+            std::move(sceneDescriptorLayout),
+            device->getVirtualDevice(),
+            1,
+            vk::ShaderStageFlagBits::eAllGraphics
+        );
+        lightsDescriptorSet = lightsSetLayout->allocate();
     }
 
     void LightingSystem::step(un::World& world, f32 delta, un::JobWorker* worker) {
@@ -36,24 +48,31 @@ namespace un {
             }
             light.light = registry.get<un::PointLight>(entity);
         }
-        lightsRewritten.set(lightsDirty);
         if (lightsDirty) {
-            size_t bufSize = findSceneBufferSize();
+            //size_t bufSize = 32 * (8 * sizeof(float)) + sizeof(u32);
+            size_t bufSize = 1040;
             un::BinaryWriter buf(bufSize);
             buf.write<u32>(numLights);
-            const size_t ssboHeader = 16;
-            buf.skip(ssboHeader - sizeof(u32));
+            /*const size_t ssboHeader = 16;
+            buf.skip(ssboHeader - sizeof(u32));*/
             for (const auto& item : runtimeScenePointLights) {
                 buf.write(item);
             }
-            sceneLightingBuffer.ensureLargeEnough(*renderer, bufSize);
+            lightsBuffer.ensureLargeEnough(*renderer, bufSize);
             {
                 un::BufferWriter writer(
                     renderer,
                     worker->getGraphicsResources().getCommandPool(),
                     false
                 );
-                writer.overwriteWithStaging(sceneLightingBuffer, buf.getBuffer());
+                un::DescriptorWriter descriptorWriter(renderer);
+                descriptorWriter.updateUniformDescriptor(
+                    lightsDescriptorSet,
+                    0,
+                    lightsBuffer,
+                    vk::DescriptorType::eUniformBuffer
+                );
+                writer.overwrite(lightsBuffer, buf.getBuffer());
                 updateGPULightingDataCommandIndex = frameGraphSystem->enqueuePreparationPhase(
                     *writer.getCommandBuffer()
                 );
@@ -86,11 +105,7 @@ namespace un {
     }
 
     const ResizableBuffer& LightingSystem::getSceneLightingBuffer() const {
-        return sceneLightingBuffer;
-    }
-
-    const BooleanHistoric& LightingSystem::getLightsRewritten() const {
-        return lightsRewritten;
+        return lightsBuffer;
     }
 
     void LightingSystem::describe(SystemDescriptor& descriptor) {
@@ -100,6 +115,14 @@ namespace un {
 
     u32 LightingSystem::getUpdateGpuLightingDataCommandIndex() const {
         return updateGPULightingDataCommandIndex;
+    }
+
+    const vk::DescriptorSet& LightingSystem::getLightsDescriptorSet() const {
+        return lightsDescriptorSet;
+    }
+
+    DescriptorAllocator* LightingSystem::getLightsSetLayout() const {
+        return lightsSetLayout;
     }
 
 }

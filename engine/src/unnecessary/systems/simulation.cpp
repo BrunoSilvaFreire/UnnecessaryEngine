@@ -49,9 +49,6 @@ namespace un {
                     jobsNames += ", ";
 
                 }
-                LOG(INFO) << "Scheduled jobs" << jobsNames << " for " << group.name
-                          << " ("
-                          << index << ").";
                 systemToJobs[index] = scheduledJobs;
 
                 chain.separate();

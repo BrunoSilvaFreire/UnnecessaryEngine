@@ -72,7 +72,6 @@ namespace un {
     }
 
     void DispatchFrameGraphSystem::step(World& world, f32 delta, un::JobWorker* worker) {
-        LOG(INFO) << "Dispatching frame.";
         un::Size2D size = renderer->getSwapChain().getResolution();
         const vk::Rect2D& renderArea = vk::Rect2D(
             vk::Offset2D(0, 0),
