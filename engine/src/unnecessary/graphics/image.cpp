@@ -8,9 +8,9 @@ namespace un {
         vk::Format format,
         vk::Extent3D size,
         vk::ImageLayout layout,
-        un::ImageDetails details,
-        vk::ImageUsageFlagBits usage,
+        vk::ImageUsageFlags usage,
         vk::ImageType type,
+        un::ImageDetails details,
         vk::SharingMode mode,
         vk::ImageCreateFlags flags
     ) {
@@ -34,4 +34,22 @@ namespace un {
             )
         );
     }
+
+    void Image::dispose(const vk::Device& device) {
+        device.destroy(image);
+    }
+
+    vk::Image Image::operator*() {
+        return image;
+    }
+
+    Image::operator vk::Image() {
+        return image;
+    }
+
+    ImageDetails::ImageDetails(
+        u8 mipLevels,
+        vk::SampleCountFlagBits sampleCountFlag,
+        vk::ImageTiling tiling
+    ) : mipLevels(mipLevels), sampleCountFlag(sampleCountFlag), tiling(tiling) {}
 }

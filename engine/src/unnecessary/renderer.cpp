@@ -64,4 +64,12 @@ namespace un {
     RenderingPipeline* Renderer::getCurrentPipeline() const {
         return currentPipeline;
     }
+
+    const un::SwapChain& Renderer::getSwapChain() const {
+        return swapChain;
+    }
+
+    const RenderingDevice& Renderer::getRenderingDevice() const {
+        return renderingDevice;
+    }
 }

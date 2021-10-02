@@ -12,33 +12,10 @@ namespace un {
 
     void GraphicsPipelineBuilder::withStandardRasterization() {
         withInputAssembly(vk::PrimitiveTopology::eTriangleList);
-        std::vector<vk::VertexInputBindingDescription> inputBindings;
-        std::vector<vk::VertexInputAttributeDescription> inputAttributes;
-        u32 stride = vertexLayout.getStride();
-        const std::vector<un::VertexInput>& elements = vertexLayout.getElements();
-        u32 count = elements.size();
-        u32 offset = 0;
-        u32 binding = vertexLayout.getBinding();
-        for (u32 i = 0; i < count; ++i) {
-            const un::VertexInput& input = elements[i];
-            inputBindings.emplace_back(binding, stride);
-            inputAttributes.emplace_back(
-                i,
-                binding,
-                input.getFormat(),
-                offset
-            );
-            offset += input.getElementSize();
-        }
-        vertexInput.emplace(
-            (vk::PipelineVertexInputStateCreateFlags) 0,
-            inputBindings,
-            inputAttributes
-        );
         rasterization.emplace(
             (vk::PipelineRasterizationStateCreateFlags) 0,
-            true,
-            true,
+            false,
+            false,
             vk::PolygonMode::eFill,
             (vk::CullModeFlags) vk::CullModeFlagBits::eFront,
             vk::FrontFace::eClockwise,
@@ -69,10 +46,32 @@ namespace un {
                 (vk::PipelineCacheCreateFlags) 0
             )
         );
-
+        std::vector<vk::VertexInputBindingDescription> inputBindings;
+        std::vector<vk::VertexInputAttributeDescription> inputAttributes;
+        u32 stride = vertexLayout.getStride();
+        const std::vector<un::VertexInput>& elements = vertexLayout.getElements();
+        u32 count = elements.size();
+        u32 offset = 0;
+        u32 binding = vertexLayout.getBinding();
+        inputBindings.emplace_back(binding, stride);
+        for (u32 i = 0 ; i < count ; ++i) {
+            const un::VertexInput& input = elements[i];
+            inputAttributes.emplace_back(
+                i,
+                binding,
+                input.getFormat(),
+                offset
+            );
+            offset += input.getLength();
+        }
+        vk::PipelineVertexInputStateCreateInfo vertexInput(
+            (vk::PipelineVertexInputStateCreateFlags) 0,
+            inputBindings,
+            inputAttributes
+        );
         std::vector<vk::DescriptorSetLayout> layouts;
         const auto& descriptors = pipelineLayout.getDescriptorLayouts();
-        for (u32 i = 0; i < descriptors.size(); ++i) {
+        for (u32 i = 0 ; i < descriptors.size() ; ++i) {
             const auto& descriptor = descriptors[i];
             switch (descriptor.getType()) {
                 case un::DescriptorSetType::eShared:
@@ -116,37 +115,7 @@ namespace un {
                 "main"
             );
         }
-        std::vector<vk::VertexInputBindingDescription> vertexBindings;
-        std::vector<vk::VertexInputAttributeDescription> vertexAttributes;
-        const std::vector<un::VertexInput>& vertexElements = vertexLayout.getElements();
 
-        vertexBindings.emplace_back(
-            0,
-            vertexLayout.getStride()
-        );
-        u32 offset = 0;
-        u32 binding = vertexLayout.getBinding();
-        for (int i = 0; i < vertexElements.size(); ++i) {
-            const un::VertexInput& input = vertexElements[i];
-            vertexAttributes.emplace_back(
-                i,
-                binding,
-                input.getFormat(),
-                offset
-            );
-            offset += input.getElementSize();
-        }
-        vk::PipelineVertexInputStateCreateInfo vertexInput(
-            (vk::PipelineVertexInputStateCreateFlags) 0,
-            vertexBindings,
-            vertexAttributes
-        );
-
-
-        vk::PipelineInputAssemblyStateCreateInfo inputAssembly(
-            (vk::PipelineInputAssemblyStateCreateFlags) 0,
-            vk::PrimitiveTopology::eTriangleList
-        );
         std::array<const vk::DynamicState, 2> dynamicStates(
             {
                 vk::DynamicState::eViewport,
@@ -185,14 +154,6 @@ namespace un {
             vk::SampleCountFlagBits::e1,
             false
         );
-        vk::PipelineRasterizationStateCreateInfo rasterization(
-            (vk::PipelineRasterizationStateCreateFlags) 0,
-            0,
-            0,
-            vk::PolygonMode::eFill,
-            (vk::CullModeFlags) vk::CullModeFlagBits::eBack
-        );
-        rasterization.setLineWidth(1.0F);
         std::vector<vk::PipelineColorBlendAttachmentState> attachments(
             {
                 vk::PipelineColorBlendAttachmentState(
@@ -223,10 +184,10 @@ namespace un {
             (vk::PipelineCreateFlags) 0,
             stageInfos,
             &vertexInput,
-            &inputAssembly,
+            inputAssembly.operator->(),
             nullptr,
             &viewportState,
-            &rasterization,
+            rasterization.operator->(),
             &multisample,
             nullptr,
             &colorBlend,
@@ -242,7 +203,7 @@ namespace un {
         );
         if (pipelineResult.result != vk::Result::eSuccess) {
             std::ostringstream str;
-            str << "Unable to create graphics pipeline: '"
+            str << "Unable to clayout(location = 0) in vec3 position;reate graphics pipeline: '"
                 << vk::to_string(pipelineResult.result)
                 << "' (" << pipelineResult.result << ").";
             throw std::runtime_error(str.str());

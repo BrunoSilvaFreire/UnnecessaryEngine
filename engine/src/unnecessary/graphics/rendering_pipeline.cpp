@@ -1,9 +1,10 @@
 #include <unnecessary/graphics/rendering/rendering_pipeline.h>
 #include <unnecessary/graphics/renderer.h>
+#include "unnecessary/graphics/rendering/frame_resource.h"
 
 namespace un {
     void RenderingPipeline::begin(un::Renderer* renderer, vk::Framebuffer framebuffer) {
-        for (auto[pass, index] : frameGraph->getFrameGraph().all_vertices()) {
+        for (auto[pass, index]: frameGraph->getFrameGraph().all_vertices()) {
             vk::CommandBufferInheritanceInfo inheritanceInfo(
                 frameGraph->getVulkanPass(),
                 index,
@@ -36,25 +37,25 @@ namespace un {
         un::FrameGraph graph;
         configureGraph(graph);
         frameGraph = un::BakedFrameGraph(std::move(graph), *renderer);
-        for (auto[index, storage] : imports) {
+        for (auto[index, storage]: imports) {
             *storage = &frameGraph->getRenderPass(index);
         }
     }
 
-    un::RenderPass* DummyRenderingPipeline::getDepthPass() const {
+    un::RenderPass* PhongRenderingPipeline::getDepthPass() const {
         return depthPass;
     }
 
-    un::RenderPass* DummyRenderingPipeline::getDrawOpaquePass() const {
+    un::RenderPass* PhongRenderingPipeline::getDrawOpaquePass() const {
         return drawOpaquePass;
     }
 
-    un::FrameResource* DummyRenderingPipeline::getDepthBuffer() const {
+    FrameResource* PhongRenderingPipeline::getDepthBuffer() const {
         return depthBuffer;
     }
 
-    void DummyRenderingPipeline::configureGraph(FrameGraph& graph) {
-        colorAttachmentHandle = graph.addAttachment(
+    void PhongRenderingPipeline::configureGraph(FrameGraph& graph) {
+        colorAttachmentHandle = graph.addBorrowedAttachment(
             vk::ClearColorValue(
                 std::array<float, 4>(
                     {
@@ -72,16 +73,32 @@ namespace un {
             vk::ImageLayout::eUndefined,
             vk::ImageLayout::ePresentSrcKHR
         );
-        auto drawOpaqueInfo = graph.addPass(
+        depthAttachmentHandle = graph.addOwnedAttachment(
+            vk::ImageUsageFlagBits::eDepthStencilAttachment,
+            vk::ClearDepthStencilValue(0, 0),
+            (vk::AttachmentDescriptionFlags) 0,
+            vk::Format::eD32Sfloat,
+            vk::SampleCountFlagBits::e1,
+            vk::AttachmentLoadOp::eClear,
+            vk::AttachmentStoreOp::eStore,
+            vk::AttachmentLoadOp::eClear,
+            vk::AttachmentStoreOp::eStore,
+            vk::ImageLayout::eUndefined,
+            vk::ImageLayout::eDepthStencilAttachmentOptimal
+        );
+        auto drawOpaque = graph.addPass(
             "drawOpaquePass",
             vk::PipelineStageFlagBits::eFragmentShader |
-            vk::PipelineStageFlagBits::eVertexShader |
-            vk::PipelineStageFlagBits::eComputeShader
+            vk::PipelineStageFlagBits::eVertexShader
         );
-        drawOpaqueInfo.usesColorAttachment(
+        drawOpaque.rendersToWindow(
             colorAttachmentHandle,
             vk::ImageLayout::eColorAttachmentOptimal
         );
-        storePassInto(drawOpaqueInfo, &drawOpaquePass);
+        drawOpaque.usesDepthAttachment(
+            depthAttachmentHandle,
+            vk::ImageLayout::eDepthStencilAttachmentOptimal
+        );
+        storePassInto(drawOpaque, &drawOpaquePass);
     }
 }

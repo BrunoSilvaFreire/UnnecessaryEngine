@@ -34,7 +34,11 @@ namespace un {
 
         un::SwapChain& getSwapChain();
 
+        const un::SwapChain& getSwapChain() const;
+
         RenderingDevice& getRenderingDevice();
+
+        const RenderingDevice& getRenderingDevice() const;
 
         const Queue& getGraphics() const;
 

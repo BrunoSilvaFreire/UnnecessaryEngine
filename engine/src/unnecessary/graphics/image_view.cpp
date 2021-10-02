@@ -33,7 +33,7 @@ namespace un {
         return vulkanView;
     }
 
-    void ImageView::dispose(vk::Device& device) {
+    void ImageView::dispose(const vk::Device& device) {
         device.destroy(vulkanView);
     }
 }

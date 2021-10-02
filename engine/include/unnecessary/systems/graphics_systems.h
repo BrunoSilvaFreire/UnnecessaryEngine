@@ -14,11 +14,10 @@ namespace un {
     private:
         un::Renderer* renderer;
         un::CommandBufferGraph commandGraph;
-        un::DummyRenderingPipeline* renderingPipeline;
+        un::PhongRenderingPipeline* renderingPipeline;
         std::set<u32> preparationCommands;
 
         u32 currentFramebufferIndex{};
-        std::vector<vk::Framebuffer> framebuffers;
         vk::Semaphore imageAvailableSemaphore;
 
     public:
@@ -46,7 +45,7 @@ namespace un {
     class DispatchFrameGraphSystem : public un::System {
     private:
         un::PrepareFrameGraphSystem* graphSystem{};
-        un::DummyRenderingPipeline* renderingPipeline{};
+        un::PhongRenderingPipeline* renderingPipeline{};
         un::Renderer* renderer;
 
     public:

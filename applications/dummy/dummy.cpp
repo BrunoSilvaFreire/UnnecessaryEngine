@@ -15,7 +15,7 @@
 #include <cxxopts.hpp>
 #include <unnecessary/graphics/lighting.h>
 #include <random>
-#include <unnecessary/graphics/frame_graph.h>
+#include "unnecessary/graphics/rendering/frame_graph.h"
 #include <unnecessary/components/dummy.h>
 #include <unnecessary/graphics/systems/drawing.h>
 #include "gameplay.h"
@@ -35,14 +35,16 @@ void testParallelism(un::JobSystem& jobs) {
     private:
         std::vector<IncrementPair> pairs;
     public:
-        IncrementPairJob(std::vector<IncrementPair>&& pairs) : pairs(std::move(this->pairs)) {}
+        explicit IncrementPairJob(
+            std::vector<IncrementPair>&& pairs
+        ) : pairs(std::move(pairs)) {}
 
         void operator()(size_t index, un::JobWorker* worker) override {
             IncrementPair& pair = pairs[index];
             pair.position += pair.velocity;
         }
     };
-    for (size_t i = 0 ; i < numEntries ; ++i) {
+    for (size_t i = 0; i < numEntries; ++i) {
         auto& vel = incrementPairs[i];
         vel.velocity = glm::vec3(
             randomFloat(),
@@ -77,13 +79,23 @@ int main(int argc, char** argv) {
     un::MeshInfo info;
     un::VertexLayout vertexLayout;
     //Position
-    vertexLayout.push<f32>(3, vk::Format::eR32G32B32Sfloat);
+    vertexLayout.push<f32>(
+        3,
+        vk::Format::eR32G32B32Sfloat,
+        un::CommonVertexAttribute::ePosition
+    );
+    //Normal
+    vertexLayout.push<f32>(
+        3,
+        vk::Format::eR32G32B32Sfloat,
+        un::CommonVertexAttribute::eNormal
+    );
 
     /*
     //Color
     vertexLayout.push<f32>(3, vk::Format::eR32G32B32Sfloat);
     */
-    auto renderingPipeline = renderer.createPipeline<un::DummyRenderingPipeline>();
+    auto renderingPipeline = renderer.createPipeline<un::PhongRenderingPipeline>();
     world.addSystem<un::TransformSystem>();
     world.addSystem<un::ProjectionSystem>();
     world.addSystem<un::PrepareFrameGraphSystem>(&renderer);
@@ -93,25 +105,25 @@ int main(int argc, char** argv) {
     u32 load, upload;
     vk::Device device = renderer.getVirtualDevice();
     un::JobChain(&jobs)
-        .immediately<un::LoadObjJob>(&load, "resources/teapot.obj", &data)
+        .immediately<un::LoadObjJob>(&load, "resources/teapot_normal.obj", &data)
         .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
         .after(
             upload,
             [&](un::JobWorker* worker) {
                 un::BoundVertexLayout boundLayout(vertexLayout);
                 auto* vertex = new un::ShaderStage(
-                    "standart.vert",
+                    "phong.vert",
                     vk::ShaderStageFlagBits::eVertex,
                     device,
                     un::PushConstants(0, sizeof(un::PerObjectData))
                 );
                 /*auto* geometry = new un::ShaderStage(
-                    "standart.geom",
+                    "phong.geom",
                     vk::ShaderStageFlagBits::eGeometry,
                     device
                 );*/
                 auto* fragment = new un::ShaderStage(
-                    "standart.frag",
+                    "phong.frag",
                     vk::ShaderStageFlagBits::eFragment,
                     device
                 );
@@ -139,25 +151,23 @@ int main(int argc, char** argv) {
                         renderer,
                         renderingPipeline->unsafeGetFrameGraph().getVulkanPass())
                 );
-                int numSidePots = 0;
-                int distance = 3;
-                for (int x = -numSidePots ; x <= numSidePots ; ++x) {
-                    for (int y = -numSidePots ; y <= numSidePots ; ++y) {
-
-
-                        entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights, un::Path>();
-                        auto[pos, mesh, objectLights, path] = world.get<un::Translation, un::RenderMesh, un::ObjectLights, un::Path>(
+                int numSidePots = 5;
+                int distance = 15;
+                for (int x = -numSidePots; x <= numSidePots; ++x) {
+                    for (int y = -numSidePots; y <= numSidePots; ++y) {
+                        entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights>();
+                        auto[pos, mesh, objectLights] = world.get<un::Translation, un::RenderMesh, un::ObjectLights>(
                             entity
                         );
-                        path.speed = 5;
                         pos.value = glm::vec3(
                             x * distance,
                             0,
                             y * distance
                         );
-                        objectLights.descriptorSet = drawingSystem->getObjectDescriptorAllocator()
-                                                                  ->allocate();
-                        objectLights.buffer = un::ResizableBuffer(
+                        objectLights.descriptorSet = drawingSystem
+                            ->getObjectDescriptorAllocator()
+                            ->allocate();
+                        auto olb = objectLights.buffer = un::ResizableBuffer(
                             renderer,
                             vk::BufferUsageFlagBits::eUniformBuffer,
                             sizeof(un::ObjectLightingData),
@@ -165,25 +175,13 @@ int main(int argc, char** argv) {
                             vk::MemoryPropertyFlagBits::eHostCoherent |
                             vk::MemoryPropertyFlagBits::eHostVisible
                         );
-                        vk::DescriptorBufferInfo bufferInfo(
-                            objectLights.buffer,
-                            objectLights.buffer.getOffset(),
-                            VK_WHOLE_SIZE
-                        );
-                        device.updateDescriptorSets(
-                            {
-                                vk::WriteDescriptorSet(
-                                    objectLights.descriptorSet,
-                                    0, 0,
-                                    1,
-                                    vk::DescriptorType::eUniformBuffer,
-                                    nullptr,
-                                    &bufferInfo
-                                )
-                            }, {
-
-                            }
-                        );
+                        un::DescriptorWriter(&renderer)
+                            .updateUniformDescriptor(
+                                objectLights.descriptorSet,
+                                0,
+                                olb,
+                                vk::DescriptorType::eUniformBuffer
+                            );
                         mesh.material = new un::Material(shader);
                         mesh.meshInfo = &info;
                     }
@@ -191,17 +189,29 @@ int main(int argc, char** argv) {
             }
         );
 
-    for (int j = 0 ; j < 7 ; ++j) {
+    for (int j = 0; j < 7; ++j) {
         auto light = world.createEntity<un::LocalToWorld, un::PointLight, un::Translation>();
         auto& pointLight = world.get<un::PointLight>(light);
         pointLight.lighting = un::Lighting(
             1, 0, 0, 1
         );
     }
-    auto cameraEntity = world.createEntity<un::LocalToWorld, un::Camera, un::Projection, un::Perspective, un::Translation, un::Rotation, un::FreeFlight>();
-    un::FreeFlight& freeFlight = registry.get<un::FreeFlight>(cameraEntity);
-    freeFlight.speed = 1;
-    freeFlight.angularSpeed = 0.05F;
+    auto cameraEntity = world.createEntity<un::LocalToWorld,
+        un::Camera,
+        un::Projection,
+        un::Perspective,
+        un::Translation,
+        un::Rotation,
+        un::Path>();
+    un::Path& path = registry.get<un::Path>(cameraEntity);
+    path.speed = .5;
+    path.positions = {
+        glm::vec3(0, 0, 0),
+        glm::vec3(10, 0, 10),
+        glm::vec3(-10, 0, 10),
+        glm::vec3(10, 5, 10),
+        glm::vec3(-10, 5, 10),
+    };
     un::Camera& camera = registry.get<un::Camera>(cameraEntity);
     un::Perspective& perspective = registry.get<un::Perspective>(cameraEntity);
     un::Translation& translation = registry.get<un::Translation>(cameraEntity);
@@ -209,7 +219,7 @@ int main(int argc, char** argv) {
     translation.value.x = 0;
     translation.value.y = 5;
     perspective.aspect = 16.0F / 9.0F;
-    perspective.fieldOfView = 60.0F;
+    perspective.fieldOfView = 100.0F;
     perspective.zNear = 0.1F;
     perspective.zFar = 1000.0F;
     auto cDescriptorSet = camera.cameraDescriptorSet = drawingSystem->getCameraDescriptorSetAllocator()
@@ -233,7 +243,7 @@ int main(int argc, char** argv) {
     }
     //world.addSystem<un::FreeFlightSystem>(app.getWindow());
     world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
-    //world.addSystem<un::PathRunningSystem>();
+    world.addSystem<un::PathRunningSystem>();
     world.getSimulation().getSimulationGraph().saveToDot("simulation.dot");
     app.execute();
 }

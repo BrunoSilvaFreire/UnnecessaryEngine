@@ -12,6 +12,7 @@ namespace un {
         u32 indexCount;
         un::BoundVertexLayout layout;
         un::Buffer vertex, index;
+        std::optional<un::Buffer> normals;
     public:
         MeshInfo();
 
@@ -27,6 +28,10 @@ namespace un {
         un::Buffer& getVertex();
 
         un::Buffer& getIndex();
+
+        std::optional<un::Buffer>& getNormals();
+
+        const std::optional<un::Buffer>& getNormals() const;
     };
 
     struct MeshData {

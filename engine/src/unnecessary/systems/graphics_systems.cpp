@@ -27,7 +27,7 @@ namespace un {
                 &currentFramebufferIndex
             )
         );
-        auto currentFramebuffer = framebuffers[currentFramebufferIndex];
+        auto currentFramebuffer = renderingPipeline->unsafeGetFrameGraph().getFrameBuffer(currentFramebufferIndex);
         commandGraph.clear();
         renderingPipeline->begin(renderer, currentFramebuffer);
     }
@@ -36,39 +36,14 @@ namespace un {
         return commandGraph;
     }
 
-    vk::Framebuffer PrepareFrameGraphSystem::getCurrentFramebuffer() {
-        return framebuffers[currentFramebufferIndex];
-    }
-
     void PrepareFrameGraphSystem::describe(SystemDescriptor& descriptor) {
         descriptor.runsOnStage(un::kUploadFrameData);
-        renderingPipeline = descriptor.usesPipeline<un::DummyRenderingPipeline>(renderer);
-        if (renderingPipeline != nullptr) {
-            auto& chain = renderer->getSwapChain();
-            auto device = renderer->getVirtualDevice();
-            const un::Size2D& resolution = chain.getResolution();
-            std::vector<vk::ImageView> views;
-            for (const auto& item : chain.getViews()) {
-                auto view = item.getVulkanView();
-                framebuffers.emplace_back(
-                    device.createFramebuffer(
-                        vk::FramebufferCreateInfo(
-                            (vk::FramebufferCreateFlags) 0,
-                            renderingPipeline->unsafeGetFrameGraph().getVulkanPass(),
-                            1, &view,
-                            resolution.x,
-                            resolution.y,
-                            1
-                        )
-                    )
-                );
-            }
-            imageAvailableSemaphore = device.createSemaphore(
-                vk::SemaphoreCreateInfo(
-                    (vk::SemaphoreCreateFlags) 0
-                )
-            );
-        }
+        renderingPipeline = descriptor.usesPipeline<un::PhongRenderingPipeline>(renderer);
+        imageAvailableSemaphore = renderer->getVirtualDevice().createSemaphore(
+            vk::SemaphoreCreateInfo(
+                (vk::SemaphoreCreateFlags) 0
+            )
+        );
     }
 
     void DispatchFrameGraphSystem::step(World& world, f32 delta, un::JobWorker* worker) {
@@ -140,7 +115,7 @@ namespace un {
     void DispatchFrameGraphSystem::describe(SystemDescriptor& descriptor) {
         descriptor.runsOnStage(un::kDispatchFrame);
         graphSystem = descriptor.dependsOn<un::PrepareFrameGraphSystem>();
-        renderingPipeline = descriptor.usesPipeline<un::DummyRenderingPipeline>(renderer);
+        renderingPipeline = descriptor.usesPipeline<un::PhongRenderingPipeline>(renderer);
     }
 
     DispatchFrameGraphSystem::DispatchFrameGraphSystem(
@@ -151,6 +126,6 @@ namespace un {
 
     vk::Framebuffer PrepareFrameGraphSystem::getCurrentFramebuffer(u32* pIndex) {
         *pIndex = currentFramebufferIndex;
-        return framebuffers[currentFramebufferIndex];
+        return renderer->getCurrentPipeline()->unsafeGetFrameGraph().getFrameBuffer(currentFramebufferIndex);
     }
 }

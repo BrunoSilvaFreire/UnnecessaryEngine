@@ -9,12 +9,19 @@ namespace un {
         buffersToDispose.emplace(buffer);
     }
 
-    void DisposeTracker::dispose(vk::Device device) {
-        for (vk::Buffer buf : buffersToDispose) {
+    void DisposeTracker::dispose(const vk::Device& device) {
+        for (vk::Buffer buf: buffersToDispose) {
             device.destroy(buf);
         }
-        for (vk::DeviceMemory memory : memoriesToFree) {
+        for (vk::DeviceMemory memory: memoriesToFree) {
             device.free(memory);
         }
+        for (un::IDisposable* disposable: tracked) {
+            disposable->dispose(device);
+        }
+    }
+
+    void DisposeTracker::include(IDisposable* disposable) {
+        tracked.emplace(disposable);
     }
 }

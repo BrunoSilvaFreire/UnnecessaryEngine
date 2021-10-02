@@ -99,29 +99,53 @@ add_library(
     include/unnecessary/systems/graphics_systems.h
     include/unnecessary/graphics/buffers/command_buffer_graph.h
     src/unnecessary/graphics/buffers/command_buffer_graph.cpp
-    include/unnecessary/graphics/frame_graph.h src/unnecessary/graphics/frame_graph.cpp include/unnecessary/graphics/rendering/rendering_pipeline.h include/unnecessary/misc/aggregator.h src/unnecessary/systems/graphics_systems.cpp src/unnecessary/graphics/rendering_pipeline.cpp include/unnecessary/graphics/dispose_tracker.h src/unnecessary/graphics/dispose_tracker.cpp include/unnecessary/systems/simulation.h src/unnecessary/systems/simulation.cpp include/unnecessary/algorithm/dependency_graph.h include/unnecessary/misc/types.h src/unnecessary/misc/types.cpp include/unnecessary/algorithm/tree.h)
+    include/unnecessary/graphics/rendering/frame_graph.h
+    src/unnecessary/graphics/frame_graph.cpp
+    include/unnecessary/graphics/rendering/rendering_pipeline.h
+    include/unnecessary/misc/aggregator.h
+    src/unnecessary/systems/graphics_systems.cpp
+    src/unnecessary/graphics/rendering_pipeline.cpp
+    include/unnecessary/graphics/dispose_tracker.h
+    src/unnecessary/graphics/dispose_tracker.cpp
+    include/unnecessary/systems/simulation.h
+    src/unnecessary/systems/simulation.cpp
+    include/unnecessary/algorithm/dependency_graph.h
+    include/unnecessary/misc/types.h
+    src/unnecessary/misc/types.cpp
+    include/unnecessary/algorithm/tree.h
+    include/unnecessary/graphics/framebuffer.h
+    include/unnecessary/graphics/rendering/renderpass.h
+    src/unnecessary/graphics/rendering/renderpass.cpp
+    include/unnecessary/graphics/rendering/baked_frame_graph.h
+    src/unnecessary/graphics/rendering/baked_frame_graph.cpp
+    src/unnecessary/graphics/framebuffer.cpp
+    include/unnecessary/graphics/rendering/attachment.h
+    src/unnecessary/graphics/rendering/attachment.cpp
+    include/unnecessary/graphics/rendering/frame_resource.h
+    src/unnecessary/graphics/rendering/frame_resource.cpp
+
+)
 
 target_include_directories(
-        unnecessary
-        PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    unnecessary
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 message("${CMAKE_CURRENT_SOURCE_DIR}")
 string(LENGTH "${CMAKE_CURRENT_SOURCE_DIR}_" SOURCE_PATH_SIZE)
 target_compile_definitions(
-        unnecessary
-        PUBLIC
-        DEBUG
-        NOMINMAX
-        VULKAN_HPP_TYPESAFE_CONVERSION
-        VULKAN_HPP_NO_SPACESHIP_OPERATOR
-        SOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}
+    unnecessary
+    PUBLIC
+    DEBUG
+    NOMINMAX
+    VULKAN_HPP_TYPESAFE_CONVERSION
+    VULKAN_HPP_NO_SPACESHIP_OPERATOR
+    SOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}
 )
 set(
-        SHADERS
-        resources/shaders/glsl/standart.frag.glsl
-        resources/shaders/glsl/standart.vert.glsl
-        resources/shaders/glsl/standart.geom.glsl
+    SHADERS
+    resources/shaders/glsl/phong.frag.glsl
+    resources/shaders/glsl/phong.vert.glsl
 )
 set(resources_output ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources)
 set(shader_output_dir ${resources_output}/shaders)
@@ -129,33 +153,34 @@ foreach (shader ${SHADERS})
     add_shader(${shader})
 endforeach ()
 set(
-        RESOURCES
-        ../resources/teapot.obj
+    RESOURCES
+    resources/models/teapot.obj
+    resources/models/teapot_normal.obj
 )
 
 foreach (resource ${RESOURCES})
     get_filename_component(resource_filename ${resource} NAME)
-    set(resource_abs ${CMAKE_SOURCE_DIR}/resources/${resource_filename})
+    set(resource_abs "${CMAKE_CURRENT_SOURCE_DIR}/${resource}")
     set(resource_output ${resources_output}/${resource_filename})
     set(target_name copyResource-${resource_filename})
     add_custom_target(
-            ${target_name}
-            COMMENT "Copy resource ${resource_abs} to ${resource_output}"
-            BYPRODUCTS ${resource_output}
-            COMMAND ${CMAKE_COMMAND} -E copy ${resource_abs} ${resource_output}
+        ${target_name}
+        COMMENT "Copy resource ${resource_abs} to ${resource_output}"
+        BYPRODUCTS ${resource_output}
+        COMMAND ${CMAKE_COMMAND} -E copy ${resource_abs} ${resource_output}
     )
     add_dependencies(unnecessary ${target_name})
 endforeach ()
 target_link_libraries(
-        unnecessary
-        Vulkan::Vulkan
-        CONAN_PKG::glm
-        CONAN_PKG::entt
-        CONAN_PKG::termcolor
-        CONAN_PKG::glfw
-        CONAN_PKG::tinyobjloader
-        CONAN_PKG::cxxopts
-        grapphs
+    unnecessary
+    Vulkan::Vulkan
+    CONAN_PKG::glm
+    CONAN_PKG::entt
+    CONAN_PKG::termcolor
+    CONAN_PKG::glfw
+    CONAN_PKG::tinyobjloader
+    CONAN_PKG::cxxopts
+    grapphs
 )
 if (WIN32)
 endif ()

@@ -22,7 +22,7 @@ namespace un {
 
         operator vk::ImageView();
 
-        void dispose(vk::Device& device) override;
+        void dispose(const vk::Device& device) override;
     };
 
 }

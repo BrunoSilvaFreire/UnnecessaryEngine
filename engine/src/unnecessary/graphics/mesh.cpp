@@ -27,4 +27,12 @@ namespace un {
         return index;
     }
 
+    const std::optional<un::Buffer>& MeshInfo::getNormals() const {
+        return normals;
+    }
+
+    std::optional<un::Buffer>& MeshInfo::getNormals() {
+        return normals;
+    }
+
 }

@@ -4,20 +4,24 @@
 
 #include <set>
 #include <vulkan/vulkan.hpp>
+#include <unnecessary/graphics/disposable.h>
 
 namespace un {
-    class DisposeTracker {
+    class DisposeTracker : IDisposable {
     private:
 
         std::set<vk::Buffer> buffersToDispose;
         std::set<vk::DeviceMemory> memoriesToFree;
+        std::set<IDisposable*> tracked;
     public:
 
         void include(vk::Buffer buffer);
 
         void include(vk::DeviceMemory memory);
 
-        void dispose(vk::Device device);
+        void include(IDisposable* disposable);
+
+        void dispose(const vk::Device& device) override;
     };
 
 }

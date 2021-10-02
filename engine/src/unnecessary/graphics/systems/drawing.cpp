@@ -136,7 +136,7 @@ namespace un {
         descriptor.runsOnStage(un::kRecordFrame);
         lightingSystem = descriptor.dependsOn<un::LightingSystem>();
         frameGraphSystem = descriptor.dependsOn<un::PrepareFrameGraphSystem>();
-        renderingPipeline = descriptor.usesPipeline<un::DummyRenderingPipeline>(renderer);
+        renderingPipeline = descriptor.usesPipeline<un::PhongRenderingPipeline>(renderer);
     }
 
 

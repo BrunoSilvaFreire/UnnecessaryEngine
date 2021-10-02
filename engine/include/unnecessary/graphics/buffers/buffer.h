@@ -15,7 +15,6 @@ namespace un {
         vk::MemoryRequirements memoryRequirements;
         vk::DeviceSize offset;
         vk::DeviceSize size;
-
         void allocateMemory(
             const un::RenderingDevice& renderingDevice,
             vk::MemoryPropertyFlags flags

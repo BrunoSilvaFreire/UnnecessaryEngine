@@ -24,14 +24,8 @@ namespace un {
         BoundVertexLayout vertexLayout;
         GraphicsPipelineLayout pipelineLayout;
         std::vector<const un::ShaderStage*> stages;
-        std::optional<vk::PipelineVertexInputStateCreateInfo> vertexInput;
         std::optional<vk::PipelineInputAssemblyStateCreateInfo> inputAssembly;
-        std::optional<vk::PipelineTessellationStateCreateInfo> tesselation;
-        std::optional<vk::PipelineViewportStateCreateInfo> viewport;
         std::optional<vk::PipelineRasterizationStateCreateInfo> rasterization;
-        std::optional<vk::PipelineMultisampleStateCreateInfo> multisample;
-        std::optional<vk::PipelineDepthStencilStateCreateInfo> depthStencil;
-        std::optional<vk::PipelineDynamicStateCreateInfo> dynamicState;
     public:
         explicit GraphicsPipelineBuilder(BoundVertexLayout layout);
 

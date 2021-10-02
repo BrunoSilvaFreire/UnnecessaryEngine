@@ -1,9 +1,10 @@
 #ifndef UNNECESSARYENGINE_RENDERING_PIPELINE_H
 #define UNNECESSARYENGINE_RENDERING_PIPELINE_H
 
-#include <unnecessary/graphics/frame_graph.h>
+#include <unnecessary/graphics/rendering/baked_frame_graph.h>
 #include <unnecessary/jobs/jobs.h>
 #include <optional>
+#include "frame_resource.h"
 
 namespace un {
     class RenderingPipeline {
@@ -17,7 +18,6 @@ namespace un {
             const un::RenderPassDescriptor& descriptor,
             un::RenderPass** into
         );
-
     public:
         virtual ~RenderingPipeline();
 
@@ -29,12 +29,13 @@ namespace un {
     };
 
 
-    class DummyRenderingPipeline : public un::RenderingPipeline {
+    class PhongRenderingPipeline : public un::RenderingPipeline {
     private:
         un::RenderPass* drawOpaquePass{};
         un::RenderPass* depthPass{};
         un::FrameResource* depthBuffer{};
         std::size_t colorAttachmentHandle{};
+        std::size_t depthAttachmentHandle{};
     protected:
         void configureGraph(FrameGraph& graph) override;
 

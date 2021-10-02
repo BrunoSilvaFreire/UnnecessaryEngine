@@ -5,7 +5,8 @@
 
 namespace un {
     class IDisposable {
-        virtual void dispose(vk::Device& device) = 0;
+    public:
+        virtual void dispose(const vk::Device& device) = 0;
     };
 }
 #endif

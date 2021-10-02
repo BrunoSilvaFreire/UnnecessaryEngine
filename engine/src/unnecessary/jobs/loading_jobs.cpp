@@ -16,6 +16,7 @@ namespace un {
             &err,
             &stream
         )) {
+
             return;
         }
         LOG(INFO) << "Mesh " << path << " fully loaded";
@@ -32,12 +33,57 @@ namespace un {
         tinyobj::shape_t& shape = data->shapes[0];
 
         tinyobj::attrib_t& attrib = data->attrib;
-        u64 vBufSize = vertexLayout.getStride() * (attrib.vertices.size() / 3);
+        std::size_t numVertices = attrib.vertices.size() / 3;
+        u32 stride = vertexLayout.getStride();
+        u64 vBufSize = stride * numVertices;
+        u8* vBuf = new u8[vBufSize];
+        std::memset(vBuf, 0, vBufSize);
+        float* asFloat = reinterpret_cast<float*>(vBuf);
         auto& meshIndices = shape.mesh.indices;
         size_t numIndices = meshIndices.size();
         std::vector<u16> indices(numIndices);
+
         for (size_t i = 0; i < numIndices; ++i) {
             indices[i] = meshIndices[i].vertex_index;
+        }
+        for (size_t i = 0; i < numVertices; ++i) {
+            std::size_t vertexIndex = i;
+            std::size_t normalIndex = i;
+            std::size_t textureIndex = i;
+            std::size_t offset = 0;
+            std::size_t vertexBaseAddress = vertexIndex * stride;
+            for (const auto& item: vertexLayout.getElements()) {
+                std::size_t attributeAddress = vertexBaseAddress + offset;
+                float* toCopy = nullptr;
+                switch (item.getType()) {
+
+                    case CommonVertexAttribute::ePosition:
+                        toCopy = &attrib.vertices[vertexIndex * 3];
+                        break;
+                    case CommonVertexAttribute::eNormal:
+                        if (normalIndex == -1) {
+                            break;
+                        }
+                        toCopy = &attrib.normals[normalIndex * 3];
+                        break;
+                    case CommonVertexAttribute::eTexture:
+                        if (textureIndex == -1) {
+                            break;
+                        }
+                        toCopy = &attrib.texcoords[textureIndex];
+                        break;
+                    default:
+                        throw std::runtime_error(
+                            "Doesn't know how to process vertex input type"
+                        );
+                }
+
+                size_t numBytes = item.getLength();
+                if (toCopy != nullptr) {
+                    std::memcpy(vBuf + attributeAddress, toCopy, numBytes);
+                }
+                offset += numBytes;
+            }
         }
         u64 iBufSize = sizeof(u16) * numIndices;
 
@@ -48,8 +94,7 @@ namespace un {
             true,
             vk::MemoryPropertyFlagBits::eHostVisible
         );
-        auto& vertices = attrib.vertices;
-        vertexStagingBuffer.push(device, vertices.data());
+        vertexStagingBuffer.push(device, vBuf);
         un::Buffer indexStagingBuffer(
             *renderer,
             vk::BufferUsageFlagBits::eTransferSrc,
@@ -57,6 +102,7 @@ namespace un {
             true,
             vk::MemoryPropertyFlagBits::eHostVisible
         );
+
         indexStagingBuffer.push(device, indices.data());
         un::CommandBuffer uploadBuffer(
             *renderer,
@@ -120,6 +166,7 @@ namespace un {
             }
         );
         LOG(INFO) << "Mesh uploaded";
+        delete[] vBuf;
     }
 
     UploadMeshJob::UploadMeshJob(

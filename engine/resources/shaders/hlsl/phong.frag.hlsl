@@ -1,15 +1,15 @@
 #include "common.hlsl"
+#include "utils.hlsl"
 #pragma pack_matrix(column_major)
 
 struct FragmentInput
 {
-	float4 position : POSITION;
 	float3 normal : NORMAL;
 };
 
 struct FragmentOutput
 {
-	float3 color : COLOR;
+	float4 color : SV_Target;
 };
 
 /* [[vk::binding(0, 2)]]
@@ -41,7 +41,7 @@ FragmentOutput main(FragmentInput input)
 		color += diffuse(lightDir, input.normal, light.lighting);
 	} */
 	FragmentOutput output;
-	output.color = float3(1,0,0);
+	output.color = float4(normalToColor(input.normal), 1);
 
 	return output;
 }

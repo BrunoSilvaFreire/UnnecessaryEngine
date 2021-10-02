@@ -6,6 +6,14 @@
 #include <unnecessary/algorithm/layout.h>
 
 namespace un {
+    enum class CommonVertexAttribute {
+        eGeneric,
+        ePosition,
+        eNormal,
+        eColor,
+        eTexture
+    };
+
     struct VertexInput {
     private:
         /**
@@ -17,32 +25,54 @@ namespace un {
          */
         u8 size;
         vk::Format format;
+        un::CommonVertexAttribute type;
     public:
-        VertexInput(u8 count, u8 size, vk::Format format);
+        VertexInput(
+            u8 count,
+            u8 size,
+            vk::Format format,
+            un::CommonVertexAttribute type = un::CommonVertexAttribute::eGeneric
+        );
 
         u8 getCount() const;
 
         u8 getElementSize() const;
 
+        std::size_t getLength() const;
+
         vk::Format getFormat() const;
+
+        CommonVertexAttribute getType() const;
     };
 
 
-    class VertexLayout : public un::Layout<::un::VertexInput> {
+    class VertexLayout : public un::Layout<un::VertexInput> {
 
     public:
         template<typename T>
-        void push(u8 count, vk::Format format);
+        void push(
+            u8 count,
+            vk::Format format,
+            un::CommonVertexAttribute type = un::CommonVertexAttribute::eGeneric
+        );
 
         u32 getStride();
 
     };
 
     template<>
-    void VertexLayout::push<f32>(u8 count, vk::Format format);
+    void VertexLayout::push<f32>(
+        u8 count,
+        vk::Format format,
+        un::CommonVertexAttribute type
+    );
 
     template<>
-    void VertexLayout::push<u8>(u8 count, vk::Format format);
+    void VertexLayout::push<u8>(
+        u8 count,
+        vk::Format format,
+        un::CommonVertexAttribute type
+    );
 
     class BoundVertexLayout : public VertexLayout {
     private:
