@@ -85,11 +85,13 @@ int main(int argc, char** argv) {
         un::CommonVertexAttribute::ePosition
     );
     //Normal
+/*
     vertexLayout.push<f32>(
         3,
         vk::Format::eR32G32B32Sfloat,
         un::CommonVertexAttribute::eNormal
     );
+*/
 
     /*
     //Color
@@ -105,7 +107,7 @@ int main(int argc, char** argv) {
     u32 load, upload;
     vk::Device device = renderer.getVirtualDevice();
     un::JobChain(&jobs)
-        .immediately<un::LoadObjJob>(&load, "resources/teapot_normal.obj", &data)
+        .immediately<un::LoadObjJob>(&load, "resources/teapot.obj", &data)
         .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
         .after(
             upload,
@@ -117,11 +119,11 @@ int main(int argc, char** argv) {
                     device,
                     un::PushConstants(0, sizeof(un::PerObjectData))
                 );
-                /*auto* geometry = new un::ShaderStage(
+                auto* geometry = new un::ShaderStage(
                     "phong.geom",
                     vk::ShaderStageFlagBits::eGeometry,
                     device
-                );*/
+                );
                 auto* fragment = new un::ShaderStage(
                     "phong.frag",
                     vk::ShaderStageFlagBits::eFragment,
@@ -133,7 +135,7 @@ int main(int argc, char** argv) {
                 fragment->usesDescriptor(2, 0);
                 un::GraphicsPipelineBuilder pipeline(
                     boundLayout,
-                    {vertex, fragment}
+                    {vertex, geometry, fragment}
                 );
                 pipeline.withStandardRasterization();
 
@@ -206,11 +208,11 @@ int main(int argc, char** argv) {
     un::Path& path = registry.get<un::Path>(cameraEntity);
     path.speed = .5;
     path.positions = {
-        glm::vec3(0, 0, 0),
-        glm::vec3(10, 0, 10),
-        glm::vec3(-10, 0, 10),
-        glm::vec3(10, 5, 10),
-        glm::vec3(-10, 5, 10),
+        glm::vec3(0, 0, -150),
+        glm::vec3(10, 0, -100),
+        glm::vec3(-10, 0, -100),
+        glm::vec3(10, -20, -50),
+        glm::vec3(-10, -20, -50),
     };
     un::Camera& camera = registry.get<un::Camera>(cameraEntity);
     un::Perspective& perspective = registry.get<un::Perspective>(cameraEntity);

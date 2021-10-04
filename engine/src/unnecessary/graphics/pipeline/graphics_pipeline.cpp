@@ -17,7 +17,7 @@ namespace un {
             false,
             false,
             vk::PolygonMode::eFill,
-            (vk::CullModeFlags) vk::CullModeFlagBits::eFront,
+            (vk::CullModeFlags) vk::CullModeFlagBits::eBack,
             vk::FrontFace::eClockwise,
             false,
             0.0,

@@ -7,18 +7,19 @@ struct GeometryInput
     vec3 position;
 };
 
-layout(location = 0) out vec4 outPos;
 layout(location = 1) out vec3 outNormal;
-layout(location = 0) in vec3 inPos[3];
 
 void main()
 {
 
-    vec3 normal = normalize(cross(inPos[2] - inPos[0], inPos[1] - inPos[0]));
+    vec3 a = gl_in[0].gl_Position.xyz;
+    vec3 b = gl_in[1].gl_Position.xyz;
+    vec3 c = gl_in[2].gl_Position.xyz;
+    vec3 normal = normalize(cross(c - a, b - a));
     for (int i = 0; i < 3; i++)
     {
-        outPos = vec4(inPos[i], 1.0);
         outNormal = normal;
+        gl_Position = gl_in[i].gl_Position;
         EmitVertex();
     }
     EndPrimitive();

@@ -146,6 +146,7 @@ set(
     SHADERS
     resources/shaders/glsl/phong.frag.glsl
     resources/shaders/glsl/phong.vert.glsl
+    resources/shaders/glsl/phong.geom.glsl
 )
 set(resources_output ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources)
 set(shader_output_dir ${resources_output}/shaders)
