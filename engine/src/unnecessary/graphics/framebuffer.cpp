@@ -38,7 +38,9 @@ namespace un {
                 un::ImageView& imageView = ownedImagesView.emplace_back(
                     renderingDevice,
                     image,
-                    format
+                    format,
+                    vk::ImageViewType::e2D,
+                    attachment.getOwnedImageFlags()
                 );
                 views.emplace_back(imageView);
             }

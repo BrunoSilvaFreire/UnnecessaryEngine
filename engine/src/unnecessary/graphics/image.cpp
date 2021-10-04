@@ -1,4 +1,5 @@
 #include <unnecessary/graphics/image.h>
+#include <unnecessary/algorithm/vk_utility.h>
 
 namespace un {
 
@@ -32,6 +33,17 @@ namespace un {
                 &index,
                 layout
             )
+        );
+        memoryRequirements = device.getImageMemoryRequirements(image);
+        memory = un::allocateMemoryFor(
+            renderer,
+            vk::MemoryPropertyFlagBits::eDeviceLocal,
+            memoryRequirements
+        );
+        device.bindImageMemory(
+            image,
+            memory,
+            0
         );
     }
 

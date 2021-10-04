@@ -123,8 +123,8 @@ add_library(
     src/unnecessary/graphics/rendering/attachment.cpp
     include/unnecessary/graphics/rendering/frame_resource.h
     src/unnecessary/graphics/rendering/frame_resource.cpp
-
-)
+    include/unnecessary/algorithm/vk_utility.h
+    src/unnecessary/algorithm/vk_utility.cpp)
 
 target_include_directories(
     unnecessary

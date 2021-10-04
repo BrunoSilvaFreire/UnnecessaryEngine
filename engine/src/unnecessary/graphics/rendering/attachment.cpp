@@ -10,12 +10,13 @@ namespace un {
         const vk::AttachmentDescription& description,
         const vk::ClearValue& clear,
         vk::ImageLayout ownedImageLayout,
-        vk::ImageUsageFlags ownedImageUsage
-
+        vk::ImageUsageFlags ownedImageUsage,
+        vk::ImageAspectFlags ownedImageFlags
     ) : description(description),
         clear(clear),
         ownedImageLayout(ownedImageLayout),
-        ownedImageUsage(ownedImageUsage) {
+        ownedImageUsage(ownedImageUsage),
+        ownedImageFlags(ownedImageFlags) {
 
     }
 
@@ -33,5 +34,9 @@ namespace un {
 
     vk::ImageUsageFlags Attachment::getOwnedImageUsage() const {
         return ownedImageUsage;
+    }
+
+    vk::ImageAspectFlags Attachment::getOwnedImageFlags() const {
+        return ownedImageFlags;
     }
 };

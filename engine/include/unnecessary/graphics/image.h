@@ -26,6 +26,8 @@ namespace un {
     class Image : public IDisposable {
     private:
         vk::Image image;
+        vk::MemoryRequirements memoryRequirements;
+        vk::DeviceMemory memory;
     public:
         Image(
             un::RenderingDevice& renderer,

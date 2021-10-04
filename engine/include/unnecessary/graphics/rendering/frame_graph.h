@@ -61,8 +61,6 @@ namespace un {
 
         un::RenderPassDescription* getPass();
 
-        void rendersToWindow(std::size_t attachmentIndex, vk::ImageLayout layout);
-
         void usesAttachment(std::size_t attachmentIndex, vk::ImageLayout layout);
 
         void usesColorAttachment(std::size_t attachmentIndex, vk::ImageLayout layout);
@@ -147,7 +145,8 @@ namespace un {
             vk::ImageLayout finalLayout = vk::ImageLayout::eUndefined
         );
         std::size_t addOwnedAttachment(
-            vk::ImageUsageFlags  usageFlags,
+            vk::ImageUsageFlags usageFlags,
+            vk::ImageAspectFlags aspectFlags,
             const vk::ClearValue& clearValue,
             vk::AttachmentDescriptionFlags flags = {},
             vk::Format format = vk::Format::eUndefined,

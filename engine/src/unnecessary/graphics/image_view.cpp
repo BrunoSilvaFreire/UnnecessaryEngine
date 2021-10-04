@@ -6,7 +6,8 @@ namespace un {
         un::RenderingDevice& renderer,
         vk::Image image,
         vk::Format format,
-        vk::ImageViewType type
+        vk::ImageViewType type,
+        vk::ImageAspectFlags flags
     ) {
         vk::Device device = renderer.getVirtualDevice();
 
@@ -18,7 +19,7 @@ namespace un {
                 format,
                 vk::ComponentMapping(),
                 vk::ImageSubresourceRange(
-                    (vk::ImageAspectFlags) vk::ImageAspectFlagBits::eColor,
+                    flags,
                     0, 1, 0, 1
                 )
             )

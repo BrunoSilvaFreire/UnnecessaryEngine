@@ -127,13 +127,6 @@ namespace un {
         return passIndex;
     }
 
-    void RenderPassDescriptor::rendersToWindow(
-        std::size_t attachmentIndex,
-        vk::ImageLayout layout
-    ) {
-        usesColorAttachment(attachmentIndex, layout);
-    }
-
     const std::string& RenderPassDescription::getName() const {
         return name;
     }
@@ -179,6 +172,7 @@ namespace un {
 
     std::size_t FrameGraph::addOwnedAttachment(
         vk::ImageUsageFlags usageFlags,
+        vk::ImageAspectFlags aspectFlags,
         const vk::ClearValue& clearValue,
         vk::AttachmentDescriptionFlags flags,
         vk::Format format,
@@ -205,7 +199,8 @@ namespace un {
             ),
             clearValue,
             initialLayout,
-            usageFlags
+            usageFlags,
+            aspectFlags
         );
         return index;
     }

@@ -54,7 +54,7 @@ namespace un {
         u32 offset = 0;
         u32 binding = vertexLayout.getBinding();
         inputBindings.emplace_back(binding, stride);
-        for (u32 i = 0 ; i < count ; ++i) {
+        for (u32 i = 0; i < count; ++i) {
             const un::VertexInput& input = elements[i];
             inputAttributes.emplace_back(
                 i,
@@ -71,7 +71,7 @@ namespace un {
         );
         std::vector<vk::DescriptorSetLayout> layouts;
         const auto& descriptors = pipelineLayout.getDescriptorLayouts();
-        for (u32 i = 0 ; i < descriptors.size() ; ++i) {
+        for (u32 i = 0; i < descriptors.size(); ++i) {
             const auto& descriptor = descriptors[i];
             switch (descriptor.getType()) {
                 case un::DescriptorSetType::eShared:
@@ -88,7 +88,7 @@ namespace un {
         }
 
         std::vector<vk::PushConstantRange> pushes;
-        for (const un::ShaderStage* stage : stages) {
+        for (const un::ShaderStage* stage: stages) {
             auto& pushConstant = stage->getPushConstantRange();
             if (pushConstant.has_value()) {
                 auto value = pushConstant.value();
@@ -107,7 +107,7 @@ namespace un {
             )
         );
         std::vector<vk::PipelineShaderStageCreateInfo> stageInfos;
-        for (const un::ShaderStage* stage : stages) {
+        for (const un::ShaderStage* stage: stages) {
             stageInfos.emplace_back(
                 (vk::PipelineShaderStageCreateFlags) 0,
                 stage->getFlags(),
@@ -179,7 +179,14 @@ namespace un {
             }
         );
 
-
+        vk::PipelineDepthStencilStateCreateInfo depth(
+            static_cast<vk::PipelineDepthStencilStateCreateFlags>(0),
+            true,
+            true,
+            vk::CompareOp::eLess,
+            false,
+            false
+        );
         vk::GraphicsPipelineCreateInfo createInfo(
             (vk::PipelineCreateFlags) 0,
             stageInfos,
@@ -189,7 +196,7 @@ namespace un {
             &viewportState,
             rasterization.operator->(),
             &multisample,
-            nullptr,
+            &depth,
             &colorBlend,
             &dynamicState,
             vkPipelineLayout,
@@ -203,7 +210,8 @@ namespace un {
         );
         if (pipelineResult.result != vk::Result::eSuccess) {
             std::ostringstream str;
-            str << "Unable to clayout(location = 0) in vec3 position;reate graphics pipeline: '"
+            str
+                << "Unable to clayout(location = 0) in vec3 position;reate graphics pipeline: '"
                 << vk::to_string(pipelineResult.result)
                 << "' (" << pipelineResult.result << ").";
             throw std::runtime_error(str.str());
@@ -221,7 +229,7 @@ namespace un {
 
     void GraphicsPipelineBuilder::addStage(const ShaderStage* stage) {
         stages.push_back(stage);
-        for (const auto& item : stage->getUsedResources().getDescriptors()) {
+        for (const auto& item: stage->getUsedResources().getDescriptors()) {
             descriptorAccessFlags[item.set] |= stage->getFlags();
         }
     }
@@ -235,7 +243,7 @@ namespace un {
         const BoundVertexLayout& layout,
         std::initializer_list<const ShaderStage*> shaders
     ) : GraphicsPipelineBuilder(layout) {
-        for (const ShaderStage* stage : shaders) {
+        for (const ShaderStage* stage: shaders) {
             addStage(stage);
         }
     }

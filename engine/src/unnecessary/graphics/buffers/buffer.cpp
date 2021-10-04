@@ -1,5 +1,6 @@
 #include <unnecessary/graphics/buffers/buffer.h>
-#include "unnecessary/graphics/buffers/command_buffer.h"
+#include <unnecessary/graphics/buffers/command_buffer.h>
+#include <unnecessary/algorithm/vk_utility.h>
 
 namespace un {
     Buffer::Buffer(
@@ -34,11 +35,7 @@ namespace un {
         const vk::Device& device = renderingDevice.getVirtualDevice();
         auto deviceProperties = renderingDevice.getDeviceProperties();
         memoryRequirements = device.getBufferMemoryRequirements(buffer);
-        memory = device.allocateMemory(
-            vk::MemoryAllocateInfo(
-                memoryRequirements.size,
-                renderingDevice.selectMemoryTypeFor(memoryRequirements, flags)
-            ));
+        memory = un::allocateMemoryFor(renderingDevice, flags, memoryRequirements);
         device.bindBufferMemory(buffer, memory, 0);
     }
 

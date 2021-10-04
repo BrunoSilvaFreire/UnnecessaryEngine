@@ -75,9 +75,10 @@ namespace un {
         );
         depthAttachmentHandle = graph.addOwnedAttachment(
             vk::ImageUsageFlagBits::eDepthStencilAttachment,
-            vk::ClearDepthStencilValue(0, 0),
+            vk::ImageAspectFlagBits::eDepth,
+            vk::ClearDepthStencilValue(1, 0),
             (vk::AttachmentDescriptionFlags) 0,
-            vk::Format::eD32Sfloat,
+            vk::Format::eD16Unorm,
             vk::SampleCountFlagBits::e1,
             vk::AttachmentLoadOp::eClear,
             vk::AttachmentStoreOp::eStore,
@@ -91,7 +92,7 @@ namespace un {
             vk::PipelineStageFlagBits::eFragmentShader |
             vk::PipelineStageFlagBits::eVertexShader
         );
-        drawOpaque.rendersToWindow(
+        drawOpaque.usesColorAttachment(
             colorAttachmentHandle,
             vk::ImageLayout::eColorAttachmentOptimal
         );

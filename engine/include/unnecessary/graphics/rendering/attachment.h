@@ -17,12 +17,14 @@ namespace un {
          */
         vk::ImageLayout ownedImageLayout;
         vk::ImageUsageFlags ownedImageUsage;
+        vk::ImageAspectFlags ownedImageFlags;
     public:
         Attachment(
             const vk::AttachmentDescription& description,
             const vk::ClearValue& clear,
             vk::ImageLayout ownedImageLayout = vk::ImageLayout::eUndefined,
-            vk::ImageUsageFlags ownedImageUsage = static_cast<vk::ImageUsageFlags>(0)
+            vk::ImageUsageFlags ownedImageUsage = static_cast<vk::ImageUsageFlags>(0),
+            vk::ImageAspectFlags ownedImageFlags = static_cast<vk::ImageAspectFlags>(0)
         );
 
         const vk::AttachmentDescription& getDescription() const;
@@ -32,6 +34,9 @@ namespace un {
         vk::ImageLayout getOwnedImageLayout() const;
 
         vk::ImageUsageFlags getOwnedImageUsage() const;
+
+        vk::ImageAspectFlags getOwnedImageFlags() const;
+
     };
 
 }

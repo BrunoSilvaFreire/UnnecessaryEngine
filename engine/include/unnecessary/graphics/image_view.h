@@ -15,7 +15,8 @@ namespace un {
             un::RenderingDevice& renderer,
             vk::Image image,
             vk::Format format,
-            vk::ImageViewType type = vk::ImageViewType::e2D
+            vk::ImageViewType type = vk::ImageViewType::e2D,
+            vk::ImageAspectFlags flags = vk::ImageAspectFlagBits::eColor
         );
 
         const vk::ImageView& getVulkanView() const;

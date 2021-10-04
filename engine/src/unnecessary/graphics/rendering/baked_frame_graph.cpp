@@ -58,7 +58,8 @@ namespace un {
                 vk::PipelineBindPoint::eGraphics,
                 vertex->getUsedAttachments(),
                 vertex->getColorAttachments(),
-                vertex->getResolveAttachments()
+                vertex->getResolveAttachments(),
+                vertex->getDepthAttachments().data()
             );
             for (auto[neighborIndex, edge]: frameGraph.edges_from(index)) {
                 if (edge.getType() != un::RenderPassDependency::Type::eUses) {
