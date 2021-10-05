@@ -22,5 +22,15 @@ namespace un {
         float position;
         std::vector<glm::vec3> positions;
     };
+    struct Orbit {
+        glm::vec3 center;
+        float speed;
+        float radius;
+        /**
+         * How far along the orbit are we?
+         */
+        float position;
+        float height;
+    };
 }
 #endif //UNNECESSARYENGINE_DUMMY_H

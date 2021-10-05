@@ -124,7 +124,7 @@ add_library(
     include/unnecessary/graphics/rendering/frame_resource.h
     src/unnecessary/graphics/rendering/frame_resource.cpp
     include/unnecessary/algorithm/vk_utility.h
-    src/unnecessary/algorithm/vk_utility.cpp)
+    src/unnecessary/algorithm/vk_utility.cpp include/unnecessary/algorithm/geometry.h)
 
 target_include_directories(
     unnecessary

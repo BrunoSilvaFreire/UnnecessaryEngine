@@ -10,11 +10,12 @@ vec3 diffuse(vec3 lightDir, vec3 normalDir, Lighting light) {
 }
 void main()
 {
-    vec3 lightDir = vec3(1, -1, 1);
+    vec3 lightDir = vec3(-1, -1, 1);
     float intensity = dot(lightDir, normal);
     Lighting lighting;
     lighting.intensity = 1;
     lighting.color =vec3(0, 1, 1);
+    //outColor = vec4(diffuse(lightDir, normal, lighting), 1.0);;
     outColor = vec4(normalToColor(normal), 1.0);;
 }
 

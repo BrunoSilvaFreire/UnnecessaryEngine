@@ -106,6 +106,10 @@ int main(int argc, char** argv) {
     auto drawingSystem = world.addSystem<un::DrawingSystem>(&renderer);
     u32 load, upload;
     vk::Device device = renderer.getVirtualDevice();
+
+    const int numSidePots = 5;
+    const int distance = 15;
+    const float finalPoints = -(distance * numSidePots);
     un::JobChain(&jobs)
         .immediately<un::LoadObjJob>(&load, "resources/teapot.obj", &data)
         .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
@@ -153,8 +157,6 @@ int main(int argc, char** argv) {
                         renderer,
                         renderingPipeline->unsafeGetFrameGraph().getVulkanPass())
                 );
-                int numSidePots = 5;
-                int distance = 15;
                 for (int x = -numSidePots; x <= numSidePots; ++x) {
                     for (int y = -numSidePots; y <= numSidePots; ++y) {
                         entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights>();
@@ -204,16 +206,13 @@ int main(int argc, char** argv) {
         un::Perspective,
         un::Translation,
         un::Rotation,
-        un::Path>();
-    un::Path& path = registry.get<un::Path>(cameraEntity);
-    path.speed = .5;
-    path.positions = {
-        glm::vec3(0, 0, -150),
-        glm::vec3(10, 0, -100),
-        glm::vec3(-10, 0, -100),
-        glm::vec3(10, -20, -50),
-        glm::vec3(-10, -20, -50),
-    };
+        un::Orbit>();
+    un::Orbit& path = registry.get<un::Orbit>(cameraEntity);
+    path.speed = .25F;
+    path.height = -20;
+    path.radius = 50;
+    path.position = 0;
+    path.center = glm::vec3(0, 0, 0);
     un::Camera& camera = registry.get<un::Camera>(cameraEntity);
     un::Perspective& perspective = registry.get<un::Perspective>(cameraEntity);
     un::Translation& translation = registry.get<un::Translation>(cameraEntity);
@@ -245,7 +244,7 @@ int main(int argc, char** argv) {
     }
     //world.addSystem<un::FreeFlightSystem>(app.getWindow());
     world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
-    world.addSystem<un::PathRunningSystem>();
+    world.addSystem<un::OrbitSystem>();
     world.getSimulation().getSimulationGraph().saveToDot("simulation.dot");
     app.execute();
 }

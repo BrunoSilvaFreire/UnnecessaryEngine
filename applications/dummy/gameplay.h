@@ -7,12 +7,20 @@
 
 #include <unnecessary/systems/system.h>
 #include <GLFW/glfw3.h>
+
 namespace un {
     class PathRunningSystem : public un::System {
     public:
-        void step(World &world, f32 delta, un::JobWorker *worker) override;
+        void step(World& world, f32 delta, un::JobWorker* worker) override;
 
-        void describe(SystemDescriptor &descriptor) override;
+        void describe(SystemDescriptor& descriptor) override;
+    };
+
+    class OrbitSystem : public un::System {
+    public:
+        void describe(SystemDescriptor& descriptor) override;
+
+        void step(World& world, f32 delta, un::JobWorker* worker) override;
     };
 
     struct FreeFlight {
@@ -25,9 +33,9 @@ namespace un {
         GLFWwindow* wnd;
         float lastMouseX, lastMouseY;
     public:
-        FreeFlightSystem(GLFWwindow *window);
+        FreeFlightSystem(GLFWwindow* window);
 
-        void step(World &world, f32 delta, un::JobWorker *worker) override;
+        void step(World& world, f32 delta, un::JobWorker* worker) override;
 
         void describe(SystemDescriptor& descriptor) override;
     };
