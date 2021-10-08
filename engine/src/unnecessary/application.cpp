@@ -11,9 +11,9 @@ namespace un {
         const std::function<const char*(const T&)>& selector
     ) {
         std::vector<std::string> notFound;
-        for (const char*& requirement : requirements) {
+        for (const char*& requirement: requirements) {
             bool found = false;
-            for (const T& property : elements) {
+            for (const T& property: elements) {
                 std::string propertyName = std::string(selector(property));
 
 
@@ -29,7 +29,7 @@ namespace un {
             }
         }
         if (!notFound.empty()) {
-            for (std::string& layer:notFound) {
+            for (std::string& layer: notFound) {
                 LOG(FUCK) << name << " '" << layer << "' not found.";
             }
             throw std::runtime_error("Unable to find all required elements.");
@@ -58,10 +58,6 @@ namespace un {
         return false;
     }
 
-    template<typename T>
-    bool tryFindFunction(const vk::Instance& vulkan, const char* name, T** result) {
-        return (*result = reinterpret_cast<T*>(vulkan.getProcAddr(name))) != nullptr;
-    }
 
     vk::Instance loadVulkan(
         const std::string& name,
@@ -92,7 +88,7 @@ namespace un {
         instanceExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         instanceExtensions.emplace_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 #endif
-        for (const char* extension :instanceExtensions) {
+        for (const char* extension: instanceExtensions) {
             LOG(INFO) << "Using instance extension: " << GREEN(extension);
         }
         assertHasElements<vk::ExtensionProperties>(
@@ -137,7 +133,8 @@ namespace un {
 
         } catch (vk::LayerNotPresentError& layerNotPresentError) {
             LOG(FUCK) << RED(
-                layerNotPresentError.what() << " (" << layerNotPresentError.code()<< ")");
+                layerNotPresentError.what() << " (" << layerNotPresentError.code()
+                                            << ")");
             throw layerNotPresentError;
         }
     }
@@ -182,7 +179,7 @@ namespace un {
                 version
             )),
         renderer(nullptr),
-        jobSystem(nullptr) {
+        jobSystem(nullptr), database(vulkan) {
         LOG(INFO) << "Initializing app " << GREEN(name);
 
         monitor = glfwGetPrimaryMonitor();
@@ -252,6 +249,8 @@ namespace un {
         jobSystem = new un::JobSystem(*this, nThreads);
     }
 
+#pragma clang diagnostic pop
+
     void Application::execute() {
         jobSystem->start();
         while (pooling) {
@@ -307,5 +306,9 @@ namespace un {
 
     u32 Application::getHeight() const {
         return height;
+    }
+
+    const VulkanFunctionDatabase& Application::getDatabase() const {
+        return database;
     }
 }

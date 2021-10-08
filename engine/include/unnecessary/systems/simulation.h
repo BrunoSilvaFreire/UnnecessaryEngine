@@ -18,7 +18,8 @@ namespace un {
     JOB_GROUP(EarlyGameplay);
     JOB_GROUP(LateGameplay);
 
-    class System;
+    class SimpleSystem;
+    class ExplicitSystem;
 
     class World;
 
@@ -32,7 +33,7 @@ namespace un {
         std::string name;
         Type type;
         union {
-            un::System* asSystem;
+            un::ExplicitSystem* asSystem;
             struct {
                 // Reserved for future use
             } asStage;
@@ -40,7 +41,7 @@ namespace un {
 
         explicit SimulationNode(std::string name);
 
-        SimulationNode(std::string name, un::System* system);
+        SimulationNode(std::string name, un::ExplicitSystem* system);
 
         un::SimulationNode& operator=(const un::SimulationNode& other);
     };
@@ -56,7 +57,7 @@ namespace un {
     class Simulation {
     private:
         un::SimulationGraph simulationGraph;
-        std::unordered_map<un::System*, u32> system2Id;
+        std::unordered_map<ExplicitSystem*, u32> system2Id;
         std::unordered_map<std::string, u32> stage2Id;
 
         bool findStage(
@@ -64,7 +65,7 @@ namespace un {
             u32* pInt
         );
 
-        bool tryDescribe(u32 index, un::System* system);
+        bool tryDescribe(u32 index, ExplicitSystem* system);
         void runJobsAfter(
             const std::unordered_map<u32, std::set<u32>>& map,
             u32 index,

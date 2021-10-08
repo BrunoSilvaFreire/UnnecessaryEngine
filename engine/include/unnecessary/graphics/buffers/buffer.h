@@ -6,6 +6,7 @@
 #define UNNECESSARYENGINE_BUFFER_H
 
 #include <unnecessary/graphics/renderer.h>
+#include <unnecessary/algorithm/vk_utility.h>
 
 namespace un {
     class Buffer {
@@ -15,6 +16,7 @@ namespace un {
         vk::MemoryRequirements memoryRequirements;
         vk::DeviceSize offset;
         vk::DeviceSize size;
+
         void allocateMemory(
             const un::RenderingDevice& renderingDevice,
             vk::MemoryPropertyFlags flags
@@ -45,7 +47,14 @@ namespace un {
 
         vk::DeviceSize getSize() const;
 
-
+        void tag(
+            vk::Device device,
+            const un::VulkanFunctionDatabase& database,
+            const std::string& tag
+        ) {
+            un::tag(buffer, device, database, tag);
+            un::tag(memory, device, database, tag + "-Memory");
+        }
     };
 
     class ResizableBuffer : public un::Buffer {

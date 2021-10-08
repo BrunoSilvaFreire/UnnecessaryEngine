@@ -60,4 +60,12 @@ namespace un {
     FrameBuffer::operator vk::Framebuffer() {
         return framebuffer;
     }
+
+    void FrameBuffer::tag(
+        vk::Device device,
+        const VulkanFunctionDatabase& db,
+        const std::string& name
+    ) {
+        un::tag(framebuffer, device, db, name);
+    }
 }

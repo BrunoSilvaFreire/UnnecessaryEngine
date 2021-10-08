@@ -3,7 +3,7 @@
 namespace un {
 
 
-    u64 BinaryWriter::getFreeSize() {
+    u64 BinaryWriter::getFreeSize() const {
         return size - ptr;
     }
 

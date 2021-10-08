@@ -2,6 +2,7 @@
 #define UNNECESSARYENGINE_FRAMEBUFFER_H
 
 #include <vulkan/vulkan.hpp>
+#include <unnecessary/graphics/disposable.h>
 #include <unnecessary/graphics/image.h>
 #include <unnecessary/graphics/image_view.h>
 #include <unnecessary/graphics/rendering/frame_graph.h>
@@ -11,7 +12,7 @@ namespace un {
 
     class Renderer;
 
-    class FrameBuffer {
+    class FrameBuffer : public ITaggable {
     private:
         vk::Framebuffer framebuffer;
         std::vector<un::Image> ownedImages;
@@ -25,6 +26,12 @@ namespace un {
         );
 
         operator vk::Framebuffer();
+
+        void tag(
+            vk::Device device,
+            const VulkanFunctionDatabase& db,
+            const std::string& name
+        ) override;
     };
 
 }

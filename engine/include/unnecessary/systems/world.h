@@ -9,7 +9,7 @@
 #define UNNECESSARYENGINE_WORLD_H
 
 namespace un {
-    class System;
+    class SimpleSystem;
 
     class Simulation;
 

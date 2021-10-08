@@ -1,6 +1,5 @@
 #include <unnecessary/graphics/buffers/buffer.h>
 #include <unnecessary/graphics/buffers/command_buffer.h>
-#include <unnecessary/algorithm/vk_utility.h>
 
 namespace un {
     Buffer::Buffer(

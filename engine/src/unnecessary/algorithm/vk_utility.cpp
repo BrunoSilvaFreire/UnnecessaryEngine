@@ -14,4 +14,22 @@ namespace un {
             )
         );
     }
+
+    VulkanFunctionDatabase::VulkanFunctionDatabase(vk::Instance vulkan) {
+        un::loadFunction(
+            vulkan,
+            "vkSetDebugUtilsObjectNameEXT",
+            &pSetDebugUtilsObjectName
+        );
+    }
+
+    void VulkanFunctionDatabase::setDebugUtilsObjectName(
+        vk::Device device,
+        const vk::DebugUtilsObjectNameInfoEXT& nameInfo
+    ) const {
+        pSetDebugUtilsObjectName(
+            device,
+            &(nameInfo.operator const VkDebugUtilsObjectNameInfoEXT&())
+        );
+    }
 }

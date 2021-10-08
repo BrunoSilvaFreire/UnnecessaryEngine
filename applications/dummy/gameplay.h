@@ -5,18 +5,23 @@
 #ifndef UNNECESSARYENGINE_GAMEPLAY_H
 #define UNNECESSARYENGINE_GAMEPLAY_H
 
-#include <unnecessary/systems/system.h>
 #include <GLFW/glfw3.h>
+#include <unnecessary/systems/system.h>
+#include <unnecessary/jobs/parallel_for_job.h>
+#include <unnecessary/components/common.h>
+#include <unnecessary/components/common.h>
+#include <unnecessary/systems/transform.h>
 
 namespace un {
-    class PathRunningSystem : public un::System {
+
+    class PathRunningSystem : public un::SimpleSystem {
     public:
         void step(World& world, f32 delta, un::JobWorker* worker) override;
 
         void describe(SystemDescriptor& descriptor) override;
     };
 
-    class OrbitSystem : public un::System {
+    class OrbitSystem : public un::SimpleSystem {
     public:
         void describe(SystemDescriptor& descriptor) override;
 
@@ -28,7 +33,7 @@ namespace un {
         float angularSpeed;
     };
 
-    class FreeFlightSystem : public un::System {
+    class FreeFlightSystem : public un::SimpleSystem {
     private:
         GLFWwindow* wnd;
         float lastMouseX, lastMouseY;

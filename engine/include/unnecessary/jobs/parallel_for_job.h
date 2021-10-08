@@ -36,6 +36,11 @@ namespace un {
             size_t numEntries,
             size_t minNumberLoopsPerThread = 64
         );
+        void schedule(
+            un::JobChain& chain,
+            size_t numEntries,
+            size_t minNumberLoopsPerThread = 64
+        );
     };
 }
 #endif //UNNECESSARYENGINE_PARALLEL_FOR_JOB_H

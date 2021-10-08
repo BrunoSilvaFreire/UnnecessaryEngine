@@ -1,0 +1,1 @@
+-DCMAKE_CXX_CLANG_TIDY=/usr/bin/clang-tidy -DCMAKE_CXX_CPPCHECK=/usr/bin/cppcheck;--std=c++11 -DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=/usr/bin/include-what-you-use -DCMAKE_EXPORT_COMPILE_COMMANDS=On

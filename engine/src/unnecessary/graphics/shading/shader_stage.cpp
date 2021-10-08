@@ -82,7 +82,7 @@ namespace un {
 
     PushConstants::PushConstants(u32 offset, u32 size) : offset(offset), size(size) {}
 
-    PushConstants::PushConstants() {}
+    PushConstants::PushConstants() = default;
 
     const std::vector<un::DescriptorReference>& ShaderResources::getDescriptors() const {
         return descriptors;

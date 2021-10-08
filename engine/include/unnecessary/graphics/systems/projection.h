@@ -9,7 +9,7 @@
 #include <unnecessary/components/common.h>
 
 namespace un {
-    class ProjectionSystem : public System {
+    class ProjectionSystem : public SimpleSystem {
     public:
         void step(World& world, f32 delta, un::JobWorker* worker) override;
 

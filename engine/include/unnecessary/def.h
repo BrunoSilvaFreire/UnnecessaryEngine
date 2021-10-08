@@ -23,7 +23,7 @@ void for_types(TF&& f) {
 
 #define vkCall(x) assertVkCall(x, #x);
 
-void assertVkCall(vk::Result result, std::string method);
+void assertVkCall(vk::Result result, const std::string& method);
 
 namespace un {
     typedef glm::u16vec2 Size2D;

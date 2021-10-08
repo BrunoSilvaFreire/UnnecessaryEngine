@@ -5,7 +5,7 @@
 #include <unnecessary/systems/graphics_systems.h>
 
 namespace un {
-    class CameraSystem : public un::System {
+    class CameraSystem : public un::SimpleSystem {
     private:
         un::Renderer* renderer;
     public:

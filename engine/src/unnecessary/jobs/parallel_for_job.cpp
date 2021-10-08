@@ -15,14 +15,22 @@ void un::ParallelForJob::schedule(
     size_t numEntries,
     size_t minNumberLoopsPerThread
 ) {
+    un::JobChain chain(system);
+    schedule(chain, numEntries, minNumberLoopsPerThread);
+}
+
+void un::ParallelForJob::schedule(
+    un::JobChain& chain,
+    size_t numEntries,
+    size_t minNumberLoopsPerThread
+) {
     un::Chronometer<std::chrono::microseconds> chronometer;
-    size_t numWorkers = system->getNumWorkers();
+    size_t numWorkers = chain.getSystem()->getNumWorkers();
     size_t numEntriesPerJob = numEntries / numWorkers;
     auto start = std::chrono::high_resolution_clock::now();
     if (numEntriesPerJob < minNumberLoopsPerThread) {
         numEntriesPerJob = minNumberLoopsPerThread;
     }
-    un::JobChain chain(system);
     size_t numFullJobs = numEntries / numEntriesPerJob;
     size_t totalFullyProcessedLoops = numFullJobs * numEntriesPerJob;
     size_t rest = numEntries - totalFullyProcessedLoops;
@@ -38,11 +46,4 @@ void un::ParallelForJob::schedule(
     if (rest > 0) {
         chain.immediately<ParallelizeJob>(this, rest, numEntries);
     }
-    chain.onFinished(
-        [chronometer](un::JobWorker*) {
-            LOG(INFO) << "Parallel job finished after " << chronometer.stop()
-                      << " microsecond";
-        }
-    );
-
 }

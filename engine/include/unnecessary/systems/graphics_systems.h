@@ -10,7 +10,7 @@
 #include <functional>
 
 namespace un {
-    class PrepareFrameGraphSystem : public un::System {
+    class PrepareFrameGraphSystem : public un::SimpleSystem {
     private:
         un::Renderer* renderer;
         un::CommandBufferGraph commandGraph;
@@ -42,7 +42,7 @@ namespace un {
 
     };
 
-    class DispatchFrameGraphSystem : public un::System {
+    class DispatchFrameGraphSystem : public un::SimpleSystem {
     private:
         un::PrepareFrameGraphSystem* graphSystem{};
         un::PhongRenderingPipeline* renderingPipeline{};

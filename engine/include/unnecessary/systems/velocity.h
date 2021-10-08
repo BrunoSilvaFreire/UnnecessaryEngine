@@ -9,7 +9,7 @@
 #include <unnecessary/jobs/jobs.h>
 
 namespace un {
-    class VelocitySystem : public un::System {
+    class VelocitySystem : public un::SimpleSystem {
     public:
         void step(World& world, f32 delta, un::JobWorker* worker) override;
 

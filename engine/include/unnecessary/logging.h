@@ -36,11 +36,14 @@ namespace un {
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wstring-plus-int"
+
 #endif
 
 #ifdef UN_USE_ABS_PATH_FOR_LOGGING
 #define __FILENAME__ __FILE__
 #else
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wstring-plus-int"
 #define __FILENAME__ (__FILE__ + SOURCE_PATH_SIZE)
 #endif
 

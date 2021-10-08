@@ -10,8 +10,10 @@
 #include <unnecessary/graphics/renderer.h>
 #include <unnecessary/algorithm/event.h>
 #include <unnecessary/jobs/jobs.h>
+#include <unnecessary/algorithm/vk_utility.h>
 
 namespace un {
+
 
     class Application {
     private:
@@ -26,7 +28,7 @@ namespace un {
         Event<f32> onPool;
         JobSystem* jobSystem;
         u32 width, height;
-
+        VulkanFunctionDatabase database;
     public:
         Application(const std::string& name, const Version& version, int nThreads = -1);
 
@@ -55,6 +57,8 @@ namespace un {
         Event<f32>& getOnPool();
 
         JobSystem& getJobSystem();
+
+        const VulkanFunctionDatabase& getDatabase() const;
     };
 
 };

@@ -14,7 +14,7 @@
 #include "graphics_systems.h"
 
 namespace un {
-    class LightingSystem : public un::System {
+    class LightingSystem : public un::SimpleSystem {
     private:
         u32 maxNumLightsPerObject;
         std::vector<un::PointLightData> runtimeScenePointLights;

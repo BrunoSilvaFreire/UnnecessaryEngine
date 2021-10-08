@@ -89,4 +89,8 @@ namespace un {
     un::Job* JobChain::getJob(u32 i) {
         return system->getJob(i);
     }
+
+    JobSystem* JobChain::getSystem() const {
+        return system;
+    }
 }

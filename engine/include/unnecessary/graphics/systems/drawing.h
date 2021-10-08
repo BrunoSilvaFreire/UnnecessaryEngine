@@ -11,7 +11,7 @@
 #include <unnecessary/systems/lighting.h>
 
 namespace un {
-    class DrawingSystem : public System {
+    class DrawingSystem : public SimpleSystem {
     private:
         un::Renderer* renderer;
 

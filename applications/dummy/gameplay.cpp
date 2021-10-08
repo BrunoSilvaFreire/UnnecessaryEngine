@@ -1,7 +1,7 @@
 #include "gameplay.h"
+#include "operations.h"
 #include <unnecessary/components/dummy.h>
-#include <unnecessary/components/common.h>
-#include <unnecessary/systems/transform.h>
+
 
 #define DEG2RAD (M_PI * 2) / 360
 namespace un {
@@ -150,8 +150,13 @@ namespace un {
             glm::vec3 finalPos = path.center + offset;
             translation.value = finalPos;
             glm::vec3 dir = glm::normalize(path.center - finalPos);
-            rotation.value = glm::vec3(0,currentRad- (DEG2RAD * 360), 0);
+//            rotation.value = glm::vec3(0,currentRad - (DEG2RAD * 180), 0);
+            rotation.value = glm::quatLookAt(
+                dir,
+                glm::vec3(0, 1, 0)
+            );
             path.position = currentRad;
         }
     }
+
 }

@@ -14,7 +14,7 @@ namespace un {
 
     SimulationNode::SimulationNode(
         std::string name,
-        un::System* const system
+        ExplicitSystem* const system
     ) : name(std::move(name)),
         asSystem(system),
         type(un::SimulationNode::Type::eSystem) {
@@ -114,7 +114,7 @@ namespace un {
         return false;
     }
 
-    bool Simulation::tryDescribe(u32 index, un::System* system) {
+    bool Simulation::tryDescribe(u32 index, ExplicitSystem* system) {
         un::SystemDescriptor descriptor(index, this);
         system->describe(descriptor);
         const auto& problems = descriptor.getProblems();

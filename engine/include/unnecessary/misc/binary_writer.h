@@ -14,7 +14,7 @@ namespace un {
 
         virtual ~BinaryWriter();
 
-        u64 getFreeSize();
+        u64 getFreeSize() const;
 
         u8* getBuffer() const;
 

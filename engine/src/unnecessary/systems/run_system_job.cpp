@@ -4,7 +4,7 @@
 namespace un {
     RunSystemJob::RunSystemJob(
         un::World* world,
-        un::System* system,
+        un::SimpleSystem* system,
         f32 deltaTime
     ) : world(world), system(system), deltaTime(deltaTime) {}
 
@@ -12,7 +12,7 @@ namespace un {
         system->step(*world, deltaTime, worker);
     }
 
-/*    un::System* RunSystemJob::getSystem() const {
+/*    un::SimpleSystem* RunSystemJob::getSystem() const {
         return system;
     }*/
 }

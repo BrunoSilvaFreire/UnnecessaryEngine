@@ -9,7 +9,7 @@
 
 namespace un {
 
-    struct System;
+    struct SimpleSystem;
 
     class Problem {
     private:
@@ -80,7 +80,7 @@ namespace un {
         virtual void describe(un::SystemDescriptor& descriptor) {}
     };
 
-    struct System : public ExplicitSystem {
+    struct SimpleSystem : public ExplicitSystem {
     public:
         void scheduleJobs(World& world, float deltaTime, JobChain& chain) override;
 

@@ -1,6 +1,6 @@
 #include <unnecessary/def.h>
 
-void assertVkCall(vk::Result result, std::string method) {
+void assertVkCall(vk::Result result, const std::string& method) {
     if (result != vk::Result::eSuccess) {
         std::string str = "Error while calling ";
         str += method;

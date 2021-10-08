@@ -6,7 +6,7 @@
 #include <unnecessary/systems/world.h>
 
 namespace un {
-    class TransformSystem : public System {
+    class TransformSystem : public SimpleSystem {
     public:
         void step(World& world, f32 delta, un::JobWorker* worker) override;
 

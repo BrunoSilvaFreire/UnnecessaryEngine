@@ -16,7 +16,7 @@ namespace un {
     void SystemDescriptor::runsAfterStage(const std::string& stageName) {
         u32 stageId;
         if (!simulation->findStage(stageName, &stageId)) {
-            std::string msg = "System is trying to run after stage '";
+            std::string msg = "SimpleSystem is trying to run after stage '";
             msg += stageName;
             msg += "' which doesn't exist.";
             problems.emplace_back(msg);
@@ -28,7 +28,7 @@ namespace un {
     void SystemDescriptor::runsOnStage(const std::string& stageName) {
         u32 stageId;
         if (!simulation->findStage(stageName, &stageId)) {
-            std::string msg = "System is trying to be run on stage '";
+            std::string msg = "SimpleSystem is trying to be run on stage '";
             msg += stageName;
             msg += "' which doesn't exist.";
             problems.emplace_back(msg);
@@ -46,7 +46,7 @@ namespace un {
 
     }
 
-    void System::scheduleJobs(World& world, float deltaTime, JobChain& chain) {
+    void SimpleSystem::scheduleJobs(World& world, float deltaTime, JobChain& chain) {
         u32 scheduledId;
         chain.immediately<un::RunSystemJob>(&scheduledId, &world, this, deltaTime);
         std::string name;

@@ -5,6 +5,7 @@
 #include <unnecessary/graphics/disposable.h>
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/graphics/rendering_device.h>
+#include "unnecessary/algorithm/vk_utility.h"
 
 namespace un {
     class Renderer;
@@ -36,7 +37,7 @@ namespace un {
             vk::ImageLayout layout,
             vk::ImageUsageFlags usage,
             vk::ImageType type,
-            un::ImageDetails details = un::ImageDetails( ),
+            un::ImageDetails details = un::ImageDetails(),
             vk::SharingMode mode = vk::SharingMode::eExclusive,
             vk::ImageCreateFlags flags = (vk::ImageCreateFlags) 0
         );
@@ -46,6 +47,15 @@ namespace un {
         operator vk::Image();
 
         void dispose(const vk::Device& device) override;
+
+        void tag(
+            vk::Device device,
+            const un::VulkanFunctionDatabase& db,
+            const std::string& name
+        ) {
+            un::tag(image, device, db, name);
+            un::tag(memory, device, db, name + "-Memory");
+        }
     };
 
 }

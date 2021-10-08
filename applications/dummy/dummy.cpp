@@ -19,6 +19,7 @@
 #include <unnecessary/components/dummy.h>
 #include <unnecessary/graphics/systems/drawing.h>
 #include "gameplay.h"
+#include "operations.h"
 
 float randomFloat() {
     return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -104,6 +105,7 @@ int main(int argc, char** argv) {
     world.addSystem<un::CameraSystem>(&renderer);
     auto lightingSystem = world.addSystem<un::LightingSystem>(4, &renderer);
     auto drawingSystem = world.addSystem<un::DrawingSystem>(&renderer);
+    world.addSystem<RandomizerSystem>();
     u32 load, upload;
     vk::Device device = renderer.getVirtualDevice();
 
@@ -157,9 +159,23 @@ int main(int argc, char** argv) {
                         renderer,
                         renderingPipeline->unsafeGetFrameGraph().getVulkanPass())
                 );
+                const auto& db = app.getDatabase();
                 for (int x = -numSidePots; x <= numSidePots; ++x) {
                     for (int y = -numSidePots; y <= numSidePots; ++y) {
-                        entt::entity entity = world.createEntity<un::LocalToWorld, un::Translation, un::RenderMesh, un::ObjectLights>();
+                        entt::entity entity = world.createEntity<
+                            un::LocalToWorld,
+                            un::Translation,
+                            un::Rotation,
+                            un::Scale,
+                            Randomizer,
+                            un::RenderMesh,
+                            un::ObjectLights
+                        >();
+                        std::stringstream str;
+                        str << "TeapotLights-";
+                        //str << x << "-" << y << "-";
+                        str << static_cast<u32>(entity);
+                        std::string name = str.str();
                         auto[pos, mesh, objectLights] = world.get<un::Translation, un::RenderMesh, un::ObjectLights>(
                             entity
                         );
@@ -171,6 +187,12 @@ int main(int argc, char** argv) {
                         objectLights.descriptorSet = drawingSystem
                             ->getObjectDescriptorAllocator()
                             ->allocate();
+                        un::tag(
+                            objectLights.descriptorSet,
+                            device,
+                            db,
+                            name + "-DescriptorSet"
+                        );
                         auto olb = objectLights.buffer = un::ResizableBuffer(
                             renderer,
                             vk::BufferUsageFlagBits::eUniformBuffer,
@@ -179,6 +201,8 @@ int main(int argc, char** argv) {
                             vk::MemoryPropertyFlagBits::eHostCoherent |
                             vk::MemoryPropertyFlagBits::eHostVisible
                         );
+
+                        olb.tag(device, db, name);
                         un::DescriptorWriter(&renderer)
                             .updateUniformDescriptor(
                                 objectLights.descriptorSet,
