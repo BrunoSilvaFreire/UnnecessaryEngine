@@ -199,7 +199,7 @@ namespace un {
             height = 480;
             mon = nullptr;
         }
-/*#ifdef DEBUG
+#ifdef DEBUG
         PFN_vkCreateDebugUtilsMessengerEXT pFnCreateDebugUtilsMessenger;
         if (tryFindFunction(
             vulkan,
@@ -240,7 +240,7 @@ namespace un {
         } else {
 
         }
-#endif*/
+#endif
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         window = glfwCreateWindow(width, height, name.c_str(), mon, nullptr);
         glfwMakeContextCurrent(window);

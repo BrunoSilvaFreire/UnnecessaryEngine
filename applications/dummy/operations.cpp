@@ -2,24 +2,41 @@
 
 namespace un {
 
-    ApplyRandomizationJob::ApplyRandomizationJob(RandomizerArchetype* view) : view(view) {
+    ApplyRandomizationJob::ApplyRandomizationJob(
+        RandomizerArchetype* view,
+        World* world
+    ) : entities(view),
+        world(world) {
 
     };
+
+    void RandomizerSystem::describe(un::SystemDescriptor& descriptor) {
+        descriptor.runsOnStage(un::kLateGameplay);
+    }
 
     void RandomizerSystem::scheduleJobs(
         un::World& world,
         float deltaTime,
         un::JobChain& chain
     ) {
-        RandomizerArchetype kek = world.view<un::Translation, un::Rotation, un::Scale, Randomizer>();
-        kek.
-        view = std::move(kek);
-        ApplyRandomizationJob* job = new ApplyRandomizationJob(&view);
-        job->schedule(chain, view.size_hint());
+        auto eView = world.view<un::Translation, un::Rotation, un::Scale, Randomizer>();
+        view.clear();
+        view.reserve(eView.size_hint());
+        for (entt::entity e: eView) {
+            view.emplace_back(e);
+        }
 
-
+        ApplyRandomizationJob* job = new ApplyRandomizationJob(&view, &world);
+        if (!view.empty()) {
+            un::ParallelForJob::schedule(job, chain, view.size());
+        }
     }
 
+    entt::entity ApplyRandomizationJob::findEntity(size_t index) {
+        return entities->operator[](index);
+    }
+
+    [[gnu::always_inline]]
     void ApplyRandomizationJob::operator()(size_t index, un::JobWorker* worker) {
         entt::entity entity = findEntity(index);
         un::Randomizer& randomizer = world->get<un::Randomizer>(entity);

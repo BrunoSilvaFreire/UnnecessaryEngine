@@ -9,7 +9,7 @@ namespace un {
     ) : numSets(numSetsToReserve),
         freeSets(numSetsToReserve) {
         std::vector<vk::DescriptorPoolSize> descriptorSizes;
-        for (un::DescriptorElement& element : layout.getElements()) {
+        for (un::DescriptorElement& element: layout.getElements()) {
             u32 count;
 
             vk::DescriptorType type = element.getType();
@@ -40,35 +40,41 @@ namespace un {
 
     std::vector<vk::DescriptorSet> DescriptorAllocator::allocate(size_t count) {
         std::vector<vk::DescriptorSet> sets(count);
-        vk::DescriptorSet* basePtr = sets.data();
-        size_t pending = count;
-        do {
-            un::DescriptorPool top = freePools.top();
-            size_t available = top.getFreeSets();
-            size_t toAllocate;
-            if (available >= pending) {
-                toAllocate = pending;
-            } else {
-                toAllocate = available;
-            }
-            vk::DescriptorSet* ptr = basePtr + (count - pending);
-            top.allocate(toAllocate, ptr, owningDevice, vulkanLayout);
-            if (top.isFull()) {
-                create();
-            }
-            pending -= toAllocate;
-        } while (pending > 0);
+        {
+            std::lock_guard lock(allocation);
 
+            vk::DescriptorSet* basePtr = sets.data();
+            size_t pending = count;
+            do {
+                un::DescriptorPool top = freePools.top();
+                size_t available = top.getFreeSets();
+                size_t toAllocate;
+                if (available >= pending) {
+                    toAllocate = pending;
+                } else {
+                    toAllocate = available;
+                }
+                vk::DescriptorSet* ptr = basePtr + (count - pending);
+                top.allocate(toAllocate, ptr, owningDevice, vulkanLayout);
+                if (top.isFull()) {
+                    create();
+                }
+                pending -= toAllocate;
+            } while (pending > 0);
+        }
         return sets;
     }
 
     vk::DescriptorSet DescriptorAllocator::allocate() {
-        un::DescriptorPool& top = freePools.top();
         vk::DescriptorSet set;
-        if (top.isFull()) {
-            top = create();
+        {
+            std::lock_guard lock(allocation);
+            un::DescriptorPool& top = freePools.top();
+            if (top.isFull()) {
+                top = create();
+            }
+            top.allocate(1, &set, owningDevice, vulkanLayout);
         }
-        top.allocate(1, &set, owningDevice, vulkanLayout);
         return set;
     }
 
@@ -121,9 +127,8 @@ namespace un {
         vk::DescriptorSetLayout layout
     ) {
         assertCanAllocate(count);
-        freeSets -= count;
         std::vector<vk::DescriptorSetLayout> layouts(count);
-        for (size_t i = 0 ; i < count ; ++i) {
+        for (size_t i = 0; i < count; ++i) {
             layouts[i] = layout;
         }
         vk::DescriptorSetAllocateInfo info(
@@ -132,6 +137,7 @@ namespace un {
             layouts.data()
         );
         vkCall(device.allocateDescriptorSets(&info, setPtr));
+        freeSets -= count;
 
     }
 
@@ -142,7 +148,8 @@ namespace un {
         vk::ShaderStageFlagBits shaderStageFlags
     ) : layout(std::move(oldLayout)),
         poolReserveCount(numSetsPerPool),
-        owningDevice(owningDevice) {
+        owningDevice(owningDevice),
+        allocation() {
         create();
         vulkanLayout = layout.build(owningDevice, shaderStageFlags);
     }

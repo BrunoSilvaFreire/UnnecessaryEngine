@@ -26,6 +26,8 @@ namespace un {
     class World : public entt::registry {
     private:
         u32 targetFPS = 165;
+        u64 frameCounter = 0;
+        std::array<float, 8> latestUpdatesDurations;
         un::Simulation simulation;
         un::JobSystem* jobSystem;
     public:

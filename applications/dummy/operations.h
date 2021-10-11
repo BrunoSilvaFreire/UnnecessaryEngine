@@ -19,18 +19,11 @@ namespace un {
         glm::vec3 rotationAxis;
     };
 
-    typedef entt::basic_view<
-        entt::entity,
-        entt::exclude_t<>,
-        Translation,
-        Rotation,
-        Scale,
-        Randomizer
-    > RandomizerArchetype;
+    typedef std::vector<entt::entity> RandomizerArchetype;
 
     class RandomizerSystem : public un::ExplicitSystem {
     private:
-        RandomizerArchetype view;
+        std::vector<entt::entity> view;
     public:
         void describe(un::SystemDescriptor& descriptor) override;
 
@@ -40,27 +33,21 @@ namespace un {
 
     class ApplyRandomizationJob : public un::ParallelForJob {
     private:
-        RandomizerArchetype* view;
         un::World* world;
-        std::vector<entt::entity> entities;
-        float deltaTime;
+        RandomizerArchetype* entities;
+        float deltaTime = 1.0F / 60.0F;
 
         entt::entity findEntity(size_t index);
 
     public:
         explicit ApplyRandomizationJob(
-            RandomizerArchetype* view
+            RandomizerArchetype* view,
+            World* world
         );
 
-        void operator()(size_t index, un::JobWorker* worker) override;
+        inline void operator()(size_t index, un::JobWorker* worker) override;
 
     };
-
-
-    void RandomizerSystem::describe(un::SystemDescriptor& descriptor) {
-        descriptor.runsOnStage(un::kLateGameplay);
-    }
-
 
 
 }

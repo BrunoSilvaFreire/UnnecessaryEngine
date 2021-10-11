@@ -36,7 +36,7 @@ namespace un {
         objectSetLayout = new un::DescriptorAllocator(
             std::move(perObjectDescriptorLayout),
             device,
-            64,
+            16384,
             vk::ShaderStageFlagBits::eAllGraphics
         );
     }

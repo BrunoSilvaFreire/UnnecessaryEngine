@@ -51,8 +51,8 @@ namespace un {
     }
 
     void PathRunningSystem::step(un::World& world, f32 delta, un::JobWorker* worker) {
-        for (auto[entity, path, translation]: world.view<un::Path, un::Translation>()
-                                                   .each()) {
+        for (auto[entity, path, translation, rotation]: world.view<un::Path, un::Translation, un::Rotation>()
+                                                             .each()) {
             float newPos = path.position + (delta * path.speed);
             auto& positions = path.positions;
             int nPoints = positions.size();
@@ -66,7 +66,16 @@ namespace un {
             float time = fmod(newPos, 1);
             int index = floor(newPos);
             int next = (index + 1) % nPoints;
-            translation.value = lerp(positions[index], positions[next], time);
+            translation.value = lerp(
+                positions[index].position,
+                positions[next].position,
+                time
+            );
+            rotation.value = glm::lerp(
+                positions[index].rotation,
+                positions[next].rotation,
+                time
+            );
         }
     }
 

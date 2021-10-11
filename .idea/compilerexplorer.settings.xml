@@ -163,10 +163,11 @@
         </entry>
       </map>
     </option>
-    <option name="additionalSwitches" value="-fverbose-asm -O0" />
+    <option name="additionalSwitches" value="-fverbose-asm -O5 -S -l" />
     <option name="autoscrollFromSource" value="true" />
     <option name="autoscrollToSource" value="true" />
     <option name="shortenTemplates" value="true" />
+    <option name="highlightColorRGB" value="-12171706" />
     <option name="initialNoticeShown" value="true" />
   </component>
 </project>

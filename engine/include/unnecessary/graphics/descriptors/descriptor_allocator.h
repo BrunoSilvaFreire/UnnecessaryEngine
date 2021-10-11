@@ -58,6 +58,7 @@ namespace un {
 
         un::DescriptorPool create();
 
+        std::mutex allocation;
     public:
         DescriptorAllocator(
             DescriptorSetLayout&& oldLayout,

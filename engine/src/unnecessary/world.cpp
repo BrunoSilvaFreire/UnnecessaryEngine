@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <unnecessary/systems/world.h>
 #include <unnecessary/systems/system.h>
 #include <unnecessary/misc/benchmark.h>
@@ -28,6 +29,7 @@ namespace un {
         un::Chronometer<std::chrono::milliseconds> chronometer;
         un::JobChain chain(jobSystem, false);
         simulation.step(*this, delta, chain);
+        frameCounter++;
         std::condition_variable variable;
         std::mutex mutex;
         std::unique_lock lock(mutex);
@@ -36,10 +38,22 @@ namespace un {
                 variable.notify_one();
             }
         );
+
         jobSystem->tasks.saveToDot("jobs.dot");
         chain.dispatch();
         variable.wait(lock);
         u32 cpuFrameTimeMillis = chronometer.stop();
+        u64 numTicks = latestUpdatesDurations.size();
+        u64 update = frameCounter % numTicks;
+        latestUpdatesDurations[update] = static_cast<float>(cpuFrameTimeMillis) / 1000;
+        if (update == numTicks - 1) {
+            float avgCpuTime = 0;
+            for (u32 j = 0; j < numTicks; ++j) {
+                avgCpuTime += latestUpdatesDurations[j];
+            }
+            avgCpuTime /= numTicks;
+            LOG(INFO) << "Avg CPU Time (" << numTicks << " ticks):" << avgCpuTime;
+        }
         u32 totalMSForFrame = static_cast<u32>(1000.0F / targetFPS);
         if (totalMSForFrame > cpuFrameTimeMillis) {
             u64 msToSleep = totalMSForFrame - cpuFrameTimeMillis;

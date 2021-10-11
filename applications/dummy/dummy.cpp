@@ -24,6 +24,7 @@
 float randomFloat() {
     return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 }
+/*
 
 void testParallelism(un::JobSystem& jobs) {
     int numEntries = 24000000;
@@ -55,8 +56,9 @@ void testParallelism(un::JobSystem& jobs) {
     }
 
     IncrementPairJob job(std::move(incrementPairs));
-    job.schedule(&jobs, numEntries);
+    un::ParallelForJob::schedule(job, &jobs, numEntries);
 }
+*/
 
 int main(int argc, char** argv) {
     cxxopts::Options options("UnnecessaryEngine", "Fast Data Oriented Rendering Engine");
@@ -101,17 +103,24 @@ int main(int argc, char** argv) {
     auto renderingPipeline = renderer.createPipeline<un::PhongRenderingPipeline>();
     world.addSystem<un::TransformSystem>();
     world.addSystem<un::ProjectionSystem>();
+#ifndef HEADLESS
     world.addSystem<un::PrepareFrameGraphSystem>(&renderer);
     world.addSystem<un::CameraSystem>(&renderer);
     auto lightingSystem = world.addSystem<un::LightingSystem>(4, &renderer);
     auto drawingSystem = world.addSystem<un::DrawingSystem>(&renderer);
-    world.addSystem<RandomizerSystem>();
+#endif
+    world.addSystem<un::RandomizerSystem>();
     u32 load, upload;
     vk::Device device = renderer.getVirtualDevice();
 
-    const int numSidePots = 5;
+#ifdef HEADLESS
+    const int numSidePots = 1000;
+#else
+    const int numSidePots = 50;
+#endif
     const int distance = 15;
     const float finalPoints = -(distance * numSidePots);
+#ifndef HEADLESS
     un::JobChain(&jobs)
         .immediately<un::LoadObjJob>(&load, "resources/teapot.obj", &data)
         .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
@@ -167,7 +176,7 @@ int main(int argc, char** argv) {
                             un::Translation,
                             un::Rotation,
                             un::Scale,
-                            Randomizer,
+                            un::Randomizer,
                             un::RenderMesh,
                             un::ObjectLights
                         >();
@@ -176,8 +185,15 @@ int main(int argc, char** argv) {
                         //str << x << "-" << y << "-";
                         str << static_cast<u32>(entity);
                         std::string name = str.str();
-                        auto[pos, mesh, objectLights] = world.get<un::Translation, un::RenderMesh, un::ObjectLights>(
+                        auto[pos, mesh, objectLights, randomizer] = world.get<un::Translation, un::RenderMesh, un::ObjectLights, un::Randomizer>(
                             entity
+                        );
+                        randomizer.time = 0;
+                        randomizer.speed = randomFloat() * .5;
+                        randomizer.rotationAxis = glm::vec3(
+                            randomFloat(),
+                            randomFloat(),
+                            randomFloat()
                         );
                         pos.value = glm::vec3(
                             x * distance,
@@ -216,6 +232,48 @@ int main(int argc, char** argv) {
                 }
             }
         );
+#else
+    un::JobChain(&jobs)
+        .immediately<un::LoadObjJob>(&load, "resources/teapot.obj", &data)
+        .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
+        .after(
+            upload,
+            [&](un::JobWorker* worker) {
+                const auto& db = app.getDatabase();
+                for (int x = -numSidePots; x <= numSidePots; ++x) {
+                    for (int y = -numSidePots; y <= numSidePots; ++y) {
+                        entt::entity entity = world.createEntity<
+                            un::LocalToWorld,
+                            un::Translation,
+                            un::Rotation,
+                            un::Scale,
+                            un::Randomizer
+                        >();
+                        std::stringstream str;
+                        str << "TeapotLights-";
+                        //str << x << "-" << y << "-";
+                        str << static_cast<u32>(entity);
+                        std::string name = str.str();
+                        auto[pos, randomizer] = world.get<un::Translation, un::Randomizer>(
+                            entity
+                        );
+                        randomizer.time = 0;
+                        randomizer.speed = randomFloat() * 10;
+                        randomizer.rotationAxis = glm::vec3(
+                            randomFloat(),
+                            randomFloat(),
+                            randomFloat()
+                        );
+                        pos.value = glm::vec3(
+                            x * distance,
+                            0,
+                            y * distance
+                        );
+                    }
+                }
+            }
+        );
+#endif
 
     for (int j = 0; j < 7; ++j) {
         auto light = world.createEntity<un::LocalToWorld, un::PointLight, un::Translation>();
@@ -230,23 +288,29 @@ int main(int argc, char** argv) {
         un::Perspective,
         un::Translation,
         un::Rotation,
-        un::Orbit>();
-    un::Orbit& path = registry.get<un::Orbit>(cameraEntity);
-    path.speed = .25F;
-    path.height = -20;
-    path.radius = 50;
-    path.position = 0;
-    path.center = glm::vec3(0, 0, 0);
+        un::Path>();
+    un::Path& path = registry.get<un::Path>(cameraEntity);
+    path.speed = .5;
+    path.positions = {
+        un::Location(glm::vec3(0, 0, -150), glm::vec3(0, 0, 0)),
+        un::Location(glm::vec3(10, 0, -100), glm::vec3(0, 0, 0)),
+        un::Location(glm::vec3(-10, 0, -100), glm::vec3(0, 0, 0)),
+        un::Location(glm::vec3(10, -20, -50), glm::vec3(-30, 0, 0)),
+        un::Location(glm::vec3(-10, -20, -50), glm::vec3(-30, 0, 0)),
+        un::Location(glm::vec3(10, -20, -150), glm::vec3(-30, 0, 0)),
+        un::Location(glm::vec3(-10, -20, -150), glm::vec3(-30, 0, 0))
+    };
     un::Camera& camera = registry.get<un::Camera>(cameraEntity);
     un::Perspective& perspective = registry.get<un::Perspective>(cameraEntity);
     un::Translation& translation = registry.get<un::Translation>(cameraEntity);
     translation.value.z = -15;
     translation.value.x = 0;
-    translation.value.y = 5;
+    translation.value.y = 50;
     perspective.aspect = 16.0F / 9.0F;
     perspective.fieldOfView = 100.0F;
     perspective.zNear = 0.1F;
     perspective.zFar = 1000.0F;
+#ifndef HEADLESS
     auto cDescriptorSet = camera.cameraDescriptorSet = drawingSystem->getCameraDescriptorSetAllocator()
                                                                     ->allocate();
     auto cDescriptorBuffer = camera.cameraDescriptorBuffer = un::Buffer(
@@ -266,9 +330,16 @@ int main(int argc, char** argv) {
             vk::DescriptorType::eUniformBuffer
         );
     }
+#endif
     //world.addSystem<un::FreeFlightSystem>(app.getWindow());
+#ifndef HEADLESS
     world.addSystem<un::DispatchFrameGraphSystem>(&renderer);
-    world.addSystem<un::OrbitSystem>();
+#endif
+    world.addSystem<un::PathRunningSystem>();
     world.getSimulation().getSimulationGraph().saveToDot("simulation.dot");
     app.execute();
 }
+
+un::Location::Location(const glm::vec3& position, const glm::quat& rotation) : position(
+    position
+), rotation(rotation) {}

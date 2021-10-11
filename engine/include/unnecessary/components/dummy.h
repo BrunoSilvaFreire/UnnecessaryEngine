@@ -17,10 +17,18 @@ namespace un {
     struct Player {
         unsigned int id;
     };
+
+    struct Location {
+        glm::vec3 position;
+        glm::quat rotation;
+
+        Location(const glm::vec3& position, const glm::quat& rotation);
+    };
+
     struct Path {
         float speed;
         float position;
-        std::vector<glm::vec3> positions;
+        std::vector<Location> positions;
     };
     struct Orbit {
         glm::vec3 center;
