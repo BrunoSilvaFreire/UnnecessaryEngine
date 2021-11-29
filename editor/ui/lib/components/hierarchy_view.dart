@@ -15,6 +15,15 @@ class HierarchyView extends Window {
   HierarchyView() : super(MdiIcons.fileTree, "Hierarchy");
 }
 
+class HierarchyViewFactory extends WindowFactory {
+  HierarchyViewFactory() : super("hierarchy_view");
+
+  @override
+  Window create() {
+    return HierarchyView();
+  }
+}
+
 class HierarchyViewWidget extends StatefulWidget {
   final List<Entity> entities = List.generate(
     3,

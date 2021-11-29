@@ -10,3 +10,12 @@ class ProjectView extends Window {
 
   ProjectView() : super(MdiIcons.folder, 'Project');
 }
+
+class ProjectViewFactory extends WindowFactory {
+  ProjectViewFactory() : super("project_view");
+
+  @override
+  Window create() {
+    return ProjectView();
+  }
+}
