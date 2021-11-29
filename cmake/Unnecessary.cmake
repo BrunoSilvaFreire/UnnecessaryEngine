@@ -27,7 +27,7 @@ function(add_shader SHADER)
     add_custom_target(
             "assembleShader-${shader_identifier}"
             COMMENT "Assembling ${shader_abs} to SPIR_V (${shader_output_asm})"
-            BYPRODUCTS ${shader_output}
+            BYPRODUCTS ${shader_output_asm}
             SOURCES "${shader_abs}"
             COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
             COMMAND glslc -fshader-stage=${SHADER_TYPE} ${shader_abs} -S -g -o ${shader_output_asm}

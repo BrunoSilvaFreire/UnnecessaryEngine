@@ -40,10 +40,12 @@ namespace un {
     void ApplyRandomizationJob::operator()(size_t index, un::JobWorker* worker) {
         entt::entity entity = findEntity(index);
         un::Randomizer& randomizer = world->get<un::Randomizer>(entity);
+
         float time = randomizer.time += deltaTime;
         float scaleAmount = std::sin(time * randomizer.speed);
         un::Scale& scale = world->get<un::Scale>(entity);
         scale.value = glm::vec3(scaleAmount);
+
         un::Rotation& rotation = world->get<un::Rotation>(entity);
         rotation.value *= glm::quat(randomizer.rotationAxis * randomizer.speed);
     }
