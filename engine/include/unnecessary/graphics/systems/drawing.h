@@ -7,6 +7,7 @@
 #include <unnecessary/graphics/renderer.h>
 #include <unnecessary/graphics/descriptors/descriptor_set.h>
 #include <unnecessary/graphics/descriptors/descriptor_allocator.h>
+#include <unnecessary/graphics/rendering/phong_rendering_pipeline.h>
 #include <unnecessary/jobs/jobs.h>
 #include <unnecessary/systems/lighting.h>
 

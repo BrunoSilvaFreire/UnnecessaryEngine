@@ -26,9 +26,9 @@ namespace un {
         );
     }
 
-    void BufferWriter::overwriteWithStaging(const Buffer& buffer, void* ptr) {
+    void BufferWriter::overwriteWithStaging(const GPUBuffer& buffer, void* ptr) {
         vk::DeviceSize size = buffer.getSize();
-        un::Buffer stagingBuffer(
+        un::GPUBuffer stagingBuffer(
             *renderer,
             vk::BufferUsageFlagBits::eTransferSrc,
             size,
@@ -50,7 +50,7 @@ namespace un {
         );
     }
 
-    void BufferWriter::overwrite(Buffer& buffer, void* ptr) {
+    void BufferWriter::overwrite(GPUBuffer& buffer, void* ptr) {
         buffer.push(renderer->getVirtualDevice(), ptr);
     }
 

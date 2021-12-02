@@ -46,7 +46,7 @@ namespace un {
         return type;
     }
 
-    u32 VertexLayout::getStride() {
+    u32 VertexLayout::getStride() const {
         u32 stride = 0;
         for (const un::VertexInput& input: elements) {
             stride += input.getLength();

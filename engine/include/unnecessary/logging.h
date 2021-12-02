@@ -55,7 +55,7 @@ namespace un {
 #define RED(MSG) COLORED(MSG, termcolor::red)
 #define PURPLE(MSG) COLORED(MSG, termcolor::magenta)
 #define YELLOW(MSG) COLORED(MSG, termcolor::yellow)
-#define LOG(LEVEL) Log(LEVEL, __LINE__, __FILENAME__).stream()
+#define LOG(LEVEL) un::Log(LEVEL, __LINE__, __FILENAME__).stream()
 
 
 #endif

@@ -3,7 +3,6 @@
   <component name="CMakeSharedSettings">
     <configurations>
       <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G Ninja" />
-      <configuration PROFILE_NAME="Debug Static Analysis" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G Ninja -DCMAKE_CXX_CLANG_TIDY=/usr/bin/clang-tidy -DCMAKE_CXX_CPPCHECK=/usr/bin/cppcheck;--std=c++11 -DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=/usr/bin/include-what-you-use -DCMAKE_EXPORT_COMPILE_COMMANDS=On" BUILD_OPTIONS="-j 24" />
     </configurations>
   </component>
 </project>

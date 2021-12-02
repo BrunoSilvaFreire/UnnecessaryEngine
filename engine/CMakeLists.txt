@@ -126,7 +126,7 @@ add_library(
     include/unnecessary/algorithm/vk_utility.h
     src/unnecessary/algorithm/vk_utility.cpp
     include/unnecessary/algorithm/geometry.h
-)
+    include/unnecessary/graphics/rendering/phong_rendering_pipeline.h src/unnecessary/graphics/rendering/phong_rendering_pipeline.cpp include/unnecessary/jobs/load_file_job.h src/unnecessary/jobs/load_file_job.cpp include/unnecessary/misc/membuf.h src/unnecessary/misc/membuf.cpp)
 
 target_include_directories(
     unnecessary
@@ -148,7 +148,7 @@ set(
     SHADERS
     resources/shaders/glsl/phong.frag.glsl
     resources/shaders/glsl/phong.vert.glsl
-    resources/shaders/glsl/phong.geom.glsl
+    resources/shaders/glsl/emit_normals.geom.glsl
 )
 set(resources_output ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources)
 set(shader_output_dir ${resources_output}/shaders)
@@ -183,6 +183,7 @@ target_link_libraries(
     CONAN_PKG::glfw
     CONAN_PKG::tinyobjloader
     CONAN_PKG::cxxopts
+    CONAN_PKG::assimp
     grapphs
 )
 if (WIN32)

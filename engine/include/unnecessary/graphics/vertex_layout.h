@@ -47,7 +47,6 @@ namespace un {
 
 
     class VertexLayout : public un::Layout<un::VertexInput> {
-
     public:
         template<typename T>
         void push(
@@ -56,7 +55,7 @@ namespace un {
             un::CommonVertexAttribute type = un::CommonVertexAttribute::eGeneric
         );
 
-        u32 getStride();
+        u32 getStride() const;
 
     };
 

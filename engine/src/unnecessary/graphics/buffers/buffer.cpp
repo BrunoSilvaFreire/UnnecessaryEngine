@@ -2,7 +2,7 @@
 #include <unnecessary/graphics/buffers/command_buffer.h>
 
 namespace un {
-    Buffer::Buffer(
+    GPUBuffer::GPUBuffer(
         Renderer& renderer,
         vk::BufferUsageFlags usage,
         u64 size,
@@ -27,7 +27,7 @@ namespace un {
         }
     }
 
-    void Buffer::allocateMemory(
+    void GPUBuffer::allocateMemory(
         const un::RenderingDevice& renderingDevice,
         vk::MemoryPropertyFlags flags
     ) {
@@ -38,23 +38,23 @@ namespace un {
         device.bindBufferMemory(buffer, memory, 0);
     }
 
-    const vk::Buffer& Buffer::getVulkanBuffer() const {
+    const vk::Buffer& GPUBuffer::getVulkanBuffer() const {
         return buffer;
     }
 
-    const vk::DeviceMemory& Buffer::getMemory() const {
+    const vk::DeviceMemory& GPUBuffer::getMemory() const {
         return memory;
     }
 
-    Buffer::operator vk::Buffer&() {
+    GPUBuffer::operator vk::Buffer&() {
         return buffer;
     }
 
-    Buffer::operator vk::Buffer() const {
+    GPUBuffer::operator vk::Buffer() const {
         return buffer;
     }
 
-    void Buffer::push(vk::Device device, void* data, bool flush) {
+    void GPUBuffer::push(vk::Device device, void* data, bool flush) {
         void* toWriteTo;
         vkCall(
             device.mapMemory(
@@ -80,11 +80,11 @@ namespace un {
     }
 
 
-    vk::DeviceSize Buffer::getOffset() const {
+    vk::DeviceSize GPUBuffer::getOffset() const {
         return offset;
     }
 
-    vk::DeviceSize Buffer::getSize() const {
+    vk::DeviceSize GPUBuffer::getSize() const {
         return size;
     }
 
@@ -95,7 +95,7 @@ namespace un {
         u64 size,
         const vk::MemoryPropertyFlags& flags
     ) : bufferFlags(usage), memoryFlags(flags) {
-        Buffer::size = size;
+        GPUBuffer::size = size;
     }
 
     ResizableBuffer::ResizableBuffer(
@@ -105,8 +105,8 @@ namespace un {
         bool allocate,
         const vk::MemoryPropertyFlags& flags
     ) : bufferFlags(usage), memoryFlags(flags) {
-        Buffer::size = size;
-        Buffer::offset = 0;
+        GPUBuffer::size = size;
+        GPUBuffer::offset = 0;
         createBuffer(renderer);
         if (allocate) {
             allocateMemory(renderer.getRenderingDevice(), flags);

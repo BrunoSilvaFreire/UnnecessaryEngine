@@ -24,78 +24,33 @@ namespace un {
 
     LoadObjJob::LoadObjJob(
         std::filesystem::path path,
-        MeshData* result
+        ObjMeshData* result
     ) : path(std::move(path)), result(result) {}
 
 
     void UploadMeshJob::operator()(un::JobWorker* worker) {
         vk::Device device = renderer->getVirtualDevice();
-        tinyobj::shape_t& shape = data->shapes[0];
+        const auto& shape = data->getBuffer();
 
-        tinyobj::attrib_t& attrib = data->attrib;
-        std::size_t numVertices = attrib.vertices.size() / 3;
+        const std::vector<u16>& indices = data->getIndices();
+        std::size_t numVertices = data->getNumVertices();
+        std::size_t numIndices = indices.size();
         u32 stride = vertexLayout.getStride();
         u64 vBufSize = stride * numVertices;
-        u8* vBuf = new u8[vBufSize];
-        std::memset(vBuf, 0, vBufSize);
-        float* asFloat = reinterpret_cast<float*>(vBuf);
-        auto& meshIndices = shape.mesh.indices;
-        size_t numIndices = meshIndices.size();
-        std::vector<u16> indices(numIndices);
-
-        for (size_t i = 0; i < numIndices; ++i) {
-            indices[i] = meshIndices[i].vertex_index;
-        }
-        for (size_t i = 0; i < numVertices; ++i) {
-            std::size_t vertexIndex = i;
-            std::size_t normalIndex = i;
-            std::size_t textureIndex = i;
-            std::size_t offset = 0;
-            std::size_t vertexBaseAddress = vertexIndex * stride;
-            for (const auto& item: vertexLayout.getElements()) {
-                std::size_t attributeAddress = vertexBaseAddress + offset;
-                float* toCopy = nullptr;
-                switch (item.getType()) {
-
-                    case CommonVertexAttribute::ePosition:
-                        toCopy = &attrib.vertices[vertexIndex * 3];
-                        break;
-                    case CommonVertexAttribute::eNormal:
-                        if (normalIndex == -1) {
-                            break;
-                        }
-                        toCopy = &attrib.normals[normalIndex * 3];
-                        break;
-                    case CommonVertexAttribute::eTexture:
-                        if (textureIndex == -1) {
-                            break;
-                        }
-                        toCopy = &attrib.texcoords[textureIndex];
-                        break;
-                    default:
-                        throw std::runtime_error(
-                            "Doesn't know how to process vertex input type"
-                        );
-                }
-
-                size_t numBytes = item.getLength();
-                if (toCopy != nullptr) {
-                    std::memcpy(vBuf + attributeAddress, toCopy, numBytes);
-                }
-                offset += numBytes;
-            }
-        }
         u64 iBufSize = sizeof(u16) * numIndices;
 
-        un::Buffer vertexStagingBuffer(
+        un::GPUBuffer vertexStagingBuffer(
             *renderer,
             vk::BufferUsageFlagBits::eTransferSrc,
             vBufSize,
             true,
             vk::MemoryPropertyFlagBits::eHostVisible
         );
-        vertexStagingBuffer.push(device, vBuf);
-        un::Buffer indexStagingBuffer(
+        vertexStagingBuffer.push(
+            device,
+            (void*) shape.data()
+        );
+        un::GPUBuffer indexStagingBuffer(
             *renderer,
             vk::BufferUsageFlagBits::eTransferSrc,
             iBufSize,
@@ -103,7 +58,10 @@ namespace un {
             vk::MemoryPropertyFlagBits::eHostVisible
         );
 
-        indexStagingBuffer.push(device, indices.data());
+        indexStagingBuffer.push(
+            device,
+            (void*) indices.data()
+        );
         un::CommandBuffer uploadBuffer(
             *renderer,
             worker->getGraphicsResources().getCommandPool());
@@ -111,14 +69,14 @@ namespace un {
             vk::CommandBufferBeginInfo(
                 vk::CommandBufferUsageFlagBits::eOneTimeSubmit
             ));
-        un::Buffer vertexBuf(
+        un::GPUBuffer vertexBuf(
             *renderer,
             vk::BufferUsageFlagBits::eVertexBuffer |
             vk::BufferUsageFlagBits::eTransferDst,
             vBufSize,
             true
         );
-        un::Buffer indexBuf(
+        un::GPUBuffer indexBuf(
             *renderer,
             vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
             iBufSize,
@@ -166,17 +124,69 @@ namespace un {
             }
         );
         LOG(INFO) << "Mesh uploaded";
-        delete[] vBuf;
     }
 
     UploadMeshJob::UploadMeshJob(
         VertexLayout vertexLayout,
         u32 vertexLayoutBinding,
-        MeshData* data,
+        Mesh* data,
         MeshInfo* result,
         Renderer* renderer
     ) : vertexLayout(std::move(vertexLayout)),
         vertexLayoutBinding(vertexLayoutBinding),
         data(data), result(result),
         renderer(renderer) {}
+
+
+    void LoadModelJob::operator()(un::JobWorker* worker) {
+        Assimp::Importer importer;
+        const aiScene* pScene = importer.ReadFile(
+            path.string(),
+            aiProcess_Triangulate | aiProcess_SortByPType
+        );
+        u32 stride = layout.getStride();
+        results->resize(pScene->mNumMeshes);
+        const auto& layoutElements = layout.getElements();
+        for (std::size_t i = 0 ; i < pScene->mNumMeshes ; ++i) {
+            aiMesh* pMesh = pScene->mMeshes[i];
+            un::Mesh* mesh = results->operator[](i) = new un::Mesh();
+
+            std::size_t numVertices = pMesh->mNumVertices;
+            mesh->resize(numVertices, layout);
+            //TODO: Dynamically figure out mesh attributes
+            glm::vec3* vertices = reinterpret_cast<glm::vec3*>(pMesh->mVertices);
+            glm::vec3* normals = reinterpret_cast<glm::vec3*>(pMesh->mNormals);
+            glm::vec4* colors = reinterpret_cast<glm::vec4*>(pMesh->mColors);
+            glm::vec3* uvs = reinterpret_cast<glm::vec3*>(pMesh->mTextureCoords);
+            for (std::size_t j = 0 ; j < numVertices ; ++j) {
+                size_t offset = 0;
+                for (std::size_t k = 0 ; k < layoutElements.size() ; ++k) {
+                    const auto& element = layoutElements[k];
+                    switch (element.getType()) {
+                        case un::CommonVertexAttribute::eGeneric:
+                            break;
+                        case un::CommonVertexAttribute::ePosition:
+                            mesh->write(vertices[j], j, stride, offset);
+                            break;
+                        case un::CommonVertexAttribute::eNormal:
+                            mesh->write(normals[j], j, stride, offset);
+                            break;
+                        case un::CommonVertexAttribute::eColor:
+                            mesh->write(colors[j], j, stride, offset);
+                            break;
+                        case un::CommonVertexAttribute::eTexture:
+                            mesh->write(glm::vec2(uvs[j]), j, stride, offset);
+                            break;
+                    }
+                    offset += element.getLength();
+                }
+            }
+        }
+    }
+
+    LoadModelJob::LoadModelJob(
+        const std::filesystem::path& path,
+        std::vector<un::Mesh*>* results,
+        const VertexLayout& layout
+    ) : path(path), results(results), layout(layout) {}
 }

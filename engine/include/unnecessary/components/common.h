@@ -16,7 +16,7 @@ namespace un {
     struct Camera {
     public:
         vk::DescriptorSet cameraDescriptorSet;
-        un::Buffer cameraDescriptorBuffer;
+        un::GPUBuffer cameraDescriptorBuffer;
     };
 
     COMPONENT()

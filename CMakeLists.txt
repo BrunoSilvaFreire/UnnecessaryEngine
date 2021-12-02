@@ -17,6 +17,7 @@ conan_cmake_run(
     glfw/3.3.2
     tinyobjloader/1.0.6
     cxxopts/2.2.1
+    assimp/5.1.0
 
     SETTINGS
     compiler.cppstd=20

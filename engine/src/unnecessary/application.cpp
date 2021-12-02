@@ -160,8 +160,8 @@ namespace un {
                 logSeverity = FUCK;
                 break;
         }
-        LOG(logSeverity) << " @ Validation layer: " << pCallbackData->pMessage
-                         << std::endl;
+//        LOG(logSeverity) << " @ Validation layer: " << pCallbackData->pMessage
+//                         << std::endl;
 
         return VK_FALSE;
     }
@@ -248,8 +248,6 @@ namespace un {
         renderer = new un::Renderer(vulkan, window);
         jobSystem = new un::JobSystem(*this, nThreads);
     }
-
-#pragma clang diagnostic pop
 
     void Application::execute() {
         jobSystem->start();

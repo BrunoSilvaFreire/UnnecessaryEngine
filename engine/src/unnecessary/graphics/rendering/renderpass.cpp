@@ -15,7 +15,7 @@ namespace un {
 
     void RenderPass::checkInitialized() const {
         if (!initialized) {
-            throw std::runtime_error("Buffer is not yet ready for recording.");
+            throw std::runtime_error("GPUBuffer is not yet ready for recording.");
         }
     }
 

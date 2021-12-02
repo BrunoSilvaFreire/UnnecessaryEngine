@@ -9,7 +9,7 @@
 #include <unnecessary/algorithm/vk_utility.h>
 
 namespace un {
-    class Buffer {
+    class GPUBuffer {
     protected:
         vk::Buffer buffer;
         vk::DeviceMemory memory;
@@ -23,9 +23,9 @@ namespace un {
         );
 
     public:
-        Buffer() = default;
+        GPUBuffer() = default;
 
-        Buffer(
+        GPUBuffer(
             un::Renderer& renderer,
             vk::BufferUsageFlags usage,
             u64 size,
@@ -57,7 +57,7 @@ namespace un {
         }
     };
 
-    class ResizableBuffer : public un::Buffer {
+    class ResizableBuffer : public un::GPUBuffer {
     private:
         ResizableBuffer(
             const vk::BufferUsageFlags& usage,

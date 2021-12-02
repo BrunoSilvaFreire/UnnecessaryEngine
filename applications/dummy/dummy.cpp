@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     un::Renderer& renderer = app.getRenderer();
     entt::registry& registry = world.getRegistry();
     un::JobSystem& jobs = app.getJobSystem();
-    un::MeshData data;
+    un::ObjMeshData data;
     un::MeshInfo info;
     un::VertexLayout vertexLayout;
     //Position
@@ -313,7 +313,7 @@ int main(int argc, char** argv) {
 #ifndef HEADLESS
     auto cDescriptorSet = camera.cameraDescriptorSet = drawingSystem->getCameraDescriptorSetAllocator()
                                                                     ->allocate();
-    auto cDescriptorBuffer = camera.cameraDescriptorBuffer = un::Buffer(
+    auto cDescriptorBuffer = camera.cameraDescriptorBuffer = un::GPUBuffer(
         renderer,
         vk::BufferUsageFlagBits::eUniformBuffer,
         sizeof(un::Matrices),

@@ -15,8 +15,8 @@ void main() {
     float intensity = dot(lightDir, normal);
     Lighting lighting;
     lighting.intensity = 1;
-    lighting.color =vec3(0, 1, 1);
-    //outColor = vec4(diffuse(lightDir, normal, lighting), 1.0);;
-    outColor = vec4(normalToColor(normal), 1.0);;
+    lighting.color = vec3(0, 1, 1);
+    outColor = vec4(diffuse(lightDir, normal, lighting), 1.0);
+    //outColor = vec4(normalToColor(normal), 1.0);
 }
 

@@ -20,3 +20,6 @@ struct PointLight
     Lighting lighting;
     vec3 position;
 };
+struct PhongData {
+    vec3 viewDir;
+};

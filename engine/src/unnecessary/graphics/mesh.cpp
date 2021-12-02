@@ -15,23 +15,23 @@ namespace un {
     MeshInfo::MeshInfo(
         u32 indexCount,
         const BoundVertexLayout& layout,
-        const Buffer& vertex,
-        const Buffer& index
+        const GPUBuffer& vertex,
+        const GPUBuffer& index
     ) : indexCount(indexCount), layout(layout), vertex(vertex), index(index) {}
 
-    Buffer& MeshInfo::getVertex() {
+    GPUBuffer& MeshInfo::getVertex() {
         return vertex;
     }
 
-    Buffer& MeshInfo::getIndex() {
+    GPUBuffer& MeshInfo::getIndex() {
         return index;
     }
 
-    const std::optional<un::Buffer>& MeshInfo::getNormals() const {
+    const std::optional<un::GPUBuffer>& MeshInfo::getNormals() const {
         return normals;
     }
 
-    std::optional<un::Buffer>& MeshInfo::getNormals() {
+    std::optional<un::GPUBuffer>& MeshInfo::getNormals() {
         return normals;
     }
 

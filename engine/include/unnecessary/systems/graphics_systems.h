@@ -2,6 +2,7 @@
 #define UNNECESSARYENGINE_GRAPHICS_SYSTEMS_H
 
 #include <unnecessary/systems/system.h>
+#include <unnecessary/graphics/rendering/phong_rendering_pipeline.h>
 #include <unnecessary/graphics/buffers/command_buffer_graph.h>
 #include <unnecessary/graphics/buffers/command_buffer.h>
 #include <unnecessary/misc/aggregator.h>

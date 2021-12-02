@@ -12,6 +12,9 @@ namespace un {
         std::vector<T>& getElements() {
             return elements;
         }
+        const std::vector<T>& getElements() const {
+            return elements;
+        }
     };
 }
 #endif

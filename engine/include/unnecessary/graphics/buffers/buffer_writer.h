@@ -23,9 +23,9 @@ namespace un {
 
         ~BufferWriter();
 
-        void overwriteWithStaging(const un::Buffer& buffer, void* ptr);
+        void overwriteWithStaging(const un::GPUBuffer& buffer, void* ptr);
 
-        void overwrite(un::Buffer& buffer, void* ptr);
+        void overwrite(un::GPUBuffer& buffer, void* ptr);
 
         const un::CommandBuffer& getCommandBuffer();
     };
