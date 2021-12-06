@@ -10,6 +10,7 @@
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
 #include <unnecessary/graphics/descriptors/descriptor_layout.h>
+#include <unnecessary/misc/membuf.h>
 
 namespace un {
     struct PushConstants {
@@ -50,6 +51,13 @@ namespace un {
             const vk::ShaderStageFlagBits& flags,
             std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>()
         );
+
+        ShaderStage(
+            std::string name,
+            const vk::ShaderStageFlagBits& flags,
+            vk::Device device,
+            const un::Buffer& content,
+            std::optional<un::PushConstants> pushConstantRange = std::optional<un::PushConstants>());
 
         ShaderStage(
             const std::string& name,

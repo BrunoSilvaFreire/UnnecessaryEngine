@@ -43,7 +43,8 @@ namespace un {
 
 
     ShaderStage::ShaderStage(
-        std::string name, const vk::ShaderStageFlagBits& flags,
+        std::string name,
+        const vk::ShaderStageFlagBits& flags,
         std::optional<un::PushConstants> pushConstantRange
     ) : name(std::move(name)),
         flags(flags),
@@ -51,6 +52,25 @@ namespace un {
             pushConstantRange
         ) {
 
+    }
+    ShaderStage::ShaderStage(
+        std::string name,
+        const vk::ShaderStageFlagBits& flags,
+        vk::Device device,
+        const un::Buffer& content,
+        std::optional<un::PushConstants> pushConstantRange
+    ) : name(std::move(name)),
+        flags(flags),
+        pushConstantRange(
+            pushConstantRange
+        ) {
+        loadedModule = device.createShaderModule(
+            vk::ShaderModuleCreateInfo(
+                (vk::ShaderModuleCreateFlags) 0,
+                content.size(),
+                reinterpret_cast<u32*>(content.operator->())
+            )
+        );
     }
 
     ShaderStage::ShaderStage(

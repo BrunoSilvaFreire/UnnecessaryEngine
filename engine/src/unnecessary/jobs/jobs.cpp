@@ -93,7 +93,7 @@ namespace un {
     }
 
     void JobSystem::awakeSomeoneUp() {
-        for (JobWorker& worker : workers) {
+        for (JobWorker& worker: workers) {
             if (!worker.isAwake()) {
                 // Wake up worker
                 worker.awake();
@@ -226,16 +226,21 @@ namespace un {
         return graphicsResources;
     }
 
+#define LOG_JOB_COMPLETION
+
     void JobSystem::notifyCompletion(u32 id) {
         {
             std::lock_guard<std::mutex> guard(graphUsage);
+#ifdef LOG_JOB_COMPLETION
+            LOG(INFO) << "Job " << GREEN(id) << " has been completed.";
+#endif
             // Notify job who depends on this that it's done
-            for (auto[dependantID, _unused] : tasks.dependantsOn(id)) {
+            for (auto[dependantID, _unused]: tasks.dependantsOn(id)) {
                 bool ready = true;
                 tasks.disconnect(id, dependantID);
                 tasks.disconnect(dependantID, id);
                 // Check whether we can add this to the awaiting execution queue
-                for (auto[otherDependency, otherVertex] : tasks.dependenciesOf(dependantID)) {
+                for (auto[otherDependency, otherVertex]: tasks.dependenciesOf(dependantID)) {
                     if (otherDependency != id) {
                         // There is another dependency we need to wait for
                         ready = false;
@@ -271,7 +276,7 @@ namespace un {
     }
 
     void JobSystem::start() {
-        for (auto& item : workers) {
+        for (auto& item: workers) {
             item.start();
         }
     }

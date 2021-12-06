@@ -248,15 +248,15 @@ namespace un {
         }
     }
 
-    void GraphicsPipelineBuilder::addDescriptorResource(DescriptorSetLayout&& layout) {
-        pipelineLayout.push(un::DescriptorResource(std::move(layout)));
+    void GraphicsPipelineBuilder::addDescriptorSet(DescriptorSetLayout&& layout) {
+        pipelineLayout.push(un::DescriptorSet(std::move(layout)));
     }
 
-    void GraphicsPipelineBuilder::addDescriptorResource(DescriptorResource&& resource) {
+    void GraphicsPipelineBuilder::addDescriptorSet(DescriptorSet&& resource) {
         pipelineLayout.push(std::move(resource));
     }
 
-    void GraphicsPipelineBuilder::addDescriptorResource(vk::DescriptorSetLayout layout) {
-        addDescriptorResource(un::DescriptorResource(layout));
+    void GraphicsPipelineBuilder::addDescriptorSet(vk::DescriptorSetLayout layout) {
+        addDescriptorSet(un::DescriptorSet(layout));
     }
 }

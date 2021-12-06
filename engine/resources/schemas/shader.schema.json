@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BrunoSilvaFreire/UnnecessaryEngine/shader.schema.json",
+  "title": "Scene",
+  "type": "object",
+  "required": [
+    "name",
+    "stages"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "stages": {
+      "type": "object",
+      "additionalProperties": {
+        "type": {
+          "$ref": "shader_stage.schema.json"
+        }
+      }
+    },
+    "uniforms": {
+      "type": "array",
+      "items": {
+        "$ref": "uniform.schema.json"
+      }
+    }
+  }
+}

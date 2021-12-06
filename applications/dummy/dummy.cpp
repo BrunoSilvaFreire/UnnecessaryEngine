@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
                 un::BoundVertexLayout boundLayout(vertexLayout);
                 auto* vertex = new un::ShaderStage(
                     "phong.vert",
-                    vk::ShaderStageFlagBits::eVertex,
+                    vk::ShaderStageFlagBits::eVertex, vk::Device(),
                     device,
                     un::PushConstants(0, sizeof(un::PerObjectData))
                 );
@@ -154,13 +154,13 @@ int main(int argc, char** argv) {
                 );
                 pipeline.withStandardRasterization();
 
-                pipeline.addDescriptorResource(
+                pipeline.addDescriptorSet(
                     lightingSystem->getLightsSetLayout()->getVulkanLayout()
                 );
-                pipeline.addDescriptorResource(
+                pipeline.addDescriptorSet(
                     drawingSystem->getCameraDescriptorSetAllocator()->getVulkanLayout()
                 );
-                pipeline.addDescriptorResource(
+                pipeline.addDescriptorSet(
                     drawingSystem->getObjectDescriptorAllocator()->getVulkanLayout()
                 );
                 auto* shader = new un::Pipeline(

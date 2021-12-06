@@ -1,6 +1,7 @@
 #ifndef UNNECESSARYENGINE_DEF_H
 #define UNNECESSARYENGINE_DEF_H
 
+#include <cstddef>
 #include <vulkan/vulkan.hpp>
 #include <glm/glm.hpp>
 

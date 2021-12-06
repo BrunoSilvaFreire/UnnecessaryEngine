@@ -52,4 +52,7 @@ if (MINGW)
         -lws2_32
     )
 endif ()
+if (MSVC)
+    add_definitions("/MP")
+endif()
 add_subdirectory(editor)

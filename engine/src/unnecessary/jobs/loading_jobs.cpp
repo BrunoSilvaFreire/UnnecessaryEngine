@@ -144,6 +144,9 @@ namespace un {
             path.string(),
             aiProcess_Triangulate | aiProcess_SortByPType
         );
+        if (pScene == nullptr) {
+            return;
+        }
         u32 stride = layout.getStride();
         results->resize(pScene->mNumMeshes);
         const auto& layoutElements = layout.getElements();

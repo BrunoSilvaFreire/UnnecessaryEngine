@@ -1,4 +1,5 @@
 #include <unnecessary/graphics/descriptors/descriptor_allocator.h>
+#include <mutex>
 
 namespace un {
 

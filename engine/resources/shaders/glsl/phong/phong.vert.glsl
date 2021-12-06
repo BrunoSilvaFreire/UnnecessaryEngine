@@ -1,6 +1,6 @@
 #version 450 core
 
-#include "common.glsl"
+#include "../common.glsl"
 
 layout(set = 1, binding = 0) uniform cameraData
 {

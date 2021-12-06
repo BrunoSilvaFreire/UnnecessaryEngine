@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BrunoSilvaFreire/UnnecessaryEngine/shader.schema.json",
+  "title": "Scene",
+  "type": "object",
+  "required": [
+    "name",
+    "stage"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "stage": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "vertex",
+          "fragment",
+          "geometry"
+        ]
+      }
+    }
+  }
+}

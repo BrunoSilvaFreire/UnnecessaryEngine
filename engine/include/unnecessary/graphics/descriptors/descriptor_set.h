@@ -17,15 +17,15 @@ namespace un {
         eUnique
     };
 
-    class DescriptorResource {
+    class DescriptorSet {
     private:
         un::DescriptorSetType type;
         vk::DescriptorSetLayout sharedSetLayout;
         un::DescriptorSetLayout uniqueSetLayout;
     public:
-        explicit DescriptorResource(const vk::DescriptorSetLayout& sharedSetLayout);
+        explicit DescriptorSet(const vk::DescriptorSetLayout& sharedSetLayout);
 
-        explicit DescriptorResource(un::DescriptorSetLayout&& uniqueLayout);
+        explicit DescriptorSet(un::DescriptorSetLayout&& uniqueLayout);
 
         un::DescriptorSetType getType() const;
 

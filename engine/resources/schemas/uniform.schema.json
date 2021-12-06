@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BrunoSilvaFreire/UnnecessaryEngine/shader.schema.json",
+  "title": "UniformScope",
+  "type": "object",
+  "properties": {
+    "scope": {
+      "type": {
+        "$ref": "uniform_scope.schema.json"
+      }
+    }
+  }
+}

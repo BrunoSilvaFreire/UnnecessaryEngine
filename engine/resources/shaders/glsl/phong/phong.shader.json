@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../schemas/shader.schema.json",
+  "name": "phong",
+  "stages": {
+    "frag": {
+      "stage": "frag"
+    },
+    "vert": "phong.vert"
+  },
+  "uniforms": [
+    {
+      "scope": "const"
+    }
+  ]
+}

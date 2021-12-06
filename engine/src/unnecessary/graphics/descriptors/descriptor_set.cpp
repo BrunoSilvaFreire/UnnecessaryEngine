@@ -72,27 +72,27 @@ namespace un {
         offset(offset),
         range(range) {}
 
-    DescriptorResource::DescriptorResource(
+    DescriptorSet::DescriptorSet(
         const vk::DescriptorSetLayout& sharedSetLayout
     ) : sharedSetLayout(sharedSetLayout),
         type(un::DescriptorSetType::eShared) {}
 
-    DescriptorResource::DescriptorResource(
+    DescriptorSet::DescriptorSet(
         un::DescriptorSetLayout&& uniqueLayout
     ) : uniqueSetLayout(uniqueLayout),
         type(un::DescriptorSetType::eUnique) {
 
     }
 
-    DescriptorSetType DescriptorResource::getType() const {
+    DescriptorSetType DescriptorSet::getType() const {
         return type;
     }
 
-    const vk::DescriptorSetLayout& DescriptorResource::getSharedSetLayout() const {
+    const vk::DescriptorSetLayout& DescriptorSet::getSharedSetLayout() const {
         return sharedSetLayout;
     }
 
-    const un::DescriptorSetLayout& DescriptorResource::getUniqueLayout() const {
+    const un::DescriptorSetLayout& DescriptorSet::getUniqueLayout() const {
         return uniqueSetLayout;
     }
 }

@@ -7,14 +7,14 @@
 #include <unnecessary/graphics/descriptors/descriptor_set.h>
 
 namespace un {
-    class GraphicsPipelineLayout : Layout<un::DescriptorResource> {
+    class GraphicsPipelineLayout : Layout<un::DescriptorSet> {
 
     public:
-        void push(un::DescriptorResource&& layout);
+        void push(un::DescriptorSet&& layout);
 
-        const un::DescriptorResource& getSet(size_t index) const;
+        const un::DescriptorSet& getSet(size_t index) const;
 
-        const std::vector<un::DescriptorResource>& getDescriptorLayouts() const;
+        const std::vector<un::DescriptorSet>& getDescriptorLayouts() const;
     };
 }
 #endif

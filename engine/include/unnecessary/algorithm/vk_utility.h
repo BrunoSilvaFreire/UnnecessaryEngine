@@ -53,7 +53,7 @@ namespace un {
             device,
             vk::DebugUtilsObjectNameInfoEXT(
                 obj.objectType,
-                (uint64_t) ((typename T::NativeType) obj),
+                (uint64_t) ((typename T::CType) obj),
                 tag.c_str()
             )
         );

@@ -44,6 +44,20 @@ namespace un {
 
         JobChain& after(u32 dependencyId, Job* job);
 
+        template<typename T, typename... Args>
+        JobChain& after(
+            const std::initializer_list<u32>& dependencies,
+            Args... args
+        ) {
+            auto job = new T(std::forward<Args>(args)...);
+            auto id = system->enqueue(job);
+            for (u32 dependency: dependencies) {
+                system->addDependency(dependency, id);
+            }
+            allJobs.emplace(id);
+            return *this;
+        }
+
         JobChain& after(u32 dependencyId, const un::LambdaJob::Callback& callback);
 
         JobChain& after(u32 runAfter, u32 job);

@@ -1,12 +1,14 @@
 #include <cxxopts.hpp>
 #include <unnecessary/application.h>
-#include "unnecessary/systems/world.h"
-#include "unnecessary/systems/transform.h"
-#include "unnecessary/graphics/systems/projection.h"
-#include "unnecessary/systems/cameras.h"
-#include "unnecessary/jobs/loading_jobs.h"
-#include "unnecessary/jobs/load_file_job.h"
-#include "unnecessary/logging.h"
+#include <unnecessary/systems/world.h>
+#include <unnecessary/systems/transform.h>
+#include <unnecessary/graphics/systems/projection.h>
+#include <unnecessary/graphics/pipeline/graphics_pipeline.h>
+#include <unnecessary/systems/cameras.h>
+#include <unnecessary/jobs/loading_jobs.h>
+#include <unnecessary/jobs/load_file_job.h>
+#include <unnecessary/logging.h>
+
 
 namespace un {
     namespace systems {
@@ -37,7 +39,7 @@ int main(int argc, char** argv) {
     }
     un::Application app("Orbital", un::Version(0, 1, 0), nThreads);
     un::Renderer& renderer = app.getRenderer();
-    renderer.createPipeline<un::PhongRenderingPipeline>();
+    un::PhongRenderingPipeline* pPipeline = renderer.createPipeline<un::PhongRenderingPipeline>();
     un::World world(app);
     un::VertexLayout vertexLayout;
     vertexLayout.push<float>(
@@ -54,17 +56,48 @@ int main(int argc, char** argv) {
         u32 load, upload;
         un::Mesh data;
         un::MeshInfo info;
-        std::vector<un::Mesh*> meshes;
         un::Buffer phongFragment, phongVertex;
+        u32 loadFrag, loadVert;
+        std::vector<un::Mesh*> meshes;
         {
             un::JobChain chain(&app.getJobSystem());
             chain.immediately<un::LoadFileJob>(
-                "resources/shaders/phong.frag.spv",
+                &loadFrag,
+                std::filesystem::absolute("resources/shaders/phong.frag.spv"),
                 &phongFragment
             );
             chain.immediately<un::LoadFileJob>(
-                "resources/shaders/phong.vert.spv",
-                &phongFragment
+                &loadVert,
+                std::filesystem::absolute("resources/shaders/phong.vert.spv"),
+                &phongVertex
+            );
+            chain.after<un::LambdaJob>(
+                {loadFrag, loadVert},
+                [&]() {
+                    const vk::Device& device = renderer.getVirtualDevice();
+                    auto frag = new un::ShaderStage(
+                        "phong-frag",
+                        vk::ShaderStageFlagBits::eFragment,
+                        device,
+                        phongFragment
+                    );
+                    auto vert = new un::ShaderStage(
+                        "phong-vert",
+                        vk::ShaderStageFlagBits::eVertex,
+                        device,
+                        phongVertex,
+                        un::PushConstants(0, sizeof(un::PerObjectData))
+                    );
+                    un::GraphicsPipelineBuilder builder(
+                        un::BoundVertexLayout(vertexLayout),
+                        {vert, frag}
+                    );
+                    builder.withStandardRasterization();
+                    const un::Pipeline& pipeline = builder.build(
+                        renderer,
+                        pPipeline->unsafeGetFrameGraph().getVulkanPass()
+                    );
+                }
             );
             // Load model
             chain.immediately<un::LoadModelJob>(
@@ -88,8 +121,9 @@ int main(int argc, char** argv) {
                 }
             );
         }
+        //un::systems::add_rendering_systems(app, world);
+        LOG(INFO) << "Starting app";
+        app.execute();
     }
-    //un::systems::add_rendering_systems(app, world);
-    LOG(INFO) << "Starting app";
-    app.execute();
+
 }

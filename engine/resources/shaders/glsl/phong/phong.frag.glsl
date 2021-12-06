@@ -1,6 +1,6 @@
 #version 450
-#include "utils.glsl"
-#include "common.glsl"
+#include "../utils.glsl"
+#include "../common.glsl"
 
 layout(location = 1) in vec3 normal;
 layout(location = 0) out vec4 outColor;

@@ -42,11 +42,11 @@ namespace un {
 
         un::Pipeline build(un::Renderer& renderer, vk::RenderPass renderPass);
 
-        void addDescriptorResource(un::DescriptorSetLayout&& layout);
+        void addDescriptorSet(un::DescriptorSetLayout&& layout);
 
-        void addDescriptorResource(vk::DescriptorSetLayout layout);
+        void addDescriptorSet(vk::DescriptorSetLayout layout);
 
-        void addDescriptorResource(un::DescriptorResource&& resource);
+        void addDescriptorSet(un::DescriptorSet&& resource);
     };
 
 }

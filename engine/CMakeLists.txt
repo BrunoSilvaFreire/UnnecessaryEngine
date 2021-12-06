@@ -146,8 +146,8 @@ target_compile_definitions(
 )
 set(
     SHADERS
-    resources/shaders/glsl/phong.frag.glsl
-    resources/shaders/glsl/phong.vert.glsl
+    resources/shaders/glsl/phong/phong.frag.glsl
+    resources/shaders/glsl/phong/phong.vert.glsl
     resources/shaders/glsl/emit_normals.geom.glsl
 )
 set(resources_output ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources)

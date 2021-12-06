@@ -17,6 +17,14 @@ namespace un {
         }
 
     public:
+        std::size_t size() const {
+            return count * sizeof(T);
+        }
+
+        std::size_t getCount() const {
+            return count;
+        }
+
         u8* operator->() {
             return ptr;
         }
@@ -28,6 +36,7 @@ namespace un {
         ~MemoryBuffer() {
             if (isAllocated()) {
                 free(ptr);
+                ptr = nullptr;
             }
         }
 
