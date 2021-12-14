@@ -68,7 +68,7 @@ namespace un {
                         case eUses:
                             runJobsAfter(systemToJobs, index, neighbor, chain);
                             break;
-                        case eProvides:
+                        case eUsed:
                             // We run on this stage, gotta add dependencies of it
                             if (dependency->type != un::SimulationNode::Type::eStage) {
                                 continue;

@@ -18,9 +18,10 @@ conan_cmake_run(
     tinyobjloader/1.0.6
     cxxopts/2.2.1
     assimp/5.1.0
+    gtest/1.10.0
 
     SETTINGS
-    compiler.cppstd=20
+    compiler.cppstd=${CMAKE_CXX_STANDARD}
 
     BASIC_SETUP
     CMAKE_TARGETS
@@ -53,6 +54,9 @@ if (MINGW)
     )
 endif ()
 if (MSVC)
-    add_definitions("/MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()
 add_subdirectory(editor)
+add_subdirectory(module/core)
+add_subdirectory(module/graphs)
+add_subdirectory(module/jobs)

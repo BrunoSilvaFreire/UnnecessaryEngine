@@ -43,20 +43,6 @@ namespace un {
 
     };
 
-    class LambdaJob : public Job {
-    public:
-        typedef std::function<void(un::JobWorker* worker)> Callback;
-        typedef std::function<void()> VoidCallback;
-    private:
-        Callback callback;
-        VoidCallback voidCallback;
-    public:
-        LambdaJob(const Callback& callback);
-
-        LambdaJob(const VoidCallback& callback);
-
-        void operator()(un::JobWorker* worker) override;
-    };
 
 
     class JobWorker {
@@ -111,7 +97,6 @@ namespace un {
 
     class JobSystem {
         friend class JobWorker;
-
     private:
         JobGraph tasks;
 
@@ -167,10 +152,6 @@ namespace un {
         u32 enqueue(Job* job);
 
         u32 enqueue(u32 dependsOn, Job* job);
-
-        u32 enqueue(un::LambdaJob::Callback callback);
-
-        u32 enqueue(u32 dependsOn, const un::LambdaJob::Callback& callback);
 
         int getNumWorkers();
 

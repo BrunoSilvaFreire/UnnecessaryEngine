@@ -1,10 +1,10 @@
-typedef TreeConfigurator<T> = void Function(Tree<T> tree);
+typedef TreeConfigurator<J> = void Function(Tree<J> tree);
 
-class Tree<T> {
-  T? data;
-  late List<Tree<T>> children;
+class Tree<J> {
+  J? data;
+  late List<Tree<J>> children;
 
-  Tree.create(this.data, TreeConfigurator<T> configurator) {
+  Tree.create(this.data, TreeConfigurator<J> configurator) {
     children = List.empty(growable: true);
     configurator(this);
   }
@@ -13,13 +13,13 @@ class Tree<T> {
     children = List.empty(growable: true);
   }
 
-  Tree<T> addChild(T data) {
+  Tree<J> addChild(J data) {
     var tree = Tree(data);
     children.add(tree);
     return tree;
   }
 
-  Tree<T> addAndConfigureChild(T data, TreeConfigurator<T> configurator) {
+  Tree<J> addAndConfigureChild(J data, TreeConfigurator<J> configurator) {
     var tree = Tree.create(data, configurator);
     children.add(tree);
     return tree;

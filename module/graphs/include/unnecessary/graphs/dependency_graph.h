@@ -16,9 +16,12 @@ namespace un {
         eUsed
     };
 
-#define GRAPPH_TYPES(VType, EType)  using VertexType = #VType;\
-                                    using EdgeType = #EType;\
-                                    using u32 = u32;
+    template<typename T>
+    std::string vertex_properties(
+        const T* vertexType
+    ) {
+        return "";
+    }
 
     template<typename VertexType>
     class DependencyGraph : private gpp::AdjacencyList<VertexType, DependencyType, u32> {
@@ -35,7 +38,7 @@ namespace un {
             std::set<u32>& currentlyEnqueued,
             const Explorer& explorer
         ) const {
-            for (auto[neighbor, edge] : DependencyGraph<VertexType>::edges_from(index)) {
+            for (auto[neighbor, edge]: DependencyGraph<VertexType>::edges_from(index)) {
                 if (visited.contains(neighbor)) {
                     continue;
                 }
@@ -57,16 +60,13 @@ namespace un {
         }
 
     protected:
-        virtual std::string getProperties(const VertexType* vertexType) const {
-            return "";
-        }
 
         std::vector<u32> findDependencies(
             u32 index,
             un::DependencyType expected
         ) {
             std::vector<u32> dependencies;
-            for (auto[dependency, edge] : this->node(index).connections()) {
+            for (auto[dependency, edge]: this->node(index).connections()) {
                 if (edge != expected) {
                     continue;
                 }
@@ -79,19 +79,16 @@ namespace un {
 
         std::string toDot() const {
             std::stringstream dot;
-            dot << "digraph {";
-            for (auto[vertexPtr, index] : DependencyGraph<VertexType>::all_vertices()) {
+            dot << "digraph {" << std::endl;
+            for (auto[vertexPtr, index]: DependencyGraph<VertexType>::all_vertices()) {
                 dot << index << "[label =\"#" << index << ": "
                     << un::to_string(*vertexPtr)
                     << "\" fontname=\"monospace\"" <<
-                    getProperties(vertexPtr) <<
+                    vertex_properties(vertexPtr) <<
                     "];" << std::endl;
             }
-            for (auto[vertex, index] : DependencyGraph<VertexType>::all_vertices()) {
-                for (auto[
-                    otherIndex,
-                    edge
-                    ] : DependencyGraph<VertexType>::edges_from(index)) {
+            for (auto[vertex, index]: DependencyGraph<VertexType>::all_vertices()) {
+                for (auto[otherIndex, edge]: DependencyGraph<VertexType>::edges_from(index)) {
                     if (edge == un::DependencyType::eUses) {
                         dot << index << "->" << otherIndex << ";" << std::endl;
                     }
@@ -199,7 +196,7 @@ namespace un {
 
         DependencyView allConnectionsOf(u32 index) {
             std::vector<u32> all;
-            for (auto[dependency, edge] : this->node(index).connections()) {
+            for (auto[dependency, edge]: this->node(index).connections()) {
                 all.emplace_back(dependency);
             }
             return DependencyView(
@@ -228,7 +225,7 @@ namespace un {
             std::queue<u32> open;
             std::set<u32> currentlyEnqueued;
             std::set<u32> visited;
-            for (u32 item : independent) {
+            for (u32 item: independent) {
                 open.push(item);
             }
             while (!open.empty()) {

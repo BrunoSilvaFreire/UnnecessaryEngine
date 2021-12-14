@@ -50,7 +50,7 @@ add_library(
     src/unnecessary/graphics/systems/projection.cpp
     src/unnecessary/jobs/loading_jobs.cpp
     include/unnecessary/jobs/loading_jobs.h
-    src/unnecessary/jobs/jobs.cpp
+    src/unnecessary/jobs/job_system.cpp
     src/unnecessary/def.cpp
     include/unnecessary/systems/run_system_job.h
     src/unnecessary/systems/run_system_job.cpp

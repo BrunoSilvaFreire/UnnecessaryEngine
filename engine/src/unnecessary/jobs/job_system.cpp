@@ -174,7 +174,9 @@ namespace un {
 #endif
     }
 
-    void JobWorker::start() { thread = new std::thread(&JobWorker::workerThread, this); }
+    void JobWorker::start() {
+        thread = new std::thread(&JobWorker::workerThread, this);
+    }
 
     JobWorker::~JobWorker() {
         LOG(INFO) << "Worker " << thread->get_id() << " marked for shutdown";

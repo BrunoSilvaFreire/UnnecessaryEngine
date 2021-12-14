@@ -14,13 +14,13 @@ class ComponentMeta {
 }
 
 class Entity {
-  Future<List<T>> _invokeList<T>(String method) {
+  Future<List<J>> _invokeList<J>(String method) {
     return UnnecessaryPlugin.channel.invokeListMethod(method, this)
-        as Future<List<T>>;
+        as Future<List<J>>;
   }
 
-  Future<T> _invoke<T>(String method) {
-    return UnnecessaryPlugin.channel.invokeMethod(method, this) as Future<T>;
+  Future<J> _invoke<J>(String method) {
+    return UnnecessaryPlugin.channel.invokeMethod(method, this) as Future<J>;
   }
 
   Future<List<ComponentMeta>> findComponents() => _invokeList("findComponents");

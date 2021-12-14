@@ -1,3 +1,5 @@
+include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryModules.cmake)
+
 function(add_unnecessary_thirdparty_library NAME)
     add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/${NAME})
     message("Added ${CMAKE_SOURCE_DIR}/thirdparty/${NAME}")

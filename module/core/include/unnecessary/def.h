@@ -2,8 +2,7 @@
 #define UNNECESSARYENGINE_DEF_H
 
 #include <cstddef>
-#include <vulkan/vulkan.hpp>
-#include <glm/glm.hpp>
+#include <unnecessary/strings.h>
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -13,12 +12,11 @@ typedef unsigned long u64;
 typedef float f32;
 typedef double f64;
 
-#define vkCall(x) assertVkCall(x, #x);
-
-void assertVkCall(vk::Result result, const std::string& method);
-
-namespace un {
-    typedef glm::u16vec2 Size2D;
-}
-
+#ifdef GNU
+#defisne UN_AGGRESIVE_INLINE __attribute__((always_inline)) inline
+#elif _MSC_VER
+#define UN_AGGRESIVE_INLINE inline
+#else
+#define UN_AGGRESIVE_INLINE inline
+#endif
 #endif

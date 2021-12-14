@@ -58,8 +58,6 @@ namespace un {
             return *this;
         }
 
-        JobChain& after(u32 dependencyId, const un::LambdaJob::Callback& callback);
-
         JobChain& after(u32 runAfter, u32 job);
 
         JobChain& after(u32 after, u32* id, Job* job);
