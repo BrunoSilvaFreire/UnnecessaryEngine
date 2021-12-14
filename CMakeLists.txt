@@ -9,7 +9,7 @@ endif ()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 include(CMakePrintHelpers)
 include(cmake/Unnecessary.cmake)
-conan_cmake_run(
+conan_cmake_configure(
     REQUIRES
     glm/0.9.9.8
     termcolor/1.0.1
@@ -18,16 +18,29 @@ conan_cmake_run(
     tinyobjloader/1.0.6
     cxxopts/2.2.1
     assimp/5.1.0
-    gtest/1.10.0
+    gtest/1.11.0
 
-    SETTINGS
-    compiler.cppstd=${CMAKE_CXX_STANDARD}
-
-    BASIC_SETUP
-    CMAKE_TARGETS
-    BUILD missing
+    GENERATORS
+    cmake_find_package
 )
 
+conan_cmake_autodetect(settings)
+
+conan_cmake_install(
+    PATH_OR_REFERENCE .
+    BUILD missing
+    REMOTE conan-center
+    SETTINGS ${settings}
+)
+set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
+find_package(glm REQUIRED)
+find_package(EnTT REQUIRED)
+find_package(termcolor REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(tinyobjloader REQUIRED)
+find_package(cxxopts REQUIRED)
+find_package(assimp REQUIRED)
+find_package(GTest REQUIRED)
 
 set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
 add_unnecessary_thirdparty_library(grapphs)
@@ -55,7 +68,7 @@ if (MINGW)
 endif ()
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-endif()
+endif ()
 add_subdirectory(editor)
 add_subdirectory(module/core)
 add_subdirectory(module/graphs)

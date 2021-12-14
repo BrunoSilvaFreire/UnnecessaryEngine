@@ -6,7 +6,7 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
-#include <unnecessary/jobs/job.h>
+#include "unnecessary/jobs/job.h"
 
 namespace un {
 
@@ -27,29 +27,34 @@ namespace un {
 
         void workerThread() {
             do {
+                LOG(INFO) << "Worker " << index << " started execution";
                 JobType* jobPtr;
                 u32 id;
 
                 while (provider(&jobPtr, &id)) {
-                    jobPtr->operator()(this);
+                    jobPtr->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
                     notifier(jobPtr, id);
                 }
                 if (running) {
                     sleep();
                 }
             } while (running);
-            LOG(INFO) << "Worker " << thread->get_id() << " finished execution";
+            LOG(INFO) << "Worker " << index << " finished execution";
         }
 
     public:
         AbstractJobWorker(
             size_t index,
-            bool autostart
+            bool autostart,
+            un::JobProvider<JobType> provider,
+            un::JobNotifier<JobType> notifier
         ) : index(index),
             thread(nullptr),
             waiting(),
             running(true),
-            awaken(false) {
+            awaken(false),
+            provider(provider),
+            notifier(notifier) {
             if (autostart) {
                 start();
             }
@@ -109,7 +114,13 @@ namespace un {
     };
 
     class JobWorker : public un::AbstractJobWorker<un::SimpleJob> {
-
+    public:
+        JobWorker(
+            size_t index,
+            bool autostart,
+            const JobProvider <JobType>& provider,
+            const JobNotifier <JobType>& notifier
+        );
     };
 }
 #endif

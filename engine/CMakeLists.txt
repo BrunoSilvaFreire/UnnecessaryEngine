@@ -126,7 +126,7 @@ add_library(
     include/unnecessary/algorithm/vk_utility.h
     src/unnecessary/algorithm/vk_utility.cpp
     include/unnecessary/algorithm/geometry.h
-    include/unnecessary/graphics/rendering/phong_rendering_pipeline.h src/unnecessary/graphics/rendering/phong_rendering_pipeline.cpp include/unnecessary/jobs/load_file_job.h src/unnecessary/jobs/load_file_job.cpp include/unnecessary/misc/membuf.h src/unnecessary/misc/membuf.cpp)
+    include/unnecessary/graphics/rendering/phong_rendering_pipeline.h src/unnecessary/graphics/rendering/phong_rendering_pipeline.cpp include/unnecessary/jobs/load_file_job.h src/unnecessary/jobs/load_file_job.cpp include/unnecessary/misc/membuf.h src/unnecessary/misc/membuf.cpp ../module/jobs/include/unnecessary/jobs/workers/worker_pool.h)
 
 target_include_directories(
     unnecessary
@@ -177,13 +177,13 @@ endforeach ()
 target_link_libraries(
     unnecessary
     Vulkan::Vulkan
-    CONAN_PKG::glm
-    CONAN_PKG::entt
-    CONAN_PKG::termcolor
-    CONAN_PKG::glfw
-    CONAN_PKG::tinyobjloader
-    CONAN_PKG::cxxopts
-    CONAN_PKG::assimp
+    glm::glm
+    EnTT::EnTT
+    termcolor::termcolor
+    glfw::glfw
+    tinyobjloader::tinyobjloader
+    cxxopts::cxxopts
+    assimp::assimp
     grapphs
 )
 if (WIN32)

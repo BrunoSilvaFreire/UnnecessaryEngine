@@ -12,7 +12,7 @@ namespace un {
 #ifdef __GNUG__
 
     template<typename T>
-    std::string typeNameOf() {
+    std::string type_name_of() {
         //https://stackoverflow.com/questions/281818/unmangling-the-result-of-stdtype-infoname
         int status = -4;
 

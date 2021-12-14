@@ -2,11 +2,6 @@
 #define UNNECESSARYENGINE_JOBSYSTEM_H
 
 #include <queue>
-#include <unnecessary/def.h>
-#include <unnecessary/logging.h>
-#include <unnecessary/graphs/dependency_graph.h>
-#include <unnecessary/misc/types.h>
-#include <unnecessary/jobs/job.h>
 #include <utility>
 #include <chrono>
 #include <thread>
@@ -14,7 +9,13 @@
 #include <mutex>
 #include <condition_variable>
 #include <functional>
-#include "unnecessary/misc/templates.h"
+#include <unnecessary/def.h>
+#include <unnecessary/logging.h>
+#include <unnecessary/graphs/dependency_graph.h>
+#include <unnecessary/jobs/job.h>
+#include <unnecessary/misc/types.h>
+#include <unnecessary/misc/templates.h>
+#include <unnecessary/jobs/workers/worker_pool.h>
 
 #define READ_ONLY()
 #define READ_WRITE()
@@ -25,15 +26,6 @@ namespace un {
     template<typename J>
     class JobGraph : public un::DependencyGraph<J*> {};
 
-    template<typename T>
-    class WorkerPool {
-    private:
-        std::vector<T> workers;
-    public:
-        void allocateWorkers() {
-            u32 numWorkers;
-        }
-    };
 
     template<typename ...WorkerArchetypes>
     class JobSystem {
@@ -49,51 +41,41 @@ namespace un {
 
         void notifyCompletion(JobHandle id);
 
-        template<typename T, typename Seq>
-        struct expander;
-
-        template<typename T, std::size_t... Is>
-        struct expander<T, std::index_sequence<Is...>> {
-            template<typename E, std::size_t>
-            using elem = E;
-
-            using type = std::tuple<elem<T, Is>...>;
-        };
-
     public:
-        typedef typename expander<
-            u32,
-            std::make_index_sequence<sizeof...(WorkerArchetypes)>
-        >::type NumWorkersTuple;
+        typedef typename repeat_tuple<
+            WorkerArchetypeConfiguration<WorkerArchetypes...>,
+            sizeof...(WorkerArchetypes)
+        >::type WorkerAllocationConfig;
 
-        JobSystem(
-            NumWorkersTuple numWorkersPerArchetype
+        explicit JobSystem(
+            WorkerAllocationConfig numWorkersPerArchetype
         ) : queueUsage(),
             graphUsage() {
+
+            // Instantiate workers
             for_types_indexed<WorkerArchetypes...>(
-                [&](auto t, auto index) {
-                    using WorkerType = typename decltype(t)::type;
-                    un::WorkerPool<WorkerType>& archWorkers = workers[index];
-                    size_t numWorkers = std::get<index>(numWorkersPerArchetype);
+                [&]<typename WorkerType, std::size_t WorkerIndex>() {
+                    auto& archWorkers = std::get<WorkerIndex>(workers);
+                    auto& workerConfig = std::get<WorkerIndex>(numWorkersPerArchetype);
+                    LOG(INFO) << "Allocating " << GREEN(workerConfig.getNumWorkers())
+                              << " workers of archetype "
+                              << PURPLE(un::type_name_of<WorkerType>());
 
-                    if (numWorkers == 0) {
-                        numWorkers = 4;
-                    }
+                    archWorkers.allocateWorkers(
+                        workerConfig,
+                        [&](typename WorkerType::JobType** jobPtr, JobHandle* id) {
+                            return false;
+                        },
 
-                    archWorkers.reserve(numWorkers);
-                    for (size_t i = 0 ; i < numWorkers ; ++i) {
-                        archWorkers.emplace_back(
-                            this,
-                            i,
-                            false
-                        );
-                    }
+                        [](typename WorkerType::JobType* jobPtr, JobHandle id) {
+
+                        }
+                    );
                 }
             );
-
         };
 
-        ~JobSystem();
+        ~JobSystem() = default;
 
         void start();
 
@@ -104,13 +86,32 @@ namespace un {
         int getNumWorkers();
 
         template<typename T>
-        void enqueue(T* job) {
-            auto pool = std::get<un::index_of_type<T, WorkerArchetypes...>>(workers);
+        JobHandle enqueue(T* job, bool markForExecution) {
+            return 0;
         }
 
         friend class World;
     };
 
-    typedef un::JobSystem<un::JobWorker> SimpleJobSystem;
+    class SimpleJobSystem : public un::JobSystem<un::JobWorker> {
+    public:
+        SimpleJobSystem(
+            std::size_t numWorkers,
+            bool autoStart
+        ) : un::JobSystem<un::JobWorker>(
+            un::WorkerArchetypeConfiguration<un::JobWorker>(
+                numWorkers,
+                [=](
+                    std::size_t index,
+                    un::JobProvider<un::SimpleJob> provider,
+                    un::JobNotifier<un::SimpleJob> notifier
+                ) {
+                    return new un::JobWorker(index, autoStart, provider, notifier);
+                }
+            )
+        ) {
+
+        }
+    };
 }
 #endif

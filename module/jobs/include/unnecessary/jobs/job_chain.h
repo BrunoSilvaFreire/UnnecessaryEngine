@@ -45,6 +45,13 @@ namespace un {
         }
 
         template<typename J>
+        JobChain& immediately(J* job) {
+            auto handle = system->enqueue(job, false);
+            immediately(handle);
+            return *this;
+        }
+
+        template<typename J>
         JobChain& immediately(JobHandle* id, J* job) {
             JobHandle handle = *id = system->enqueue(job, false);
             immediately(handle);
@@ -102,7 +109,9 @@ namespace un {
             return *this;
         }
 
-        void dispatch();
+        void dispatch(){
+
+        }
 
         JobSystemType* getSystem() const {
             return system;

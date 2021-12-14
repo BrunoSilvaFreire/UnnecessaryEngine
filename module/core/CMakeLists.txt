@@ -9,6 +9,7 @@ add_unnecessary_module(
     include/unnecessary/misc/binary_writer.h
     include/unnecessary/misc/historic.h
     include/unnecessary/misc/benchmark.h
+    src/unnecessary/logging.cpp
     src/unnecessary/misc/types.cpp
     src/unnecessary/misc/membuf.cpp
     src/unnecessary/misc/binary_writer.cpp
@@ -24,5 +25,5 @@ add_unnecessary_module(
 target_link_libraries(
     unnecessary_core
     PUBLIC
-    CONAN_PKG::termcolor
+    termcolor::termcolor
 )

@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <unnecessary/misc/membuf.h>
-#include <unnecessary/jobs/worker.h>
+#include "unnecessary/jobs/workers/worker.h"
 
 namespace un {
     class LoadFileJob : public un::SimpleJob {

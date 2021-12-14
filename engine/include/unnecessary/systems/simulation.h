@@ -78,7 +78,7 @@ namespace un {
         template<typename T, typename ...Args>
         std::pair<u32, T*> addSystem(Args... args) {
             T* system = new T(args...);
-            u32 id = simulationGraph.add(un::typeNameOf<T>(), system);
+            u32 id = simulationGraph.add(un::type_name_of<T>(), system);
             if (!tryDescribe(id, system)) {
                 return std::pair(-1, nullptr);
             }

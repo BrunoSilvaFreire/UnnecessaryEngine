@@ -36,7 +36,7 @@ namespace un {
 
         const std::string& getName() const;
 
-        void setName(const std::string& name);
+        void setName(const std::string& newName);
     };
 
     class JobGraph : public un::DependencyGraph<un::Job*> {

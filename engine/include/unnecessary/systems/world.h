@@ -50,9 +50,8 @@ namespace un {
         entt::entity createEntity() {
             entt::entity entity = create();
             for_types<T...>(
-                [&](auto t) {
-                    using t_type = typename decltype(t)::type;
-                    emplace<t_type>(entity);
+                [&]<typename C>(auto t) {
+                    emplace<C>(entity);
                 }
             );
             return entity;

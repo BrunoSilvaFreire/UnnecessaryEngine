@@ -9,7 +9,7 @@ add_unnecessary_module(
     include/unnecessary/jobs/misc/load_file_job.h
     include/unnecessary/jobs/parallel_for_job.h
     include/unnecessary/jobs/misc/lambda_job.h
-    include/unnecessary/jobs/worker.h
+    include/unnecessary/jobs/workers/worker.h
     src/unnecessary/jobs/jobs.cpp
     src/unnecessary/jobs/load_file_job.cpp
     src/unnecessary/jobs/parallel_for_job.cpp

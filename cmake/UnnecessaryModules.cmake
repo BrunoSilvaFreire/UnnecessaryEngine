@@ -71,7 +71,7 @@ function(
             ${NAME}_tests
             PUBLIC
             ${NAME}
-            CONAN_PKG::gtest
+            GTest::GTest
         )
         set_target_properties(
             ${NAME}_tests

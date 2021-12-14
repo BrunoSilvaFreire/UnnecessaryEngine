@@ -9,10 +9,10 @@ namespace un {
     typedef u32 JobHandle;
 
     template<typename T>
-    using JobProvider = std::function<bool(T** jobPtr, u32* id)>;
+    using JobProvider = std::function<bool(T** jobPtr, JobHandle* id)>;
 
     template<typename T>
-    using JobNotifier = std::function<void(T* jobPtr, u32 id)>;
+    using JobNotifier = std::function<void(T* jobPtr, JobHandle id)>;
 
     template<typename _Worker>
     class Job {
@@ -23,9 +23,13 @@ namespace un {
 
         virtual void operator()(WorkerType* worker) = 0;
 
-        const std::string& getName() const;
+        const std::string& getName() const {
+            return name;
+        }
 
-        void setName(const std::string& name);
+        void setName(const std::string& newName) {
+            name = newName;
+        }
     };
 }
 #endif
