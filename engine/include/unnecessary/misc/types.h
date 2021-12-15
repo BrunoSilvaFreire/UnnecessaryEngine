@@ -29,7 +29,7 @@ namespace un {
 
 #else
     template<typename T>
-    std::string typeNameOf() {
+    std::string type_name_of() {
         return typeid(T).name();
     }
 

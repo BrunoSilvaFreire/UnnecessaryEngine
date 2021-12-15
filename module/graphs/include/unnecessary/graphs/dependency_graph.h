@@ -23,22 +23,23 @@ namespace un {
         return "";
     }
 
-    template<typename VertexType>
-    class DependencyGraph : private gpp::AdjacencyList<VertexType, DependencyType, u32> {
+    template<typename VertexType, typename IndexType = u32>
+    class DependencyGraph
+        : private gpp::AdjacencyList<VertexType, DependencyType, IndexType> {
     public:
-        typedef std::function<void(u32 index, const VertexType& vertex)> Explorer;
+        typedef std::function<void(IndexType index, const VertexType& vertex)> Explorer;
 
     private:
-        std::set<u32> independent;
+        std::set<IndexType> independent;
 
         void visit(
-            u32 index,
-            std::queue<u32>& open,
-            std::set<u32>& visited,
-            std::set<u32>& currentlyEnqueued,
+            IndexType index,
+            std::queue<IndexType>& open,
+            std::set<IndexType>& visited,
+            std::set<IndexType>& currentlyEnqueued,
             const Explorer& explorer
         ) const {
-            for (auto[neighbor, edge]: DependencyGraph<VertexType>::edges_from(index)) {
+            for (auto[neighbor, edge] : DependencyGraph<VertexType>::edges_from(index)) {
                 if (visited.contains(neighbor)) {
                     continue;
                 }
@@ -61,12 +62,12 @@ namespace un {
 
     protected:
 
-        std::vector<u32> findDependencies(
-            u32 index,
+        std::vector<IndexType> findDependencies(
+            IndexType index,
             un::DependencyType expected
         ) {
-            std::vector<u32> dependencies;
-            for (auto[dependency, edge]: this->node(index).connections()) {
+            std::vector<IndexType> dependencies;
+            for (auto[dependency, edge] : this->node(index).connections()) {
                 if (edge != expected) {
                     continue;
                 }
@@ -80,15 +81,17 @@ namespace un {
         std::string toDot() const {
             std::stringstream dot;
             dot << "digraph {" << std::endl;
-            for (auto[vertexPtr, index]: DependencyGraph<VertexType>::all_vertices()) {
+            for (auto[vertexPtr, index] : DependencyGraph<VertexType>::all_vertices()) {
                 dot << index << "[label =\"#" << index << ": "
                     << un::to_string(*vertexPtr)
                     << "\" fontname=\"monospace\"" <<
                     vertex_properties(vertexPtr) <<
                     "];" << std::endl;
             }
-            for (auto[vertex, index]: DependencyGraph<VertexType>::all_vertices()) {
-                for (auto[otherIndex, edge]: DependencyGraph<VertexType>::edges_from(index)) {
+            for (auto[vertex, index] : DependencyGraph<VertexType>::all_vertices()) {
+                for (auto[otherIndex, edge] : DependencyGraph<VertexType>::edges_from(
+                    index
+                )) {
                     if (edge == un::DependencyType::eUses) {
                         dot << index << "->" << otherIndex << ";" << std::endl;
                     }
@@ -109,16 +112,17 @@ namespace un {
         public:
             class DependencyIterator {
             private:
-                u32 ptr;
+                IndexType ptr;
                 DependencyView* owner;
             public:
                 DependencyIterator(
-                    u32 index,
+                    IndexType index,
                     DependencyView* owner
                 ) : ptr(index), owner(owner) {
                 }
 
-                std::pair<u32, VertexType*> operator*();
+                std::pair<IndexType, VertexType*> operator*();
+
 
                 void operator++() {
                     ptr++;
@@ -135,14 +139,14 @@ namespace un {
 
         private:
             DependencyIterator first, last;
-            std::vector<u32> dependencies;
+            std::vector<IndexType> dependencies;
             DependencyGraph<VertexType>* owner;
 
 
         public:
             DependencyView(
                 DependencyGraph<VertexType>* owner,
-                std::vector<u32> dependencies
+                std::vector<IndexType> dependencies
             ) : owner(owner),
                 dependencies(dependencies),
                 first(0, this),
@@ -158,34 +162,34 @@ namespace un {
             }
         };
 
-        un::DependencyType dependency(u32 from, u32 to) {
+        un::DependencyType dependency(IndexType from, IndexType to) {
             return *this->edge(from, to);
         }
 
-        void addDependency(u32 from, u32 to) {
+        void addDependency(IndexType from, IndexType to) {
             independent.erase(from);
             DependencyGraph<VertexType>::connect(from, to, un::DependencyType::eUses);
             DependencyGraph<VertexType>::connect(to, from, un::DependencyType::eUsed);
         }
 
-        void remove(u32 index) {
-            gpp::AdjacencyList<VertexType, DependencyType, u32>::remove(index);
+        void remove(IndexType index) {
+            gpp::AdjacencyList<VertexType, DependencyType, IndexType>::remove(index);
         }
 
         bool disconnect(
-            u32 from,
-            u32 to
+            IndexType from,
+            IndexType to
         ) override {
-            return gpp::AdjacencyList<VertexType, DependencyType, u32>::disconnect(
+            return gpp::AdjacencyList<VertexType, DependencyType, IndexType>::disconnect(
                 from,
                 to
             );
         }
 
         template<typename ...Args>
-        u32 add(Args... args) {
+        IndexType add(Args... args) {
             VertexType vertex(args...);
-            u32 id = gpp::AdjacencyList<VertexType, DependencyType, u32>::push(
+            IndexType id = gpp::AdjacencyList<VertexType, DependencyType, IndexType>::push(
                 std::move(
                     vertex
                 )
@@ -194,9 +198,9 @@ namespace un {
             return id;
         };
 
-        DependencyView allConnectionsOf(u32 index) {
-            std::vector<u32> all;
-            for (auto[dependency, edge]: this->node(index).connections()) {
+        DependencyView allConnectionsOf(IndexType index) {
+            std::vector<IndexType> all;
+            for (auto[dependency, edge] : this->node(index).connections()) {
                 all.emplace_back(dependency);
             }
             return DependencyView(
@@ -205,14 +209,14 @@ namespace un {
             );
         }
 
-        DependencyView dependenciesOf(u32 index) {
+        DependencyView dependenciesOf(IndexType index) {
             return DependencyView(
                 this,
                 findDependencies(index, un::DependencyType::eUses)
             );
         }
 
-        DependencyView dependantsOn(u32 index) {
+        DependencyView dependantsOn(IndexType index) {
             return DependencyView(
                 this,
                 findDependencies(index, un::DependencyType::eUsed)
@@ -222,14 +226,14 @@ namespace un {
         void each(
             const Explorer& explorer
         ) const {
-            std::queue<u32> open;
-            std::set<u32> currentlyEnqueued;
-            std::set<u32> visited;
-            for (u32 item: independent) {
+            std::queue<IndexType> open;
+            std::set<IndexType> currentlyEnqueued;
+            std::set<IndexType> visited;
+            for (IndexType item : independent) {
                 open.push(item);
             }
             while (!open.empty()) {
-                u32 next = open.front();
+                IndexType next = open.front();
                 open.pop();
                 visit(next, open, visited, currentlyEnqueued, explorer);
             }
@@ -239,26 +243,24 @@ namespace un {
         __attribute__((noinline))
 #endif
 
-        VertexType* operator[](u32 index) {
+        VertexType* operator[](IndexType index) {
             return this->vertex(index);
         }
 
-        const VertexType* operator[](u32 index) const {
+        const VertexType* operator[](IndexType index) const {
             return this->vertex(index);
         }
 
-        bool tryGetVertex(u32 index, VertexType& output) {
+        bool tryGetVertex(IndexType index, VertexType& output) {
             return this->try_get_vertex(index, output);
         }
     };
-
-    template<typename VertexType>
-    std::pair<u32, VertexType*>
-    DependencyGraph<VertexType>::DependencyView::DependencyIterator::operator*() {
-        u32 dependency = owner->dependencies[ptr];
+    template<typename VertexType, typename IndexType>
+    std::pair<IndexType, VertexType*>
+    un::DependencyGraph<VertexType, IndexType>::DependencyView::DependencyIterator::operator*() {
+        IndexType dependency = owner->dependencies[ptr];
         return std::pair(dependency, owner->owner->vertex(dependency));
     }
-
 
 }
 #endif

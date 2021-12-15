@@ -9,6 +9,7 @@ endif ()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 include(CMakePrintHelpers)
 include(cmake/Unnecessary.cmake)
+
 conan_cmake_configure(
     REQUIRES
     glm/0.9.9.8
@@ -65,10 +66,13 @@ if (MINGW)
         -lwsock32
         -lws2_32
     )
-endif ()
-if (MSVC)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+    message("Lmao")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif ()
+message("Flags: ${CMAKE_CXX_FLAGS}")
 add_subdirectory(editor)
 add_subdirectory(module/core)
 add_subdirectory(module/graphs)

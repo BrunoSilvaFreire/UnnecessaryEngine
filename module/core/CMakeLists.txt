@@ -4,6 +4,7 @@ add_unnecessary_module(
     SOURCES
     include/unnecessary/def.h
     include/unnecessary/logging.h
+    include/unnecessary/misc/event.h
     include/unnecessary/misc/types.h
     include/unnecessary/misc/membuf.h
     include/unnecessary/misc/binary_writer.h

@@ -101,7 +101,7 @@ namespace un {
         JobGraph tasks;
 
 
-        std::vector<JobWorker> workers;
+        std::vector<JobWorker> workerPools;
         std::queue<u32> awaitingExecution;
         std::mutex queueUsage, graphUsage;
 

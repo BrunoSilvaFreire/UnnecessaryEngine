@@ -6,6 +6,7 @@
       <file path="$PROJECT_DIR$/engine/include" />
       <file path="$PROJECT_DIR$/engine/resources" />
       <file path="$PROJECT_DIR$/engine/src" />
+      <file path="$PROJECT_DIR$/module/algorithms/include" />
       <file path="$PROJECT_DIR$/module/core/include" />
       <file path="$PROJECT_DIR$/module/core/src" />
       <file path="$PROJECT_DIR$/module/core/tests" />

@@ -5,7 +5,7 @@
 
 namespace un {
 
-    template<typename _Worker>
+    template<typename _Worker = un::JobWorker>
     class LambdaJob : public Job<_Worker> {
     public:
         typedef std::function<void(typename un::Job<_Worker>::WorkerType* worker)> Callback;

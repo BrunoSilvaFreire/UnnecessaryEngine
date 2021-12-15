@@ -1,5 +1,5 @@
 #include <unnecessary/logging.h>
-
+#include <filesystem>
 namespace un {
     std::mutex Log::globalMutex;
 
@@ -26,11 +26,13 @@ namespace un {
         const std::string& file
     ) : flushed(false) {
         globalMutex.lock();
+        std::filesystem::path path(file);
+
         stream() <<
                  DEFAULT_COLOR << '[' <<
                  termcolor::green << header <<
                  DEFAULT_COLOR << "] " <<
-                 termcolor::magenta << '<' << file << "#L" << line << '>' <<
+                 termcolor::magenta << '<' << path.filename() << ":" << line << '>' <<
                  DEFAULT_COLOR << ": ";
     }
 }

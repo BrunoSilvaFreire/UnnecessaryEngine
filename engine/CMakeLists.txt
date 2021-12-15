@@ -126,7 +126,7 @@ add_library(
     include/unnecessary/algorithm/vk_utility.h
     src/unnecessary/algorithm/vk_utility.cpp
     include/unnecessary/algorithm/geometry.h
-    include/unnecessary/graphics/rendering/phong_rendering_pipeline.h src/unnecessary/graphics/rendering/phong_rendering_pipeline.cpp include/unnecessary/jobs/load_file_job.h src/unnecessary/jobs/load_file_job.cpp include/unnecessary/misc/membuf.h src/unnecessary/misc/membuf.cpp ../module/jobs/include/unnecessary/jobs/workers/worker_pool.h)
+    include/unnecessary/graphics/rendering/phong_rendering_pipeline.h src/unnecessary/graphics/rendering/phong_rendering_pipeline.cpp include/unnecessary/jobs/load_file_job.h src/unnecessary/jobs/load_file_job.cpp include/unnecessary/misc/membuf.h src/unnecessary/misc/membuf.cpp ../module/jobs/include/unnecessary/jobs/workers/worker_pool.h ../module/algorithms/include/unnecessary/algorithms/heap.h)
 
 target_include_directories(
     unnecessary

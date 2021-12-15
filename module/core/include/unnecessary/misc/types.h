@@ -6,7 +6,8 @@
 #include <cstdlib>
 #include <memory>
 #include <cxxabi.h>
-
+#else
+#include <typeinfo>
 #endif
 namespace un {
 #ifdef __GNUG__
@@ -29,7 +30,7 @@ namespace un {
 
 #else
     template<typename T>
-    std::string typeNameOf() {
+    std::string type_name_of() {
         return typeid(T).name();
     }
 

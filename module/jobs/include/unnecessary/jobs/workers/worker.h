@@ -6,7 +6,8 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
-#include "unnecessary/jobs/job.h"
+#include <unnecessary/jobs/job.h>
+#include <unnecessary/misc/event.h>
 
 namespace un {
 
@@ -24,14 +25,15 @@ namespace un {
         std::mutex handbrakeMutex;
         std::mutex sleepMutex;
         std::condition_variable waiting;
+        un::EventVoid finished;
 
         void workerThread() {
             do {
                 LOG(INFO) << "Worker " << index << " started execution";
                 JobType* jobPtr;
-                u32 id;
+                JobHandle id;
 
-                while (provider(&jobPtr, &id)) {
+                while (running && provider(&jobPtr, &id)) {
                     jobPtr->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
                     notifier(jobPtr, id);
                 }
@@ -39,6 +41,7 @@ namespace un {
                     sleep();
                 }
             } while (running);
+            finished();
             LOG(INFO) << "Worker " << index << " finished execution";
         }
 
@@ -51,8 +54,9 @@ namespace un {
         ) : index(index),
             thread(nullptr),
             waiting(),
-            running(true),
+            running(false),
             awaken(false),
+            finished(),
             provider(provider),
             notifier(notifier) {
             if (autostart) {
@@ -81,6 +85,10 @@ namespace un {
             return awaken;
         }
 
+        un::EventVoid& getOnFinished() {
+            return finished;
+        }
+
         void awake() {
             {
                 std::lock_guard<std::mutex> lock(sleepMutex);
@@ -103,23 +111,36 @@ namespace un {
         }
 
         void start() {
+            if (running) {
+                return;
+            }
+            running = true;
             thread = new std::thread(&AbstractJobWorker::workerThread, this);
+        }
+
+        void stop() {
+            if (!running) {
+                return;
+            }
+            LOG(INFO) << "Stopping worker " << index;
+            running = false;
+            if (!isAwake()) {
+                awake();
+            }
         }
     };
 
     class JobWorker;
 
-    class SimpleJob : public un::Job<JobWorker> {
-
-    };
+    typedef un::Job<JobWorker> SimpleJob;
 
     class JobWorker : public un::AbstractJobWorker<un::SimpleJob> {
     public:
         JobWorker(
             size_t index,
             bool autostart,
-            const JobProvider <JobType>& provider,
-            const JobNotifier <JobType>& notifier
+            const JobProvider<JobType>& provider,
+            const JobNotifier<JobType>& notifier
         );
     };
 }

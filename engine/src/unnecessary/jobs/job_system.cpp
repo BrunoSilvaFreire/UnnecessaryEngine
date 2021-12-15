@@ -93,7 +93,7 @@ namespace un {
     }
 
     void JobSystem::awakeSomeoneUp() {
-        for (JobWorker& worker: workers) {
+        for (JobWorker& worker : workerPools) {
             if (!worker.isAwake()) {
                 // Wake up worker
                 worker.awake();
@@ -113,10 +113,10 @@ namespace un {
         if (nCores == 0) {
             nCores = 4;
         }
-        LOG(INFO) << "Using " << GREEN(nCores) << " workers for job system.";
-        workers.reserve(nCores);
+        LOG(INFO) << "Using " << GREEN(nCores) << " workerPools for job system.";
+        workerPools.reserve(nCores);
         for (size_t i = 0 ; i < nCores ; ++i) {
-            workers.emplace_back(application, this, i, false);
+            workerPools.emplace_back(application, this, i, false);
         }
     }
 
@@ -236,13 +236,14 @@ namespace un {
 #ifdef LOG_JOB_COMPLETION
             LOG(INFO) << "Job " << GREEN(id) << " has been completed.";
 #endif
+
             // Notify job who depends on this that it's done
-            for (auto[dependantID, _unused]: tasks.dependantsOn(id)) {
+            for (auto[dependantID, _unused] : tasks.dependantsOn(id)) {
                 bool ready = true;
                 tasks.disconnect(id, dependantID);
                 tasks.disconnect(dependantID, id);
                 // Check whether we can add this to the awaiting execution queue
-                for (auto[otherDependency, otherVertex]: tasks.dependenciesOf(dependantID)) {
+                for (auto[otherDependency, otherVertex] : tasks.dependenciesOf(dependantID)) {
                     if (otherDependency != id) {
                         // There is another dependency we need to wait for
                         ready = false;
@@ -255,8 +256,8 @@ namespace un {
             tasks.remove(id);
             auto toAwake = awaitingExecution.size();
             int i = 0;
-            while (i < workers.size() && toAwake > 0) {
-                JobWorker& worker = workers[i++];
+            while (i < workerPools.size() && toAwake > 0) {
+                JobWorker& worker = workerPools[i++];
                 if (!worker.isAwake()) {
                     worker.awake();
                     toAwake--;
@@ -274,17 +275,16 @@ namespace un {
     }
 
     int JobSystem::getNumWorkers() {
-        return workers.size();
+        return workerPools.size();
     }
 
     void JobSystem::start() {
-        for (auto& item: workers) {
+        for (auto& item : workerPools) {
             item.start();
         }
     }
 
     JobWorker::WorkerGraphicsResources::WorkerGraphicsResources(RenderingDevice& renderingDevice) {
-
         auto device = renderingDevice.getVirtualDevice();
         commandPool = device.createCommandPool(
             vk::CommandPoolCreateInfo(
@@ -292,7 +292,6 @@ namespace un {
                 renderingDevice.getGraphics().getIndex()
             )
         );
-
     }
 
     const vk::CommandPool& JobWorker::WorkerGraphicsResources::getCommandPool() const {

@@ -38,7 +38,7 @@ namespace un {
 #pragma clang diagnostic ignored "-Wstring-plus-int"
 
 #endif
-
+#define UN_USE_ABS_PATH_FOR_LOGGING
 #ifdef UN_USE_ABS_PATH_FOR_LOGGING
 #define __FILENAME__ __FILE__
 #else

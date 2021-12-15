@@ -3,7 +3,7 @@ add_unnecessary_module(
 
     SOURCES
     include/unnecessary/graphs/dependency_graph.h
-
+    src/unnecessary/graphs/dependency_graph.cpp
     DEPENDENCIES
     unnecessary_core
 )
