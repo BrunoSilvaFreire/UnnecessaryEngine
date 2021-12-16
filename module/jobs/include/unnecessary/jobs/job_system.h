@@ -52,11 +52,11 @@ namespace un {
         void done(typename WorkerType::JobType* job, JobHandle handle) {
             {
                 std::lock_guard<std::mutex> lock(graphAccessMutex);
-                for (auto pair : graph.dependantsOn(handle)) {
+                for (auto pair: graph.dependantsOn(handle)) {
                     auto otherIndex = pair.first;
                     auto other = pair.second;
                     bool ready = true;
-                    for (auto[otherDependency, otherVertex] : graph.dependenciesOf(
+                    for (auto[otherDependency, otherVertex]: graph.dependenciesOf(
                         otherIndex
                     )) {
                         if (otherDependency != handle) {
@@ -73,7 +73,7 @@ namespace un {
                                     auto& archWorkers = std::get<OtherWorkerIndex>(
                                         workerPools
                                     );
-                                    archWorkers->dispatch(other->jobIndex);
+                                    archWorkers->unsafeDispatch(other->jobIndex);
                                 }
                             }
                         );
@@ -97,7 +97,7 @@ namespace un {
                     auto& archWorkers = std::get<WorkerIndex>(workerPools);
                     auto& workerConfig = std::get<WorkerIndex>(numWorkersPerArchetype);
                     LOG(INFO) << "Allocating " << GREEN(workerConfig.getNumWorkers())
-                              << " workerPools of archetype "
+                              << " workers of archetype "
                               << PURPLE(un::type_name_of<WorkerType>());
                     totalNumberOfWorkers += workerConfig.getNumWorkers();
                     using JobType = typename WorkerType::JobType;
@@ -120,8 +120,6 @@ namespace un {
             );
         };
 
-        void start();
-
         void addDependency(JobHandle to, JobHandle from) {
 #ifdef DEBUG
             if (from == to) {
@@ -134,17 +132,18 @@ namespace un {
             }
         }
 
-        void markForExecution(JobHandle job);
-
-        int getNumWorkers();
-
         template<typename T>
         JobHandle enqueue(T* job, bool dispatch) {
             using JobWorkerType = typename T::WorkerType;
             constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, WorkerArchetypes...>();
             un::WorkerPool<JobWorkerType>* pool = std::get<ArchetypeIndex>(workerPools);
-            un::JobHandle graphHandle = graph.add();
-            pool->enqueue(job, graphHandle, dispatch);
+            un::JobHandle graphHandle = graph.add(
+                un::JobNode{
+                    .archetypeIndex = ArchetypeIndex
+                }
+            );
+            un::JobNode* node = graph[graphHandle];
+            node->jobIndex = pool->enqueue(job, graphHandle, dispatch);
             return graphHandle;
         }
 
@@ -161,7 +160,7 @@ namespace un {
         void dispatch(JobHandle handle) {
             using JobWorkerType = typename T::WorkerType;
             un::WorkerPool<JobWorkerType>* pool = std::get<ArchetypeIndex>(workerPools);
-            return pool->dispatch(handle);
+            pool->dispatch(handle);
         }
 
 
@@ -169,7 +168,7 @@ namespace un {
         void dispatch(JobHandle handle) {
             using JobWorkerType = typename T::WorkerType;
             constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, WorkerArchetypes...>();
-            return dispatch<T, ArchetypeIndex>(handle);
+            dispatch<T, ArchetypeIndex>(handle);
         }
 
         void finish(bool block) {
@@ -183,7 +182,7 @@ namespace un {
                 for_types_indexed<WorkerArchetypes...>(
                     [&]<typename WorkerType, std::size_t WorkerIndex>() {
                         auto& pool = std::get<WorkerIndex>(workerPools);
-                        for (WorkerType* worker : pool->getWorkers()) {
+                        for (WorkerType* worker: pool->getWorkers()) {
                             worker->getOnFinished() += [&]() {
                                 remaining--;
                                 allExited.notify_one();
@@ -204,7 +203,7 @@ namespace un {
                 for_types_indexed<WorkerArchetypes...>(
                     [&]<typename WorkerType, std::size_t WorkerIndex>() {
                         auto& pool = std::get<WorkerIndex>(workerPools);
-                        for (WorkerType* worker : pool->getWorkers()) {
+                        for (WorkerType* worker: pool->getWorkers()) {
                             worker->stop();
                         }
                     }

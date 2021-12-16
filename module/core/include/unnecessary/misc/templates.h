@@ -20,6 +20,7 @@ namespace un {
             (f.template operator()<Indices>(), ...);
         }(std::make_index_sequence<Index>());
     }
+
     template<typename IndexSequence, typename Lambda>
     constexpr void for_indexed(Lambda&& f) {
         [&f]<auto... Indices>(std::index_sequence<Indices...>) {
@@ -55,7 +56,8 @@ namespace un {
     struct index;
 
     template<typename T, typename... Ts>
-    struct index<T, T, Ts...> : std::integral_constant<std::size_t, 0> {};
+    struct index<T, T, Ts...> : std::integral_constant<std::size_t, 0> {
+    };
 
     template<typename T, typename U, typename... Ts>
     struct index<T, U, Ts...> : std::integral_constant<

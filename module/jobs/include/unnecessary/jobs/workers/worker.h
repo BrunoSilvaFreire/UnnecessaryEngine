@@ -29,7 +29,6 @@ namespace un {
 
         void workerThread() {
             do {
-                LOG(INFO) << "Worker " << index << " started execution";
                 JobType* jobPtr;
                 JobHandle id;
 
@@ -42,7 +41,6 @@ namespace un {
                 }
             } while (running);
             finished();
-            LOG(INFO) << "Worker " << index << " finished execution";
         }
 
     public:

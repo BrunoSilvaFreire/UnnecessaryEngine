@@ -44,14 +44,12 @@ function(
     if ("${LISTCOUNT}" GREATER 0)
         target_link_libraries(${NAME} PUBLIC "${UN_MODULE_DEPENDENCIES}")
     endif ()
-    string(LENGTH "${CMAKE_CURRENT_SOURCE_DIR}_" SOURCE_PATH_SIZE)
     target_compile_definitions(
         ${NAME}
         PUBLIC
         NOMINMAX
         VULKAN_HPP_TYPESAFE_CONVERSION
         VULKAN_HPP_NO_SPACESHIP_OPERATOR
-        SOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}
     )
     if ("${NUMTESTS}" GREATER 0)
         add_executable(
@@ -79,5 +77,4 @@ function(
             LINKER_LANGUAGE CXX
         )
     endif ()
-
 endfunction()

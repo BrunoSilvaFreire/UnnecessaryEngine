@@ -20,10 +20,18 @@ TEST(jobs, load_file) {
     un::Buffer buf;
     {
         un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+        un::JobHandle loadHandle, lambdaHandle;
         chain.immediately<un::LoadFileJob>(
-            "/home/brunorbsf/CLionProjects/UNWin/module/jobs/resources/dummy.txt",
+            &loadHandle,
+            "/home/brunorbsf/CLionProjects/UNWin/module/jobs/shaders/dummy.txt",
             &buf
         );
+        chain.finally(
+            [&]() {
+                LOG(INFO) << "Finished reading file: " << buf.data();
+            }
+        );
+
     }
     sleep(2);
     jobSystem.finish(true);
@@ -40,7 +48,6 @@ TEST(jobs, sequence_test) {
     {
         un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
         un::JobHandle first, second;
-        un::JobHandle previous1, previous2;
         chain.immediately<un::LambdaJob<>>(
             &first,
             [&]() {
@@ -53,7 +60,7 @@ TEST(jobs, sequence_test) {
                 log(1);
             }
         );
-        for (size_t i = 0 ; i < 20 ; i += 2) {
+        for (size_t i = 0; i < 20000; i += 2) {
             chain.after<un::LambdaJob<>>(
                 first,
                 &first,

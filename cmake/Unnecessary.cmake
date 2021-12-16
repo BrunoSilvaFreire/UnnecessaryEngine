@@ -1,4 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryModules.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryShader.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryDebug.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryTools.cmake)
 
 function(add_unnecessary_thirdparty_library NAME)
     add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/${NAME})

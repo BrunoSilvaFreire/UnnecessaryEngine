@@ -50,11 +50,12 @@ namespace un {
 
         template<size_t ArchetypeIndex>
         JobChain& afterAll(JobHandle job) {
-            for (un::JobHandle handle : std::get<ArchetypeIndex>(allJobs)) {
+            for (un::JobHandle handle: std::get<ArchetypeIndex>(allJobs)) {
                 if (handle != job) {
                     after<ArchetypeIndex>(handle, job);
                 }
             }
+            return *this;
         }
 
         template<typename Archetype>
@@ -84,7 +85,7 @@ namespace un {
         ) {
             auto job = new T(std::forward<Args>(args)...);
             auto id = system->enqueue(job);
-            for (JobHandle dependency : dependencies) {
+            for (JobHandle dependency: dependencies) {
                 system->addDependency(dependency, id);
             }
             allJobs.emplace(id);
@@ -125,14 +126,14 @@ namespace un {
 
         template<typename J, typename... Args>
         JobChain& after(JobHandle dependencyId, Args... args) {
-            after(dependencyId, new J(std::forward<Args>(args)...));
+            after<J>(dependencyId, new J(std::forward<Args>(args)...));
             return *this;
         }
 
 
-        template<typename T, typename... Args>
+        template<typename J, typename... Args>
         JobChain& after(JobHandle dependencyId, JobHandle* resultId, Args... args) {
-            after(dependencyId, resultId, new T(std::forward<Args>(args)...));
+            after<J>(dependencyId, resultId, new J(std::forward<Args>(args)...));
             return *this;
         }
 

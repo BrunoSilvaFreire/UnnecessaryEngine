@@ -8,5 +8,7 @@ namespace un {
     std::string to_string(const T& value) {
         return std::to_string(value);
     }
+
+    std::string capitalize(std::string value);
 }
 #endif

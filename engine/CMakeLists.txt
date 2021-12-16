@@ -100,7 +100,7 @@ add_library(
     include/unnecessary/graphics/buffers/command_buffer_graph.h
     src/unnecessary/graphics/buffers/command_buffer_graph.cpp
     include/unnecessary/graphics/rendering/frame_graph.h
-    src/unnecessary/graphics/frame_graph.cpp
+    src/unnecessary/graphics/render_graph.cpp
     include/unnecessary/graphics/rendering/rendering_pipeline.h
     include/unnecessary/misc/aggregator.h
     src/unnecessary/systems/graphics_systems.cpp
@@ -126,7 +126,13 @@ add_library(
     include/unnecessary/algorithm/vk_utility.h
     src/unnecessary/algorithm/vk_utility.cpp
     include/unnecessary/algorithm/geometry.h
-    include/unnecessary/graphics/rendering/phong_rendering_pipeline.h src/unnecessary/graphics/rendering/phong_rendering_pipeline.cpp include/unnecessary/jobs/load_file_job.h src/unnecessary/jobs/load_file_job.cpp include/unnecessary/misc/membuf.h src/unnecessary/misc/membuf.cpp ../module/jobs/include/unnecessary/jobs/workers/worker_pool.h ../module/algorithms/include/unnecessary/algorithms/heap.h)
+    include/unnecessary/graphics/rendering/phong_rendering_pipeline.h
+    src/unnecessary/graphics/rendering/phong_rendering_pipeline.cpp
+    include/unnecessary/jobs/load_file_job.h
+    src/unnecessary/jobs/load_file_job.cpp
+    include/unnecessary/misc/membuf.h
+    src/unnecessary/misc/membuf.cpp
+)
 
 target_include_directories(
     unnecessary

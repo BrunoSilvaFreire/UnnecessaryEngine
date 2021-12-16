@@ -55,7 +55,7 @@ namespace un {
     template<typename J>
     void un::ParallelizeJob<J>::operator()(un::JobWorker* worker) {
         for (size_t i = fromIndex; i < toIndex; ++i) {
-           parallelForJob->operator()(i, worker);
+            parallelForJob->operator()(i, worker);
         }
     }
 

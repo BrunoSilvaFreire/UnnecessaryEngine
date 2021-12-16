@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
     const float finalPoints = -(distance * numSidePots);
 #ifndef HEADLESS
     un::JobChain(&jobs)
-        .immediately<un::LoadObjJob>(&load, "resources/teapot.obj", &data)
+        .immediately<un::LoadObjJob>(&load, "shaders/teapot.obj", &data)
         .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
         .after(
             upload,

@@ -25,12 +25,12 @@ namespace un {
     std::string select_filename(const std::string& file) {
         std::filesystem::path path(file);
         std::vector<std::string> parts;
-        for (auto part : path) {
+        for (auto part: path) {
             parts.emplace_back(part.string());
         }
         std::string str;
         std::size_t first = parts.size() - 1;
-        for (int i = first ; i >= 0 ; --i) {
+        for (int i = first; i >= 0; --i) {
             auto part = parts[i];
             if (part == "src" || part == "include") {
                 break;

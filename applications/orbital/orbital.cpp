@@ -63,12 +63,12 @@ int main(int argc, char** argv) {
             un::JobChain chain(&app.getJobSystem());
             chain.immediately<un::LoadFileJob>(
                 &loadFrag,
-                std::filesystem::absolute("resources/shaders/phong.frag.spv"),
+                std::filesystem::absolute("shaders/shaders/phong.frag.spv"),
                 &phongFragment
             );
             chain.immediately<un::LoadFileJob>(
                 &loadVert,
-                std::filesystem::absolute("resources/shaders/phong.vert.spv"),
+                std::filesystem::absolute("shaders/shaders/phong.vert.spv"),
                 &phongVertex
             );
             chain.after<un::LambdaJob>(
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
             // Load model
             chain.immediately<un::LoadModelJob>(
                      &load,
-                     "resources/teapot.obj",
+                     "shaders/teapot.obj",
                      &meshes,
                      vertexLayout
                  )

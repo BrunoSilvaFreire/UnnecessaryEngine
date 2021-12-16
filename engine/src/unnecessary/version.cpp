@@ -25,4 +25,5 @@ namespace un {
         stream << ver.getMajor() << '.' << ver.getMinor() << '.' << ver.getPatch();
         return stream.str();
     }
+
 }

@@ -20,6 +20,7 @@ conan_cmake_configure(
     cxxopts/2.2.1
     assimp/5.1.0
     gtest/1.11.0
+    nlohmann_json/3.10.4
 
     GENERATORS
     cmake_find_package
@@ -42,12 +43,13 @@ find_package(tinyobjloader REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(assimp REQUIRED)
 find_package(GTest REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
 add_unnecessary_thirdparty_library(grapphs)
-add_subdirectory(engine)
-add_subdirectory(applications/dummy)
-add_subdirectory(applications/orbital)
+#add_subdirectory(engine)
+#add_subdirectory(applications/dummy)
+#add_subdirectory(applications/orbital)
 add_compile_options(
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
 )
@@ -67,13 +69,12 @@ if (MINGW)
         -lws2_32
     )
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
-    message("Lmao")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif ()
-message("Flags: ${CMAKE_CXX_FLAGS}")
 add_subdirectory(editor)
 add_subdirectory(module/core)
 add_subdirectory(module/graphs)
 add_subdirectory(module/jobs)
+add_subdirectory(module/rendering)

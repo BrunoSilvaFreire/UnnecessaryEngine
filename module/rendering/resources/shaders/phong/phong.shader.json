@@ -1,0 +1,35 @@
+{
+    "name": "phong",
+    "stages": {
+        "vert": {
+            "stream": {
+                "position": "position"
+            },
+            "inputs": {
+                "global": {
+                    "vp": "vp"
+                },
+                "instance": {
+                    "model": "model"
+                }
+            }
+        },
+        "frag": {
+            "inputs": {
+                "vertex": {
+                    "position": "position"
+                },
+                "instance": {
+                }
+            }
+        }
+    },
+    "inputs": {
+        "global": {
+        },
+        "pipeline": {
+        },
+        "instance": {
+        }
+    }
+}

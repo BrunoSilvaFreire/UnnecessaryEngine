@@ -15,11 +15,11 @@ namespace un {
     public:
         void flush();
 
-        Log(const std::string &header, u32 line, const std::string &file);
+        Log(const std::string& header, u32 line, const std::string& file);
 
         ~Log();
 
-        std::ostream &stream();
+        std::ostream& stream();
     };
 }
 #define INFO "INFO"

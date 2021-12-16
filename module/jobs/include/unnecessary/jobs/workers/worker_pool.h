@@ -138,7 +138,7 @@ namespace un {
 
         void ensureNumWorkersAwake(size_t num) {
             size_t numWorkersNeededToAwake = num;
-            for (const auto& worker : workers) {
+            for (const auto& worker: workers) {
                 if (worker->isAwake()) {
                     numWorkersNeededToAwake--;
                 }
@@ -148,7 +148,7 @@ namespace un {
             }
             while (numWorkersNeededToAwake > 0) {
                 std::size_t lastIndex = workers.size();
-                for (std::size_t i = 0 ; i < lastIndex ; ++i) {
+                for (std::size_t i = 0; i < lastIndex; ++i) {
                     if (i == lastIndex - 1) {
                         return;
                     }
@@ -161,10 +161,6 @@ namespace un {
             }
         }
 
-        void unsafeDispatch(JobHandle handle) {
-            ready.push(handle);
-            ensureNumWorkersAwake(ready.size());
-        }
 
     public:
 
@@ -173,12 +169,19 @@ namespace un {
         }
 
         ~WorkerPool() {
-            for (WorkerType* worker : workers) {
+            for (WorkerType* worker: workers) {
                 worker->stop();
                 delete worker;
             }
         }
 
+        /**
+         * Adds the given job to this pool, with the option to immediately add it to the
+         * ready jobs list.
+         * @param graphHandle The index where the given job is stored inside the job graph.
+         * @param dispatch Should this immediately be dispatched.
+         * @return The index where the given job is stored inside the pool.
+         */
         JobHandle enqueue(JobType* job, JobHandle graphHandle, bool dispatch) {
             JobHandle handle;
             {
@@ -210,17 +213,22 @@ namespace un {
         void dispatch(std::set<JobHandle> handles) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
-                for (JobHandle handle : handles) {
+                for (JobHandle handle: handles) {
                     unsafeDispatch(handle);
                 }
             }
+        }
+
+        void unsafeDispatch(JobHandle handle) {
+            ready.push(handle);
+            ensureNumWorkersAwake(ready.size());
         }
 
 
         void allocateWorkers(WorkerArchetypeConfiguration<WorkerType> configuration) {
             auto numWorkers = configuration.numWorkers;
             workers.reserve(numWorkers);
-            for (std::size_t i = 0 ; i < numWorkers ; ++i) {
+            for (std::size_t i = 0; i < numWorkers; ++i) {
                 workers.emplace_back(createWorker(configuration, i));
             }
         }

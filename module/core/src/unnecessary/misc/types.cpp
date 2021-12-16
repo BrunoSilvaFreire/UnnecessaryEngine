@@ -13,6 +13,7 @@ namespace un {
 
         return (status == 0) ? res.get() : value;
     }
+
 #else
 
     std::string demangle(const char* value) {

@@ -2,9 +2,7 @@
   "$schema": "../../../schemas/shader.schema.json",
   "name": "phong",
   "stages": {
-    "frag": {
-      "stage": "frag"
-    },
+    "frag": "phong.frag",
     "vert": "phong.vert"
   },
   "uniforms": [

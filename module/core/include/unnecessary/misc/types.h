@@ -1,11 +1,14 @@
 #ifndef UNNECESSARYENGINE_TYPES_H
 #define UNNECESSARYENGINE_TYPES_H
+
 #include <string>
+
 #ifdef __GNUG__
 
 #include <cstdlib>
 #include <memory>
 #include <cxxabi.h>
+
 #else
 #include <typeinfo>
 #endif

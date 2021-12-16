@@ -13,7 +13,7 @@ namespace un {
             size_t left, right;
         };
 
-        std::vector<Node> values;
+        std::vector <Node> values;
 
 
     public:

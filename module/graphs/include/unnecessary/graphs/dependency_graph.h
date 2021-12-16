@@ -39,7 +39,7 @@ namespace un {
             std::set<IndexType>& currentlyEnqueued,
             const Explorer& explorer
         ) const {
-            for (auto[neighbor, edge] : DependencyGraph<VertexType>::edges_from(index)) {
+            for (auto[neighbor, edge]: DependencyGraph<VertexType>::edges_from(index)) {
                 if (visited.contains(neighbor)) {
                     continue;
                 }
@@ -67,7 +67,7 @@ namespace un {
             un::DependencyType expected
         ) {
             std::vector<IndexType> dependencies;
-            for (auto[dependency, edge] : this->node(index).connections()) {
+            for (auto[dependency, edge]: this->node(index).connections()) {
                 if (edge != expected) {
                     continue;
                 }
@@ -81,15 +81,15 @@ namespace un {
         std::string toDot() const {
             std::stringstream dot;
             dot << "digraph {" << std::endl;
-            for (auto[vertexPtr, index] : DependencyGraph<VertexType>::all_vertices()) {
+            for (auto[vertexPtr, index]: DependencyGraph<VertexType>::all_vertices()) {
                 dot << index << "[label =\"#" << index << ": "
                     << un::to_string(*vertexPtr)
                     << "\" fontname=\"monospace\"" <<
                     vertex_properties(vertexPtr) <<
                     "];" << std::endl;
             }
-            for (auto[vertex, index] : DependencyGraph<VertexType>::all_vertices()) {
-                for (auto[otherIndex, edge] : DependencyGraph<VertexType>::edges_from(
+            for (auto[vertex, index]: DependencyGraph<VertexType>::all_vertices()) {
+                for (auto[otherIndex, edge]: DependencyGraph<VertexType>::edges_from(
                     index
                 )) {
                     if (edge == un::DependencyType::eUses) {
@@ -200,7 +200,7 @@ namespace un {
 
         DependencyView allConnectionsOf(IndexType index) {
             std::vector<IndexType> all;
-            for (auto[dependency, edge] : this->node(index).connections()) {
+            for (auto[dependency, edge]: this->node(index).connections()) {
                 all.emplace_back(dependency);
             }
             return DependencyView(
@@ -229,7 +229,7 @@ namespace un {
             std::queue<IndexType> open;
             std::set<IndexType> currentlyEnqueued;
             std::set<IndexType> visited;
-            for (IndexType item : independent) {
+            for (IndexType item: independent) {
                 open.push(item);
             }
             while (!open.empty()) {
@@ -255,6 +255,7 @@ namespace un {
             return this->try_get_vertex(index, output);
         }
     };
+
     template<typename VertexType, typename IndexType>
     std::pair<IndexType, VertexType*>
     un::DependencyGraph<VertexType, IndexType>::DependencyView::DependencyIterator::operator*() {
