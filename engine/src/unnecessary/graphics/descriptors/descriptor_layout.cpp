@@ -15,8 +15,8 @@ namespace un {
         vk::Device owningDevice,
         vk::ShaderStageFlags shaderStageFlags
     ) const {
-        std::vector<vk::DescriptorSetLayoutBinding> bindings(elements.size());
-        for (u32 i = 0; i < elements.size(); ++i) {
+        std::vector<vk::DescriptorSetLayoutBinding> bindings(elements.singleSize());
+        for (u32 i = 0; i < elements.singleSize(); ++i) {
             const DescriptorElement& element = elements[i];
             bindings[i] = vk::DescriptorSetLayoutBinding(
                 i,

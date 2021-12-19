@@ -84,8 +84,8 @@ namespace un {
             *id = next;
             awaitingExecution.pop();
         }
-        if (awaitingExecution.size() > N_JOBS_WARNING) {
-            LOG(WARN) << "There are " << YELLOW(awaitingExecution.size())
+        if (awaitingExecution.singleSize() > N_JOBS_WARNING) {
+            LOG(WARN) << "There are " << YELLOW(awaitingExecution.singleSize())
                       << " jobs awaiting execution.";
         }
         *result = getJob(next);
@@ -254,9 +254,9 @@ namespace un {
                 }
             }
             tasks.remove(id);
-            auto toAwake = awaitingExecution.size();
+            auto toAwake = awaitingExecution.singleSize();
             int i = 0;
-            while (i < workerPools.size() && toAwake > 0) {
+            while (i < workerPools.singleSize() && toAwake > 0) {
                 JobWorker& worker = workerPools[i++];
                 if (!worker.isAwake()) {
                     worker.awake();
@@ -275,7 +275,7 @@ namespace un {
     }
 
     int JobSystem::getNumWorkers() {
-        return workerPools.size();
+        return workerPools.singleSize();
     }
 
     void JobSystem::start() {

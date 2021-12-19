@@ -17,7 +17,7 @@ namespace un {
         un::RenderingDevice& renderingDevice = renderer->getRenderingDevice();
 
         const auto& attachments = graph.getAttachments();
-        for (std::size_t i = 0; i < attachments.size(); ++i) {
+        for (std::size_t i = 0; i < attachments.singleSize(); ++i) {
             auto attachment = attachments[i];
 
             if (graph.isAttachmentBorrowed(i)) {

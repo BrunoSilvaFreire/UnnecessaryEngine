@@ -103,7 +103,7 @@ namespace un {
                 toWait.begin();
                 toSignal.begin();
                 waitDstStageMask.begin();
-                buffersAggregator.reserve(vertices.size());
+                buffersAggregator.reserve(vertices.singleSize());
                 for (u32 vertex : vertices) {
                     buffersAggregator.emplace(
                         CommandBufferGraph::vertex(vertex)->cmdBuffer
@@ -161,7 +161,7 @@ namespace un {
 
     std::size_t CommandBufferGraph::hashDependencies(const std::set<u32>& dependencies) {
         std::size_t hc = 0;
-        hc ^= dependencies.size();
+        hc ^= dependencies.singleSize();
         for (u32 i : dependencies) {
             hc ^= i;
         }

@@ -11,7 +11,7 @@ cbuffer cameraData {
 	Matrices matrices;
 };
 
-struct VertexInput
+struct VertexAttribute
 {
 	float3 position : POSITION;
 	float3 normal : NORMAL;
@@ -23,7 +23,7 @@ struct VertexOutput
 	float3 normal : NORMAL;
 };
 
-VertexOutput main(VertexInput input)
+VertexOutput main(VertexAttribute input)
 {
 	const float4x4 mvp = matrices.vp * data.model;
 	VertexOutput output;

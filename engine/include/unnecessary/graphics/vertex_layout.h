@@ -14,7 +14,7 @@ namespace un {
         eTexture
     };
 
-    struct VertexInput {
+    struct VertexAttribute {
     private:
         /**
          * How many elements there are
@@ -23,11 +23,11 @@ namespace un {
         /**
          * The size in bytes of a single element
          */
-        u8 size;
+        u8 singleSize;
         vk::Format format;
         un::CommonVertexAttribute type;
     public:
-        VertexInput(
+        VertexAttribute(
             u8 count,
             u8 size,
             vk::Format format,
@@ -46,8 +46,10 @@ namespace un {
     };
 
 
-    class VertexLayout : public un::Layout<un::VertexInput> {
+    class VertexLayout : public un::Layout<un::VertexAttribute> {
     public:
+        VertexLayout() : VertexAttribute(std::string(), 0, 0, vk::Format::eR16G16B16A16Uint) {}
+
         template<typename T>
         void push(
             u8 count,

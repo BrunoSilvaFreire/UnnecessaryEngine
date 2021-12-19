@@ -37,7 +37,7 @@ namespace un {
     void LightingSystem::step(un::World& world, f32 delta, un::JobWorker* worker) {
         auto& registry = world.getRegistry();
         auto allPointLights = registry.view<un::PointLight>();
-        size_t numLights = allPointLights.size();
+        size_t numLights = allPointLights.singleSize();
         runtimeScenePointLights.resize(numLights);
         size_t index = 0;
         for (entt::entity entity : allPointLights) {
@@ -80,7 +80,7 @@ namespace un {
             lightsDirty = false;
         }
         un::SceneLightingData sceneLightingData{};
-        sceneLightingData.numPointLights = runtimeScenePointLights.size();
+        sceneLightingData.numPointLights = runtimeScenePointLights.singleSize();
         sceneLightingData.pointLights = runtimeScenePointLights.data();
         un::BufferWriter objectBufferWriter(renderer, vk::CommandPool(), false);
         std::vector<float> distances;
@@ -91,7 +91,7 @@ namespace un {
         size_t size = 0;
         size += sizeof(u32); //nLights
         size += 12; //Padding
-        size += runtimeScenePointLights.size() * sizeof(un::PointLightData);
+        size += runtimeScenePointLights.singleSize() * sizeof(un::PointLightData);
         return size;
     }
 

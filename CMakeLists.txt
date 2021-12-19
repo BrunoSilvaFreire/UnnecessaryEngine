@@ -49,7 +49,6 @@ set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
 add_unnecessary_thirdparty_library(grapphs)
 #add_subdirectory(engine)
 #add_subdirectory(applications/dummy)
-#add_subdirectory(applications/orbital)
 add_compile_options(
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
 )
@@ -78,3 +77,6 @@ add_subdirectory(module/core)
 add_subdirectory(module/graphs)
 add_subdirectory(module/jobs)
 add_subdirectory(module/rendering)
+
+
+add_subdirectory(applications/orbital)

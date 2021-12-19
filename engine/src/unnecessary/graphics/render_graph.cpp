@@ -64,7 +64,7 @@ namespace un {
     ) {
         auto index = reference.getIndex();
         auto resources = frameGraph->resources;
-        if (index >= resources.size()) {
+        if (index >= resources.singleSize()) {
             *resource = nullptr;
             return false;
         } else {
@@ -151,7 +151,7 @@ namespace un {
         vk::ImageLayout initialLayout,
         vk::ImageLayout finalLayout
     ) {
-        std::size_t index = attachments.size();
+        std::size_t index = attachments.singleSize();
         attachments.emplace_back(
             vk::AttachmentDescription(
                 flags,
@@ -184,7 +184,7 @@ namespace un {
         vk::ImageLayout initialLayout,
         vk::ImageLayout finalLayout
     ) {
-        std::size_t index = attachments.size();
+        std::size_t index = attachments.singleSize();
         attachments.emplace_back(
             vk::AttachmentDescription(
                 flags,

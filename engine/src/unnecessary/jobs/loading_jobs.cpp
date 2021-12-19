@@ -34,7 +34,7 @@ namespace un {
 
         const std::vector<u16>& indices = data->getIndices();
         std::size_t numVertices = data->getNumVertices();
-        std::size_t numIndices = indices.size();
+        std::size_t numIndices = indices.singleSize();
         u32 stride = vertexLayout.getStride();
         u64 vBufSize = stride * numVertices;
         u64 iBufSize = sizeof(u16) * numIndices;
@@ -163,7 +163,7 @@ namespace un {
             glm::vec3* uvs = reinterpret_cast<glm::vec3*>(pMesh->mTextureCoords);
             for (std::size_t j = 0 ; j < numVertices ; ++j) {
                 size_t offset = 0;
-                for (std::size_t k = 0 ; k < layoutElements.size() ; ++k) {
+                for (std::size_t k = 0 ; k < layoutElements.singleSize() ; ++k) {
                     const auto& element = layoutElements[k];
                     switch (element.getType()) {
                         case un::CommonVertexAttribute::eGeneric:

@@ -41,7 +41,7 @@ namespace un {
     ) {
         float priority = 1.0;
 
-        for (u32 i = 0 ; i < queueProperties.size() ; ++i) {
+        for (u32 i = 0 ; i < queueProperties.singleSize() ; ++i) {
             auto property = queueProperties[i];
             if ((property.queueFlags & flags) != flags) {
                 continue;
@@ -84,7 +84,7 @@ namespace un {
 
 
         std::unordered_map<u32, u32> scores;
-        for (u32 i = 0 ; i < devices.size() ; ++i) {
+        for (u32 i = 0 ; i < devices.singleSize() ; ++i) {
             const vk::PhysicalDevice& device = devices[i];
             vk::PhysicalDeviceProperties properties = device.getProperties();
             if (!deviceRequirements.isMet(device)) {
@@ -125,7 +125,7 @@ namespace un {
 
         std::optional<u32> graphicsQueue, presentQueue;
 
-        for (u32 i = 0 ; i < queueProperties.size() ; ++i) {
+        for (u32 i = 0 ; i < queueProperties.singleSize() ; ++i) {
             auto property = queueProperties[i];
             if ((property.queueFlags & vk::QueueFlagBits::eGraphics) !=
                 vk::QueueFlagBits::eGraphics) {

@@ -16,6 +16,7 @@
       <file path="$PROJECT_DIR$/module/jobs/tests" />
       <file path="$PROJECT_DIR$/module/rendering/include" />
       <file path="$PROJECT_DIR$/module/rendering/resources" />
+      <file path="$PROJECT_DIR$/module/rendering/src" />
       <file path="$PROJECT_DIR$/module/rendering/tools" />
       <file path="$PROJECT_DIR$/thirdparty/grapphs/include" />
       <file path="$PROJECT_DIR$/tools/shader_preprocessor" />

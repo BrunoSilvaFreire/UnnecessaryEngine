@@ -38,7 +38,7 @@ class Win32Window {
                      const Point& origin,
                      const Size& size);
 
-  // Release OS shaders associated with window.
+  // Release OS pipelines associated with window.
   void Destroy();
 
   // Inserts |content| into the window tree.

@@ -43,12 +43,9 @@ function(add_unnecessary_shader PATH)
                 TARGET ${TARGET} PRE_BUILD
                 COMMENT "Preprocessing stage '${SHADER_STAGE_NAME}' (${SHADER_OUTPUT})"
                 MAIN_DEPENDENCY ${SHADER_STAGE_FILE}
+
                 COMMAND
-                spirv-cross ${SHADER_OUTPUT}
-                --reflect
-                --output ${SHADER_REFLECTION_OUTPUT}
-                COMMAND
-                unnecessary_shader_preprocessor
+                unnecessary_shader_tool
                 ${PATH_ABS}
                 --shader_stage ${SHADER_STAGE_NAME}
                 --output ${SHADER_OUTPUT_DIR}
@@ -57,12 +54,15 @@ function(add_unnecessary_shader PATH)
                 TARGET ${TARGET} POST_BUILD
                 BYPRODUCTS ${SHADER_OUTPUT}
                 COMMENT "Compiling stage '${SHADER_STAGE_NAME}' (${SHADER_OUTPUT})"
-#                MAIN_DEPENDENCY ${SHADER_STAGE_FILE}
                 COMMAND
                 glslc
                 -fshader-stage=${SHADER_STAGE_NAME}
                 ${SHADER_STAGE_FILE}
                 -o ${SHADER_OUTPUT}
+                COMMAND
+                spirv-cross ${SHADER_OUTPUT}
+                --reflect
+                --output ${SHADER_REFLECTION_OUTPUT}
         )
     endforeach ()
 endfunction()
@@ -73,7 +73,4 @@ function(include_unnecessary_shader TARGET SHADER)
             ${TARGET}
             ${SHADER_TARGET}
     )
-    print_target_properties(${TARGET})
-    print_target_properties(${SHADER_TARGET})
-
 endfunction()

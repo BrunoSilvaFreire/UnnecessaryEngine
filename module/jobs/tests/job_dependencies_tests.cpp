@@ -23,7 +23,7 @@ TEST(jobs, load_file) {
         un::JobHandle loadHandle, lambdaHandle;
         chain.immediately<un::LoadFileJob>(
             &loadHandle,
-            "/home/brunorbsf/CLionProjects/UNWin/module/jobs/shaders/dummy.txt",
+            "/home/brunorbsf/CLionProjects/UNWin/module/jobs/pipelines/dummy.txt",
             &buf
         );
         chain.finally(

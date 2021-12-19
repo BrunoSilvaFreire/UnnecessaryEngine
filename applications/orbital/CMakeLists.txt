@@ -1,13 +1,10 @@
 add_executable(orbital orbital.cpp)
-target_link_libraries(orbital unnecessary)
-includeShader(
+target_link_libraries(
     orbital
-    ../../engine/resources/shaders/glsl/phong/phong.frag.glsl
+    unnecessary_rendering
+    unnecessary_rendering
 )
-includeShader(
-    orbital
-    ../../engine/resources/shaders/glsl/phong/phong.vert.glsl
-)
+include_unnecessary_shader(orbital phong)
 includeResource(
     orbital
     ../../engine/resources/models/teapot_normal.fbx

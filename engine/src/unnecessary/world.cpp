@@ -43,7 +43,7 @@ namespace un {
         chain.dispatch();
         variable.wait(lock);
         u32 cpuFrameTimeMillis = chronometer.stop();
-        u64 numTicks = latestUpdatesDurations.size();
+        u64 numTicks = latestUpdatesDurations.singleSize();
         u64 update = frameCounter % numTicks;
         latestUpdatesDurations[update] = static_cast<float>(cpuFrameTimeMillis) / 1000;
         if (update == numTicks - 1) {

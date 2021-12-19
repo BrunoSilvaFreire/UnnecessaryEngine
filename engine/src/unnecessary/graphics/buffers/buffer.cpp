@@ -60,7 +60,7 @@ namespace un {
             device.mapMemory(
                 memory,
                 0,
-                memoryRequirements.size,
+                memoryRequirements.singleSize,
                 (vk::MemoryMapFlags) 0,
                 &toWriteTo
             )
@@ -71,7 +71,7 @@ namespace un {
             ranges.front() = vk::MappedMemoryRange(memory, 0, VK_WHOLE_SIZE);
             vkCall(
                 device.flushMappedMemoryRanges(
-                    ranges.size(),
+                    ranges.singleSize(),
                     ranges.data()
                 )
             );

@@ -50,7 +50,7 @@ namespace un {
         std::vector<vk::VertexInputAttributeDescription> inputAttributes;
         u32 stride = vertexLayout.getStride();
         const std::vector<un::VertexInput>& elements = vertexLayout.getElements();
-        u32 count = elements.size();
+        u32 count = elements.singleSize();
         u32 offset = 0;
         u32 binding = vertexLayout.getBinding();
         inputBindings.emplace_back(binding, stride);
@@ -71,7 +71,7 @@ namespace un {
         );
         std::vector<vk::DescriptorSetLayout> layouts;
         const auto& descriptors = pipelineLayout.getDescriptorLayouts();
-        for (u32 i = 0; i < descriptors.size(); ++i) {
+        for (u32 i = 0; i < descriptors.singleSize(); ++i) {
             const auto& descriptor = descriptors[i];
             switch (descriptor.getType()) {
                 case un::DescriptorSetType::eShared:
@@ -95,7 +95,7 @@ namespace un {
                 pushes.emplace_back(
                     stage->getFlags(),
                     value.offset,
-                    value.size
+                    value.singleSize
                 );
             }
         }

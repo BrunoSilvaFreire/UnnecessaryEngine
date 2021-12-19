@@ -9,7 +9,7 @@ namespace un {
     ) {
         return device.getVirtualDevice().allocateMemory(
             vk::MemoryAllocateInfo(
-                requirements.size,
+                requirements.singleSize,
                 device.selectMemoryTypeFor(requirements, flags)
             )
         );

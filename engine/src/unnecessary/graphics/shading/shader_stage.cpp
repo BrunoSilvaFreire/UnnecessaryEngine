@@ -6,7 +6,7 @@ namespace un {
 
     void ShaderStage::load(vk::Device& device, const std::filesystem::path& root) {
         std::filesystem::path shaderPath =
-            root / "shaders" / "shaders" / (name + ".spv");
+            root / "pipelines" / "pipelines" / (name + ".spv");
         if (!std::filesystem::exists(shaderPath)) {
             std::string msg = "Unable to find shader @ ";
             msg += shaderPath.string();
@@ -67,7 +67,7 @@ namespace un {
         loadedModule = device.createShaderModule(
             vk::ShaderModuleCreateInfo(
                 (vk::ShaderModuleCreateFlags) 0,
-                content.size(),
+                content.singleSize(),
                 reinterpret_cast<u32*>(content.operator->())
             )
         );

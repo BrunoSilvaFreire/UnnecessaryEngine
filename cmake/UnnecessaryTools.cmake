@@ -9,7 +9,7 @@ function(add_unnecessary_tool NAME)
             MULTI_VALUES
             SOURCES
             DEPENDENCIES
-            TESTS
+
     )
     cmake_parse_arguments(
             PARSE_ARGV 0
@@ -27,8 +27,7 @@ function(add_unnecessary_tool NAME)
     target_include_directories(
             ${NAME}
             PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<INSTALL_INTERFACE:include>
+            ${CMAKE_CURRENT_SOURCE_DIR}/tools
     )
     set_target_properties(
             ${NAME}
@@ -47,30 +46,4 @@ function(add_unnecessary_tool NAME)
             VULKAN_HPP_TYPESAFE_CONVERSION
             VULKAN_HPP_NO_SPACESHIP_OPERATOR
     )
-    if ("${NUMTESTS}" GREATER 0)
-        add_executable(
-                ${NAME}_tests
-                ${UN_MODULE_TESTS}
-        )
-        target_compile_definitions(
-                ${NAME}_tests
-                PUBLIC
-                DEBUG
-                NOMINMAX
-                VULKAN_HPP_TYPESAFE_CONVERSION
-                VULKAN_HPP_NO_SPACESHIP_OPERATOR
-                SOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}
-        )
-        target_link_libraries(
-                ${NAME}_tests
-                PUBLIC
-                ${NAME}
-                GTest::GTest
-        )
-        set_target_properties(
-                ${NAME}_tests
-                PROPERTIES
-                LINKER_LANGUAGE CXX
-        )
-    endif ()
 endfunction()

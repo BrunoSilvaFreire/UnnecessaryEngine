@@ -26,7 +26,7 @@ namespace un {
     un::FrameResourceReference FrameGraph::addResource(
         const std::string& resourceName
     ) {
-        size_t index = resources.size();
+        size_t index = resources.singleSize();
         auto& reference = resources.emplace_back(resourceName);
         return un::FrameResourceReference(index, &reference);
     }
@@ -50,7 +50,7 @@ namespace un {
         frameBuffers() {
         std::vector<vk::SubpassDescription> subPasses;
         std::vector<vk::SubpassDependency> subPassesDependencies;
-        subPasses.reserve(frameGraph.size());
+        subPasses.reserve(frameGraph.singleSize());
         for (auto[vertex, index]: frameGraph.all_vertices()) {
             bakedPasses.emplace_back(&renderer);
             subPasses.emplace_back(
@@ -94,7 +94,7 @@ namespace un {
         auto& chain = renderer.getSwapChain();
         const un::Size2D& resolution = chain.getResolution();
         std::vector<vk::ImageView> views;
-        for (int j = 0; j < chain.getViews().size(); ++j) {
+        for (int j = 0; j < chain.getViews().singleSize(); ++j) {
             frameBuffers.emplace_back(
                 &renderer,
                 frameGraph,

@@ -66,8 +66,8 @@ namespace un {
         const vk::Device& device = renderingDevice.getVirtualDevice();
         vkCall(device.createSwapchainKHR(&swapChainInfo, nullptr, &swapChain));
         images = device.getSwapchainImagesKHR(swapChain);
-        views.reserve(images.size());
-        for (int i = 0; i < images.size(); ++i) {
+        views.reserve(images.singleSize());
+        for (int i = 0; i < images.singleSize(); ++i) {
             views.emplace_back(
                 renderingDevice,
                 images[i],
