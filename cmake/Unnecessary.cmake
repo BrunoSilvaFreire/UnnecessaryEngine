@@ -2,6 +2,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryModules.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryShader.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryDebug.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryTools.cmake)
+find_program(GLSLC_EXEC glslc REQUIRED)
+find_program(SPIRV_EXEC spirv-cross REQUIRED)
 
 function(add_unnecessary_thirdparty_library NAME)
     add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/${NAME})
@@ -26,7 +28,7 @@ function(add_shader SHADER)
         BYPRODUCTS ${shader_output}
         SOURCES "${shader_abs}"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
-        COMMAND glslc -fshader-stage=${SHADER_TYPE} ${shader_abs} -o ${shader_output}
+        COMMAND ${GLSLC_EXEC} -fshader-stage=${SHADER_TYPE} ${shader_abs} -o ${shader_output}
     )
     set(shader_output_asm ${shader_output_dir}/${shader_filename}.spvasm)
 
@@ -36,7 +38,7 @@ function(add_shader SHADER)
         BYPRODUCTS ${shader_output_asm}
         SOURCES "${shader_abs}"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
-        COMMAND glslc -fshader-stage=${SHADER_TYPE} ${shader_abs} -S -g -o ${shader_output_asm}
+        COMMAND ${GLSLC_EXEC} -fshader-stage=${SHADER_TYPE} ${shader_abs} -S -g -o ${shader_output_asm}
     )
     set(shader_output_glsl ${shader_output_dir}/${shader_filename}.glsl)
     add_custom_target(
@@ -45,7 +47,7 @@ function(add_shader SHADER)
         DEPENDS ${target_name}
         SOURCES "${shader_abs}"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
-        COMMAND spirv-cross ${shader_output} -V --output ${shader_output_glsl}
+        COMMAND ${SPIRV_EXEC} ${shader_output} -V --output ${shader_output_glsl}
     )
     set(shader_output_json ${shader_output_dir}/${shader_filename}.json)
     add_custom_target(
@@ -54,7 +56,7 @@ function(add_shader SHADER)
         DEPENDS ${target_name}
         SOURCES "${shader_abs}"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${shader_output_dir}
-        COMMAND spirv-cross ${shader_output} --reflect --dump-resources --output ${shader_output_json}
+        COMMAND ${SPIRV_EXEC} ${shader_output} --reflect --dump-resources --output ${shader_output_json}
     )
     add_dependencies(unnecessary ${target_name})
 endfunction()

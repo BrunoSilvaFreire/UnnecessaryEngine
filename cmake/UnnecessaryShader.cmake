@@ -7,24 +7,25 @@ endmacro()
 
 function(add_unnecessary_shader PATH)
     file(
-            READ ${PATH} SHADER_JSON
+        READ ${PATH} SHADER_JSON
     )
     get_filename_component(PATH_ABS ${PATH} ABSOLUTE)
 
     get_filename_component(
-            SHADER_JSON_DIRECTORY
-            ${PATH}
-            DIRECTORY
+        SHADER_JSON_DIRECTORY
+        ${PATH}
+        DIRECTORY
     )
 
     string(JSON SHADER_NAME GET "${SHADER_JSON}" name)
     get_unnecessary_shader_target_name(${SHADER_NAME} TARGET)
     add_custom_target(
-            ${TARGET}
-            COMMENT "Compiling shader '${SHADER_NAME}'"
+        ${TARGET}
+        COMMENT "Compiling shader '${SHADER_NAME}'"
     )
     get_target_property(TGT_DIR ${TARGET} BINARY_DIR)
     get_target_property(TGT_SRC_DIR ${TARGET} SOURCE_DIR)
+    get_target_property(RENDERING_SRC_DIR unnecessary_rendering SOURCE_DIR)
 
     string(JSON SHADER_NUM_STAGES LENGTH "${SHADER_JSON}" stages)
     math(EXPR SHADER_STAGES_RANGE "${SHADER_NUM_STAGES}-1")
@@ -35,34 +36,53 @@ function(add_unnecessary_shader PATH)
         set(SHADER_OUTPUT_DIR "${TGT_DIR}/spirv/${SHADER_NAME}")
         set(SHADER_OUTPUT "${SHADER_OUTPUT_DIR}/${SHADER_NAME}.${SHADER_STAGE_NAME}.spirv")
         set(SHADER_REFLECTION_OUTPUT "${SHADER_OUTPUT_DIR}/${SHADER_NAME}.${SHADER_STAGE_NAME}.reflection.json")
-        add_custom_command(
-                TARGET ${TARGET} PRE_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_OUTPUT_DIR}
-        )
-        add_custom_command(
-                TARGET ${TARGET} PRE_BUILD
-                COMMENT "Preprocessing stage '${SHADER_STAGE_NAME}' (${SHADER_OUTPUT})"
-                MAIN_DEPENDENCY ${SHADER_STAGE_FILE}
+        set_target_properties(
+            ${TARGET}
+            PROPERTIES
+            SHADER_OUTPUT_DIR ${SHADER_OUTPUT_DIR}
 
-                COMMAND
-                unnecessary_shader_tool
-                ${PATH_ABS}
-                --shader_stage ${SHADER_STAGE_NAME}
-                --output ${SHADER_OUTPUT_DIR}
         )
         add_custom_command(
-                TARGET ${TARGET} POST_BUILD
-                BYPRODUCTS ${SHADER_OUTPUT}
-                COMMENT "Compiling stage '${SHADER_STAGE_NAME}' (${SHADER_OUTPUT})"
-                COMMAND
-                glslc
-                -fshader-stage=${SHADER_STAGE_NAME}
-                ${SHADER_STAGE_FILE}
-                -o ${SHADER_OUTPUT}
-                COMMAND
-                spirv-cross ${SHADER_OUTPUT}
-                --reflect
-                --output ${SHADER_REFLECTION_OUTPUT}
+            TARGET ${TARGET} PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${SHADER_OUTPUT_DIR}
+        )
+        add_custom_command(
+            TARGET ${TARGET} PRE_BUILD
+            COMMENT "Preprocessing stage '${SHADER_STAGE_NAME}' (${SHADER_OUTPUT})"
+            MAIN_DEPENDENCY ${SHADER_STAGE_FILE}
+
+            COMMAND
+            unnecessary_shader_tool
+            ${PATH_ABS}
+            --glsl
+            --output ${SHADER_OUTPUT_DIR}
+        )
+        add_custom_command(
+            TARGET ${TARGET} POST_BUILD
+            BYPRODUCTS ${SHADER_OUTPUT}
+            COMMENT "Compiling stage '${SHADER_STAGE_NAME}' (${SHADER_OUTPUT})"
+            COMMAND
+            glslc
+            -fshader-stage=${SHADER_STAGE_NAME}
+            ${SHADER_STAGE_FILE}
+            -I "${RENDERING_SRC_DIR}/resources/shaders"
+            -I "${SHADER_OUTPUT_DIR}"
+            -o ${SHADER_OUTPUT}
+            COMMAND
+            spirv-cross ${SHADER_OUTPUT}
+            --reflect
+            --output ${SHADER_REFLECTION_OUTPUT}
+        )
+        add_custom_command(
+            TARGET ${TARGET} PRE_BUILD
+            COMMENT "Preprocessing stage '${SHADER_STAGE_NAME}' (${SHADER_OUTPUT})"
+            MAIN_DEPENDENCY ${SHADER_STAGE_FILE}
+
+            COMMAND
+            unnecessary_shader_tool
+            ${PATH_ABS}
+            --cpp
+            --output ${SHADER_OUTPUT_DIR}
         )
     endforeach ()
 endfunction()
@@ -70,7 +90,17 @@ endfunction()
 function(include_unnecessary_shader TARGET SHADER)
     get_unnecessary_shader_target_name(${SHADER} SHADER_TARGET)
     add_dependencies(
-            ${TARGET}
-            ${SHADER_TARGET}
+        ${TARGET}
+        ${SHADER_TARGET}
+    )
+    get_target_property(
+        SHADER_OUTPUT_DIR
+        ${SHADER_TARGET}
+        SHADER_OUTPUT_DIR
+    )
+    target_include_directories(
+        ${TARGET}
+        PUBLIC
+        ${SHADER_OUTPUT_DIR}
     )
 endfunction()

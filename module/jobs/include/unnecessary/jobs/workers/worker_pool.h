@@ -43,6 +43,20 @@ namespace un {
             )>& creator
         ) : numWorkers(numWorkers), creator(creator) {}
 
+        static WorkerArchetypeConfiguration<WorkerType> forwarding(
+            size_t numWorkers
+        ) {
+            return WorkerArchetypeConfiguration(
+                numWorkers, [](
+                    std::size_t index,
+                    un::JobProvider<typename WorkerType::JobType> provider,
+                    un::JobNotifier<typename WorkerType::JobType> notifier
+                ) {
+                    return new WorkerType(index, true, provider, notifier);
+                }
+            );
+        }
+
         std::size_t getNumWorkers() const {
             return numWorkers;
         }
@@ -138,7 +152,7 @@ namespace un {
 
         void ensureNumWorkersAwake(size_t num) {
             size_t numWorkersNeededToAwake = num;
-            for (const auto& worker: workers) {
+            for (const auto& worker : workers) {
                 if (worker->isAwake()) {
                     numWorkersNeededToAwake--;
                 }
@@ -169,7 +183,7 @@ namespace un {
         }
 
         ~WorkerPool() {
-            for (WorkerType* worker: workers) {
+            for (WorkerType* worker : workers) {
                 worker->stop();
                 delete worker;
             }
@@ -213,7 +227,7 @@ namespace un {
         void dispatch(std::set<JobHandle> handles) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
-                for (JobHandle handle: handles) {
+                for (JobHandle handle : handles) {
                     unsafeDispatch(handle);
                 }
             }

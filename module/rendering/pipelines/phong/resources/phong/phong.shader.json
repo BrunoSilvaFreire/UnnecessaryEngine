@@ -1,0 +1,46 @@
+{
+    "name": "phong",
+    "stages": {
+        "vert": {
+            "vertex_stream": {
+                "position": "in",
+                "normal": "out"
+            },
+            "inputs": [
+                "vp_matrix",
+                "model_matrix"
+            ]
+        },
+        "frag": {
+            "vertex_stream": {
+                "normal": "in"
+            },
+            "inputs": [
+                "ambient_color"
+            ]
+        }
+    },
+    "vertex_stream": {
+        "position": {
+            "type": "vec3"
+        },
+        "normal": {
+            "type": "vec3"
+        },
+        "uv": {
+            "type": "vec2"
+        }
+    },
+    "inputs": {
+        "vp_matrix": {
+            "type": "mat4"
+        },
+        "model_matrix": {
+            "scope": "instance",
+            "type": "mat4"
+        },
+        "ambient_color": {
+            "type": "vec3"
+        }
+    }
+}

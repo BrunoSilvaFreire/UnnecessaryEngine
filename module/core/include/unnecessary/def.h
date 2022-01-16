@@ -13,10 +13,10 @@ typedef float f32;
 typedef double f64;
 
 #ifdef GNU
-#defisne UN_AGGRESIVE_INLINE __attribute__((always_inline)) inline
+#define UN_AGGRESSIVE_INLINE __attribute__((always_inline)) inline
 #elif _MSC_VER
-#define UN_AGGRESIVE_INLINE inline
+#define UN_AGGRESSIVE_INLINE __forceinline
 #else
-#define UN_AGGRESIVE_INLINE inline
+#define UN_AGGRESSIVE_INLINE inline
 #endif
 #endif

@@ -1,5 +1,12 @@
+#[[
 add_unnecessary_module(
-        algorithms
-        SOURCES
-        include/unnecessary/algorithms/heap.h
-)
+    unnecessary_algorithms
+
+    SOURCES
+
+    DEPENDENCIES
+    unnecessary_core
+
+    TESTS
+    tests/min_heap_tests.cpp
+)]]

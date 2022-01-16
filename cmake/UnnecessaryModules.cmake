@@ -51,6 +51,13 @@ function(
         VULKAN_HPP_TYPESAFE_CONVERSION
         VULKAN_HPP_NO_SPACESHIP_OPERATOR
     )
+    if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+        target_compile_definitions(
+            ${NAME}
+            PUBLIC
+            DEBUG
+        )
+    endif ()
     if ("${NUMTESTS}" GREATER 0)
         add_executable(
             ${NAME}_tests

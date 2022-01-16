@@ -7,6 +7,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <unnecessary/jobs/job.h>
+#include <unnecessary/logging.h>
 #include <unnecessary/misc/event.h>
 
 namespace un {
@@ -60,7 +61,7 @@ namespace un {
             if (autostart) {
                 start();
             }
-#ifdef WIN32
+#ifdef WIN32a
             int affinityMask = 1 << index;
             HANDLE hThread = reinterpret_cast<HANDLE>(thread->native_handle());
             auto returnStatus = SetThreadAffinityMask(hThread, affinityMask);

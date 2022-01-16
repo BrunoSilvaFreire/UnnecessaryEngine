@@ -4,7 +4,11 @@
 namespace un {
     GlslType::GlslType() {}
 
-    GlslType::GlslType(size_t singleSize, size_t numElements, vk::Format format) : singleSize(
+    GlslType::GlslType(
+        size_t singleSize,
+        size_t numElements,
+        vk::Format format
+    ) : singleSize(
         singleSize
     ), numElements(numElements), format(format) {}
 
@@ -34,9 +38,9 @@ namespace un {
     GlslTypeDatabase::GlslTypeDatabase() {
         // Generate vec's
         std::array<vk::Format, 3> vecFormat = {
-            vk::Format::eR32Sfloat,
             vk::Format::eR32G32Sfloat,
-            vk::Format::eR32G32B32Sfloat
+            vk::Format::eR32G32B32Sfloat,
+            vk::Format::eR32G32B32A32Sfloat
         };
         std::array<vk::Format, 3> matForms = {
             vk::Format::eUndefined,
@@ -46,6 +50,8 @@ namespace un {
         for (std::size_t i = 2; i <= 4; ++i) {
             std::string name = "vec";
             name += std::to_string(i);
+            std::string cpp = "glm::vec";
+            translate(name, cpp + std::to_string(i));
             types.emplace(
                 name,
                 un::GlslType(
@@ -58,11 +64,21 @@ namespace un {
         for (std::size_t i = 2; i <= 4; ++i) {
             std::string name = "mat";
             name += std::to_string(i);
+            std::string cpp = "glm::mat";
+            translate(name, cpp + std::to_string(i));
             types[name] = un::GlslType(
                 sizeof(float),
                 i * i,
                 matForms[i - 2]
             );
         }
+    }
+
+    void GlslTypeDatabase::translate(std::string glsl, std::string cpp) {
+        glsl2Cpp[glsl] = cpp;
+    }
+
+    std::string GlslTypeDatabase::glslToCpp(const std::string& basicString) {
+        return glsl2Cpp[basicString];
     }
 }

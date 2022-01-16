@@ -11,12 +11,13 @@ add_unnecessary_module(
         include/unnecessary/misc/historic.h
         include/unnecessary/misc/benchmark.h
         src/unnecessary/logging.cpp
+        src/unnecessary/strings.cpp
+        src/unnecessary/version.cpp
         src/unnecessary/misc/types.cpp
         src/unnecessary/misc/membuf.cpp
         src/unnecessary/misc/binary_writer.cpp
         src/unnecessary/misc/historic.cpp
         src/unnecessary/misc/benchmark.cpp
-        src/unnecessary/strings.cpp
 
         TESTS
         tests/membuf_tests.cpp

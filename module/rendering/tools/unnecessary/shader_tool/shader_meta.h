@@ -21,34 +21,55 @@ namespace un {
         std::vector<un::Input>& getInputs();
     };
 
+    class InputUsage {
+    private:
+        std::string name;
+        /**
+         * Either in or out
+         */
+        std::string modifier;
+    public:
+        InputUsage(const std::string& name, const std::string& modifier);
+
+        const std::string& getName() const;
+
+        const std::string& getModifier() const;
+    };
+
     class ShaderStageMeta {
     private:
         std::string name;
         std::set<std::string> usedInputs;
-        std::set<std::string> usedVertexAttributes;
+        std::vector<un::InputUsage> usedVertexAttributes;
     public:
         ShaderStageMeta(const std::string& name);
 
         void usesInput(const std::string& input);
 
-        void usesVertexAttribute(const std::string& vertex);
+        void usesVertexAttribute(const std::string& vertex, const std::string& modifier);
 
         const std::string& getName() const;
 
         const std::set<std::string>& getUsedInputs() const;
 
-        const std::set<std::string>& getUsedVertexAttributes() const;
+        const std::vector<un::InputUsage>& getUsedVertexAttributes() const;
+
+        bool isUsingInputPack(const un::InputPack& scope) const;
     };
 
     struct VertexAttributeMeta {
     private:
         std::size_t index;
+        std::string type;
         un::VertexAttribute attribute;
     public:
         VertexAttributeMeta(
             size_t index,
+            std::string type,
             const VertexAttribute& attribute
         );
+
+        const std::string& getType() const;
 
         size_t getIndex() const;
 
@@ -68,6 +89,7 @@ namespace un {
         std::string name;
         std::unordered_map<un::InputScope, un::InputPack> inputs;
         std::vector<un::ShaderStageMeta> stages;
+        std::vector<std::string> vertexStreamTypes;
         un::VertexLayout vertexStreamLayout;
     public:
 
@@ -79,7 +101,10 @@ namespace un {
 
         const VertexLayout& getVertexStreamLayout() const;
 
-        void setVertexStreamLayout(const un::VertexLayout& newLayout);
+        void setVertexStreamLayout(
+            const un::VertexLayout& newLayout,
+            const std::vector<std::string>& vertexStreamTypes
+        );
 
         un::VertexAttributeMeta getVertexAttributeMeta(const std::string& vertexName);
 

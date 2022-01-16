@@ -1,8 +1,0 @@
-#ifndef UNNECESSARYENGINE_RENDER_PASS_DESCRIPTION_H
-#define UNNECESSARYENGINE_RENDER_PASS_DESCRIPTION_H
-namespace un {
-    class RenderPass {
-
-    };
-}
-#endif

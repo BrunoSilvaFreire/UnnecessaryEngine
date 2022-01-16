@@ -1,5 +1,4 @@
 #include <unnecessary/shader_tool/shader_meta.h>
-#include <pamac.h>
 
 namespace un {
 
@@ -43,9 +42,11 @@ namespace un {
     }
 
     void ShaderMeta::setVertexStreamLayout(
-        const VertexLayout& newLayout
+        const un::VertexLayout& newLayout,
+        const std::vector<std::string>& vertexStreamTypes
     ) {
         ShaderMeta::vertexStreamLayout = newLayout;
+        ShaderMeta::vertexStreamTypes = vertexStreamTypes;
     }
 
     un::VertexAttributeMeta
@@ -66,6 +67,7 @@ namespace un {
         }
         return un::VertexAttributeMeta(
             index,
+            vertexStreamTypes[index],
             vertexStreamLayout[index]
         );
     }
@@ -84,18 +86,33 @@ namespace un {
         return usedInputs;
     }
 
-    void ShaderStageMeta::usesVertexAttribute(const std::string& vertex) {
-        usedVertexAttributes.emplace(vertex);
+    void ShaderStageMeta::usesVertexAttribute(
+        const std::string& vertex,
+        const std::string& modifier
+    ) {
+        usedVertexAttributes.emplace_back(vertex, modifier);
     }
 
-    const std::set<std::string>& ShaderStageMeta::getUsedVertexAttributes() const {
+    const std::vector<un::InputUsage>& ShaderStageMeta::getUsedVertexAttributes() const {
         return usedVertexAttributes;
+    }
+
+    bool ShaderStageMeta::isUsingInputPack(const un::InputPack& scope) const {
+        for (const auto& item : usedInputs) {
+            for (const auto& other : scope.getInputs()) {
+                if (other.getName() == item) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     VertexAttributeMeta::VertexAttributeMeta(
         size_t index,
+        std::string type,
         const VertexAttribute& attribute
-    ) : index(index), attribute(attribute) {}
+    ) : index(index), attribute(attribute), type(type) {}
 
 
     size_t VertexAttributeMeta::getIndex() const {
@@ -105,4 +122,21 @@ namespace un {
     const VertexAttribute& VertexAttributeMeta::getAttribute() const {
         return attribute;
     }
+
+    const std::string& VertexAttributeMeta::getType() const {
+        return type;
+    }
+
+    const std::string& InputUsage::getName() const {
+        return name;
+    }
+
+    const std::string& InputUsage::getModifier() const {
+        return modifier;
+    }
+
+    InputUsage::InputUsage(
+        const std::string& name,
+        const std::string& modifier
+    ) : name(name), modifier(modifier) {}
 }

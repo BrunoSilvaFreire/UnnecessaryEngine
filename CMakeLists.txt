@@ -31,14 +31,15 @@ conan_cmake_autodetect(settings)
 conan_cmake_install(
     PATH_OR_REFERENCE .
     BUILD missing
-    REMOTE conan-center
+    REMOTE conancenter
     SETTINGS ${settings}
 )
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
+find_package(Vulkan REQUIRED)
 find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(termcolor REQUIRED)
-find_package(glfw3 REQUIRED)
+find_package(glfw REQUIRED)
 find_package(tinyobjloader REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(assimp REQUIRED)
@@ -74,9 +75,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
 endif ()
 add_subdirectory(editor)
 add_subdirectory(module/core)
+add_subdirectory(module/algorithms)
 add_subdirectory(module/graphs)
 add_subdirectory(module/jobs)
+add_subdirectory(module/application)
 add_subdirectory(module/rendering)
+add_subdirectory(module/simulation)
 
 
 add_subdirectory(applications/orbital)

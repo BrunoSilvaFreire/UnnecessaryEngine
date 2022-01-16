@@ -59,12 +59,14 @@ namespace un {
         if (json.contains(kVertexStreamKey)) {
             const auto& vertexStream = json[kVertexStreamKey].get<nlohmann::json>();
             un::VertexLayout layout;
+            std::vector<std::string> types;
             for (const auto& item : vertexStream.items()) {
                 std::string name = item.key();
                 const nlohmann::json& input = item.value().get<nlohmann::json>();
                 const auto& type = input[kTypeKey].get<std::string>();
                 un::GlslType* pType;
                 if (database.tryFind(type, &pType)) {
+                    types.emplace_back(type);
                     layout += un::VertexAttribute(
                         name,
                         pType->getNumElements(),
@@ -73,7 +75,7 @@ namespace un {
                     );
                 }
             }
-            meta.setVertexStreamLayout(layout);
+            meta.setVertexStreamLayout(layout, types);
         }
         return meta;
     }
@@ -88,9 +90,9 @@ namespace un {
             }
         }
         if (jsonStage.contains(kVertexStreamKey)) {
-            const auto& vertexStream = jsonStage[kVertexStreamKey].get<std::vector<std::string>>();
-            for (const auto& item : vertexStream) {
-                meta.usesVertexAttribute(item);
+            const auto& vertexStream = jsonStage[kVertexStreamKey].get<nlohmann::json>();
+            for (const auto& item : vertexStream.items()) {
+                meta.usesVertexAttribute(item.key(), item.value().get<std::string>());
             }
         }
         return meta;

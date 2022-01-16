@@ -1,4 +1,3 @@
-find_package(glfw3 REQUIRED)
 add_unnecessary_module(
     unnecessary_rendering
 
@@ -6,25 +5,53 @@ add_unnecessary_module(
 
     include/unnecessary/rendering/renderer.h
     include/unnecessary/rendering/render_graph.h
-    include/unnecessary/rendering/render_pass_description.h
+    include/unnecessary/rendering/render_pass.h
+    include/unnecessary/rendering/render_group.h
+    include/unnecessary/rendering/image.h
+    include/unnecessary/rendering/image_view.h
+    include/unnecessary/rendering/swapchain.h
+    include/unnecessary/rendering/jobs/render_job.h
+    include/unnecessary/rendering/jobs/graphics_worker.h
+    include/unnecessary/rendering/jobs/render_graph_system.h
+    include/unnecessary/rendering/buffers/command_buffer.h
+    include/unnecessary/rendering/layout/layout.h
+    include/unnecessary/rendering/layout/vertex_layout.h
+    include/unnecessary/rendering/layout/descriptor_set_layout.h
     include/unnecessary/rendering/pipelines/inputs.h
     include/unnecessary/rendering/pipelines/pipeline.h
     include/unnecessary/rendering/pipelines/pipeline_stage.h
 
     src/unnecessary/rendering/renderer.cpp
     src/unnecessary/rendering/render_graph.cpp
-    src/unnecessary/rendering/render_pass_description.cpp
+    src/unnecessary/rendering/render_pass.cpp
+    src/unnecessary/rendering/render_group.cpp
+    src/unnecessary/rendering/image.cpp
+    src/unnecessary/rendering/image_view.cpp
+    src/unnecessary/rendering/queue.cpp
+    src/unnecessary/rendering/rendering_device.cpp
+    src/unnecessary/rendering/swapchain.cpp
+    src/unnecessary/rendering/material.cpp
+    src/unnecessary/rendering/window.cpp
+    src/unnecessary/rendering/jobs/graphics_worker.cpp
+    src/unnecessary/rendering/jobs/render_graph_system.cpp
+    src/unnecessary/rendering/vulkan/vulkan_utils.cpp
+    src/unnecessary/rendering/vulkan/vulkan_requirements.cpp
+    src/unnecessary/rendering/buffers/command_buffer.cpp
     src/unnecessary/rendering/layout/layout.cpp
     src/unnecessary/rendering/layout/vertex_layout.cpp
+    src/unnecessary/rendering/layout/descriptor_set_layout.cpp
     src/unnecessary/rendering/pipelines/inputs.cpp
     src/unnecessary/rendering/pipelines/pipeline.cpp
     src/unnecessary/rendering/pipelines/pipeline_stage.cpp
-
 
     DEPENDENCIES
     unnecessary_core
     unnecessary_jobs
     unnecessary_graphs
+    unnecessary_simulation
+    unnecessary_application
+    Vulkan::Vulkan
+    glm::glm
     glfw::glfw
 )
 add_unnecessary_tool(
@@ -42,15 +69,11 @@ add_unnecessary_tool(
     DEPENDENCIES
     unnecessary_core
     unnecessary_rendering
+    unnecessary_simulation
+    unnecessary_application
     cxxopts::cxxopts
     nlohmann_json::nlohmann_json
 )
-add_unnecessary_shader(
-    resources/shaders/phong/phong.shader.json
+add_subdirectory(
+    pipelines/phong
 )
-
-#[[
-include_unnecessary_shader(
-        unnecessary_rendering
-        phong
-)]]

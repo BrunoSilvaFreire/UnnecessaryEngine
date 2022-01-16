@@ -2,10 +2,11 @@ add_executable(orbital orbital.cpp)
 target_link_libraries(
     orbital
     unnecessary_rendering
-    unnecessary_rendering
+    unnecessary_phong_pipeline
+    unnecessary_simulation
 )
 include_unnecessary_shader(orbital phong)
 includeResource(
     orbital
-    ../../engine/resources/models/teapot_normal.fbx
+    ../../legacy/resources/models/teapot_normal.fbx
 )

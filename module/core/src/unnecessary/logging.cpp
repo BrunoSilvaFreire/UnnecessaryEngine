@@ -22,7 +22,7 @@ namespace un {
         flush();
     }
 
-    std::string select_filename(const std::string& file) {
+/*    std::string select_filename(const std::string& file) {
         std::filesystem::path path(file);
         std::vector<std::string> parts;
         for (auto part: path) {
@@ -41,7 +41,7 @@ namespace un {
             str = part + str;
         }
         return str;
-    }
+    }*/
 
     Log::Log(
         const std::string& header,

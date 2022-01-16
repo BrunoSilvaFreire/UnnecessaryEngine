@@ -7,6 +7,9 @@
       <file path="$PROJECT_DIR$/engine/resources" />
       <file path="$PROJECT_DIR$/engine/src" />
       <file path="$PROJECT_DIR$/module/algorithms/include" />
+      <file path="$PROJECT_DIR$/module/algorithms/tests" />
+      <file path="$PROJECT_DIR$/module/application/include" />
+      <file path="$PROJECT_DIR$/module/application/src" />
       <file path="$PROJECT_DIR$/module/core/include" />
       <file path="$PROJECT_DIR$/module/core/src" />
       <file path="$PROJECT_DIR$/module/core/tests" />
@@ -15,9 +18,14 @@
       <file path="$PROJECT_DIR$/module/jobs/src" />
       <file path="$PROJECT_DIR$/module/jobs/tests" />
       <file path="$PROJECT_DIR$/module/rendering/include" />
+      <file path="$PROJECT_DIR$/module/rendering/pipelines/phong/include" />
+      <file path="$PROJECT_DIR$/module/rendering/pipelines/phong/resources" />
+      <file path="$PROJECT_DIR$/module/rendering/pipelines/phong/src" />
       <file path="$PROJECT_DIR$/module/rendering/resources" />
       <file path="$PROJECT_DIR$/module/rendering/src" />
       <file path="$PROJECT_DIR$/module/rendering/tools" />
+      <file path="$PROJECT_DIR$/module/simulation/include" />
+      <file path="$PROJECT_DIR$/module/simulation/src" />
       <file path="$PROJECT_DIR$/thirdparty/grapphs/include" />
       <file path="$PROJECT_DIR$/tools/shader_preprocessor" />
       <file path="$PROJECT_DIR$/tools/unpython" />

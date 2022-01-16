@@ -27,11 +27,16 @@ namespace un {
     class GlslTypeDatabase {
     private:
         std::unordered_map<std::string, un::GlslType> types;
+        std::unordered_map<std::string, std::string> glsl2Cpp;
+
+        void translate(std::string glsl, std::string cpp);
 
     public:
         GlslTypeDatabase();
 
         bool tryFind(std::string name, un::GlslType** pType);
+
+        std::string glslToCpp(const std::string& basicString);
     };
 }
 #endif
