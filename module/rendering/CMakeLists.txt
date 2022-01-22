@@ -10,6 +10,9 @@ add_unnecessary_module(
     include/unnecessary/rendering/image.h
     include/unnecessary/rendering/image_view.h
     include/unnecessary/rendering/swapchain.h
+    include/unnecessary/rendering/attachment.h
+    include/unnecessary/rendering/framebuffer.h
+    include/unnecessary/rendering/debug/vulkan_reporter.h
     include/unnecessary/rendering/jobs/render_job.h
     include/unnecessary/rendering/jobs/graphics_worker.h
     include/unnecessary/rendering/jobs/render_graph_system.h
@@ -32,8 +35,12 @@ add_unnecessary_module(
     src/unnecessary/rendering/swapchain.cpp
     src/unnecessary/rendering/material.cpp
     src/unnecessary/rendering/window.cpp
+    src/unnecessary/rendering/framebuffer.cpp
+    src/unnecessary/rendering/attachment.cpp
     src/unnecessary/rendering/jobs/graphics_worker.cpp
     src/unnecessary/rendering/jobs/render_graph_system.cpp
+    src/unnecessary/rendering/jobs/render_thread.cpp
+    src/unnecessary/rendering/debug/vulkan_reporter.cpp
     src/unnecessary/rendering/vulkan/vulkan_utils.cpp
     src/unnecessary/rendering/vulkan/vulkan_requirements.cpp
     src/unnecessary/rendering/buffers/command_buffer.cpp
@@ -54,6 +61,14 @@ add_unnecessary_module(
     glm::glm
     glfw::glfw
 )
+
+if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+    target_compile_definitions(
+        unnecessary_rendering
+        PUBLIC
+        UN_VULKAN_DEBUG
+    )
+endif ()
 add_unnecessary_tool(
     unnecessary_shader_tool
 

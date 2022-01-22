@@ -79,7 +79,8 @@ namespace un {
             typename un::LambdaJob<WorkerType>::VoidCallback callback
         ) {
             un::JobHandle job = immediately<un::LambdaJob<WorkerType>>(callback);
-            for (un::JobHandle leaf : leafs) {
+            std::set<un::JobHandle> existingLeafs = leafs;
+            for (un::JobHandle leaf : existingLeafs) {
                 after(leaf, job);
             }
             return job;

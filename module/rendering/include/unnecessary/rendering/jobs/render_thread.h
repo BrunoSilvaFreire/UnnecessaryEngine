@@ -6,19 +6,25 @@
 #include <unnecessary/rendering/jobs/render_job.h>
 
 namespace un {
+
     template<typename JobSystemType>
     class RenderThread : public un::Extension {
     private:
-        bool rendering = false;
-
+        bool _rendering = false;
         JobSystemType* _jobSystem;
         un::Renderer* _renderer;
+        un::Thread* _thread;
 
-        void schedulePasses(un::FrameData& frameData, JobSystemType* jobSystem) {
+        void schedulePasses(
+            u32 framebufferIndex,
+            un::FrameData& frameData,
+            JobSystemType* jobSystem
+        ) {
             auto graph = _renderer->getRenderGraph();
-            un::PassData data;
+            un::FrameData data;
             data.renderPass = graph.getVulkanPass();
-            data.framebuffer = nullptr; // TODO: Get
+
+            data.framebuffer = graph.getFrameBuffer(framebufferIndex);
             un::GraphicsChain chain;
             std::unordered_map<u32, un::JobHandle> vertexIndex2JobHandle;
             std::unordered_map<u32, std::set<u32>> passesDependencies;
@@ -86,42 +92,48 @@ namespace un {
         }
 
         void renderThread() {
-            while (rendering) {
-                vk::Semaphore imageReadySemaphore;
-                u32 imageIndex = _renderer->getVirtualDevice().acquireNextImageKHR(
-                    _renderer->getSwapChain().getSwapChain(),
+            while (_rendering) {
+                const vk::Device& device = _renderer->getVirtualDevice();
+                un::SwapChain& swapChain = _renderer->getSwapChain();
+                vk::Semaphore semaphore = swapChain.acquireSemaphore();
+                u32 imageIndex = device.acquireNextImageKHR(
+                    swapChain.getSwapChain(),
                     1000,
-                    imageReadySemaphore
+                    semaphore
                 ).value;
                 un::FrameData frameData;
-                un::WorkerPool<un::GraphicsWorker>* graphicsPool = _jobSystem
-                    ->template getWorkerPool<un::GraphicsWorker>();
                 schedulePasses(
+                    imageIndex,
                     frameData,
                     _jobSystem
                 );
+
             }
         }
 
-        std::thread _thread;
     public:
         void start() {
-            if (rendering) {
+            if (_rendering) {
                 return;
             }
-            rendering = true;
-            _thread = std::thread(&RenderThread::renderThread, this);
+            _rendering = true;
+            _thread = new un::Thread(
+                "RenderThread",
+                std::bind(&RenderThread::renderThread, this)
+            );
         }
 
         void stop() {
-            rendering = false;
+            delete _thread;
+            _rendering = false;
         }
 
         RenderThread(
             JobSystemType* jobSystem,
             Renderer* renderer
-        ) : _jobSystem(jobSystem), _renderer(renderer) {
-
+        ) : _jobSystem(jobSystem),
+            _renderer(renderer),
+            _thread(nullptr) {
         }
 
         void apply(Application& application) override {

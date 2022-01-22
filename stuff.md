@@ -7,7 +7,7 @@
 * Animated character instanced x1000
 * Cutscene
 * Light baking
-* Plain rendering
+* Plain _rendering
   * Probably not accurate
 * Physics using bullet
   * How to multithread?

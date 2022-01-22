@@ -7,6 +7,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <unnecessary/jobs/job.h>
+#include <unnecessary/jobs/thread.h>
 #include <unnecessary/logging.h>
 #include <unnecessary/misc/event.h>
 
@@ -18,7 +19,7 @@ namespace un {
         typedef _Job JobType;
     private:
         size_t index;
-        std::thread* thread;
+        un::Thread* thread;
         un::JobProvider<JobType> provider;
         un::JobNotifier<JobType> notifier;
         bool running = true;
@@ -61,19 +62,6 @@ namespace un {
             if (autostart) {
                 start();
             }
-#ifdef WIN32a
-            int affinityMask = 1 << index;
-            HANDLE hThread = reinterpret_cast<HANDLE>(thread->native_handle());
-            auto returnStatus = SetThreadAffinityMask(hThread, affinityMask);
-            if (returnStatus == 0) {
-                LOG(INFO) << "Unable to set worker " << index << " affinity mask on Win32 (" << GetLastError() << ")";
-            } else {
-                LOG(INFO) << "Worker " << index << " has affinity mask " << affinityMask << " (Was " << returnStatus << ")";
-            }
-            std::string threadName = "UnnecessaryWorker-";
-            threadName += std::to_string(index);
-            SetThreadDescription(hThread, std::wstring(threadName.begin(), threadName.end()).c_str());
-#endif
         }
 
         virtual ~AbstractJobWorker() {
@@ -114,7 +102,7 @@ namespace un {
                 return;
             }
             running = true;
-            thread = new std::thread(&AbstractJobWorker::workerThread, this);
+            thread = new un::Thread(std::bind(&AbstractJobWorker::workerThread, this));
         }
 
         void stop() {
@@ -126,6 +114,10 @@ namespace un {
             if (!isAwake()) {
                 awake();
             }
+        }
+
+        un::Thread* getThread() const {
+            return thread;
         }
     };
 

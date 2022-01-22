@@ -4,7 +4,7 @@ namespace un {
 
 
     Image::Image(
-        un::RenderingDevice& renderer,
+        const un::RenderingDevice& renderer,
         vk::Format format,
         vk::Extent3D size,
         vk::ImageLayout layout,

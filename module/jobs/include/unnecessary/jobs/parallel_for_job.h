@@ -43,10 +43,13 @@ namespace un {
         static void parallelize(
             J* job,
             ChainType& chain,
-            size_t numWorkers,
             size_t numEntries,
             size_t minNumberLoopsPerThread
         ) {
+            using JobSystemType = typename ChainType::JobSystemType;
+            JobSystemType* system = chain.getSystem();
+            auto workerPool = system->template getWorkerPool<Worker>();
+            size_t numWorkers = workerPool->getNumWorkers();
             size_t numEntriesPerJob = numEntries / numWorkers;
             if (numEntriesPerJob < minNumberLoopsPerThread) {
                 numEntriesPerJob = minNumberLoopsPerThread;

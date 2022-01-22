@@ -13,6 +13,11 @@
 #include <unnecessary/rendering/render_graph.h>
 #include <unnecessary/rendering/rendering_pipeline.h>
 
+#ifdef UN_VULKAN_DEBUG
+
+#include <unnecessary/rendering/debug/vulkan_reporter.h>
+
+#endif
 namespace un {
 
     class Renderer {
@@ -22,13 +27,16 @@ namespace un {
         un::RenderingDevice _device;
         un::SwapChain _swapChain;
         un::RenderGraph _graph;
+#ifdef UN_VULKAN_DEBUG
+        un::VulkanDebugger _debugger;
+#endif
     public:
 
         Renderer(Window* window, std::string string, Version version);
 
         void usePipeline(un::RenderingPipeline* pipeline) {
             pipeline->configure(_graph);
-            _graph.bake(_device.getVirtualDevice());
+            _graph.bake(*this);
         }
 
         un::Window* getWindow() const {
@@ -53,7 +61,9 @@ namespace un {
             return _graph;
         }
 
-        const SwapChain& getSwapChain() const;
+        const un::SwapChain& getSwapChain() const;
+
+        un::SwapChain& getSwapChain();
     };
 }
 #endif

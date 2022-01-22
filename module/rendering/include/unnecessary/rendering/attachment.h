@@ -1,19 +1,14 @@
 //
-// Created by brunorbsf on 02/10/2021.
+// Created by bruno on 20/01/2022.
 //
 
 #ifndef UNNECESSARYENGINE_ATTACHMENT_H
 #define UNNECESSARYENGINE_ATTACHMENT_H
 
-
-#include <set>
-#include <string>
-#include "unnecessary/def.h"
-#include "unnecessary/graphics/buffers/command_buffer.h"
-#include "unnecessary/logging.h"
-#include "grapphs/adjacency_list.h"
+#include <vulkan/vulkan.hpp>
 
 namespace un {
+
 
     class Attachment {
     private:
@@ -49,4 +44,4 @@ namespace un {
     };
 
 }
-#endif //UNNECESSARYENGINE_ATTACHMENT_H
+#endif

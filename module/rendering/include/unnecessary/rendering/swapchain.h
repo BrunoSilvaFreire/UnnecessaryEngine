@@ -31,13 +31,30 @@ namespace un {
     };
 
     class SwapChain {
+    public:
+        struct ChainImage {
+        private:
+            vk::Image image;
+            un::ImageView imageView;
+            vk::Framebuffer framebuffer;
+        public:
+            ChainImage(const vk::Image& image, const un::ImageView& imageView);
+
+            const vk::Image& getImage() const;
+
+            const un::ImageView& getImageView() const;
+        };
+
     private:
         vk::Format format;
         vk::SwapchainKHR swapChain;
         un::Size2D resolution;
-        std::vector<vk::Image> images;
-        std::vector<un::ImageView> views;
+        std::vector<ChainImage> images;
+        std::size_t semaphoreIndex;
+        std::vector<vk::Semaphore> imageReadySemaphores;
     public:
+
+
         SwapChain() = default;
 
         SwapChain(
@@ -51,7 +68,9 @@ namespace un {
 
         const Size2D& getResolution() const;
 
-        const std::vector<un::ImageView>& getViews() const;
+        vk::Semaphore acquireSemaphore();
+
+        const std::vector<ChainImage>& getImages() const;
     };
 }
 #endif

@@ -12,7 +12,7 @@ namespace un {
         vk::ImageView vulkanView;
     public:
         ImageView(
-            un::RenderingDevice& renderer,
+            const un::RenderingDevice& renderer,
             vk::Image image,
             vk::Format format,
             vk::ImageViewType type = vk::ImageViewType::e2D,

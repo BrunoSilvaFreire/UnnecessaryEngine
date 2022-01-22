@@ -24,6 +24,10 @@
       <file path="$PROJECT_DIR$/module/rendering/resources" />
       <file path="$PROJECT_DIR$/module/rendering/src" />
       <file path="$PROJECT_DIR$/module/rendering/tools" />
+      <file path="$PROJECT_DIR$/module/sdf/include" />
+      <file path="$PROJECT_DIR$/module/sdf/src" />
+      <file path="$PROJECT_DIR$/module/sdf/tests" />
+      <file path="$PROJECT_DIR$/module/sdf/tools" />
       <file path="$PROJECT_DIR$/module/simulation/include" />
       <file path="$PROJECT_DIR$/module/simulation/src" />
       <file path="$PROJECT_DIR$/thirdparty/grapphs/include" />
@@ -31,6 +35,7 @@
       <file path="$PROJECT_DIR$/tools/unpython" />
     </sourceRoots>
     <excludeRoots>
+      <file path="$PROJECT_DIR$/legacy" />
       <file path="$PROJECT_DIR$/resources" />
     </excludeRoots>
   </component>

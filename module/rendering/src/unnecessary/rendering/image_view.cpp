@@ -3,7 +3,7 @@
 namespace un {
 
     ImageView::ImageView(
-        un::RenderingDevice& renderer,
+        const un::RenderingDevice& renderer,
         vk::Image image,
         vk::Format format,
         vk::ImageViewType type,

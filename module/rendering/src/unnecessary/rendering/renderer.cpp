@@ -20,7 +20,6 @@ namespace un {
         LOG(INFO) << "Using validation layers";
         instanceLayers.emplace_back("VK_LAYER_KHRONOS_validation");
         instanceExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-        instanceExtensions.emplace_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 #endif
         u32 count;
         const char** requiredExtensions = glfwGetRequiredInstanceExtensions(&count);
@@ -43,9 +42,14 @@ namespace un {
         Version version
     ) :
         _vulkan(un::createVulkanInstance(string, version)),
+#ifdef UN_VULKAN_DEBUG
+         _debugger(*this),
+#endif
         _device(un::RenderingDevice::create(_vulkan, window->getWindow())),
         _swapChain(_device, window->getWindowSize()),
-        _window(window) {
+        _window(window)
+
+    {
 
     }
 
@@ -54,6 +58,10 @@ namespace un {
     }
 
     const SwapChain& Renderer::getSwapChain() const {
+        return _swapChain;
+    }
+
+    un::SwapChain& Renderer::getSwapChain() {
         return _swapChain;
     }
 }

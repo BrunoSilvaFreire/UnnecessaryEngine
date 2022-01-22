@@ -63,16 +63,26 @@ namespace un {
         swapChainInfo.setClipped(true);
         const vk::Device& device = renderingDevice.getVirtualDevice();
         vkCall(device.createSwapchainKHR(&swapChainInfo, nullptr, &swapChain));
-        images = device.getSwapchainImagesKHR(swapChain);
-        std::size_t nImages = images.size();
-        views.reserve(nImages);
+        auto createdImages = device.getSwapchainImagesKHR(swapChain);
+        std::size_t nImages = createdImages.size();
+        images.reserve(nImages);
+        imageReadySemaphores.resize(nImages);
         for (int i = 0; i < nImages; ++i) {
-            views.emplace_back(
-                renderingDevice,
-                images[i],
-                format
+            images.emplace_back(
+                createdImages[i],
+                un::ImageView(
+                    renderingDevice,
+                    createdImages[i],
+                    format
+                )
+            );
+            imageReadySemaphores[i] = device.createSemaphore(
+                vk::SemaphoreCreateInfo(
+                    static_cast<vk::SemaphoreCreateFlags>(0)
+                )
             );
         }
+        semaphoreIndex = 0;
     }
 
     vk::Format SwapChain::getFormat() const {
@@ -87,9 +97,16 @@ namespace un {
         return resolution;
     }
 
-    const std::vector<un::ImageView>& SwapChain::getViews() const {
-        return views;
+    vk::Semaphore SwapChain::acquireSemaphore() {
+        std::size_t index = semaphoreIndex++;
+        semaphoreIndex %= imageReadySemaphores.size();
+        return imageReadySemaphores[index];
     }
+
+    const std::vector<SwapChain::ChainImage>& SwapChain::getImages() const {
+        return images;
+    }
+
 
     vk::SurfaceFormatKHR SwapChainSupportDetails::selectFormat() {
         std::vector<vk::SurfaceFormatKHR> preferences;
@@ -166,5 +183,18 @@ namespace un {
         }
 
         return vk::PresentModeKHR::eFifo;
+    }
+
+    SwapChain::ChainImage::ChainImage(
+        const vk::Image& image,
+        const ImageView& imageView
+    ) : image(image), imageView(imageView) {}
+
+    const vk::Image& SwapChain::ChainImage::getImage() const {
+        return image;
+    }
+
+    const ImageView& SwapChain::ChainImage::getImageView() const {
+        return imageView;
     }
 }

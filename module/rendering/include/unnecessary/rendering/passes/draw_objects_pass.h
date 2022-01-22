@@ -17,14 +17,19 @@ namespace un {
         DrawObjectsPass(
             RenderGroup* objects,
             const vk::Rect2D& renderArea,
-            const std::vector<vk::ClearValue>& clears
+            const std::vector<vk::ClearValue>& clears,
+            std::size_t colorAttachmentIndex,
+            std::size_t depthAttachmentIndex
         ) : RenderPass(
             "Draw Objects",
             vk::PipelineStageFlagBits::eAllGraphics
         ),
             objects(objects),
             renderArea(renderArea),
-            clears(clears) {}
+            clears(clears) {
+            usesColorAttachment(colorAttachmentIndex, vk::ImageLayout::eColorAttachmentOptimal);
+            usesDepthAttachment(depthAttachmentIndex, vk::ImageLayout::eDepthAttachmentOptimal);
+        }
 
     private:
         un::RenderGroup* objects;
@@ -32,7 +37,7 @@ namespace un {
         std::vector<vk::ClearValue> clears;
     public:
         void record(
-            const un::PassData& data,
+            const un::FrameData& data,
             un::CommandBuffer& cmdBuffer
         ) const override {
             // This is pre-ordered by render group

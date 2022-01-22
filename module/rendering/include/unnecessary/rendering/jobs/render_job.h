@@ -6,36 +6,39 @@
 #include <vector>
 
 namespace un {
-    struct PassOutput {
-        vk::Semaphore doneSemaphore;
-        vk::PipelineStageFlags pipelineStage;
-        vk::CommandBuffer passCommands;
-    };
-    /**
-     * Contains information needed for rendering a single frame
-     */
-    struct FrameData {
-    public:
-        std::vector<un::PassOutput> passesOutputs;
 
-    };
+
 
     class RenderPassJob : public un::GraphicsJob {
     private:
-        const un::PassData* _data;
+        const un::FrameData* _data;
         const un::RenderPass* _pass;
     public:
 
 
         RenderPassJob(
-            const un::PassData* data,
+            const un::FrameData* data,
             const un::RenderPass* pass
         ) : _data(data),
             _pass(pass) {}
 
         void operator()(un::GraphicsWorker* worker) override {
             un::CommandBuffer buf = worker->requestCommandBuffer();
+            const vk::CommandBufferInheritanceInfo& inheritanceInfo = vk::CommandBufferInheritanceInfo(
+                _data->renderPass,
+                0,
+                _data->framebuffer,
+                false
+            );
+            buf->begin(
+                vk::CommandBufferBeginInfo(
+                    vk::CommandBufferUsageFlagBits::eRenderPassContinue |
+                    vk::CommandBufferUsageFlagBits::eOneTimeSubmit,
+                    &inheritanceInfo
+                )
+            );
             _pass->record(*_data, buf);
+            buf->end();
         }
     };
 }

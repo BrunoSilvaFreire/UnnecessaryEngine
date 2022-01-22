@@ -21,7 +21,16 @@ namespace un {
 
         std::ostream& stream();
     };
+
+    enum class Severity {
+        eDebug,
+        eInfo,
+        eWarn,
+        eError,
+        eFatal
+    };
 }
+#define VERBOSE "VERBOSE"
 #define INFO "INFO"
 #define WARN "WARN"
 #define FUCK "OH SHIT OH FUCK"

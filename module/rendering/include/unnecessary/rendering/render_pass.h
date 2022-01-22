@@ -7,13 +7,9 @@
 
 #include <string>
 #include <unnecessary/rendering/render_graph.h>
-#include "unnecessary/rendering/buffers/command_buffer.h"
+#include <unnecessary/rendering/buffers/command_buffer.h>
 
 namespace un {
-    struct PassData {
-        vk::RenderPass renderPass;
-        vk::Framebuffer framebuffer;
-    };
 
     class RenderPass {
     private:
@@ -43,7 +39,7 @@ namespace un {
         virtual ~RenderPass() = default;
 
         virtual void record(
-            const un::PassData& data,
+            const un::FrameData& data,
             un::CommandBuffer& cmdBuffer
         ) const = 0;
 

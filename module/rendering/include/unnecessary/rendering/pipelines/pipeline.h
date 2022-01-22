@@ -197,7 +197,7 @@ namespace un {
                         &dynamicState,
                         vkPipelineLayout,
                         renderPass,
-                        0 //TODO: Deferred rendering
+                        0 //TODO: Deferred _rendering
                     );
 
                     auto pipelineResult = device.createGraphicsPipeline(

@@ -10,6 +10,11 @@
 #include <condition_variable>
 #include <semaphore>
 
+#ifdef WIN32
+
+#include <Windows.h>
+
+#endif
 namespace un {
     template<typename T>
     class WorkerPool;
@@ -137,10 +142,10 @@ namespace un {
 
         WorkerType* createWorker(
             const WorkerArchetypeConfiguration<WorkerType>& configuration,
-            size_t i
+            size_t index
         ) {
-            return configuration.creator(
-                i,
+            WorkerType* pWorker = configuration.creator(
+                index,
                 [&, this](JobType** pJob, JobHandle* pId) {
                     return tryRetrieveJob(pJob, pId);
                 },
@@ -148,6 +153,19 @@ namespace un {
                     done(job, id);
                 }
             );
+            un::Thread* thread = pWorker->getThread();
+
+            std::size_t affinityMask = 1 << index;
+            if (!thread->setAffinityMask(affinityMask)) {
+                LOG(INFO) << "Unable to set worker " << index << " affinity mask";
+            } else {
+                LOG(INFO) << "Worker " << index << " has affinity mask " << affinityMask;
+            }
+            std::string threadName = un::type_name_of<WorkerType>();
+            threadName += "-";
+            threadName += std::to_string(index);
+            thread->setName(threadName);
+            return pWorker;
         }
 
         void ensureNumWorkersAwake(size_t num) {
@@ -253,6 +271,10 @@ namespace un {
 
         const std::vector<WorkerType*>& getWorkers() const {
             return workers;
+        }
+
+        std::atomic_size_t getNumWorkers() const {
+            return workers.size();
         }
 
         un::Event<JobType*, JobHandle>& getOnJobCompleted() {

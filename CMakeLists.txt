@@ -21,6 +21,7 @@ conan_cmake_configure(
     assimp/5.1.0
     gtest/1.11.0
     nlohmann_json/3.10.4
+    pngpp/0.2.10
 
     GENERATORS
     cmake_find_package
@@ -45,6 +46,7 @@ find_package(cxxopts REQUIRED)
 find_package(assimp REQUIRED)
 find_package(GTest REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(pngpp REQUIRED)
 
 set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
 add_unnecessary_thirdparty_library(grapphs)
@@ -81,6 +83,7 @@ add_subdirectory(module/jobs)
 add_subdirectory(module/application)
 add_subdirectory(module/rendering)
 add_subdirectory(module/simulation)
+add_subdirectory(module/sdf)
 
 
 add_subdirectory(applications/orbital)
