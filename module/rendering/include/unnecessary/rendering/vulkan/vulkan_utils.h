@@ -30,36 +30,6 @@ namespace un {
         }
     }
 
-    class VulkanFunctionDatabase {
-    private:
-        PFN_vkSetDebugUtilsObjectNameEXT pSetDebugUtilsObjectName{};
-
-
-    public:
-        VulkanFunctionDatabase(vk::Instance vulkan);
-
-        void setDebugUtilsObjectName(
-            vk::Device device,
-            const vk::DebugUtilsObjectNameInfoEXT& nameInfo
-        ) const;
-    };
-
-    template<class T>
-    void tag(
-        T obj,
-        vk::Device device,
-        const un::VulkanFunctionDatabase& database,
-        const std::string& tag
-    ) {
-        database.setDebugUtilsObjectName(
-            device,
-            vk::DebugUtilsObjectNameInfoEXT(
-                obj.objectType,
-                (uint64_t) ((typename T::CType) obj),
-                tag.c_str()
-            )
-        );
-    }
 }
 #define vkCall(x) un::assertVkCall(x, #x);
 

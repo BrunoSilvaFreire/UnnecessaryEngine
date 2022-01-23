@@ -19,6 +19,10 @@ function(add_unnecessary_shader PATH)
 
     string(JSON SHADER_NAME GET "${SHADER_JSON}" name)
     get_unnecessary_shader_target_name(${SHADER_NAME} TARGET)
+    list(APPEND SHADER_SOURCES ${PATH})
+
+    string(JSON SHADER_NUM_STAGES LENGTH "${SHADER_JSON}" stages)
+    math(EXPR SHADER_STAGES_RANGE "${SHADER_NUM_STAGES}-1")
     add_custom_target(
         ${TARGET}
         COMMENT "Compiling shader '${SHADER_NAME}'"
@@ -27,12 +31,10 @@ function(add_unnecessary_shader PATH)
     get_target_property(TGT_SRC_DIR ${TARGET} SOURCE_DIR)
     get_target_property(RENDERING_SRC_DIR unnecessary_rendering SOURCE_DIR)
 
-    string(JSON SHADER_NUM_STAGES LENGTH "${SHADER_JSON}" stages)
-    math(EXPR SHADER_STAGES_RANGE "${SHADER_NUM_STAGES}-1")
     foreach (STAGE_INDEX RANGE ${SHADER_STAGES_RANGE})
         string(JSON SHADER_STAGE_NAME MEMBER "${SHADER_JSON}" stages ${STAGE_INDEX})
-        string(JSON SHADER_STAGE_FILE GET "${SHADER_JSON}" stages ${SHADER_STAGE_NAME})
         set(SHADER_STAGE_FILE "${TGT_SRC_DIR}/${SHADER_JSON_DIRECTORY}/${SHADER_NAME}.${SHADER_STAGE_NAME}.glsl")
+        list(APPEND SHADER_SOURCES ${SHADER_STAGE_FILE})
         set(SHADER_OUTPUT_DIR "${TGT_DIR}/spirv/${SHADER_NAME}")
         set(SHADER_OUTPUT "${SHADER_OUTPUT_DIR}/${SHADER_NAME}.${SHADER_STAGE_NAME}.spirv")
         set(SHADER_REFLECTION_OUTPUT "${SHADER_OUTPUT_DIR}/${SHADER_NAME}.${SHADER_STAGE_NAME}.reflection.json")
@@ -85,6 +87,11 @@ function(add_unnecessary_shader PATH)
             --output ${SHADER_OUTPUT_DIR}
         )
     endforeach ()
+    set_target_properties(
+        ${TARGET}
+        PROPERTIES
+        SOURCES ${SHADER_SOURCES}
+    )
 endfunction()
 
 function(include_unnecessary_shader TARGET SHADER)

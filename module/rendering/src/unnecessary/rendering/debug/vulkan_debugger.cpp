@@ -1,5 +1,5 @@
 #include <unnecessary/rendering/renderer.h>
-#include <unnecessary/rendering/debug/vulkan_reporter.h>
+#include <unnecessary/rendering/debug/vulkan_debugger.h>
 #include <unnecessary/rendering/vulkan/vulkan_utils.h>
 
 #ifndef UN_VULKAN_DEBUG_PERFORMANCE
@@ -14,7 +14,9 @@
 #endif
 namespace un {
 
-    VulkanDebugger::VulkanDebugger(un::Renderer& renderer) {
+    VulkanDebugger::VulkanDebugger(
+        un::Renderer& renderer
+    ) : _device(renderer.getVirtualDevice()) {
         vk::Instance vulkan = renderer.getVulkan();
         vk::DebugUtilsMessageSeverityFlagsEXT severity;
         un::Severity maxSeverity = un::Severity::UN_VULKAN_DEBUG_SEVERITY;
@@ -63,7 +65,11 @@ namespace un {
                 "Unable to find vkCreateDebugUtilsMessengerEXT function."
             );
         }
-
+        un::loadFunction(
+            vulkan,
+            "vkSetDebugUtilsObjectNameEXT",
+            &pSetDebugUtilsObjectName
+        );
     }
 
     VkBool32 VulkanDebugger::messenger_callback(
@@ -91,7 +97,9 @@ namespace un {
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
                 LOG(FUCK) << ostream.str();
+#ifdef DEBUG
                 RAISE_BREAKPOINT;
+#endif
                 break;
         }
         return false;

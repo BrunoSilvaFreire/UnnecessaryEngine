@@ -5,6 +5,7 @@
 #include <unnecessary/rendering/disposable.h>
 #include <unnecessary/rendering/image.h>
 #include <unnecessary/rendering/image_view.h>
+#include <unnecessary/rendering/vulkan/vulkan_wrapper.h>
 
 namespace un {
 
@@ -12,9 +13,8 @@ namespace un {
 
     class RenderGraph;
 
-    class FrameBuffer : public ITaggable {
+    class FrameBuffer : public VulkanWrapper<vk::Framebuffer> {
     private:
-        vk::Framebuffer framebuffer;
         std::vector<un::Image> ownedImages;
         std::vector<un::ImageView> ownedImagesView;
     public:
@@ -25,13 +25,6 @@ namespace un {
             std::size_t frameBufferIndex
         );
 
-        operator vk::Framebuffer();
-
-        void tag(
-            vk::Device device,
-            const VulkanFunctionDatabase& db,
-            const std::string& name
-        ) override;
     };
 
 }

@@ -13,30 +13,45 @@ namespace un {
     public:
         void configure(RenderGraph& graph) override {
             vk::Rect2D attachmentSize;
-            graph.addBorrowedAttachment(
+            size_t color = graph.addBorrowedAttachment(
                 vk::ClearColorValue(
                     std::array<float, 4>({0, 0, 0, 1})
                 ),
                 static_cast<vk::AttachmentDescriptionFlags>(0),
-                vk::Format::eB8G8R8A8Srgb
+                vk::Format::eB8G8R8A8Unorm,
+                vk::SampleCountFlagBits::e1,
+                vk::AttachmentLoadOp::eClear,
+                vk::AttachmentStoreOp::eStore,
+                vk::AttachmentLoadOp::eDontCare,
+                vk::AttachmentStoreOp::eDontCare,
+                vk::ImageLayout::eUndefined,
+                vk::ImageLayout::eColorAttachmentOptimal
             );
-            graph.addOwnedAttachment(
+            size_t depth = graph.addOwnedAttachment(
                 vk::ImageUsageFlagBits::eDepthStencilAttachment,
                 vk::ImageAspectFlagBits::eDepth,
                 vk::ClearDepthStencilValue(0, 0),
                 static_cast<vk::AttachmentDescriptionFlags>(0),
-                vk::Format::eD16Unorm
+                vk::Format::eD32Sfloat,
+                vk::SampleCountFlagBits::e1,
+                vk::AttachmentLoadOp::eClear,
+                vk::AttachmentStoreOp::eStore,
+                vk::AttachmentLoadOp::eClear,
+                vk::AttachmentStoreOp::eStore,
+                vk::ImageLayout::eUndefined,
+                vk::ImageLayout::eDepthStencilAttachmentOptimal
             );
             graph.enqueuePass<un::DrawObjectsPass>(
                 &opaqueGroup,
                 attachmentSize,
                 std::vector<vk::ClearValue>(
                     {
-                        vk::ClearColorValue(std::array<float, 4>({0, 0, 0, 1}))
+                        vk::ClearColorValue(std::array<float, 4>({0, 0, 0, 1})),
+                        vk::ClearDepthStencilValue(0, 0),
                     }
                 ),
-                0,
-                1
+                color,
+                depth
             );
 
         }

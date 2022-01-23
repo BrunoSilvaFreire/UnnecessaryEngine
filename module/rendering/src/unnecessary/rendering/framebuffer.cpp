@@ -22,7 +22,7 @@ namespace un {
 
             if (graph.isAttachmentBorrowed(i)) {
                 views.emplace_back(
-                    chainImages[frameBufferIndex].getImageView().getVulkanView()
+                    *chainImages[frameBufferIndex].getImageView()
                 );
             } else {
                 const vk::AttachmentDescription& description = attachment.getDescription();
@@ -45,7 +45,7 @@ namespace un {
                 views.emplace_back(imageView);
             }
         }
-        framebuffer = device.createFramebuffer(
+        _wrapped = device.createFramebuffer(
             vk::FramebufferCreateInfo(
                 (vk::FramebufferCreateFlags) 0,
                 renderPass,
@@ -55,17 +55,5 @@ namespace un {
                 1
             )
         );
-    }
-
-    FrameBuffer::operator vk::Framebuffer() {
-        return framebuffer;
-    }
-
-    void FrameBuffer::tag(
-        vk::Device device,
-        const VulkanFunctionDatabase& db,
-        const std::string& name
-    ) {
-        un::tag(framebuffer, device, db, name);
     }
 }

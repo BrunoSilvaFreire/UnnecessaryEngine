@@ -1,4 +1,5 @@
 #include <unnecessary/rendering/image.h>
+#include <unnecessary/rendering/renderer.h>
 
 namespace un {
 
@@ -56,6 +57,11 @@ namespace un {
 
     Image::operator vk::Image() {
         return image;
+    }
+
+    void Image::tag(Renderer& renderer, const std::string& name) {
+        renderer.tag(image, name);
+        renderer.tag(memory, name + "-Memory");
     }
 
     ImageDetails::ImageDetails(

@@ -30,13 +30,13 @@ namespace un {
         vk::PresentModeKHR selectPresentMode();
     };
 
+
     class SwapChain {
     public:
         struct ChainImage {
         private:
             vk::Image image;
             un::ImageView imageView;
-            vk::Framebuffer framebuffer;
         public:
             ChainImage(const vk::Image& image, const un::ImageView& imageView);
 
@@ -45,13 +45,20 @@ namespace un {
             const un::ImageView& getImageView() const;
         };
 
+        struct ChainSynchronizer {
+            vk::Semaphore imageReady;
+            vk::Semaphore renderFinished;
+            vk::Fence fence;
+            bool submitted;
+        };
+
     private:
         vk::Format format;
         vk::SwapchainKHR swapChain;
         un::Size2D resolution;
         std::vector<ChainImage> images;
         std::size_t semaphoreIndex;
-        std::vector<vk::Semaphore> imageReadySemaphores;
+        std::vector<ChainSynchronizer> synchonizers;
     public:
 
 
@@ -68,9 +75,11 @@ namespace un {
 
         const Size2D& getResolution() const;
 
-        vk::Semaphore acquireSemaphore();
+        ChainSynchronizer acquireSynchronizer();
 
         const std::vector<ChainImage>& getImages() const;
+
+        std::size_t getNumLinks();
     };
 }
 #endif

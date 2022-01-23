@@ -12,7 +12,7 @@ add_unnecessary_module(
     include/unnecessary/rendering/swapchain.h
     include/unnecessary/rendering/attachment.h
     include/unnecessary/rendering/framebuffer.h
-    include/unnecessary/rendering/debug/vulkan_reporter.h
+    include/unnecessary/rendering/debug/vulkan_debugger.h
     include/unnecessary/rendering/jobs/render_job.h
     include/unnecessary/rendering/jobs/graphics_worker.h
     include/unnecessary/rendering/jobs/render_graph_system.h
@@ -40,7 +40,7 @@ add_unnecessary_module(
     src/unnecessary/rendering/jobs/graphics_worker.cpp
     src/unnecessary/rendering/jobs/render_graph_system.cpp
     src/unnecessary/rendering/jobs/render_thread.cpp
-    src/unnecessary/rendering/debug/vulkan_reporter.cpp
+    src/unnecessary/rendering/debug/vulkan_debugger.cpp
     src/unnecessary/rendering/vulkan/vulkan_utils.cpp
     src/unnecessary/rendering/vulkan/vulkan_requirements.cpp
     src/unnecessary/rendering/buffers/command_buffer.cpp

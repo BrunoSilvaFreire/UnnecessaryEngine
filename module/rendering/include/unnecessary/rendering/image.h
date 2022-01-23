@@ -49,13 +49,9 @@ namespace un {
         void dispose(const vk::Device& device) override;
 
         void tag(
-            vk::Device device,
-            const un::VulkanFunctionDatabase& db,
+            un::Renderer& renderer,
             const std::string& name
-        ) {
-            un::tag(image, device, db, name);
-            un::tag(memory, device, db, name + "-Memory");
-        }
+        );
     };
 
 }

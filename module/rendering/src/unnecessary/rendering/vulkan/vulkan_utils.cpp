@@ -9,24 +9,6 @@ namespace un {
         std::make_pair("tesse", vk::ShaderStageFlagBits::eTessellationEvaluation)
     };
 
-    VulkanFunctionDatabase::VulkanFunctionDatabase(vk::Instance vulkan) {
-        un::loadFunction(
-            vulkan,
-            "vkSetDebugUtilsObjectNameEXT",
-            &pSetDebugUtilsObjectName
-        );
-    }
-
-    void VulkanFunctionDatabase::setDebugUtilsObjectName(
-        vk::Device device,
-        const vk::DebugUtilsObjectNameInfoEXT& nameInfo
-    ) const {
-        pSetDebugUtilsObjectName(
-            device,
-            &(nameInfo.operator const VkDebugUtilsObjectNameInfoEXT&())
-        );
-    }
-
     void assertVkCall(vk::Result result, const std::string& method) {
         if (result != vk::Result::eSuccess) {
             std::stringstream str;

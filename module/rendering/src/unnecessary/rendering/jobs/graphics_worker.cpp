@@ -6,7 +6,7 @@ namespace un {
         return un::CommandBuffer(
             *_renderer,
             _commandPool,
-            vk::CommandBufferLevel::eSecondary
+            vk::CommandBufferLevel::ePrimary
         );
     }
 

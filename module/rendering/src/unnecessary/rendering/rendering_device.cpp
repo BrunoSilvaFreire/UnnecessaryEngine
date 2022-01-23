@@ -262,4 +262,8 @@ namespace un {
         graphics(graphics),
         memoryProperties(memoryProperties),
         deviceProperties(deviceProperties) {}
+
+    const Queue& RenderingDevice::getPresent() const {
+        return present;
+    }
 }

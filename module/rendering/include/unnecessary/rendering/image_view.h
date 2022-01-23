@@ -7,9 +7,7 @@
 
 namespace un {
 
-    class ImageView : public IDisposable {
-    private:
-        vk::ImageView vulkanView;
+    class ImageView : public IDisposable, public un::VulkanWrapper<vk::ImageView> {
     public:
         ImageView(
             const un::RenderingDevice& renderer,
@@ -18,10 +16,6 @@ namespace un {
             vk::ImageViewType type = vk::ImageViewType::e2D,
             vk::ImageAspectFlags flags = vk::ImageAspectFlagBits::eColor
         );
-
-        const vk::ImageView& getVulkanView() const;
-
-        operator vk::ImageView();
 
         void dispose(const vk::Device& device) override;
     };

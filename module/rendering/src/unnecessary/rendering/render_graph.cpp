@@ -18,7 +18,7 @@ namespace un {
                 vertex->getResolveAttachments(),
                 vertex->getDepthAttachments().data()
             );
-            for (auto[neighborIndex, edge] : dependenciesOf(i)) {
+            for (auto neighborIndex : dependenciesOf(i)) {
                 auto neighbor = *operator[](neighborIndex);
                 // TODO: Compute these
                 vk::AccessFlags srcFlags;
@@ -35,20 +35,21 @@ namespace un {
                 );
             }
         }
-        std::vector<vk::AttachmentDescription> attachments;
-        /*for (const auto& item: frameGraph.attachments) {
-            attachments.emplace_back(item.getDescription());
-        }*/
+        std::vector<vk::AttachmentDescription> passAttachments;
+        for (const auto& attachment : attachments) {
+            passAttachments.emplace_back(attachment.getDescription());
+        }
 
         vk::RenderPass createdPass = device.createRenderPass(
             vk::RenderPassCreateInfo(
                 (vk::RenderPassCreateFlags) 0,
-                attachments,
+                passAttachments,
                 subPasses,
                 subPassesDependencies
             )
         );
         renderPass = createdPass;
+        renderer.tag(createdPass, "Render Graph Pass");
         const auto& chain = renderer.getSwapChain();
         const auto& res = chain.getResolution();
         const auto& images = chain.getImages();
@@ -73,6 +74,7 @@ namespace un {
     const std::vector<un::FrameBuffer>& RenderGraph::getFrameBuffers() const {
         return frameBuffers;
     }
+
     std::size_t RenderGraph::addBorrowedAttachment(
         const vk::ClearValue& clearValue,
         vk::AttachmentDescriptionFlags flags,
@@ -103,6 +105,7 @@ namespace un {
         borrowedAttachments.emplace(index);
         return index;
     }
+
     std::size_t RenderGraph::addOwnedAttachment(
         vk::ImageUsageFlags usageFlags,
         vk::ImageAspectFlags aspectFlags,
@@ -136,5 +139,32 @@ namespace un {
             aspectFlags
         );
         return index;
+    }
+
+    std::size_t RenderGraph::addColorAttachment(
+        vk::ImageUsageFlags usageFlags,
+        vk::ImageAspectFlags aspectFlags,
+        const vk::ClearColorValue& clearValue,
+        vk::AttachmentDescriptionFlags flags,
+        vk::Format format,
+        vk::SampleCountFlagBits samples,
+        vk::AttachmentLoadOp loadOp,
+        vk::AttachmentStoreOp storeOp,
+        vk::ImageLayout initialLayout,
+        vk::ImageLayout finalLayout
+    ) {
+        return addOwnedAttachment(
+            usageFlags,
+            aspectFlags,
+            clearValue,
+            flags, format,
+            samples,
+            loadOp,
+            storeOp,
+            vk::AttachmentLoadOp::eDontCare,
+            vk::AttachmentStoreOp::eDontCare,
+            initialLayout,
+            finalLayout
+        );
     }
 }

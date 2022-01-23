@@ -15,7 +15,7 @@
 
 #ifdef UN_VULKAN_DEBUG
 
-#include <unnecessary/rendering/debug/vulkan_reporter.h>
+#include <unnecessary/rendering/debug/vulkan_debugger.h>
 
 #endif
 namespace un {
@@ -61,9 +61,24 @@ namespace un {
             return _graph;
         }
 
+        const VulkanDebugger& getDebugger() const;
+
         const un::SwapChain& getSwapChain() const;
 
         un::SwapChain& getSwapChain();
+
+#ifdef DEBUG
+
+        template<typename ValueType>
+        UN_AGGRESSIVE_INLINE void tag(
+            ValueType value,
+            const std::string& tagName
+        ) {
+            _debugger.tag<ValueType>(value, tagName);
+        }
+
+#endif
+
     };
 }
 #endif

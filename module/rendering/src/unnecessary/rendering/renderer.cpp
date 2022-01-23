@@ -64,4 +64,8 @@ namespace un {
     un::SwapChain& Renderer::getSwapChain() {
         return _swapChain;
     }
+
+    const VulkanDebugger& Renderer::getDebugger() const {
+        return _debugger;
+    }
 }

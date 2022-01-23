@@ -52,13 +52,10 @@ namespace un {
         void done(typename WorkerType::JobType* job, JobHandle handle) {
             {
                 std::lock_guard<std::mutex> lock(graphAccessMutex);
-                for (auto pair : graph.dependantsOn(handle)) {
-                    auto otherIndex = pair.first;
-                    auto other = pair.second;
+                for (auto otherIndex : graph.dependantsOn(handle)) {
+
                     bool ready = true;
-                    for (auto[otherDependency, otherVertex] : graph.dependenciesOf(
-                        otherIndex
-                    )) {
+                    for (auto otherDependency : graph.dependenciesOf(otherIndex)) {
                         if (otherDependency != handle) {
                             // There is another dependency we need to wait for
                             ready = false;
@@ -69,12 +66,12 @@ namespace un {
                         // TODO: Ewww.
                         for_types_indexed<WorkerArchetypes...>(
                             [&]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
-                                const auto& other = graph[pair.second];
+                                const auto& other = graph[otherIndex];
                                 if (other->archetypeIndex == OtherWorkerIndex) {
                                     auto& archWorkers = std::get<OtherWorkerIndex>(
                                         workerPools
                                     );
-                                    archWorkers->unsafeDispatch(other->jobIndex);
+                                    archWorkers->unsafeDispatch(other->poolLocalIndex);
                                 }
                             }
                         );
@@ -150,18 +147,10 @@ namespace un {
                 }
             );
             un::JobNode* node = graph[graphHandle];
-            node->jobIndex = pool->enqueue(job, graphHandle, dispatch);
+            node->poolLocalIndex = pool->enqueue(job, graphHandle, dispatch);
             return graphHandle;
         }
 
-        void dispatch(const JobHandleSet& handles) {
-            for_types_indexed<WorkerArchetypes...>(
-                [&]<typename JobWorkerType, std::size_t ArchetypeIndex>() {
-                    auto* pool = std::get<ArchetypeIndex>(workerPools);
-                    return pool->dispatch(std::get<ArchetypeIndex>(handles));
-                }
-            );
-        }
 
         template<typename T, std::size_t ArchetypeIndex>
         void dispatch(JobHandle handle) {
@@ -225,6 +214,9 @@ namespace un {
             }
         }
 
+        template<typename T>
+        friend
+        class WorkerChain;
     };
 
     class SimpleJobSystem : public un::JobSystem<un::JobWorker> {

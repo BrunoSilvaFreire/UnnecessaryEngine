@@ -1,5 +1,5 @@
 #include <unnecessary/rendering/swapchain.h>
-
+#include <unnecessary/logging.h>
 namespace un {
 
     SwapChain::SwapChain(
@@ -66,7 +66,7 @@ namespace un {
         auto createdImages = device.getSwapchainImagesKHR(swapChain);
         std::size_t nImages = createdImages.size();
         images.reserve(nImages);
-        imageReadySemaphores.resize(nImages);
+        synchonizers.resize(nImages);
         for (int i = 0; i < nImages; ++i) {
             images.emplace_back(
                 createdImages[i],
@@ -76,9 +76,20 @@ namespace un {
                     format
                 )
             );
-            imageReadySemaphores[i] = device.createSemaphore(
+            ChainSynchronizer& synchronizer = synchonizers[i];
+            synchronizer.imageReady = device.createSemaphore(
                 vk::SemaphoreCreateInfo(
                     static_cast<vk::SemaphoreCreateFlags>(0)
+                )
+            );
+            synchronizer.renderFinished = device.createSemaphore(
+                vk::SemaphoreCreateInfo(
+                    static_cast<vk::SemaphoreCreateFlags>(0)
+                )
+            );
+            synchronizer.fence = device.createFence(
+                vk::FenceCreateInfo(
+                    vk::FenceCreateFlagBits::eSignaled
                 )
             );
         }
@@ -97,14 +108,18 @@ namespace un {
         return resolution;
     }
 
-    vk::Semaphore SwapChain::acquireSemaphore() {
+    un::SwapChain::ChainSynchronizer SwapChain::acquireSynchronizer() {
         std::size_t index = semaphoreIndex++;
-        semaphoreIndex %= imageReadySemaphores.size();
-        return imageReadySemaphores[index];
+        semaphoreIndex %= synchonizers.size();
+        return synchonizers[index];
     }
 
     const std::vector<SwapChain::ChainImage>& SwapChain::getImages() const {
         return images;
+    }
+
+    std::size_t SwapChain::getNumLinks() {
+        return images.size();
     }
 
 

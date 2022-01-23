@@ -11,7 +11,7 @@ namespace un {
     ) {
         vk::Device device = renderer.getVirtualDevice();
 
-        vulkanView = device.createImageView(
+        _wrapped = device.createImageView(
             vk::ImageViewCreateInfo(
                 (vk::ImageViewCreateFlags) 0,
                 image,
@@ -26,15 +26,8 @@ namespace un {
         );
     }
 
-    const vk::ImageView& ImageView::getVulkanView() const {
-        return vulkanView;
-    }
-
-    ImageView::operator vk::ImageView() {
-        return vulkanView;
-    }
 
     void ImageView::dispose(const vk::Device& device) {
-        device.destroy(vulkanView);
+        device.destroy(_wrapped);
     }
 }

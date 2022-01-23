@@ -8,7 +8,7 @@ namespace un {
         //The archetype of this job.
         u32 archetypeIndex;
         // This index points into the un::WorkerPool that this job resides.
-        u32 jobIndex;
+        u32 poolLocalIndex;
     };
 
     typedef un::DependencyGraph<un::JobNode, un::JobHandle> JobGraph;

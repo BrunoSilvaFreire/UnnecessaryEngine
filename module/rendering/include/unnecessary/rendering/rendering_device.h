@@ -54,6 +54,8 @@ namespace un {
         Queue& getPresent();
 
         const Queue& getGraphics() const;
+
+        const Queue& getPresent() const;
     };
 
     vk::DeviceMemory allocateMemoryFor(

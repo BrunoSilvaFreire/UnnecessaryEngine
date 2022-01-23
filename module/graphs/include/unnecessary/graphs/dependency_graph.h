@@ -72,56 +72,28 @@ namespace un {
 
     public:
         class DependencyView {
-        public:
-            class DependencyIterator {
-            private:
-                IndexType ptr;
-                DependencyView* owner;
-            public:
-                DependencyIterator(
-                    IndexType index,
-                    DependencyView* owner
-                ) : ptr(index), owner(owner) {
-                }
-
-                std::pair<IndexType, DependencyType> operator*();
-
-
-                void operator++() {
-                    ptr++;
-                }
-
-                bool operator==(DependencyIterator other) {
-                    return ptr == other.ptr;
-                }
-
-                bool operator!=(DependencyIterator other) {
-                    return ptr != other.ptr;
-                }
-            };
 
         private:
-            DependencyIterator first, last;
             std::vector<IndexType> dependencies;
             const DependencyGraph<VertexType>* owner;
 
 
         public:
+            typedef typename std::vector<IndexType>::iterator IteratorType;
+
             DependencyView(
                 const DependencyGraph<VertexType>* owner,
                 std::vector<IndexType> dependencies
             ) : owner(owner),
-                dependencies(dependencies),
-                first(0, this),
-                last(dependencies.size(), this) {
+                dependencies(dependencies) {
             }
 
-            DependencyIterator begin() {
-                return first;
+            IteratorType begin() {
+                return dependencies.begin();
             }
 
-            DependencyIterator end() {
-                return last;
+            IteratorType end() {
+                return dependencies.end();
             }
 
             const std::vector<IndexType>& getDependencies() const {
@@ -135,8 +107,8 @@ namespace un {
 
         void addDependency(IndexType from, IndexType to) {
             independent.erase(from);
-            DependencyGraph<VertexType>::connect(from, to, un::DependencyType::eUses);
-            DependencyGraph<VertexType>::connect(to, from, un::DependencyType::eUsed);
+            graph.connect(from, to, un::DependencyType::eUses);
+            graph.connect(to, from, un::DependencyType::eUsed);
         }
 
         void remove(IndexType index) {
@@ -209,9 +181,8 @@ namespace un {
                 const VertexType* vertex = graph.vertex(next);
                 perVertex(next, *vertex);
                 visited.emplace(next);
-                for (std::pair<IndexType, un::DependencyType> pair : dependantsOn(next)) {
-                    IndexType other = pair.first;
-                    un::DependencyType dependency = pair.second;
+                for (IndexType other : dependantsOn(next)) {
+                    const un::DependencyType& dependency = *graph.edge(next, other);
                     perEdge(next, other, dependency);
                     if (!visited.contains(other)) {
                         open.emplace(other);
@@ -233,16 +204,6 @@ namespace un {
             return graph.try_get_vertex(index, output);
         }
     };
-
-    template<typename VertexType, typename IndexType>
-    std::pair<IndexType, DependencyType>
-    un::DependencyGraph<VertexType, IndexType>::DependencyView::DependencyIterator::operator*() {
-        IndexType dependency = owner->dependencies[ptr];
-        return std::pair<IndexType, DependencyType>(
-            dependency,
-            *(owner->owner->graph.edge(ptr, dependency))
-        );
-    }
 
 }
 #endif

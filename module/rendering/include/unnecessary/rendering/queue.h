@@ -3,9 +3,10 @@
 
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/def.h>
+#include <unnecessary/rendering/vulkan/vulkan_wrapper.h>
 
 namespace un {
-    class Queue {
+    class Queue : public un::VulkanWrapper<vk::Queue> {
     private:
         u32 index;
         vk::Queue vulkan;
@@ -14,12 +15,6 @@ namespace un {
         Queue(u32 index, const vk::Queue& vulkan);
 
         u32 getIndex() const;
-
-        const vk::Queue& getVulkan() const;
-
-        vk::Queue* operator->();
-
-        operator vk::Queue();
     };
 }
 

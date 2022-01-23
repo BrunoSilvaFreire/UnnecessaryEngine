@@ -5,17 +5,21 @@
 #include <unnecessary/graphs/dependency_graph.h>
 #include <unnecessary/rendering/framebuffer.h>
 #include <unnecessary/rendering/attachment.h>
+#include "unnecessary/rendering/buffers/command_buffer.h"
+#include "unnecessary/rendering/jobs/graphics_worker.h"
 
 namespace un {
     class RenderPass;
 
     class Renderer;
 
+
     struct PassOutput {
         vk::Semaphore doneSemaphore;
         vk::PipelineStageFlags pipelineStage;
         vk::CommandBuffer passCommands;
     };
+
     /**
      * Contains information needed for _rendering a single frame
      */
@@ -24,6 +28,15 @@ namespace un {
         std::vector<un::PassOutput> passesOutputs;
         vk::RenderPass renderPass;
         vk::Framebuffer framebuffer;
+
+        un::CommandBuffer requestCommandBuffer(
+            un::GraphicsWorker* graphicsWorker,
+            const size_t i
+        ) {
+            un::CommandBuffer buffer = graphicsWorker->requestCommandBuffer();
+            passesOutputs[i].passCommands = *buffer;
+            return buffer;
+        }
     };
 
     class RenderGraph : public un::DependencyGraph<un::RenderPass*> {
@@ -48,8 +61,8 @@ namespace un {
             return *renderPass;
         }
 
-        vk::Framebuffer getFrameBuffer(std::size_t index) {
-            return frameBuffers[index];
+        vk::Framebuffer getFrameBuffer(std::size_t index) const {
+            return *frameBuffers[index];
         }
 
         std::size_t addBorrowedAttachment(
@@ -61,6 +74,19 @@ namespace un {
             vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore,
             vk::AttachmentLoadOp stencilLoadOp = vk::AttachmentLoadOp::eLoad,
             vk::AttachmentStoreOp stencilStoreOp = vk::AttachmentStoreOp::eStore,
+            vk::ImageLayout initialLayout = vk::ImageLayout::eUndefined,
+            vk::ImageLayout finalLayout = vk::ImageLayout::eUndefined
+        );
+
+        std::size_t addColorAttachment(
+            vk::ImageUsageFlags usageFlags,
+            vk::ImageAspectFlags aspectFlags,
+            const vk::ClearColorValue& clearValue,
+            vk::AttachmentDescriptionFlags flags = {},
+            vk::Format format = vk::Format::eUndefined,
+            vk::SampleCountFlagBits samples = vk::SampleCountFlagBits::e1,
+            vk::AttachmentLoadOp loadOp = vk::AttachmentLoadOp::eLoad,
+            vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore,
             vk::ImageLayout initialLayout = vk::ImageLayout::eUndefined,
             vk::ImageLayout finalLayout = vk::ImageLayout::eUndefined
         );
