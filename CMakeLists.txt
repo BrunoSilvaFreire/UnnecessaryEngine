@@ -32,7 +32,6 @@ conan_cmake_autodetect(settings)
 conan_cmake_install(
     PATH_OR_REFERENCE .
     BUILD missing
-    REMOTE conancenter
     SETTINGS ${settings}
 )
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
@@ -40,7 +39,7 @@ find_package(Vulkan REQUIRED)
 find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(termcolor REQUIRED)
-find_package(glfw REQUIRED)
+find_package(glfw3 REQUIRED)
 find_package(tinyobjloader REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(assimp REQUIRED)

@@ -11,8 +11,8 @@
 namespace un {
     class Thread {
     private:
-        std::thread _inner;
         std::function<void()> _block;
+        std::thread _inner;
 
         void operator()();
 
@@ -20,6 +20,10 @@ namespace un {
         Thread(const std::function<void()>& block);
 
         Thread(const std::string& name, const std::function<void()>& block);
+
+        Thread() = delete;
+
+        Thread(const Thread& cpy) = delete;
 
         void setName(const std::string& name);
 

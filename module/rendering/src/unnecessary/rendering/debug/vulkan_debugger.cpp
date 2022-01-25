@@ -11,6 +11,7 @@
 #ifdef WIN32
 #define RAISE_BREAKPOINT __debugbreak()
 #else
+#define RAISE_BREAKPOINT __builtin_trap;
 #endif
 namespace un {
 

@@ -12,6 +12,7 @@ namespace un {
     class RenderThread : public un::Extension {
     private:
         bool _rendering = false;
+        std::size_t _frame;
         JobSystemType* _jobSystem;
         un::Renderer* _renderer;
         un::Thread* _thread;
@@ -134,7 +135,6 @@ namespace un {
             );
             LOG(INFO) << "Presented " << synchronizer.getInnerIndex();
             synchronizer.unlock();
-
         }
 
         void renderThread() {
@@ -181,9 +181,8 @@ namespace un {
                         synchronizer
                     );
                     size_t msTime = chronometer.stop();
-
+                    _frame++;
                 }
-
             }
         }
 
@@ -209,6 +208,7 @@ namespace un {
             Renderer* renderer
         ) : _jobSystem(jobSystem),
             _renderer(renderer),
+            _frame(0),
             _thread(nullptr) {
             _inFlightFrames.resize(renderer->getSwapChain().getNumLinks());
         }
