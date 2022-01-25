@@ -37,4 +37,12 @@ namespace un {
     vk::ImageAspectFlags Attachment::getOwnedImageFlags() const {
         return ownedImageFlags;
     }
+
+    const std::string& Attachment::getName() const {
+        return name;
+    }
+
+    void Attachment::setName(const std::string& name) {
+        Attachment::name = name;
+    }
 };

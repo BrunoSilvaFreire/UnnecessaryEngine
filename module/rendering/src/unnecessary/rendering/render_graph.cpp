@@ -167,4 +167,20 @@ namespace un {
             finalLayout
         );
     }
+
+    void RenderGraph::setAttachmentName(size_t attachment, std::string name) {
+        attachments[attachment].setName(name);
+    }
+
+    un::CommandBuffer
+    FrameData::requestCommandBuffer(un::GraphicsWorker* graphicsWorker, const size_t i) {
+        un::CommandBuffer buffer = graphicsWorker->requestCommandBuffer();
+#if DEBUG
+        std::stringstream stream;
+        stream << "RenderPass-" << i << "-CommandBuffer";
+        graphicsWorker->getRenderer()->tag(*buffer, stream.str());
+#endif
+        passesOutputs[i].passCommands = *buffer;
+        return buffer;
+    }
 }

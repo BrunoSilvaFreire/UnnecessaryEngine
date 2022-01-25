@@ -2,12 +2,14 @@
 #define UNNECESSARYENGINE_SWAPCHAIN_H
 
 #include <vector>
+#include <condition_variable>
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/rendering/window.h>
 #include <unnecessary/rendering/image_view.h>
 #include <unnecessary/rendering/rendering_device.h>
 
 namespace un {
+    class Renderer;
 
     class SwapChainSupportDetails {
     private:
@@ -45,11 +47,34 @@ namespace un {
             const un::ImageView& getImageView() const;
         };
 
-        struct ChainSynchronizer {
+        class ChainSynchronizer {
+        private:
             vk::Semaphore imageReady;
             vk::Semaphore renderFinished;
             vk::Fence fence;
-            bool submitted;
+            bool inUse;
+            std::mutex _mutex;
+            std::condition_variable available;
+        public:
+            ChainSynchronizer(vk::Device device);
+
+            void access();
+
+            void unlock();
+
+            const vk::Semaphore& getImageReady() const;
+
+            const vk::Semaphore& getRenderFinished() const;
+
+            const vk::Fence& getFence() const;
+#ifdef DEBUG
+        private:
+            std::size_t innerIndex;
+        public:
+            size_t getInnerIndex() const;
+
+            void setInnerIndex(size_t innerIndex);
+#endif
         };
 
     private:
@@ -58,14 +83,14 @@ namespace un {
         un::Size2D resolution;
         std::vector<ChainImage> images;
         std::size_t semaphoreIndex;
-        std::vector<ChainSynchronizer> synchonizers;
+        std::vector<std::unique_ptr<ChainSynchronizer>> synchonizers;
     public:
 
 
         SwapChain() = default;
 
         SwapChain(
-            un::RenderingDevice& renderingDevice,
+            const un::Renderer& renderer,
             const un::Size2D& targetSize
         );
 
@@ -75,7 +100,7 @@ namespace un {
 
         const Size2D& getResolution() const;
 
-        ChainSynchronizer acquireSynchronizer();
+        ChainSynchronizer& acquireSynchronizer();
 
         const std::vector<ChainImage>& getImages() const;
 

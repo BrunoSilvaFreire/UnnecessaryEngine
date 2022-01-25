@@ -32,11 +32,7 @@ namespace un {
         un::CommandBuffer requestCommandBuffer(
             un::GraphicsWorker* graphicsWorker,
             const size_t i
-        ) {
-            un::CommandBuffer buffer = graphicsWorker->requestCommandBuffer();
-            passesOutputs[i].passCommands = *buffer;
-            return buffer;
-        }
+        );
     };
 
     class RenderGraph : public un::DependencyGraph<un::RenderPass*> {
@@ -105,6 +101,8 @@ namespace un {
             vk::ImageLayout initialLayout = vk::ImageLayout::eUndefined,
             vk::ImageLayout finalLayout = vk::ImageLayout::eUndefined
         );
+
+        void setAttachmentName(size_t attachment, std::string name);
 
         bool isAttachmentBorrowed(size_t i) const;
 

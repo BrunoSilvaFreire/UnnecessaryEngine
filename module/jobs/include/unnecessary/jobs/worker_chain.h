@@ -18,7 +18,7 @@ namespace un {
     private:
         /**
          * A job that has been added to this worker chain.
-         * Note that has not yet been submitted for execution
+         * Note that has not yet been available for execution
          * unless @see submit has been called.
          */
         class BookedJob {

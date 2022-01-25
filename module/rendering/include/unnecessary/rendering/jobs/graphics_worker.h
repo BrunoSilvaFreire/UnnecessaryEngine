@@ -25,6 +25,8 @@ namespace un {
         );
 
         un::CommandBuffer requestCommandBuffer() const;
+
+        Renderer* getRenderer() const;
     };
     typedef un::WorkerChain<un::GraphicsWorker> GraphicsChain;
 

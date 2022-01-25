@@ -1,11 +1,14 @@
 #include <unnecessary/rendering/swapchain.h>
+#include <unnecessary/rendering/renderer.h>
 #include <unnecessary/logging.h>
+
 namespace un {
 
     SwapChain::SwapChain(
-        un::RenderingDevice& renderingDevice,
+        const un::Renderer& renderer,
         const un::Size2D& targetSize
     ) {
+        auto renderingDevice = renderer.getDevice();
         vk::ImageUsageFlags swapChainUsageFlags =
             vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage;
         auto swapChainCreationFlags = static_cast<vk::ImageCreateFlags>(0);
@@ -68,7 +71,7 @@ namespace un {
         images.reserve(nImages);
         synchonizers.resize(nImages);
         for (int i = 0; i < nImages; ++i) {
-            images.emplace_back(
+            const ChainImage& image = images.emplace_back(
                 createdImages[i],
                 un::ImageView(
                     renderingDevice,
@@ -76,22 +79,28 @@ namespace un {
                     format
                 )
             );
-            ChainSynchronizer& synchronizer = synchonizers[i];
-            synchronizer.imageReady = device.createSemaphore(
-                vk::SemaphoreCreateInfo(
-                    static_cast<vk::SemaphoreCreateFlags>(0)
-                )
+
+            std::string suffix = "-";
+            suffix += std::to_string(i);
+            std::string imagePrefix = "ChainImage-";
+            renderer.tag(image.getImage(), imagePrefix + "Image" + suffix);
+            renderer.tag(*image.getImageView(), imagePrefix + "ImageView" + suffix);
+            std::unique_ptr<ChainSynchronizer>& ptr = synchonizers[i];
+            ptr = std::make_unique<ChainSynchronizer>(device);
+#ifdef DEBUG
+            ptr->setInnerIndex(i);
+#endif
+            std::string syncronizerPrefix = "ChainSynchronizer-";
+
+            renderer.tag(
+                ptr->getImageReady(),
+                syncronizerPrefix + "ImageReadySemaphore" + suffix
             );
-            synchronizer.renderFinished = device.createSemaphore(
-                vk::SemaphoreCreateInfo(
-                    static_cast<vk::SemaphoreCreateFlags>(0)
-                )
+            renderer.tag(
+                ptr->getRenderFinished(),
+                syncronizerPrefix + "RenderFinishedSemaphore" + suffix
             );
-            synchronizer.fence = device.createFence(
-                vk::FenceCreateInfo(
-                    vk::FenceCreateFlagBits::eSignaled
-                )
-            );
+            renderer.tag(ptr->getFence(), syncronizerPrefix + "Fence" + suffix);
         }
         semaphoreIndex = 0;
     }
@@ -108,10 +117,10 @@ namespace un {
         return resolution;
     }
 
-    un::SwapChain::ChainSynchronizer SwapChain::acquireSynchronizer() {
+    un::SwapChain::ChainSynchronizer& SwapChain::acquireSynchronizer() {
         std::size_t index = semaphoreIndex++;
         semaphoreIndex %= synchonizers.size();
-        return synchonizers[index];
+        return *synchonizers[index];
     }
 
     const std::vector<SwapChain::ChainImage>& SwapChain::getImages() const {
@@ -212,4 +221,66 @@ namespace un {
     const ImageView& SwapChain::ChainImage::getImageView() const {
         return imageView;
     }
+
+    SwapChain::ChainSynchronizer::ChainSynchronizer(
+        vk::Device device
+    ) : inUse(false) {
+        imageReady = device.createSemaphore(
+            vk::SemaphoreCreateInfo(
+                static_cast<vk::SemaphoreCreateFlags>(0)
+            )
+        );
+        renderFinished = device.createSemaphore(
+            vk::SemaphoreCreateInfo(
+                static_cast<vk::SemaphoreCreateFlags>(0)
+            )
+        );
+        fence = device.createFence(
+            vk::FenceCreateInfo(
+                vk::FenceCreateFlagBits::eSignaled
+            )
+        );
+    }
+
+    void SwapChain::ChainSynchronizer::access() {
+        std::unique_lock guard(_mutex);
+        if (inUse) {
+            LOG(INFO) << "Waiting @ " << innerIndex;
+            available.wait(guard);
+            LOG(INFO) << "Waited @ " << innerIndex;
+        }
+        inUse = true;
+        LOG(INFO) << "In use @ " << innerIndex;
+    }
+
+    void SwapChain::ChainSynchronizer::unlock() {
+        std::lock_guard<std::mutex> guard(_mutex);
+        LOG(INFO) << "Unlocking @ " << innerIndex;
+        available.notify_one();
+        inUse = false;
+    }
+
+    const vk::Semaphore& SwapChain::ChainSynchronizer::getImageReady() const {
+        return imageReady;
+    }
+
+    const vk::Semaphore& SwapChain::ChainSynchronizer::getRenderFinished() const {
+        return renderFinished;
+    }
+
+    const vk::Fence& SwapChain::ChainSynchronizer::getFence() const {
+        return fence;
+    }
+
+#ifdef DEBUG
+
+    size_t SwapChain::ChainSynchronizer::getInnerIndex() const {
+        return innerIndex;
+    }
+
+    void SwapChain::ChainSynchronizer::setInnerIndex(size_t innerIndex) {
+        ChainSynchronizer::innerIndex = innerIndex;
+    }
+
+#endif
 }

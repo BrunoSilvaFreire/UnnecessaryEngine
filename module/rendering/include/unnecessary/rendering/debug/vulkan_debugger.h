@@ -33,7 +33,7 @@ namespace un {
         void tag(
             T obj,
             const std::string& tag
-        ) {
+        ) const {
             vk::DebugUtilsObjectNameInfoEXT nameInfo(
                 obj.objectType,
                 (uint64_t) ((typename T::CType) obj),

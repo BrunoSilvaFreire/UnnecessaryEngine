@@ -31,4 +31,13 @@ namespace un {
     const std::vector<vk::AttachmentReference>& RenderPass::getDepthAttachments() const {
         return depthAttachments;
     }
+
+    std::ostream& operator<<(std::ostream& os, const RenderPass& pass) {
+        os << "name: " << pass.name << " stageFlags: " << vk::to_string(pass.stageFlags);
+        return os;
+    }
+
+    std::ostream& operator<<(std::ostream& os, const RenderPass* pass) {
+        return os << *pass;
+    }
 }

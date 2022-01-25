@@ -8,6 +8,7 @@
 #include <string>
 #include <unnecessary/rendering/render_graph.h>
 #include <unnecessary/rendering/buffers/command_buffer.h>
+#include <ostream>
 
 namespace un {
 
@@ -54,6 +55,10 @@ namespace un {
         const std::vector<vk::AttachmentReference>& getResolveAttachments() const;
 
         const std::vector<vk::AttachmentReference>& getDepthAttachments() const;
+
+        friend std::ostream& operator<<(std::ostream& os, const RenderPass& pass);
+
+        friend std::ostream& operator<<(std::ostream& os, const RenderPass* pass);
     };
 }
 #endif //UNNECESSARYENGINE_RENDER_PASS_H

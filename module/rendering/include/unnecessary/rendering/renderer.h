@@ -18,18 +18,25 @@
 #include <unnecessary/rendering/debug/vulkan_debugger.h>
 
 #endif
+#ifdef DEBUG
+
+#include <grapphs/dot.h>
+
+#endif
 namespace un {
 
     class Renderer {
     private:
+
         un::Window* _window;
         vk::Instance _vulkan;
         un::RenderingDevice _device;
-        un::SwapChain _swapChain;
-        un::RenderGraph _graph;
 #ifdef UN_VULKAN_DEBUG
         un::VulkanDebugger _debugger;
 #endif
+        un::SwapChain _swapChain;
+        un::RenderGraph _graph;
+
     public:
 
         Renderer(Window* window, std::string string, Version version);
@@ -37,6 +44,12 @@ namespace un {
         void usePipeline(un::RenderingPipeline* pipeline) {
             pipeline->configure(_graph);
             _graph.bake(*this);
+#ifdef DEBUG
+            auto cwd = std::filesystem::current_path();
+            auto output = cwd / "render_graph.dot";
+            LOG(INFO) << "Printing pipeline render graph to " << output;
+            gpp::save_to_dot(_graph.getInnerGraph(), output);
+#endif
         }
 
         un::Window* getWindow() const {
@@ -67,17 +80,17 @@ namespace un {
 
         un::SwapChain& getSwapChain();
 
-#ifdef DEBUG
 
         template<typename ValueType>
         UN_AGGRESSIVE_INLINE void tag(
             ValueType value,
             const std::string& tagName
-        ) {
+        ) const {
+#ifdef DEBUG
             _debugger.tag<ValueType>(value, tagName);
+#endif
         }
 
-#endif
 
     };
 }

@@ -25,5 +25,13 @@ namespace un {
                 renderer->getDevice().getGraphics().getIndex()
             )
         );
+        std::ostringstream name;
+        name << "GraphicsWorkerCommandPool-";
+        name << index;
+        renderer->tag(_commandPool, name.str());
+    }
+
+    Renderer* GraphicsWorker::getRenderer() const {
+        return _renderer;
     }
 }

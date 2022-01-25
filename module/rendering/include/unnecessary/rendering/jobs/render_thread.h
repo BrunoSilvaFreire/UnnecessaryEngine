@@ -54,19 +54,27 @@ namespace un {
             }
             chain.finally(
                 "Submit Render Commands",
-                [&]() {
-                    submitCommands(frameData, synchronizer, graph, vk::SwapchainKHR());
+                [&, framebufferIndex]() {
+                    submitCommands(
+                        framebufferIndex,
+                        frameData,
+                        synchronizer,
+                        graph,
+                        _renderer->getSwapChain().getSwapChain()
+                    );
                 }
             );
             chain.submit(jobSystem);
         }
 
         void submitCommands(
+            u32 framebufferIndex,
             const FrameData& frameData,
             SwapChain::ChainSynchronizer& synchronizer,
             const RenderGraph& graph,
             vk::SwapchainKHR swapchain
         ) const {
+            LOG(INFO) << "Submitted " << synchronizer.getInnerIndex();
             std::vector<vk::SubmitInfo> submits;
             graph.each(
                 [&](u32 index, const RenderPass* const& pass) {
@@ -104,11 +112,19 @@ namespace un {
             vk::Queue queue = *_renderer->getDevice().getGraphics();
             queue.submit(
                 submits,
-                synchronizer.fence
+                synchronizer.getFence()
             );
-            synchronizer.submitted = true;
-            std::array<vk::Semaphore, 1> imageReady;
-            std::array<u32, 1> imageIndices;
+            std::array<vk::Semaphore, 1> imageReady(
+                {
+                    synchronizer.getImageReady()
+                }
+            );
+            std::array<u32, 1> imageIndices(
+                {
+                    framebufferIndex
+                }
+            );
+            LOG(INFO) << "Presenting " << synchronizer.getInnerIndex();
             _renderer->getDevice().getPresent()->presentKHR(
                 vk::PresentInfoKHR(
                     imageReady,
@@ -116,6 +132,8 @@ namespace un {
                     imageIndices
                 )
             );
+            LOG(INFO) << "Presented " << synchronizer.getInnerIndex();
+            synchronizer.unlock();
 
         }
 
@@ -125,11 +143,9 @@ namespace un {
             while (_rendering) {
                 {
                     un::Chronometer chronometer;
-                    un::SwapChain::ChainSynchronizer synchronizer = swapChain.acquireSynchronizer();
-                    if (!synchronizer.submitted) {
-                        continue;
-                    }
-                    vk::Fence fence = synchronizer.fence;
+                    un::SwapChain::ChainSynchronizer& synchronizer = swapChain.acquireSynchronizer();
+                    synchronizer.access();
+                    vk::Fence fence = synchronizer.getFence();
                     std::array<vk::Fence, 1> fencesToWait(
                         {fence}
                     );
@@ -143,12 +159,16 @@ namespace un {
                     device.resetFences(
                         fencesToWait
                     );
-                    synchronizer.submitted = false;
-                    u32 imageIndex = device.acquireNextImageKHR(
+                    auto result = device.acquireNextImageKHR(
                         swapChain.getSwapChain(),
                         1000,
-                        synchronizer.imageReady
-                    ).value;
+                        synchronizer.getImageReady()
+                    );
+                    if (result.result != vk::Result::eSuccess) {
+                        continue;
+                    }
+                    u32 value = result.value;
+                    u32 imageIndex = value;
                     auto graph = _renderer->getRenderGraph();
                     un::FrameData& data = _inFlightFrames[imageIndex];
                     data.renderPass = graph.getVulkanPass();
@@ -160,7 +180,6 @@ namespace un {
                         _jobSystem,
                         synchronizer
                     );
-                    _renderer->getDevice().getGraphics()->waitIdle();
                     size_t msTime = chronometer.stop();
 
                 }

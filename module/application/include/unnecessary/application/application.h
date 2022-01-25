@@ -49,7 +49,7 @@ namespace un {
             running = true;
             onStart();
             while (running) {
-                fixedLoop.step();
+                //fixedLoop.step();
             }
         }
 

@@ -11,7 +11,7 @@ namespace un {
     bool Thread::setAffinityMask(std::size_t mask) {
         HANDLE hThread = reinterpret_cast<HANDLE>(_inner.native_handle());
         auto returnStatus = SetThreadAffinityMask(hThread, mask);
-        return returnStatus == 0;
+        return returnStatus != 0;
     }
 
     void Thread::setName(const std::string& name) {

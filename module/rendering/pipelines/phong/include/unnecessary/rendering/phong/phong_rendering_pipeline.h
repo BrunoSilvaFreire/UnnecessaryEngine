@@ -25,8 +25,9 @@ namespace un {
                 vk::AttachmentLoadOp::eDontCare,
                 vk::AttachmentStoreOp::eDontCare,
                 vk::ImageLayout::eUndefined,
-                vk::ImageLayout::eColorAttachmentOptimal
+                vk::ImageLayout::ePresentSrcKHR
             );
+            graph.setAttachmentName(color, "Color");
             size_t depth = graph.addOwnedAttachment(
                 vk::ImageUsageFlagBits::eDepthStencilAttachment,
                 vk::ImageAspectFlagBits::eDepth,
@@ -41,6 +42,7 @@ namespace un {
                 vk::ImageLayout::eUndefined,
                 vk::ImageLayout::eDepthStencilAttachmentOptimal
             );
+            graph.setAttachmentName(depth, "DepthBuffer");
             graph.enqueuePass<un::DrawObjectsPass>(
                 &opaqueGroup,
                 attachmentSize,

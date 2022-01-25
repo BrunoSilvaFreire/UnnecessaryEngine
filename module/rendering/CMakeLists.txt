@@ -60,6 +60,7 @@ add_unnecessary_module(
     Vulkan::Vulkan
     glm::glm
     glfw::glfw
+    grapphs_visualization
 )
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)

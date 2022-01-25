@@ -71,7 +71,7 @@ namespace un {
 
     /**
      * Holds jobs and workers for a specific archetype.
-     * @tparam _WorkerType The worker archetype used for this pool.
+     * @tparam _WorkerType The worker archetype inUse for this pool.
      */
     template<typename _WorkerType>
     class WorkerPool {
@@ -119,6 +119,7 @@ namespace un {
         bool tryRetrieveJob(JobType** job, JobHandle* handle) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
+                LOG(INFO) << "Locked by tryRetrieveJob";
                 if (!ready.empty()) {
                     JobHandle next = ready.front();
                     ready.pop();
@@ -128,16 +129,19 @@ namespace un {
                     return true;
                 }
             }
+            LOG(INFO) << "Unlocked by tryRetrieveJob";
             return false;
         }
 
         void done(JobType* job, JobHandle handle) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
+                LOG(INFO) << "Locked by done";
                 reusableIndices.push(static_cast<size_t>(handle));
                 onJobCompleted(job, handle);
                 delete job;
             }
+            LOG(INFO) << "Unlocked by done";
         }
 
         WorkerType* createWorker(
@@ -170,14 +174,6 @@ namespace un {
 
         void ensureNumWorkersAwake(size_t num) {
             size_t numWorkersNeededToAwake = num;
-            for (const auto& worker : workers) {
-                if (worker->isAwake()) {
-                    numWorkersNeededToAwake--;
-                }
-                if (numWorkersNeededToAwake == 0) {
-                    return;
-                }
-            }
             while (numWorkersNeededToAwake > 0) {
                 std::size_t lastIndex = workers.size();
                 for (std::size_t i = 0; i < lastIndex; ++i) {
@@ -218,6 +214,7 @@ namespace un {
             JobHandle handle;
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
+                LOG(INFO) << "Locked by enqueue";
                 if (reusableIndices.empty()) {
                     handle = jobs.size();
                     jobs.emplace_back(job, graphHandle);
@@ -232,23 +229,28 @@ namespace un {
                     unsafeDispatch(handle);
                 }
             }
+            LOG(INFO) << "Unlocked by enqueue";
             return handle;
         }
 
         void dispatch(JobHandle jobIndex) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
+                LOG(INFO) << "Locked by dispatch single";
                 unsafeDispatch(jobIndex);
             }
+            LOG(INFO) << "Unlocked by dispatch single";
         }
 
         void dispatch(std::set<JobHandle> handles) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
+                LOG(INFO) << "Locked by dispatch bulk";
                 for (JobHandle handle : handles) {
                     unsafeDispatch(handle);
                 }
             }
+            LOG(INFO) << "Unlocked by dispatch bulk";
         }
 
         void unsafeDispatch(JobHandle handle) {

@@ -54,7 +54,6 @@ namespace un {
             }
         }
 
-    protected:
 
         std::vector<IndexType> findDependencies(
             IndexType index,
@@ -190,6 +189,10 @@ namespace un {
                 }
                 open.pop();
             }
+        }
+
+        const InnerGraph& getInnerGraph() const {
+            return graph;
         }
 
         VertexType* operator[](IndexType index) {
