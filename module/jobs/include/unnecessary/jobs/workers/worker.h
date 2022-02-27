@@ -10,6 +10,7 @@
 #include <unnecessary/jobs/thread.h>
 #include <unnecessary/logging.h>
 #include <unnecessary/misc/event.h>
+#include <unnecessary/misc/types.h>
 
 namespace un {
 

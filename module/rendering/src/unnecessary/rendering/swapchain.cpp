@@ -245,17 +245,13 @@ namespace un {
     void SwapChain::ChainSynchronizer::access() {
         std::unique_lock guard(_mutex);
         if (inUse) {
-            LOG(INFO) << "Waiting @ " << innerIndex;
             available.wait(guard);
-            LOG(INFO) << "Waited @ " << innerIndex;
         }
         inUse = true;
-        LOG(INFO) << "In use @ " << innerIndex;
     }
 
     void SwapChain::ChainSynchronizer::unlock() {
         std::lock_guard<std::mutex> guard(_mutex);
-        LOG(INFO) << "Unlocking @ " << innerIndex;
         available.notify_one();
         inUse = false;
     }

@@ -22,6 +22,8 @@ conan_cmake_configure(
     gtest/1.11.0
     nlohmann_json/3.10.4
     pngpp/0.2.10
+    tinygltf/2.5.0
+    freetype/2.11.1
 
     GENERATORS
     cmake_find_package
@@ -29,23 +31,48 @@ conan_cmake_configure(
 
 conan_cmake_autodetect(settings)
 
+list(
+    APPEND
+    settings
+)
+
+message("Conan cmake settings: ${settings}")
 conan_cmake_install(
     PATH_OR_REFERENCE .
     BUILD missing
     SETTINGS ${settings}
+    ENV
+    CMAKE_GENERATOR=${CMAKE_GENERATOR}
+    CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
 )
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 find_package(Vulkan REQUIRED)
 find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(termcolor REQUIRED)
-find_package(glfw3 REQUIRED)
+if (WIN32)
+    find_package(glfw REQUIRED)
+elseif (UNIX)
+    find_package(GLFW3 REQUIRED)
+endif ()
 find_package(tinyobjloader REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(assimp REQUIRED)
 find_package(GTest REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(TinyGLTF REQUIRED)
+target_compile_definitions(
+    TinyGLTF::TinyGLTF
+    INTERFACE
+    TINYGLTF_NO_STB_IMAGE=1
+    TINYGLTF_NO_STB_IMAGE_WRITE=1
+    TINYGLTF_NO_INCLUDE_STB_IMAGE=1
+    TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE=1
+    TINYGLTF_NO_EXTERNAL_IMAGE=1
+    TINYGLTF_USE_CPP14=1
+)
 find_package(pngpp REQUIRED)
+find_package(freetype REQUIRED)
 
 set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
 add_unnecessary_thirdparty_library(grapphs)
@@ -83,6 +110,7 @@ add_subdirectory(module/application)
 add_subdirectory(module/rendering)
 add_subdirectory(module/simulation)
 add_subdirectory(module/sdf)
+add_subdirectory(module/gltf)
 
 
 add_subdirectory(applications/orbital)

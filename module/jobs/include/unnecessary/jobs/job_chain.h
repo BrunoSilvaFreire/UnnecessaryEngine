@@ -13,10 +13,10 @@
 #include <unnecessary/jobs/misc/lambda_job.h>
 
 namespace un {
-    template<typename _JobSystemType>
+    template<typename TJobSystem>
     class JobChain {
     public:
-        typedef _JobSystemType JobSystemType;
+        typedef TJobSystem JobSystemType;
         typedef typename JobSystemType::JobHandleSet JobGroupList;
     private:
         JobSystemType* system;

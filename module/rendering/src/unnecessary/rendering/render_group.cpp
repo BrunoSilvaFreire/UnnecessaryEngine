@@ -28,7 +28,7 @@ namespace un {
     }
 
     un::GeometryBatch&
-    MaterialBatch::getOrCreateMeshBatchFor(const un::Geometry* const geometry) {
+    MaterialBatch::getOrCreateMeshBatchFor(const un::DeviceGeometry* const geometry) {
         auto found = geometryBatches.find(geometry);
         if (found != geometryBatches.end()) {
             return found.operator*().second;
@@ -63,7 +63,7 @@ namespace un {
     void RenderGroup::push(
         un::Drawable drawable,
         un::Material* material,
-        const un::Geometry* const geometry
+        const un::DeviceGeometry* const geometry
     ) {
         un::MaterialBatch& materialBatch = getOrCreateBatchFor(material);
         un::GeometryBatch& geometryBatch = materialBatch.getOrCreateMeshBatchFor(geometry);

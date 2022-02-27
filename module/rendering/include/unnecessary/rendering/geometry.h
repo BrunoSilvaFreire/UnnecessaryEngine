@@ -5,11 +5,23 @@
 #ifndef UNNECESSARYENGINE_GEOMETRY_H
 #define UNNECESSARYENGINE_GEOMETRY_H
 
+#include <unnecessary/misc/membuf.h>
 #include <unnecessary/rendering/buffers/gpu_buffer.h>
+#include <unnecessary/rendering/layout/vertex_layout.h>
 #include <cstdint>
 
 namespace un {
-    class Geometry {
+
+    class LocalGeometry {
+    private:
+        un::VertexLayout vertexLayout;
+        un::Buffer vertexBuffer;
+        un::Buffer indexBuffer;
+        std::size_t numVertices;
+    public:
+    };
+
+    class DeviceGeometry {
     private:
         un::GPUBuffer vertexBuffer;
         un::GPUBuffer indexBuffer;
@@ -26,6 +38,13 @@ namespace un {
         std::size_t getNumVertices() const {
             return numVertices;
         }
+    };
+
+    class Geometry {
+    private:
+        LocalGeometry ram;
+        DeviceGeometry vRam;
+    public:
     };
 }
 #endif

@@ -21,9 +21,10 @@ TEST(jobs, load_file) {
     {
         un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
         un::JobHandle loadHandle, lambdaHandle;
+        std::filesystem::path filePath = "resources/dummy.txt";
         chain.immediately<un::LoadFileJob>(
             &loadHandle,
-            "/home/brunorbsf/CLionProjects/UNWin/module/jobs/pipelines/dummy.txt",
+            std::filesystem::absolute(filePath),
             &buf
         );
         chain.finally(
@@ -31,9 +32,9 @@ TEST(jobs, load_file) {
                 LOG(INFO) << "Finished reading file: " << buf.data();
             }
         );
-
     }
-    sleep(2);
+    std::chrono::seconds sleepDuration(1);
+    std::this_thread::sleep_for(sleepDuration);
     jobSystem.finish(true);
 }
 
@@ -78,6 +79,5 @@ TEST(jobs, sequence_test) {
         }
 
     }
-    sleep(10);
     jobSystem.finish(true);
 }

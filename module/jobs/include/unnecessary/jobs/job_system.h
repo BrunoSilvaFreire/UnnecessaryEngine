@@ -174,6 +174,15 @@ namespace un {
             pool->dispatch(handles);
         }
 
+        void dispatch(JobHandleSet handles) {
+            for_types_indexed<WorkerArchetypes...>(
+                [&]<typename WorkerType, std::size_t WorkerIndex>() {
+                    auto& pool = std::get<WorkerIndex>(workerPools);
+                    pool->dispatch(std::get<WorkerIndex>(handles));
+                }
+            );
+        }
+
         void finish(bool block) {
 
             if (block) {
@@ -214,9 +223,11 @@ namespace un {
             }
         }
 
-        template<typename T>
-        friend
-        class WorkerChain;
+        template<typename TWorker>
+        friend class WorkerChain;
+
+        template<typename TJobSystem>
+        friend class JobChain;
     };
 
     class SimpleJobSystem : public un::JobSystem<un::JobWorker> {

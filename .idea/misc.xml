@@ -13,6 +13,9 @@
       <file path="$PROJECT_DIR$/module/core/include" />
       <file path="$PROJECT_DIR$/module/core/src" />
       <file path="$PROJECT_DIR$/module/core/tests" />
+      <file path="$PROJECT_DIR$/module/gltf/include" />
+      <file path="$PROJECT_DIR$/module/gltf/src" />
+      <file path="$PROJECT_DIR$/module/gltf/tests" />
       <file path="$PROJECT_DIR$/module/graphs/include" />
       <file path="$PROJECT_DIR$/module/jobs/include" />
       <file path="$PROJECT_DIR$/module/jobs/src" />

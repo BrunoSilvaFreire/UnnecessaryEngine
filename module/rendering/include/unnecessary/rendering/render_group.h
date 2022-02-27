@@ -26,13 +26,13 @@ namespace un {
 
     class MaterialBatch {
     public:
-        typedef std::unordered_map<const un::Geometry*, un::GeometryBatch> GeometryMap;
+        typedef std::unordered_map<const un::DeviceGeometry*, un::GeometryBatch> GeometryMap;
 
     private:
         un::Material* material;
         GeometryMap geometryBatches;
 
-        un::GeometryBatch& getOrCreateMeshBatchFor(const un::Geometry* const geometry);
+        un::GeometryBatch& getOrCreateMeshBatchFor(const un::DeviceGeometry* const geometry);
 
     public:
         MaterialBatch(Material* material);
@@ -64,7 +64,7 @@ namespace un {
         void push(
             un::Drawable drawable,
             un::Material* material,
-            const un::Geometry* const geometry
+            const un::DeviceGeometry* const geometry
         );
     };
 

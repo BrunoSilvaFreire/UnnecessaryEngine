@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
                 un::WorkerArchetypeConfiguration<un::JobWorker>::forwarding(4),
                 un::WorkerArchetypeConfiguration<un::SimulationWorker>::forwarding(4),
                 un::WorkerArchetypeConfiguration<un::GraphicsWorker>(
-                    2,
+                    1,
                     [&renderer](
                         std::size_t index,
                         un::JobProvider<un::GraphicsJob> provider,

@@ -38,7 +38,8 @@ namespace un {
                     );
                     std::string jobName = "Record Pass: \"";
                     jobName += pass->getName();
-                    jobName += '"';
+                    jobName += "\" Frame: ";
+                    jobName += std::to_string(_frame);
                     chain.setName(handle, jobName);
                     vertexIndex2JobHandle[index] = handle;
                 },
@@ -53,8 +54,11 @@ namespace un {
                     chain.after(dependencyHandle, passHandle);
                 }
             }
+            std::ostringstream name;
+            name << "Submit Render Commands (Frame: " << _frame
+                 << ", FrameBuffer: " << framebufferIndex << ")";
             chain.finally(
-                "Submit Render Commands",
+                name.str(),
                 [&, framebufferIndex]() {
                     submitCommands(
                         framebufferIndex,
@@ -75,7 +79,6 @@ namespace un {
             const RenderGraph& graph,
             vk::SwapchainKHR swapchain
         ) const {
-            LOG(INFO) << "Submitted " << synchronizer.getInnerIndex();
             std::vector<vk::SubmitInfo> submits;
             graph.each(
                 [&](u32 index, const RenderPass* const& pass) {
@@ -125,7 +128,6 @@ namespace un {
                     framebufferIndex
                 }
             );
-            LOG(INFO) << "Presenting " << synchronizer.getInnerIndex();
             _renderer->getDevice().getPresent()->presentKHR(
                 vk::PresentInfoKHR(
                     imageReady,
@@ -133,7 +135,6 @@ namespace un {
                     imageIndices
                 )
             );
-            LOG(INFO) << "Presented " << synchronizer.getInnerIndex();
             synchronizer.unlock();
         }
 
@@ -141,48 +142,61 @@ namespace un {
             const vk::Device& device = _renderer->getVirtualDevice();
             un::SwapChain& swapChain = _renderer->getSwapChain();
             while (_rendering) {
-                {
-                    un::Chronometer chronometer;
-                    un::SwapChain::ChainSynchronizer& synchronizer = swapChain.acquireSynchronizer();
-                    synchronizer.access();
-                    vk::Fence fence = synchronizer.getFence();
-                    std::array<vk::Fence, 1> fencesToWait(
-                        {fence}
-                    );
-                    if (device.waitForFences(
-                        fencesToWait,
-                        true,
-                        1000
-                    ) != vk::Result::eSuccess) {
-                        continue;
-                    }
-                    device.resetFences(
-                        fencesToWait
-                    );
-                    auto result = device.acquireNextImageKHR(
-                        swapChain.getSwapChain(),
-                        1000,
-                        synchronizer.getImageReady()
-                    );
-                    if (result.result != vk::Result::eSuccess) {
-                        continue;
-                    }
-                    u32 value = result.value;
-                    u32 imageIndex = value;
-                    auto graph = _renderer->getRenderGraph();
-                    un::FrameData& data = _inFlightFrames[imageIndex];
-                    data.renderPass = graph.getVulkanPass();
-                    data.passesOutputs.resize(graph.getSize());
-                    data.framebuffer = graph.getFrameBuffer(imageIndex);
-                    schedulePasses(
-                        imageIndex,
-                        data,
-                        _jobSystem,
-                        synchronizer
-                    );
-                    size_t msTime = chronometer.stop();
-                    _frame++;
+                un::Chronometer chronometer;
+                un::SwapChain::ChainSynchronizer& synchronizer = swapChain.acquireSynchronizer();
+                synchronizer.access();
+                vk::Fence fence = synchronizer.getFence();
+                std::array<vk::Fence, 1> fencesToWait(
+                    {fence}
+                );
+                std::chrono::milliseconds timeout(1000 / 60);
+                u64 timeoutNano = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    timeout
+                ).count();
+                vk::Result waitForFences = device.waitForFences(
+                    fencesToWait,
+                    true,
+                    timeoutNano
+                );
+                if (waitForFences != vk::Result::eSuccess) {
+                    LOG(WARN)
+                        << "Unable to wait for fence ("
+                        << vk::to_string(waitForFences)
+                        << ")";
+                    synchronizer.unlock();
+                    continue;
                 }
+                device.resetFences(
+                    fencesToWait
+                );
+
+                auto result = device.acquireNextImageKHR(
+                    swapChain.getSwapChain(),
+                    timeoutNano,
+                    synchronizer.getImageReady()
+                );
+                if (result.result != vk::Result::eSuccess) {
+                    LOG(WARN) << "Unable to acquire image ("
+                              << vk::to_string(result.result)
+                              << ");";
+                    synchronizer.unlock();
+                    continue;
+                }
+                u32 value = result.value;
+                u32 imageIndex = value;
+                auto graph = _renderer->getRenderGraph();
+                un::FrameData& data = _inFlightFrames[imageIndex];
+                data.renderPass = graph.getVulkanPass();
+                data.passesOutputs.resize(graph.getSize());
+                data.framebuffer = graph.getFrameBuffer(imageIndex);
+                schedulePasses(
+                    imageIndex,
+                    data,
+                    _jobSystem,
+                    synchronizer
+                );
+                size_t msTime = chronometer.stop();
+                _frame++;
             }
         }
 

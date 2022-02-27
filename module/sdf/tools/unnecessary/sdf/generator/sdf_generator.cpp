@@ -1,14 +1,12 @@
-#include <unnecessary/jobs/job_system.h>
-#include <unnecessary/jobs/job_chain.h>
-#include <unnecessary/sdf/generator/jobs/process_pixel_job.h>
 #include <cxxopts.hpp>
-#include <png++/image.hpp>
+#include <unnecessary/sdf/generator/sdf_generator.h>
 
 static const char* const kInputName = "input";
 static const char* const kThreadsName = "threads";
 static const char* const kMinName = "min";
 static const char* const kMaxName = "max";
 
+#ifndef UN_TESTING
 int main(int argc, char** argv) {
     cxxopts::Options options(
         "unnecessary_sdf_generator",
@@ -27,36 +25,47 @@ int main(int argc, char** argv) {
     const auto& result = options.parse(argc, argv);
     size_t a = result.count(kInputName);
     if (a > 0) {
-        std::string shaderFile = result[kInputName].as<std::string>();
-        png::image<png::rgba_pixel> img(shaderFile);
-        nThreads = result[kThreadsName].as<int>();
-        un::SimpleJobSystem jobSystem(nThreads, true);
-        png::image<png::gray_pixel> sdf(size, size);
+        std::string imageFile = result[kInputName].as<std::string>();
+        std::string outputFile = result["output"].as<std::string>();
         float min = result[kMinName].as<float>();
         float max = result[kMaxName].as<float>();
-        un::ProcessPixelJob job(
-            &img,
-            &sdf,
-            min,
-            max
-        );
-        {
-            un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+        nThreads = result[kThreadsName].as<int>();
 
-            un::ProcessPixelJob::parallelize(
-                &job,
-                chain,
-                size * size,
-                64
-            );
-
-        }
-        jobSystem.finish(true);
-        std::string outputFile = result["output"].as<std::string>();
-        sdf.write(outputFile);
+        un::sdf::process_sdf(size, nThreads, imageFile, outputFile, min, max);
     } else {
         options.help();
         return 1;
     }
     return 0;
+}
+#endif
+void un::sdf::process_sdf(
+    int size,
+    int nThreads,
+    const std::string& imageFile,
+    const std::string& outputFile,
+    float min,
+    float max
+) {
+    png::image<png::rgba_pixel> img(imageFile);
+    un::SimpleJobSystem jobSystem(nThreads, true);
+    png::image<png::gray_pixel> sdf(size, size);
+    un::ProcessPixelJob job(
+        &img,
+        &sdf,
+        min,
+        max
+    );
+    {
+        un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+
+        un::ProcessPixelJob::parallelize(
+            &job,
+            chain,
+            size * size,
+            64
+        );
+    }
+    jobSystem.finish(true);
+    sdf.write(outputFile);
 }

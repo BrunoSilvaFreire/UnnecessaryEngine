@@ -168,21 +168,20 @@ namespace un {
             return pWorker;
         }
 
-        void ensureNumWorkersAwake(size_t num) {
+        size_t ensureNumWorkersAwake(size_t num) {
             size_t numWorkersNeededToAwake = num;
-            while (numWorkersNeededToAwake > 0) {
-                std::size_t lastIndex = workers.size();
-                for (std::size_t i = 0; i < lastIndex; ++i) {
-                    if (i == lastIndex - 1) {
-                        return;
-                    }
-                    const auto& worker = workers[i];
-                    if (!worker->isAwake()) {
-                        worker->awake();
-                        numWorkersNeededToAwake--;
-                    }
+            std::size_t lastIndex = workers.size();
+            for (size_t i = 0; i < lastIndex; ++i) {
+                const auto& worker = workers[i];
+                if (!worker->isAwake()) {
+                    worker->awake();
+                    numWorkersNeededToAwake--;
+                }
+                if (numWorkersNeededToAwake == 0) {
+                    return 0;
                 }
             }
+            return numWorkersNeededToAwake;
         }
 
 
