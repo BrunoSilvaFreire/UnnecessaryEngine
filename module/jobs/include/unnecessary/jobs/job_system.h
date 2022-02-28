@@ -52,8 +52,8 @@ namespace un {
         void done(typename WorkerType::JobType* job, JobHandle handle) {
             {
                 std::lock_guard<std::mutex> lock(graphAccessMutex);
-                for (auto otherIndex : graph.dependantsOn(handle)) {
 
+                for (auto otherIndex : graph.dependantsOn(handle)) {
                     bool ready = true;
                     for (auto otherDependency : graph.dependenciesOf(otherIndex)) {
                         if (otherDependency != handle) {
@@ -183,7 +183,12 @@ namespace un {
             );
         }
 
-        void finish(bool block) {
+        /**
+         * Immediately stops this job system.
+         * Any jobs that was previosly scheduled will **NOT** be executed.
+         * @param block Should we block while the job system isn't stopped?
+         */
+        void stop(bool block) {
 
             if (block) {
 
@@ -223,11 +228,44 @@ namespace un {
             }
         }
 
+        void complete() {
+            for_types_indexed<WorkerArchetypes...>(
+                [&]<typename WorkerType, std::size_t WorkerIndex>() {
+                    auto& pool = std::get<WorkerIndex>(workerPools);
+                    pool->complete();
+                }
+            );
+            std::atomic<size_t> remaining = totalNumberOfWorkers;
+            std::condition_variable allExited;
+            std::mutex mutex;
+            LOG(INFO) << "Stopping " << totalNumberOfWorkers << " total workers.";
+            for_types_indexed<WorkerArchetypes...>(
+                [&]<typename WorkerType, std::size_t WorkerIndex>() {
+                    auto& pool = std::get<WorkerIndex>(workerPools);
+                    for (WorkerType* worker : pool->getWorkers()) {
+                        worker->getOnFinished() += [&]() {
+                            remaining--;
+                            allExited.notify_one();
+                        };
+                    }
+                }
+            );
+            std::unique_lock<std::mutex> lock(mutex);
+            allExited.wait(
+                lock,
+                [&]() {
+                    return remaining == 0;
+                }
+            );
+        }
+
         template<typename TWorker>
-        friend class WorkerChain;
+        friend
+        class WorkerChain;
 
         template<typename TJobSystem>
-        friend class JobChain;
+        friend
+        class JobChain;
     };
 
     class SimpleJobSystem : public un::JobSystem<un::JobWorker> {

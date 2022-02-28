@@ -9,6 +9,8 @@
 namespace un {
     template<typename T>
     class MemoryBuffer {
+    public:
+        typedef T ElementType;
     private:
         void assertWithinBounds(size_t index) const {
             if (index >= count) {

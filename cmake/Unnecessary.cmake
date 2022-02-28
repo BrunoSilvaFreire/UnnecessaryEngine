@@ -2,6 +2,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryModules.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryShader.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryDebug.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryTools.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryResources.cmake)
+
 find_program(GLSLC_EXEC glslc REQUIRED)
 find_program(SPIRV_EXEC spirv-cross REQUIRED)
 

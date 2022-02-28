@@ -14,5 +14,5 @@ TEST(load_dragon, loading) {
         GTEST_LOG_(INFO) << "Expecting dragon @ " << std::filesystem::absolute(dragon);
         chain.immediately<un::LoadGLTFJob>(dragon, un::GLTFType::eBinary);
     }
-    system.finish(true);
+    system.stop(true);
 }

@@ -15,13 +15,33 @@ public:
 
 typedef un::JobSystem<un::JobWorker, DummyWorker> DummyJobSystem;
 
+TEST(jobs, openness) {
+    un::SimpleJobSystem jobSystem(4, true);
+    const std::size_t numJobs = 4;
+    std::size_t numCompletedJobs = 0;
+    {
+        un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+        for (std::size_t i = 0; i < numJobs; ++i) {
+            chain.immediately<un::LambdaJob<un::JobWorker>>(
+                [=, &numCompletedJobs]() {
+                    std::chrono::milliseconds workTime(5);
+                    std::this_thread::sleep_for(workTime);
+                    numCompletedJobs++;
+                }
+            );
+        }
+    }
+    jobSystem.complete();
+    ASSERT_EQ(numJobs, numCompletedJobs);
+}
+
 TEST(jobs, load_file) {
     un::SimpleJobSystem jobSystem(4, true);
     un::Buffer buf;
     {
         un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
         un::JobHandle loadHandle, lambdaHandle;
-        std::filesystem::path filePath = "resources/dummy.txt";
+        std::filesystem::path filePath = "/home/brunorbsf/CLionProjects/UnnecessaryEngine/module/jobs/resources/dummy.txt";
         chain.immediately<un::LoadFileJob>(
             &loadHandle,
             std::filesystem::absolute(filePath),
@@ -29,13 +49,13 @@ TEST(jobs, load_file) {
         );
         chain.finally(
             [&]() {
-                LOG(INFO) << "Finished reading file: " << buf.data();
+                char* string = reinterpret_cast<char*>(buf.data());
+//                LOG(INFO) << "Finished reading file: " << string;
+                ASSERT_STREQ(string, "Hello World!");
             }
         );
     }
-    std::chrono::seconds sleepDuration(1);
-    std::this_thread::sleep_for(sleepDuration);
-    jobSystem.finish(true);
+    jobSystem.complete();
 }
 
 void log(size_t index) {
@@ -79,5 +99,5 @@ TEST(jobs, sequence_test) {
         }
 
     }
-    jobSystem.finish(true);
+    jobSystem.stop(true);
 }

@@ -8,9 +8,11 @@
 
 namespace un {
     class LoadFileJob : public un::SimpleJob {
+    private:
         std::filesystem::path path;
         std::ios::openmode openMode;
         un::Buffer* buffer;
+        typedef std::basic_ifstream<un::Buffer::ElementType> StreamType;
     public:
         LoadFileJob(
             const std::filesystem::path& path,
@@ -18,6 +20,12 @@ namespace un {
             std::ios::openmode openMode = std::ios::binary
         ) : path(path), openMode(openMode), buffer(buffer) {
             setName(std::string("Load ") + path.string());
+
+            if (!exists(path)) {
+                std::stringstream err;
+                err << "File at '" << path << "' doesn't exist";
+                throw std::runtime_error(err.str());
+            }
         }
 
         void operator()(un::JobWorker* worker) override {
@@ -30,9 +38,19 @@ namespace un {
             buffer->resize(fileSize);
             stream.seekg(0, std::ios::beg);
             size_t pos = 0;
-            while (stream.good()) {
-                stream >> buffer->operator[](pos++);
+            stream.read(reinterpret_cast<char*>(buffer->data()), fileSize);
+            switch (stream.rdstate()) {
+
+                case std::ios::badbit:
+                    throw std::runtime_error("Bad bit after read");
+                    break;
+                case std::ios::failbit:
+                    throw std::runtime_error("Fail bit after read");
+                    break;
+                default:
+                    break;
             }
+
             stream.close();
         }
     };

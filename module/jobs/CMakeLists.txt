@@ -24,3 +24,8 @@ add_unnecessary_module(
         TESTS
         tests/job_dependencies_tests.cpp
 )
+unnecessary_target_resources(
+    TARGET unnecessary_jobs_tests
+    RESOURCES
+    resources/dummy.txt
+)

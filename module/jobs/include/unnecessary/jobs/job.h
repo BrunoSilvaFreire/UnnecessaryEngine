@@ -20,6 +20,8 @@ namespace un {
     private:
         std::string name = "Unnamed Job";
     public:
+        virtual ~Job() = default;
+
         typedef _Worker WorkerType;
 
         virtual void operator()(WorkerType* worker) = 0;

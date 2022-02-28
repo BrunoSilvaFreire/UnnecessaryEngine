@@ -3,12 +3,8 @@ function(
     NAME
 )
 
-    set(
-        FLAGS
-    )
-    set(
-        SINGLE_VALUES
-    )
+    set(FLAGS)
+    set(SINGLE_VALUES)
     set(
         MULTI_VALUES
         SOURCES

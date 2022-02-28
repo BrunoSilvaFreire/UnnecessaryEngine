@@ -32,3 +32,8 @@ add_unnecessary_tool(
     TESTS
     tests/dummy_generator_test.cpp
 )
+unnecessary_target_resources(
+    TARGET unnecessary_sdf_generator_tests
+    RESOURCES
+    tests/dummy_image.png
+)
