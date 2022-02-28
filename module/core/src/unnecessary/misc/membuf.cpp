@@ -6,6 +6,13 @@ namespace un {
 
     Buffer::Buffer() {}
 
-    Buffer::Buffer(size_t size) : MemoryBuffer(size) {}
+    Buffer::Buffer(size_t size, bool zero) : MemoryBuffer(size) {
+        if (zero) {
+            setZero();
+        }
+
+    }
+
+
 
 }

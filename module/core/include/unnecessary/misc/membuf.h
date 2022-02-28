@@ -101,6 +101,10 @@ namespace un {
             }
         }
 
+        void setZero() const {
+            std::memset(ptr, 0, count * sizeof(T));
+        }
+
         T& operator[](std::size_t index) {
 #ifdef DEBUG
             assertWithinBounds(index);
@@ -123,7 +127,7 @@ namespace un {
 
         Buffer();
 
-        Buffer(size_t size);
+        Buffer(size_t size, bool zero = true);
 
         template<typename T>
         void write(std::size_t index, const T& value) {
@@ -134,6 +138,7 @@ namespace un {
         T read(std::size_t index) {
             return ptr[index];
         }
+
     };
 
 }

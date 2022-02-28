@@ -41,11 +41,12 @@ TEST(jobs, load_file) {
     {
         un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
         un::JobHandle loadHandle, lambdaHandle;
-        std::filesystem::path filePath = "/home/brunorbsf/CLionProjects/UnnecessaryEngine/module/jobs/resources/dummy.txt";
+        std::filesystem::path filePath = "resources/dummy.txt";
         chain.immediately<un::LoadFileJob>(
             &loadHandle,
             std::filesystem::absolute(filePath),
-            &buf
+            &buf,
+            std::ios::in
         );
         chain.finally(
             [&]() {
