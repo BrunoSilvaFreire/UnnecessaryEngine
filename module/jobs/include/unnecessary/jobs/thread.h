@@ -7,7 +7,7 @@
 
 #include <thread>
 #include <functional>
-
+#include <unnecessary/def.h>
 namespace un {
     class Thread {
     private:
@@ -27,7 +27,7 @@ namespace un {
 
         void setName(const std::string& name);
 
-        bool setAffinityMask(std::size_t mask);
+        bool setCore(u32 core);
 
         void join();
     };

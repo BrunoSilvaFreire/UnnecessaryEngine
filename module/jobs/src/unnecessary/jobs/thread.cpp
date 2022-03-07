@@ -3,9 +3,7 @@
 #ifdef WIN32
 #include <Windows.h>
 #else
-
 #include <pthread.h>
-
 #endif
 namespace un {
 
@@ -35,9 +33,9 @@ namespace un {
 
 #ifdef WIN32
 
-    bool Thread::setAffinityMask(std::size_t mask) {
+    bool Thread::setCore(u32 core) {
         HANDLE hThread = reinterpret_cast<HANDLE>(_inner.native_handle());
-        auto returnStatus = SetThreadAffinityMask(hThread, mask);
+        auto returnStatus = SetThreadAffinityMask(hThread, 1 << core);
         return returnStatus != 0;
     }
 
@@ -54,10 +52,10 @@ namespace un {
 
 #else
 
-    bool Thread::setAffinityMask(std::size_t mask) {
+    bool Thread::setCore(u32 core) {
         cpu_set_t cpu;
         CPU_ZERO(&cpu);
-        CPU_SET(mask, &cpu);
+        CPU_SET(core, &cpu);
         int status = pthread_setaffinity_np(
             _inner.native_handle(),
             sizeof(cpu_set_t),

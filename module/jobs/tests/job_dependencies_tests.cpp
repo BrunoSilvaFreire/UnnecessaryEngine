@@ -67,6 +67,19 @@ TEST(jobs, load_file) {
     jobSystem.complete();
 }
 
+TEST(jobs, set_affinity) {
+    std::size_t numWorkers = std::thread::hardware_concurrency();
+    un::SimpleJobSystem jobSystem(numWorkers, true);
+    auto& workers = jobSystem
+        .getWorkerPool<un::JobWorker>()
+        ->getWorkers();
+    for (std::size_t i = 0; i < numWorkers; ++i) {
+        un::Thread* thread = workers[i]->getThread();
+        ASSERT_TRUE(thread->setCore(i));
+    }
+    jobSystem.complete();
+}
+
 void log_index(size_t index) {
     LOG(INFO) << "Ran " << index;
 }

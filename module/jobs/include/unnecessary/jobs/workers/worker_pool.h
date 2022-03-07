@@ -172,9 +172,8 @@ namespace un {
             );
             un::Thread* thread = pWorker->getThread();
 
-            std::size_t affinityMask = 1 << index;
-            if (!thread->setAffinityMask(affinityMask)) {
-//                LOG(WARN) << "Unable to set worker " << index << " affinity mask";
+            if (!thread->setCore(index)) {
+                LOG(WARN) << "Unable to set worker " << index << " to it's respective core";
             }
             std::string threadName = un::type_name_of<WorkerType>();
             threadName += "-";
