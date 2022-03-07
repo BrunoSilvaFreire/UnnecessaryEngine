@@ -29,6 +29,7 @@ namespace un {
 
         bool setAffinityMask(std::size_t mask);
 
+        void join();
     };
 }
 #endif

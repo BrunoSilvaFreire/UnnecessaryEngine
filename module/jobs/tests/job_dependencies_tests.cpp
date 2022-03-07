@@ -2,6 +2,7 @@
 #include <unnecessary/jobs/job_system.h>
 #include <unnecessary/jobs/job_chain.h>
 #include "unnecessary/jobs/misc/load_file_job.h"
+#include <cmath>
 
 class DummyWorker : public un::AbstractJobWorker<un::SimpleJob> {
 public:
@@ -16,24 +17,31 @@ public:
 typedef un::JobSystem<un::JobWorker, DummyWorker> DummyJobSystem;
 
 TEST(jobs, openness) {
-    un::SimpleJobSystem jobSystem(4, true);
-    const std::size_t numJobs = 4;
-    std::size_t numCompletedJobs = 0;
-    {
-        un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
-        for (std::size_t i = 0; i < numJobs; ++i) {
-            chain.immediately<un::LambdaJob<un::JobWorker>>(
-                [=, &numCompletedJobs]() {
-                    std::chrono::milliseconds workTime(5);
-                    std::this_thread::sleep_for(workTime);
-                    numCompletedJobs++;
-                }
-            );
+    const std::size_t numTries = 1024;
+    const std::size_t numWorkers = std::thread::hardware_concurrency();
+    const std::size_t numJobs = numWorkers * 4;
+    for (std::size_t i = 0; i < numTries; ++i) {
+
+        un::SimpleJobSystem jobSystem(numWorkers, true);
+        std::atomic<std::size_t> numCompletedJobs = 0;
+        {
+            un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+            for (std::size_t j = 0; j < numJobs; ++j) {
+                chain.immediately<un::LambdaJob<un::JobWorker>>(
+                    [=, &numCompletedJobs]() {
+                        std::chrono::milliseconds workTime(5);
+                        std::this_thread::sleep_for(workTime);
+                        numCompletedJobs++;
+                    }
+                );
+            }
         }
+        jobSystem.complete();
+        LOG(INFO) << "Execution " << i << ": " << numJobs << " vs " << numCompletedJobs;
+        ASSERT_EQ(numJobs, numCompletedJobs);
     }
-    jobSystem.complete();
-    ASSERT_EQ(numJobs, numCompletedJobs);
 }
+
 
 TEST(jobs, load_file) {
     un::SimpleJobSystem jobSystem(4, true);
@@ -59,7 +67,7 @@ TEST(jobs, load_file) {
     jobSystem.complete();
 }
 
-void log(size_t index) {
+void log_index(size_t index) {
     LOG(INFO) << "Ran " << index;
 }
 
@@ -73,13 +81,13 @@ TEST(jobs, sequence_test) {
         chain.immediately<un::LambdaJob<>>(
             &first,
             [&]() {
-                log(0);
+                log_index(0);
             }
         );
         chain.immediately<un::LambdaJob<>>(
             &second,
             []() {
-                log(1);
+                log_index(1);
             }
         );
         for (size_t i = 0; i < 20000; i += 2) {
@@ -87,18 +95,42 @@ TEST(jobs, sequence_test) {
                 first,
                 &first,
                 [=]() {
-                    log(i);
+                    log_index(i);
                 }
             );
             chain.after<un::LambdaJob<>>(
                 second,
                 &second,
                 [=]() {
-                    log(i + 1);
+                    log_index(i + 1);
                 }
             );
         }
 
     }
-    jobSystem.stop(true);
+    jobSystem.complete();
+}
+
+TEST(jobs, benchmark) {
+    un::SimpleJobSystem jobSystem(std::thread::hardware_concurrency(), true);
+    const size_t numJobs = std::pow(2, 16);
+    un::Buffer buf(numJobs, false);
+
+    {
+        un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+
+        for (size_t i = 0; i < numJobs; i++) {
+            chain.immediately<un::LambdaJob<>>(
+                [&, i]() {
+                    int r;
+                    for (int j = 0; j < 2000; ++j) {
+                        r = rand();
+                    }
+                    buf[i] = r;
+                }
+            );
+        }
+
+    }
+    jobSystem.complete();
 }

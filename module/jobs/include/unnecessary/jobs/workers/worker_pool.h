@@ -174,9 +174,7 @@ namespace un {
 
             std::size_t affinityMask = 1 << index;
             if (!thread->setAffinityMask(affinityMask)) {
-                LOG(INFO) << "Unable to set worker " << index << " affinity mask";
-            } else {
-                LOG(INFO) << "Worker " << index << " has affinity mask " << affinityMask;
+//                LOG(WARN) << "Unable to set worker " << index << " affinity mask";
             }
             std::string threadName = un::type_name_of<WorkerType>();
             threadName += "-";
@@ -190,8 +188,8 @@ namespace un {
             std::size_t lastIndex = workers.size();
             for (size_t i = 0; i < lastIndex; ++i) {
                 const auto& worker = workers[i];
-                if (!worker->isAwake()) {
-                    worker->awake();
+                if (worker->isSleeping()) {
+                    worker->notifyJobAvailable();
                     numWorkersNeededToAwake--;
                 }
                 if (numWorkersNeededToAwake == 0) {
@@ -210,7 +208,7 @@ namespace un {
 
         ~WorkerPool() {
             for (WorkerType* worker : workers) {
-                worker->stop();
+                worker->stop(true);
                 delete worker;
             }
         }
@@ -260,8 +258,9 @@ namespace un {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
                 for (JobHandle handle : handles) {
-                    unsafeDispatch(handle);
+                    ready.push(handle);
                 }
+                ensureNumWorkersAwake(ready.size());
             }
         }
 
@@ -309,20 +308,14 @@ namespace un {
         void complete() {
             std::lock_guard lock(openMutex);
             open = false;
-            if (!hasPendingJobs()) {
-                stopAllWorkers();
-            } else {
-                onJobCompleted += [this](JobType*, JobHandle) {
-                    if (!hasPendingJobs()) {
-                        stopAllWorkers();
-                    }
-                };
+            if (hasPendingJobs()) {
+                completeAllWorkers();
             }
         }
 
-        void stopAllWorkers() {
+        void completeAllWorkers() {
             for (auto worker : workers) {
-                worker->stop();
+                worker->stop(true);
             }
         }
     };

@@ -66,6 +66,6 @@ void un::sdf::process_sdf(
             64
         );
     }
-    jobSystem.stop(true);
+    jobSystem.complete();
     sdf.write(outputFile);
 }

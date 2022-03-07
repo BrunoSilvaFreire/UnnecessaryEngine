@@ -10,12 +10,14 @@ namespace un {
             return;
         }
         flushed = true;
-        stream() << std::endl;
-        globalMutex.unlock();
+        {
+            std::lock_guard<std::mutex> lock(globalMutex);
+            std::cout << sstream.str() << std::endl;
+        }
     }
 
     std::ostream& Log::stream() {
-        return std::cout;
+        return sstream;
     }
 
     Log::~Log() {
@@ -48,14 +50,12 @@ namespace un {
         u32 line,
         const std::string& file
     ) : flushed(false) {
-        globalMutex.lock();
-
-        stream() <<
-                 DEFAULT_COLOR << '[' <<
-                 termcolor::green << header <<
-                 DEFAULT_COLOR << "] " <<
-                 termcolor::magenta << '<' << file << ":" << line
-                 << '>' <<
-                 DEFAULT_COLOR << ": ";
+        sstream <<
+                DEFAULT_COLOR << '[' <<
+                termcolor::green << header <<
+                DEFAULT_COLOR << "] " <<
+                termcolor::magenta << '<' << file << ":" << line
+                << '>' <<
+                DEFAULT_COLOR << ": ";
     }
 }

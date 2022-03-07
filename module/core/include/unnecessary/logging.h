@@ -5,13 +5,14 @@
 #include <termcolor/termcolor.hpp>
 #include <mutex>
 #include <unnecessary/def.h>
+#include <sstream>
 
 namespace un {
     class Log {
     private:
         static std::mutex globalMutex;
-
         bool flushed;
+        std::stringstream sstream;
     public:
         void flush();
 

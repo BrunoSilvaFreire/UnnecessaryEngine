@@ -1,5 +1,5 @@
 #include <unnecessary/jobs/misc/load_file_job.h>
-
+#include <sstream>
 namespace un {
 
     LoadFileJob::LoadFileJob(

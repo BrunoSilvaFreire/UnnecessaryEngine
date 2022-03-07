@@ -94,9 +94,9 @@ namespace un {
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
                     auto& archWorkers = std::get<WorkerIndex>(workerPools);
                     auto& workerConfig = std::get<WorkerIndex>(numWorkersPerArchetype);
-                    LOG(INFO) << "Allocating " << GREEN(workerConfig.getNumWorkers())
-                              << " workers of archetype "
-                              << PURPLE(un::type_name_of<WorkerType>());
+//                    LOG(INFO) << "Allocating " << GREEN(workerConfig.getNumWorkers())
+//                              << " workers of archetype "
+//                              << PURPLE(un::type_name_of<WorkerType>());
                     totalNumberOfWorkers += workerConfig.getNumWorkers();
                     using JobType = typename WorkerType::JobType;
                     archWorkers->allocateWorkers(workerConfig);
@@ -204,7 +204,7 @@ namespace un {
                                 remaining--;
                                 allExited.notify_one();
                             };
-                            worker->stop();
+                            worker->stop(false);
                         }
                     }
                 );
@@ -221,7 +221,7 @@ namespace un {
                     [&]<typename WorkerType, std::size_t WorkerIndex>() {
                         auto& pool = std::get<WorkerIndex>(workerPools);
                         for (WorkerType* worker : pool->getWorkers()) {
-                            worker->stop();
+                            worker->stop(false);
                         }
                     }
                 );
@@ -229,34 +229,33 @@ namespace un {
         }
 
         void complete() {
-            for_types_indexed<WorkerArchetypes...>(
-                [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                    auto& pool = std::get<WorkerIndex>(workerPools);
-                    pool->complete();
-                }
-            );
-            std::atomic<size_t> remaining = totalNumberOfWorkers;
+            std::size_t remaining = totalNumberOfWorkers;
             std::condition_variable allExited;
-            std::mutex mutex;
-            LOG(INFO) << "Stopping " << totalNumberOfWorkers << " total workers.";
+            std::mutex remainingLock;
             for_types_indexed<WorkerArchetypes...>(
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
                     auto& pool = std::get<WorkerIndex>(workerPools);
                     for (WorkerType* worker : pool->getWorkers()) {
-                        worker->getOnFinished() += [&]() {
+                        if (worker->isRunning()) {
+                            worker->getOnFinished() += [&]() {
+                                std::unique_lock<std::mutex> lock(remainingLock);
+                                remaining--;
+                                if (remaining == 0) {
+                                    allExited.notify_one();
+                                }
+                            };
+                        } else {
                             remaining--;
-                            allExited.notify_one();
-                        };
+                        }
                     }
+                    pool->complete();
                 }
             );
-            std::unique_lock<std::mutex> lock(mutex);
-            allExited.wait(
-                lock,
-                [&]() {
-                    return remaining == 0;
-                }
-            );
+            if (remaining > 0) {
+                std::mutex completionMutex;
+                std::unique_lock<std::mutex> lock(completionMutex);
+                allExited.wait(lock);
+            }
         }
 
         template<typename TWorker>

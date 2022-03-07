@@ -13,7 +13,7 @@ namespace un {
         const std::function<void()>& block
     ) : _block(block),
         _inner(&Thread::operator(), this) {
-        if (block == nullptr){
+        if (block == nullptr) {
             throw std::runtime_error("Thread created with empty block.");
         }
     }
@@ -27,6 +27,10 @@ namespace un {
 
     void Thread::operator()() {
         _block();
+    }
+
+    void Thread::join() {
+        _inner.join();
     }
 
 #ifdef WIN32
@@ -47,6 +51,7 @@ namespace un {
             ).c_str()
         );
     }
+
 #else
 
     bool Thread::setAffinityMask(std::size_t mask) {

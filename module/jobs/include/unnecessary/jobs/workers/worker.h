@@ -14,6 +14,8 @@
 
 namespace un {
 
+    static const size_t arrLen = 512;
+
     template<class _Job>
     class AbstractJobWorker {
     public:
@@ -23,27 +25,50 @@ namespace un {
         un::Thread* thread;
         un::JobProvider<JobType> provider;
         un::JobNotifier<JobType> notifier;
-        bool running = true;
-        bool awaken;
-        std::mutex handbrakeMutex;
-        std::mutex sleepMutex;
-        std::condition_variable waiting;
+        /**
+         * Is this worker still processing it's tasks or should it exit?
+         */
+        bool running = false;
+        /**
+         * Is this worker complete all of them and is currently sleeping while waiting for more?
+         */
+        bool waiting = false;
+
+        /**
+         * Has this worker been ordered to stop?
+         */
+        bool exiting = false;
+        std::mutex jobMutex;
+        std::mutex runningMutex;
+        std::condition_variable jobAvailable;
         un::EventVoid finished;
 
         void workerThread() {
-            do {
-                JobType* jobPtr;
-                JobHandle id;
-
-                while (running && provider(&jobPtr, &id)) {
-                    jobPtr->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
-                    notifier(jobPtr, id);
-                }
-                if (running) {
-                    sleep();
-                }
-            } while (running);
+            JobType* jobPtr;
+            JobHandle id;
+            while (nextJob(&jobPtr, &id)) {
+                execute(jobPtr, id);
+            }
             finished();
+        }
+
+        bool nextJob(JobType** jobPtr, JobHandle* id) {
+            if (provider(jobPtr, id)) {
+                return true;
+            } else if (exiting) {
+                return false;
+            }
+
+            std::unique_lock<std::mutex> lock(jobMutex);
+            waiting = true;
+            jobAvailable.wait(lock);
+            waiting = false;
+            return running && provider(jobPtr, id);
+        }
+
+        void execute(JobType* jobPtr, JobHandle id) {
+            jobPtr->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
+            notifier(jobPtr, id);
         }
 
     public:
@@ -54,9 +79,9 @@ namespace un {
             un::JobNotifier<JobType> notifier
         ) : index(index),
             thread(nullptr),
-            waiting(),
+            jobAvailable(),
             running(false),
-            awaken(false),
+            waiting(false),
             finished(),
             provider(provider),
             notifier(notifier) {
@@ -66,59 +91,77 @@ namespace un {
         }
 
         virtual ~AbstractJobWorker() {
-            running = false;
+            if (thread != nullptr) {
+                thread->join();
+                delete thread;
+            }
         }
 
-        bool isAwake() {
-            return awaken;
+        bool isAwake() const {
+            return !waiting;
+        }
+
+        bool isSleeping() const {
+            return waiting;
         }
 
         un::EventVoid& getOnFinished() {
             return finished;
         }
 
-        void awake() {
+        void notifyJobAvailable() {
             {
-                std::lock_guard<std::mutex> lock(sleepMutex);
-                if (!awaken) {
-                    awaken = true;
-                    waiting.notify_one();
-                }
+                // std::lock_guard<std::mutex> lock(waitingMutex);
+                jobAvailable.notify_one();
             }
-        }
-
-        void sleep() {
-            {
-                std::lock_guard<std::mutex> lock(sleepMutex);
-                if (awaken) {
-                    awaken = false;
-                }
-            }
-            std::unique_lock<std::mutex> lock(handbrakeMutex);
-            waiting.wait(lock);
         }
 
         void start() {
-            if (running) {
-                return;
+            {
+                std::lock_guard<std::mutex> lock(runningMutex);
+                if (running) {
+                    return;
+                }
+
+                running = true;
+                thread = new un::Thread(
+                    std::bind(
+                        &AbstractJobWorker::workerThread,
+                        this
+                    )
+                );
             }
-            running = true;
-            thread = new un::Thread(std::bind(&AbstractJobWorker::workerThread, this));
         }
 
-        void stop() {
-            if (!running) {
-                return;
+        void stop(bool completelyConsume) {
+            {
+                std::lock_guard<std::mutex> lock(runningMutex);
+                if (!running) {
+                    return;
+                }
+                exiting = completelyConsume;
+                notifyJobAvailable();
             }
-            LOG(INFO) << "Stopping worker " << index;
-            running = false;
-            if (!isAwake()) {
-                awake();
-            }
+        }
+
+        bool isRunning() const {
+            return running;
+        }
+
+        bool isWaiting() const {
+            return waiting;
+        }
+
+        bool isExiting() const {
+            return exiting;
         }
 
         un::Thread* getThread() const {
             return thread;
+        }
+
+        size_t getIndex() const {
+            return index;
         }
     };
 

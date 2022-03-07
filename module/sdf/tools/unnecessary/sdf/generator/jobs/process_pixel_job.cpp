@@ -20,20 +20,25 @@ namespace un {
           maxDistance(maxDistance) {}
 
     void ProcessPixelJob::operator()(size_t index, un::JobWorker* worker) {
-        size_t width = input->get_width();
-        size_t height = input->get_height();
-        size_t ow = output->get_width();
-        size_t oh = output->get_height();
-
-        std::size_t ox = index % ow;
-        std::size_t oy = index % oh;
+        int iw = input->get_width();
+        int ih = input->get_height();
+        int ow = output->get_width();
+        int oh = output->get_height();
+        int ox = index % ow;
+        int oy = index % oh;
         glm::uvec2 inputCoords = outputToInputCoordinates(ox, oy);
-        float record = std::numeric_limits<float>::min();
-        for (int dy = -width; dy < width; ++dy) {
-            for (int dx = -width; dx < width; ++dx) {
+        float d = maxDistance;
+        for (int dy = -iw; dy < iw; ++dy) {
+//            if (std::abs(dy) > maxDistance) {
+//                continue;
+//            }
+            for (int dx = -iw; dx < iw; ++dx) {
+//                if (std::abs(dx) > maxDistance) {
+//                    continue;
+//                }
                 int nx = inputCoords.x + dx;
                 int ny = inputCoords.y + dy;
-                if (isOutOfBounds(nx, ny, width, height)) {
+                if (isOutOfBounds(nx, ny, iw, ih)) {
                     continue;
                 }
                 glm::uvec2 neighbor(nx, ny);
@@ -43,17 +48,17 @@ namespace un {
                         glm::vec2(inputCoords.x, inputCoords.y),
                         glm::vec2(neighbor.x, neighbor.y)
                     );
-                    if (candidate > record) {
-                        record = candidate;
+                    if (candidate < d) {
+                        d = candidate;
                     }
                 }
             }
         }
-        float relDistance = un::inv_lerp(minDistance, maxDistance, record);
+        float distance01 = un::inv_lerp(minDistance, maxDistance, d);
         png::gray_pixel pixel = un::lerp(
             std::numeric_limits<png::gray_pixel>::min(),
             std::numeric_limits<png::gray_pixel>::max(),
-            relDistance
+            distance01
         );
         output->set_pixel(ox, oy, pixel);
     }
