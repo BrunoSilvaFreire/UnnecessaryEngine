@@ -26,9 +26,9 @@ int main(int argc, char** argv) {
         );
         un::UnnecessaryJobSystem jobSystem(
             std::make_tuple(
-                un::WorkerArchetypeConfiguration<un::JobWorker>::forwarding(4),
-                un::WorkerArchetypeConfiguration<un::SimulationWorker>::forwarding(4),
-                un::WorkerArchetypeConfiguration<un::GraphicsWorker>(
+                un::WorkerPoolConfiguration<un::JobWorker>::forwarding(4),
+                un::WorkerPoolConfiguration<un::SimulationWorker>::forwarding(4),
+                un::WorkerPoolConfiguration<un::GraphicsWorker>(
                     1,
                     [&renderer](
                         std::size_t index,

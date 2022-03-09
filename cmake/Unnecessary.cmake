@@ -12,6 +12,16 @@ function(add_unnecessary_thirdparty_library NAME)
     message("Added ${CMAKE_SOURCE_DIR}/thirdparty/${NAME}")
 endfunction()
 
+function(set_unnecessary_compile_definitions TARGET)
+    if (APPLE)
+        target_compile_definitions(
+            ${TARGET}
+            PUBLIC
+            APPLE
+        )
+    endif ()
+endfunction()
+
 function(add_shader SHADER)
     get_filename_component(shader_filename ${SHADER} NAME_WLE)
     set(shader_abs ${CMAKE_CURRENT_SOURCE_DIR}/${SHADER})

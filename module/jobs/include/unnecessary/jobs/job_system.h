@@ -12,47 +12,41 @@
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
 #include <unnecessary/graphs/dependency_graph.h>
-#include <unnecessary/jobs/job.h>
 #include <unnecessary/misc/types.h>
 #include <unnecessary/misc/templates.h>
+#include <unnecessary/jobs/job.h>
+#include <unnecessary/jobs/job_dispatch.h>
 #include <unnecessary/jobs/workers/worker_pool.h>
-#include "unnecessary/jobs/workers/archetype_mixin.h"
+#include <unnecessary/jobs/workers/archetype_mixin.h>
 
-#define READ_ONLY()
-#define READ_WRITE()
-#define WRITE_ONLY()
 
 namespace un {
     template<typename T>
     class ProfilerPool;
 
-    template<typename ...WorkerArchetypes>
-    class JobSystem : public ArchetypeMixin<WorkerArchetypes> ... {
+    template<typename ...Archetypes>
+    class JobSystem : public ArchetypeMixin<Archetypes> ... {
     public:
         typedef std::tuple<
-            WorkerArchetypeConfiguration<WorkerArchetypes>...
+            WorkerPoolConfiguration<Archetypes>...
         > WorkerAllocationConfig;
-        typedef std::tuple<
-            ProfilerPool<WorkerArchetypes>...
-        > ProfilerPoolTuple;
+
+        typedef std::tuple<ProfilerPool<Archetypes>...> ProfilerPoolTuple;
 
         template<typename TValue>
-        using MakeRepeatedArchetypeTuple = typename un::repeat_tuple<
-            TValue,
-            sizeof...(WorkerArchetypes)
-        >::type;
+        using RepeatedTuple = typename un::repeat_tuple<TValue, sizeof...(Archetypes)>::type;
 
-        typedef MakeRepeatedArchetypeTuple<std::set<JobHandle>> JobDispatchTable;
-        typedef std::index_sequence_for<WorkerArchetypes...> ArchetypesIndices;
+        typedef un::JobDispatchTable<Archetypes...> DispatchTable;
+        typedef std::index_sequence_for<Archetypes...> ArchetypesIndices;
 
         template<typename Archetype>
         constexpr static auto index_of_archetype() {
-            return un::index_of_type<Archetype, WorkerArchetypes...>();
+            return un::index_of_type<Archetype, Archetypes...>();
         }
 
         template<typename Functor>
         constexpr static auto for_each_archetype(Functor&& functor) {
-            un::for_types_indexed<WorkerArchetypes...>(functor);
+            un::for_types_indexed<Archetypes...>(functor);
         }
 
     private:
@@ -76,7 +70,7 @@ namespace un {
                     }
                     if (ready) {
                         // TODO: Ewww.
-                        for_types_indexed<WorkerArchetypes...>(
+                        for_types_indexed<Archetypes...>(
                             [&]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
                                 const auto& other = graph[otherIndex];
                                 if (other->archetypeIndex == OtherWorkerIndex) {
@@ -99,7 +93,7 @@ namespace un {
         ) : graph() {
 
             // Instantiate workerPools
-            for_types_indexed<WorkerArchetypes...>(
+            for_types_indexed<Archetypes...>(
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
                     auto& pool = getWorkerPool<WorkerType>();
                     auto& workerConfig = std::get<WorkerIndex>(numWorkersPerArchetype);
@@ -140,7 +134,7 @@ namespace un {
         template<typename TJob>
         JobHandle enqueue(TJob* job, bool dispatch) {
             using JobWorkerType = typename TJob::WorkerType;
-            constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, WorkerArchetypes...>();
+            constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, Archetypes...>();
             un::WorkerPool<JobWorkerType>& pool = getWorkerPool<JobWorkerType>();
             un::JobHandle graphHandle = graph.add(
                 un::JobNode{
@@ -178,8 +172,8 @@ namespace un {
             pool->dispatch(handles);
         }
 */
-        void dispatch(JobDispatchTable handles) {
-            for_types_indexed<WorkerArchetypes...>(
+        void dispatch(DispatchTable handles) {
+            for_types_indexed<Archetypes...>(
                 [&, this]<typename WorkerType, std::size_t WorkerIndex>() {
                     ArchetypeMixin<WorkerType>::dispatchLocal(
                         std::get<WorkerIndex>(handles)
@@ -201,7 +195,7 @@ namespace un {
                 std::condition_variable allExited;
                 std::mutex mutex;
                 LOG(INFO) << "Stopping " << totalNumberOfWorkers << " total workers.";
-                for_types_indexed<WorkerArchetypes...>(
+                for_types_indexed<Archetypes...>(
                     [&]<typename WorkerType, std::size_t WorkerIndex>() {
                         auto& pool = getWorkerPool<WorkerType>();
                         for (WorkerType* worker : pool->getWorkers()) {
@@ -222,7 +216,7 @@ namespace un {
                 );
 
             } else {
-                for_types_indexed<WorkerArchetypes...>(
+                for_types_indexed<Archetypes...>(
                     [&]<typename WorkerType, std::size_t WorkerIndex>() {
                         auto& pool = getWorkerPool<WorkerType>();
                         for (WorkerType* worker : pool->getWorkers()) {
@@ -237,7 +231,7 @@ namespace un {
             std::size_t remaining = totalNumberOfWorkers;
             std::condition_variable allExited;
             std::mutex remainingLock;
-            for_types_indexed<WorkerArchetypes...>(
+            for_types_indexed<Archetypes...>(
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
                     auto& pool = getWorkerPool<WorkerType>();
                     for (WorkerType* worker : pool.getWorkers()) {
@@ -278,7 +272,7 @@ namespace un {
             std::size_t numWorkers,
             bool autoStart
         ) : un::JobSystem<un::JobWorker>(
-            un::WorkerArchetypeConfiguration<un::JobWorker>(
+            un::WorkerPoolConfiguration<un::JobWorker>(
                 numWorkers,
                 [=](
                     std::size_t index,

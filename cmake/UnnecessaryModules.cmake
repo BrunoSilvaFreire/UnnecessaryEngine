@@ -10,6 +10,9 @@ function(
         SOURCES
         DEPENDENCIES
         TESTS
+        SOURCES_APPLE
+        SOURCES_WIN
+        SOURCES_LINUX
     )
     cmake_parse_arguments(
         PARSE_ARGV 0
@@ -20,9 +23,17 @@ function(
         "${MULTI_VALUES}"
         ${ARG_N}
     )
+    set(ALL_SOURCES ${UN_MODULE_SOURCES})
+    if (APPLE)
+        list(APPEND ALL_SOURCES ${UN_MODULE_APPLE_SOURCES})
+    elseif (WIN32)
+        list(APPEND ALL_SOURCES ${UN_MODULE_WIN_SOURCES})
+    elseif (UNIX)
+        list(APPEND ALL_SOURCES ${UN_MODULE_LINUX_SOURCES})
+    endif ()
     add_library(
         ${NAME}
-        ${UN_MODULE_SOURCES}
+        ${ALL_SOURCES}
     )
     target_include_directories(
         ${NAME}

@@ -8,6 +8,13 @@
 #include <unnecessary/jobs/workers/worker_pool.h>
 
 namespace un {
+
+    template<typename TWorker>
+    class WorkerChain;
+
+    template<typename TJobSystem>
+    class JobChain;
+
     template<typename TWorker>
     class ArchetypeMixin {
     public:
@@ -33,8 +40,13 @@ namespace un {
         void dispatchLocal(std::set<JobHandle> handles) {
             _pool.dispatch(handles);
         }
-    public:
 
+    public:
+        friend class WorkerChain<WorkerType>;
+
+        template<typename>
+        friend
+        class JobChain;
     };
 }
 #endif

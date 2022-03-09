@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <chrono>
+#include <string>
 
 namespace un {
     class EventMeta {

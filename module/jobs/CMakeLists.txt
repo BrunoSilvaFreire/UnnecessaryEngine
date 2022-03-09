@@ -24,6 +24,15 @@ add_unnecessary_module(
     src/unnecessary/jobs/profiler/job_system_profiler.cpp
     src/unnecessary/jobs/profiler/profiler_events.cpp
 
+    SOURCES_APPLE
+    src/unnecessary/jobs/platform/thread.apple.cpp
+
+    SOURCES_LINUX
+    src/unnecessary/jobs/platform/thread.linux.cpp
+
+    SOURCES_WIN
+    src/unnecessary/jobs/platform/thread.win.cpp
+
     DEPENDENCIES
     unnecessary_core
     unnecessary_graphs

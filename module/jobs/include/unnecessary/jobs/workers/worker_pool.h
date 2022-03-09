@@ -19,10 +19,10 @@ namespace un {
     template<typename T>
     class WorkerPool;
 
-    template<typename _WorkerType>
-    struct WorkerArchetypeConfiguration {
+    template<typename TWorker>
+    struct WorkerPoolConfiguration {
     public:
-        typedef _WorkerType WorkerType;
+        typedef TWorker WorkerType;
         typedef typename WorkerType::JobType JobType;
         /**
          * Function that creates workerPools of each archetype during
@@ -39,19 +39,19 @@ namespace un {
         std::size_t numWorkers;
         WorkerCreator creator;
     public:
-        WorkerArchetypeConfiguration(
+        WorkerPoolConfiguration(
             size_t numWorkers,
-            const std::function<_WorkerType*(
+            const std::function<TWorker*(
                 std::size_t,
                 un::JobProvider<JobType>,
                 un::JobNotifier<JobType>
             )>& creator
         ) : numWorkers(numWorkers), creator(creator) {}
 
-        static WorkerArchetypeConfiguration<WorkerType> forwarding(
+        static WorkerPoolConfiguration<WorkerType> forwarding(
             size_t numWorkers
         ) {
-            return WorkerArchetypeConfiguration(
+            return WorkerPoolConfiguration(
                 numWorkers, [](
                     std::size_t index,
                     un::JobProvider<typename WorkerType::JobType> provider,
@@ -158,7 +158,7 @@ namespace un {
         }
 
         WorkerType* createWorker(
-            const WorkerArchetypeConfiguration<WorkerType>& configuration,
+            const WorkerPoolConfiguration<WorkerType>& configuration,
             size_t index
         ) {
             WorkerType* pWorker = configuration.creator(
@@ -274,7 +274,7 @@ namespace un {
         }
 
 
-        void allocateWorkers(WorkerArchetypeConfiguration<WorkerType> configuration) {
+        void allocateWorkers(WorkerPoolConfiguration<WorkerType> configuration) {
             auto numWorkers = configuration.numWorkers;
             workers.reserve(numWorkers);
             for (std::size_t i = 0; i < numWorkers; ++i) {

@@ -17,11 +17,11 @@ namespace un {
     class JobChain {
     public:
         typedef TJobSystem JobSystemType;
-        typedef typename JobSystemType::JobHandleSet JobGroupList;
+        typedef typename JobSystemType::DispatchTable DispatchTable;
     private:
         JobSystemType* system;
-        JobGroupList toStart;
-        JobGroupList allJobs;
+        DispatchTable toStart;
+        DispatchTable allJobs;
         bool dispatchOnDestruct;
 
 
