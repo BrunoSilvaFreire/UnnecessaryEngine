@@ -37,7 +37,8 @@ TEST(jobs, openness) {
             }
         }
         jobSystem.complete();
-        GTEST_LOG_(INFO) << "Execution " << i << ": " << numJobs << " vs " << numCompletedJobs;
+        GTEST_LOG_(INFO) << "Execution " << i << ": " << numJobs << " vs "
+                         << numCompletedJobs;
         ASSERT_EQ(numJobs, numCompletedJobs);
     }
 }
@@ -70,9 +71,7 @@ TEST(jobs, load_file) {
 TEST(jobs, set_affinity) {
     std::size_t numWorkers = std::thread::hardware_concurrency();
     un::SimpleJobSystem jobSystem(numWorkers, true);
-    auto& workers = jobSystem
-        .getWorkerPool<un::JobWorker>()
-        ->getWorkers();
+    auto& workers = jobSystem.getWorkerPool<un::JobWorker>().getWorkers();
     for (std::size_t i = 0; i < numWorkers; ++i) {
         un::Thread* thread = workers[i]->getThread();
         ASSERT_TRUE(thread->setCore(i));

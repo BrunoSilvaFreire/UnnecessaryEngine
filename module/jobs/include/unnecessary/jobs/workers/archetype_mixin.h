@@ -12,20 +12,29 @@ namespace un {
     class ArchetypeMixin {
     public:
         typedef TWorker WorkerType;
-    private:
-        un::WorkerPool<TWorker> _pool;
+    protected:
+        un::WorkerPool<WorkerType> _pool;
     public:
-        ArchetypeMixin() : _pool(nullptr) {
+        ArchetypeMixin() : _pool() {
 
         }
 
-        template<typename T>
-        void dispatch(JobHandle handle);
-
-        template<>
-        void dispatch<TWorker>(JobHandle handle) {
+    protected:
+        /**
+         * Dispatch a local handle to the worker pool.
+         */
+        void dispatchLocal(JobHandle handle) {
             _pool.dispatch(handle);
         }
+
+        /**
+         * Dispatch a set of local handles to the worker pool.
+         */
+        void dispatchLocal(std::set<JobHandle> handles) {
+            _pool.dispatch(handles);
+        }
+    public:
+
     };
 }
 #endif

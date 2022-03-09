@@ -34,10 +34,10 @@ namespace un {
         }
     };
 
-    template<typename Worker>
+    template<typename TWorker>
     class ParallelForJob {
     public:
-        virtual void operator()(size_t index, Worker* worker) = 0;
+        virtual void operator()(size_t index, TWorker* worker) = 0;
 
         template<typename J, typename ChainType>
         static void parallelize(
@@ -48,8 +48,8 @@ namespace un {
         ) {
             using JobSystemType = typename ChainType::JobSystemType;
             JobSystemType* system = chain.getSystem();
-            auto workerPool = system->template getWorkerPool<Worker>();
-            size_t numWorkers = workerPool->getNumWorkers();
+            auto& workerPool = system->template getWorkerPool<TWorker>();
+            size_t numWorkers = workerPool.getNumWorkers();
             size_t numEntriesPerJob = numEntries / numWorkers;
             if (numEntriesPerJob < minNumberLoopsPerThread) {
                 numEntriesPerJob = minNumberLoopsPerThread;
@@ -60,10 +60,10 @@ namespace un {
             for (size_t i = 0; i < numFullJobs; ++i) {
                 size_t from = i * numEntriesPerJob;
                 size_t to = (i + 1) * numEntriesPerJob;
-                chain.template immediately<ParallelizeJob<J, Worker>>(job, from, to);
+                chain.template immediately<ParallelizeJob<J, TWorker>>(job, from, to);
             }
             if (rest > 0) {
-                chain.template immediately<ParallelizeJob<J, Worker>>(
+                chain.template immediately<ParallelizeJob<J, TWorker>>(
                     job,
                     rest,
                     numEntries

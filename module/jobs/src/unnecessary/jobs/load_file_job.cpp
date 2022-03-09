@@ -1,5 +1,6 @@
 #include <unnecessary/jobs/misc/load_file_job.h>
 #include <sstream>
+
 namespace un {
 
     LoadFileJob::LoadFileJob(
@@ -30,7 +31,7 @@ namespace un {
         buffer->resize(fileSize);
         buffer->setZero();
         if (text) {
-            buffer[fileSize] = 0; // Null terminator
+            buffer[fileSize - 1] = 0; // Null terminator
         }
         stream.seekg(0, std::ios::beg);
         size_t pos = 0;

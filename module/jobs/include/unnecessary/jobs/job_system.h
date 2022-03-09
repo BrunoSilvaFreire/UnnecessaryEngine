@@ -16,6 +16,7 @@
 #include <unnecessary/misc/types.h>
 #include <unnecessary/misc/templates.h>
 #include <unnecessary/jobs/workers/worker_pool.h>
+#include "unnecessary/jobs/workers/archetype_mixin.h"
 
 #define READ_ONLY()
 #define READ_WRITE()
@@ -26,7 +27,7 @@ namespace un {
     class ProfilerPool;
 
     template<typename ...WorkerArchetypes>
-    class JobSystem {
+    class JobSystem : public ArchetypeMixin<WorkerArchetypes> ... {
     public:
         typedef std::tuple<
             WorkerArchetypeConfiguration<WorkerArchetypes>...
@@ -41,9 +42,8 @@ namespace un {
             sizeof...(WorkerArchetypes)
         >::type;
 
-        typedef MakeRepeatedArchetypeTuple<std::set<JobHandle>> JobHandleSet;
+        typedef MakeRepeatedArchetypeTuple<std::set<JobHandle>> JobDispatchTable;
         typedef std::index_sequence_for<WorkerArchetypes...> ArchetypesIndices;
-        typedef std::tuple<WorkerPool<WorkerArchetypes>* ...> ArchetypesPoolTuple;
 
         template<typename Archetype>
         constexpr static auto index_of_archetype() {
@@ -56,7 +56,6 @@ namespace un {
         }
 
     private:
-        ArchetypesPoolTuple workerPools;
         un::JobGraph graph;
         std::mutex graphAccessMutex;
         size_t totalNumberOfWorkers = 0;
@@ -81,10 +80,8 @@ namespace un {
                             [&]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
                                 const auto& other = graph[otherIndex];
                                 if (other->archetypeIndex == OtherWorkerIndex) {
-                                    auto& archWorkers = std::get<OtherWorkerIndex>(
-                                        workerPools
-                                    );
-                                    archWorkers->unsafeDispatch(other->poolLocalIndex);
+                                    auto& pool = getWorkerPool<OtherWorkerType>();
+                                    pool.unsafeDispatch(other->poolLocalIndex);
                                 }
                             }
                         );
@@ -99,21 +96,20 @@ namespace un {
 
         explicit JobSystem(
             WorkerAllocationConfig numWorkersPerArchetype
-        ) : graph(),
-            workerPools(new WorkerPool<WorkerArchetypes>(&graph)...) {
+        ) : graph() {
 
             // Instantiate workerPools
             for_types_indexed<WorkerArchetypes...>(
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                    auto& archWorkers = std::get<WorkerIndex>(workerPools);
+                    auto& pool = getWorkerPool<WorkerType>();
                     auto& workerConfig = std::get<WorkerIndex>(numWorkersPerArchetype);
 //                    LOG(INFO) << "Allocating " << GREEN(workerConfig.getNumWorkers())
 //                              << " workers of archetype "
 //                              << PURPLE(un::type_name_of<WorkerType>());
                     totalNumberOfWorkers += workerConfig.getNumWorkers();
                     using JobType = typename WorkerType::JobType;
-                    archWorkers->allocateWorkers(workerConfig);
-                    archWorkers->getOnJobCompleted() += [&](
+                    pool.allocateWorkers(workerConfig);
+                    pool.getOnJobCompleted() += [&](
                         JobType* job,
                         un::JobHandle graphHandle
                     ) {
@@ -123,13 +119,6 @@ namespace un {
             );
         };
 
-        ~JobSystem() {
-            for_types_indexed<WorkerArchetypes...>(
-                [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                    delete std::get<WorkerIndex>(workerPools);
-                }
-            );
-        };
 
         void addDependency(JobHandle to, JobHandle from) {
 #ifdef DEBUG
@@ -143,27 +132,27 @@ namespace un {
             }
         }
 
-        template<typename T>
-        un::WorkerPool<T>* getWorkerPool() {
-            constexpr std::size_t Index = index_of_archetype<T>();
-            return std::get<Index>(workerPools);
+        template<typename TWorker>
+        un::WorkerPool<TWorker>& getWorkerPool() {
+            return ArchetypeMixin<TWorker>::_pool;
         }
 
-        template<typename T>
-        JobHandle enqueue(T* job, bool dispatch) {
-            using JobWorkerType = typename T::WorkerType;
+        template<typename TJob>
+        JobHandle enqueue(TJob* job, bool dispatch) {
+            using JobWorkerType = typename TJob::WorkerType;
             constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, WorkerArchetypes...>();
-            un::WorkerPool<JobWorkerType>* pool = std::get<ArchetypeIndex>(workerPools);
+            un::WorkerPool<JobWorkerType>& pool = getWorkerPool<JobWorkerType>();
             un::JobHandle graphHandle = graph.add(
                 un::JobNode{
                     .archetypeIndex = ArchetypeIndex
                 }
             );
             un::JobNode* node = graph[graphHandle];
-            node->poolLocalIndex = pool->enqueue(job, graphHandle, dispatch);
+            node->poolLocalIndex = pool.enqueue(job, graphHandle, dispatch);
             return graphHandle;
         }
 
+/*
 
         template<typename T, std::size_t ArchetypeIndex>
         void dispatch(JobHandle handle) {
@@ -179,19 +168,22 @@ namespace un {
             constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, WorkerArchetypes...>();
             dispatch<T, ArchetypeIndex>(handle);
         }
+*/
 
+/*
         template<typename WorkerType>
         void dispatch(std::set<JobHandle> handles) {
             constexpr auto ArchetypeIndex = index_of_archetype<WorkerType>();
             un::WorkerPool<WorkerType>* pool = std::get<ArchetypeIndex>(workerPools);
             pool->dispatch(handles);
         }
-
-        void dispatch(JobHandleSet handles) {
+*/
+        void dispatch(JobDispatchTable handles) {
             for_types_indexed<WorkerArchetypes...>(
-                [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                    auto& pool = std::get<WorkerIndex>(workerPools);
-                    pool->dispatch(std::get<WorkerIndex>(handles));
+                [&, this]<typename WorkerType, std::size_t WorkerIndex>() {
+                    ArchetypeMixin<WorkerType>::dispatchLocal(
+                        std::get<WorkerIndex>(handles)
+                    );
                 }
             );
         }
@@ -211,7 +203,7 @@ namespace un {
                 LOG(INFO) << "Stopping " << totalNumberOfWorkers << " total workers.";
                 for_types_indexed<WorkerArchetypes...>(
                     [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                        auto& pool = std::get<WorkerIndex>(workerPools);
+                        auto& pool = getWorkerPool<WorkerType>();
                         for (WorkerType* worker : pool->getWorkers()) {
                             worker->getOnFinished() += [&]() {
                                 remaining--;
@@ -232,7 +224,7 @@ namespace un {
             } else {
                 for_types_indexed<WorkerArchetypes...>(
                     [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                        auto& pool = std::get<WorkerIndex>(workerPools);
+                        auto& pool = getWorkerPool<WorkerType>();
                         for (WorkerType* worker : pool->getWorkers()) {
                             worker->stop(false);
                         }
@@ -247,8 +239,8 @@ namespace un {
             std::mutex remainingLock;
             for_types_indexed<WorkerArchetypes...>(
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                    auto& pool = std::get<WorkerIndex>(workerPools);
-                    for (WorkerType* worker : pool->getWorkers()) {
+                    auto& pool = getWorkerPool<WorkerType>();
+                    for (WorkerType* worker : pool.getWorkers()) {
                         if (worker->isRunning()) {
                             worker->getOnFinished() += [&]() {
                                 std::unique_lock<std::mutex> lock(remainingLock);
@@ -261,7 +253,7 @@ namespace un {
                             remaining--;
                         }
                     }
-                    pool->complete();
+                    pool.complete();
                 }
             );
             if (remaining > 0) {
@@ -301,7 +293,7 @@ namespace un {
         }
 
         void start() {
-            getWorkerPool<un::JobWorker>()->start();
+            getWorkerPool<un::JobWorker>().start();
         }
 
     };

@@ -31,8 +31,8 @@ namespace un {
                     ProfilerPool<TArchetype>& profilerPool = std::get<TArchetypeIndex>(
                         tuple
                     );
-                    un::WorkerPool<TArchetype>* workerPool = jobSystem->template getWorkerPool<TArchetype>();
-                    profilerPool.bootstrap(workerPool);
+                    un::WorkerPool<TArchetype>& workerPool = jobSystem->template getWorkerPool<TArchetype>();
+                    profilerPool.bootstrap(&workerPool);
                 }
             );
         }

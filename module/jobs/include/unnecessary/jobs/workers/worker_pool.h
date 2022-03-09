@@ -204,8 +204,7 @@ namespace un {
 
     public:
 
-        WorkerPool(JobGraph* graph) : queueAccessMutex() {
-
+        WorkerPool() : queueAccessMutex() {
         }
 
         ~WorkerPool() {
