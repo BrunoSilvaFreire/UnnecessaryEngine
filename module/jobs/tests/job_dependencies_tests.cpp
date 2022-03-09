@@ -37,7 +37,7 @@ TEST(jobs, openness) {
             }
         }
         jobSystem.complete();
-        LOG(INFO) << "Execution " << i << ": " << numJobs << " vs " << numCompletedJobs;
+        GTEST_LOG_(INFO) << "Execution " << i << ": " << numJobs << " vs " << numCompletedJobs;
         ASSERT_EQ(numJobs, numCompletedJobs);
     }
 }

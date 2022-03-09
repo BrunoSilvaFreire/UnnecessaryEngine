@@ -172,13 +172,16 @@ namespace un {
             );
             un::Thread* thread = pWorker->getThread();
 
-            if (!thread->setCore(index)) {
-                LOG(WARN) << "Unable to set worker " << index << " to it's respective core";
+            if (pWorker->isRunning()) {
+                if (!thread->setCore(index)) {
+                    LOG(WARN) << "Unable to set worker " << index
+                              << " to it's respective core";
+                }
+                std::string threadName = un::type_name_of<WorkerType>();
+                threadName += "-";
+                threadName += std::to_string(index);
+                thread->setName(threadName);
             }
-            std::string threadName = un::type_name_of<WorkerType>();
-            threadName += "-";
-            threadName += std::to_string(index);
-            thread->setName(threadName);
             return pWorker;
         }
 
@@ -315,6 +318,12 @@ namespace un {
         void completeAllWorkers() {
             for (auto worker : workers) {
                 worker->stop(true);
+            }
+        }
+
+        void start() {
+            for (auto worker : getWorkers()) {
+                worker->start();
             }
         }
     };

@@ -3,6 +3,8 @@
 #define UNNECESSARYENGINE_BENCHMARK_H
 
 #include <chrono>
+#include <type_traits>
+#include <cstddef>
 
 namespace un {
     template<class Resolution = std::chrono::milliseconds>

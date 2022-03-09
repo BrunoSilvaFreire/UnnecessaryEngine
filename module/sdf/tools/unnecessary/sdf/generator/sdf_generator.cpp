@@ -1,5 +1,6 @@
 #include <cxxopts.hpp>
 #include <unnecessary/sdf/generator/sdf_generator.h>
+#include "unnecessary/jobs/profiler/job_system_profiler.h"
 
 static const char* const kInputName = "input";
 static const char* const kThreadsName = "threads";
@@ -7,6 +8,7 @@ static const char* const kMinName = "min";
 static const char* const kMaxName = "max";
 
 #ifndef UN_TESTING
+
 int main(int argc, char** argv) {
     cxxopts::Options options(
         "unnecessary_sdf_generator",
@@ -38,7 +40,9 @@ int main(int argc, char** argv) {
     }
     return 0;
 }
+
 #endif
+
 void un::sdf::process_sdf(
     int size,
     int nThreads,
@@ -48,24 +52,32 @@ void un::sdf::process_sdf(
     float max
 ) {
     png::image<png::rgba_pixel> img(imageFile);
-    un::SimpleJobSystem jobSystem(nThreads, true);
     png::image<png::gray_pixel> sdf(size, size);
-    un::ProcessPixelJob job(
-        &img,
-        &sdf,
-        min,
-        max
-    );
+    LOG(INFO) << "Creating image of size " << size << "x" << size << "(" << size * size
+              << " pixels)";
     {
-        un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
-
-        un::ProcessPixelJob::parallelize(
-            &job,
-            chain,
-            size * size,
-            64
+        un::SimpleJobSystem jobSystem(nThreads, false);
+        un::JobSystemProfiler<un::SimpleJobSystem> profiler(&jobSystem);
+        un::ProcessPixelJob job(
+            &img,
+            &sdf,
+            min,
+            max
         );
+        {
+            un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+
+            un::ProcessPixelJob::parallelize(
+                &job,
+                chain,
+                size * size,
+                64
+            );
+        }
+        jobSystem.start();
+        jobSystem.complete();
+        profiler.saveToFile(std::filesystem::current_path() / "sdf_generator.unp");
     }
-    jobSystem.complete();
+
     sdf.write(outputFile);
 }

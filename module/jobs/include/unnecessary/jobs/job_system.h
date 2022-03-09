@@ -22,6 +22,8 @@
 #define WRITE_ONLY()
 
 namespace un {
+    template<typename T>
+    class ProfilerPool;
 
     template<typename ...WorkerArchetypes>
     class JobSystem {
@@ -29,21 +31,32 @@ namespace un {
         typedef std::tuple<
             WorkerArchetypeConfiguration<WorkerArchetypes>...
         > WorkerAllocationConfig;
+        typedef std::tuple<
+            ProfilerPool<WorkerArchetypes>...
+        > ProfilerPoolTuple;
 
-        typedef typename un::repeat_tuple<
-            std::set<JobHandle>,
+        template<typename TValue>
+        using MakeRepeatedArchetypeTuple = typename un::repeat_tuple<
+            TValue,
             sizeof...(WorkerArchetypes)
-        >::type JobHandleSet;
+        >::type;
+
+        typedef MakeRepeatedArchetypeTuple<std::set<JobHandle>> JobHandleSet;
         typedef std::index_sequence_for<WorkerArchetypes...> ArchetypesIndices;
-        typedef std::tuple<WorkerPool<WorkerArchetypes>* ...> ArchetypesTuple;
+        typedef std::tuple<WorkerPool<WorkerArchetypes>* ...> ArchetypesPoolTuple;
 
         template<typename Archetype>
         constexpr static auto index_of_archetype() {
             return un::index_of_type<Archetype, WorkerArchetypes...>();
         }
 
+        template<typename Functor>
+        constexpr static auto for_each_archetype(Functor&& functor) {
+            un::for_types_indexed<WorkerArchetypes...>(functor);
+        }
+
     private:
-        ArchetypesTuple workerPools;
+        ArchetypesPoolTuple workerPools;
         un::JobGraph graph;
         std::mutex graphAccessMutex;
         size_t totalNumberOfWorkers = 0;
@@ -285,6 +298,10 @@ namespace un {
             )
         ) {
 
+        }
+
+        void start() {
+            getWorkerPool<un::JobWorker>()->start();
         }
 
     };

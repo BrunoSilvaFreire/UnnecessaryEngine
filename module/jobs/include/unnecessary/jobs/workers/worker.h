@@ -41,15 +41,18 @@ namespace un {
         std::mutex jobMutex;
         std::mutex runningMutex;
         std::condition_variable jobAvailable;
-        un::EventVoid finished;
+        un::EventVoid started, exited, sleeping, awaken;
+        un::Event<JobType*, JobHandle> fetched, executed;
 
         void workerThread() {
+            started();
             JobType* jobPtr;
             JobHandle id;
             while (nextJob(&jobPtr, &id)) {
+                fetched(jobPtr, id);
                 execute(jobPtr, id);
             }
-            finished();
+            exited();
         }
 
         bool nextJob(JobType** jobPtr, JobHandle* id) {
@@ -61,13 +64,16 @@ namespace un {
 
             std::unique_lock<std::mutex> lock(jobMutex);
             waiting = true;
+            sleeping();
             jobAvailable.wait(lock);
             waiting = false;
+            awaken();
             return running && provider(jobPtr, id);
         }
 
         void execute(JobType* jobPtr, JobHandle id) {
             jobPtr->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
+            executed(jobPtr, id);
             notifier(jobPtr, id);
         }
 
@@ -82,7 +88,7 @@ namespace un {
             jobAvailable(),
             running(false),
             waiting(false),
-            finished(),
+            exited(),
             provider(provider),
             notifier(notifier) {
             if (autostart) {
@@ -106,7 +112,7 @@ namespace un {
         }
 
         un::EventVoid& getOnFinished() {
-            return finished;
+            return exited;
         }
 
         void notifyJobAvailable() {
@@ -163,6 +169,31 @@ namespace un {
         size_t getIndex() const {
             return index;
         }
+
+        EventVoid& onExited() {
+            return exited;
+        }
+
+        EventVoid& onSleeping() {
+            return sleeping;
+        }
+
+        EventVoid& onAwaken() {
+            return awaken;
+        }
+
+        EventVoid& onStarted() {
+            return started;
+        }
+
+        un::Event<JobType*, JobHandle>& onFetched() {
+            return fetched;
+        }
+
+        un::Event<JobType*, JobHandle>& onExecuted() {
+            return executed;
+        }
+
     };
 
     class JobWorker;

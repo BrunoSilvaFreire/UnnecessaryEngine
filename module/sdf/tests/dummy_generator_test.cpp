@@ -10,12 +10,12 @@ TEST(sdf_generator, dummy_generation) {
     image = std::filesystem::absolute(image);
     output = std::filesystem::absolute(output);
     LOG(INFO) << "Testing sdf image " << image;
-    int outputSize = 64;
+    int outputSize = 32;
     float min = 0;
-    float max = 5;
+    float max = 64;
     un::sdf::process_sdf(
         outputSize,
-        std::thread::hardware_concurrency(),
+        1,
         image.string(),
         output.string(),
         min,

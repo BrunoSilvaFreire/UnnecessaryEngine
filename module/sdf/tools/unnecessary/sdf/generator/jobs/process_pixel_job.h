@@ -32,6 +32,8 @@ namespace un {
         void operator()(size_t index, JobWorker* worker) override;
 
         bool isOutOfBounds(int nx, int ny, size_t width, size_t height);
+
+        float computeDistanceOfPixel(const glm::uvec2& inputCoords);
     };
 }
 #endif

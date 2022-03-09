@@ -8,12 +8,19 @@
 #ifndef UN_VULKAN_DEBUG_SEVERITY
 #define UN_VULKAN_DEBUG_SEVERITY eDebug
 #endif
-#ifdef WIN32
-#define RAISE_BREAKPOINT __debugbreak()
-#else
-#define RAISE_BREAKPOINT __builtin_trap;
-#endif
+
 namespace un {
+#ifdef WIN32
+    void debug_break() {
+        __debugbreak();
+    }
+#else
+    void debug_break() {
+        __builtin_trap();
+    }
+
+#endif
+
 
     VulkanDebugger::VulkanDebugger(
         un::Renderer& renderer
@@ -99,7 +106,7 @@ namespace un {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
                 LOG(FUCK) << ostream.str();
 #ifdef DEBUG
-                RAISE_BREAKPOINT;
+                un::debug_break();
 #endif
                 break;
         }
