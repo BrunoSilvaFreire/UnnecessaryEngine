@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 #include <unnecessary/jobs/job_system.h>
 #include <unnecessary/jobs/job_chain.h>
-#include "unnecessary/jobs/misc/load_file_job.h"
+#include <unnecessary/jobs/misc/load_file_job.h>
+#include <unnecessary/jobs/recorder/job_system_recorder.h>
 #include <cmath>
+#include <random>
 
 class DummyWorker : public un::AbstractJobWorker<un::SimpleJob> {
 public:
@@ -17,29 +19,47 @@ public:
 typedef un::JobSystem<un::JobWorker, DummyWorker> DummyJobSystem;
 
 TEST(jobs, openness) {
-    const std::size_t numTries = 1024;
+    const std::size_t numTries = 24;
     const std::size_t numWorkers = std::thread::hardware_concurrency();
-    const std::size_t numJobs = numWorkers * 4;
+    const std::size_t numJobs = numWorkers * 8;
+    const std::size_t minDelay = 1;
+    const std::size_t maxDelay = 20;
+    std::uniform_int_distribution<std::size_t> msRange(minDelay, maxDelay);
+    std::default_random_engine engine;
     for (std::size_t i = 0; i < numTries; ++i) {
 
-        un::SimpleJobSystem jobSystem(numWorkers, true);
+        un::SimpleJobSystem jobSystem(numWorkers, false);
+        un::JobSystemRecorder<un::SimpleJobSystem> recorder(&jobSystem);
         std::atomic<std::size_t> numCompletedJobs = 0;
         {
             un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
             for (std::size_t j = 0; j < numJobs; ++j) {
+                un::JobHandle handle;
+                std::size_t sleepTime = msRange(engine);
                 chain.immediately<un::LambdaJob<un::JobWorker>>(
+                    &handle,
                     [=, &numCompletedJobs]() {
-                        std::chrono::milliseconds workTime(5);
+                        std::chrono::milliseconds workTime(sleepTime);
                         std::this_thread::sleep_for(workTime);
                         numCompletedJobs++;
                     }
                 );
+                std::stringstream name;
+                name << "Simulated Job (" << std::to_string(sleepTime) << "ms)";
+                chain.setName(handle, name.str());
             }
         }
+        jobSystem.start();
         jobSystem.complete();
+
         GTEST_LOG_(INFO) << "Execution " << i << ": " << numJobs << " vs "
                          << numCompletedJobs;
         ASSERT_EQ(numJobs, numCompletedJobs);
+        auto outputFile = std::filesystem::current_path() /
+                          (std::string("execution_") + std::to_string(i) + ".csv");
+        std::ofstream stream(outputFile, std::ios::out);
+        stream << recorder.toCSV();
+        stream.close();
     }
 }
 

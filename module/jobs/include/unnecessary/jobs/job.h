@@ -17,10 +17,11 @@ namespace un {
 
     template<typename _Worker>
     class Job {
-    private:
+    protected:
         std::string name = "Unnamed Job";
     public:
         virtual ~Job() = default;
+
 
         typedef _Worker WorkerType;
 

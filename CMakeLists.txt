@@ -75,7 +75,7 @@ target_compile_definitions(
 )
 find_package(pngpp REQUIRED)
 
-set(GRAPPHS_COMPILE_TESTS OFF CACHE BOOL "" FORCE)
+set(GRAPPHS_COMPILE_TESTS ON CACHE BOOL "" FORCE)
 add_unnecessary_thirdparty_library(grapphs)
 #add_subdirectory(engine)
 #add_subdirectory(applications/dummy)

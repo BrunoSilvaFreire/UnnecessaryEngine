@@ -41,42 +41,30 @@ namespace un {
             }
         }
 
-        template<size_t ArchetypeIndex>
+        template<typename TArchetype>
         JobChain& after(JobHandle runAfter, JobHandle job) {
             system->addDependency(runAfter, job);
-            std::get<ArchetypeIndex>(toStart).erase(job);
+            toStart.template erase<TArchetype>(job);
             return *this;
         }
 
-        template<size_t ArchetypeIndex>
+        template<typename TArchetype>
         JobChain& afterAll(JobHandle job) {
-            for (un::JobHandle handle: std::get<ArchetypeIndex>(allJobs)) {
+            for (un::JobHandle handle : allJobs.template getBatch<TArchetype>()) {
                 if (handle != job) {
-                    after<ArchetypeIndex>(handle, job);
+                    after<TArchetype>(handle, job);
                 }
             }
             return *this;
         }
 
-        template<typename Archetype>
-        JobChain& after(JobHandle runAfter, JobHandle job) {
-            return after<JobSystemType::template index_of_archetype<Archetype>()>(
-                runAfter,
-                job
-            );
-        }
-
-        template<size_t ArchetypeIndex>
+        template<typename TWorker>
         JobChain& immediately(JobHandle id) {
-            std::get<ArchetypeIndex>(toStart).emplace(id);
-            std::get<ArchetypeIndex>(allJobs).emplace(id);
+            toStart.template dispatch<TWorker>(id);
+            allJobs.template dispatch<TWorker>(id);
             return *this;
         }
 
-        template<typename Archetype>
-        JobChain& immediately(JobHandle id) {
-            return immediately<JobSystemType::template index_of_archetype<Archetype>()>(id);
-        }
 
         template<typename T, typename... Args>
         JobChain& after(
@@ -85,7 +73,7 @@ namespace un {
         ) {
             auto job = new T(std::forward<Args>(args)...);
             auto id = system->enqueue(job);
-            for (JobHandle dependency: dependencies) {
+            for (JobHandle dependency : dependencies) {
                 system->addDependency(dependency, id);
             }
             allJobs.emplace(id);
@@ -149,13 +137,16 @@ namespace un {
         void finally(Lambda callback) {
             un::JobHandle job;
             immediately<un::LambdaJob<Worker>>(&job, callback);
-            un::for_indexed<typename JobSystemType::ArchetypesIndices>(
-                [this, job]<size_t Index>() {
-                    afterAll<Index>(job);
+            JobSystemType::for_each_archetype(
+                [this, job]<typename TArchetype, size_t Index>() {
+                    afterAll<TArchetype>(job);
                 }
             );
         }
 
+        void setName(JobHandle i, const std::string& name) {
+            system->setName(i, name);
+        }
     };
 }
 #endif

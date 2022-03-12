@@ -1,6 +1,6 @@
 #include <cxxopts.hpp>
 #include <unnecessary/sdf/generator/sdf_generator.h>
-#include "unnecessary/jobs/profiler/job_system_profiler.h"
+#include "unnecessary/jobs/recorder/job_system_recorder.h"
 
 static const char* const kInputName = "input";
 static const char* const kThreadsName = "threads";
@@ -57,7 +57,7 @@ void un::sdf::process_sdf(
               << " pixels)";
     {
         un::SimpleJobSystem jobSystem(nThreads, false);
-        un::JobSystemProfiler<un::SimpleJobSystem> profiler(&jobSystem);
+        un::JobSystemRecorder<un::SimpleJobSystem> profiler(&jobSystem);
         un::ProcessPixelJob job(
             &img,
             &sdf,
@@ -76,7 +76,7 @@ void un::sdf::process_sdf(
         }
         jobSystem.start();
         jobSystem.complete();
-        profiler.saveToFile(std::filesystem::current_path() / "sdf_generator.unp");
+        profiler.saveToFile(std::filesystem::current_path() / "sdf_generator.csv");
     }
 
     sdf.write(outputFile);

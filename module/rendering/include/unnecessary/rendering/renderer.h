@@ -12,6 +12,7 @@
 #include <unnecessary/rendering/window.h>
 #include <unnecessary/rendering/render_graph.h>
 #include <unnecessary/rendering/rendering_pipeline.h>
+#include <unnecessary/rendering/debug/vulkan_debugger.h>
 
 #ifdef UN_VULKAN_DEBUG
 
@@ -74,8 +75,9 @@ namespace un {
             return _graph;
         }
 
-        const VulkanDebugger& getDebugger() const;
-
+#if DEBUG
+        const un::VulkanDebugger& getDebugger() const;
+#endif
         const un::SwapChain& getSwapChain() const;
 
         un::SwapChain& getSwapChain();

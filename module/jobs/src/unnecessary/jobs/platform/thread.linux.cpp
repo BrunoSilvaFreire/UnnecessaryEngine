@@ -1,6 +1,8 @@
 #include <unnecessary/jobs/thread.h>
+#include <pthread.h>
+
 namespace un {
-    bool Thread::setCore(u32 core) {
+    bool Thread::setAliveThreadCore(u32 core) {
         cpu_set_t cpu;
         CPU_ZERO(&cpu);
         CPU_SET(core, &cpu);
@@ -12,7 +14,7 @@ namespace un {
         return status == 0;
     }
 
-    void Thread::setName(const std::string& name) {
+    void Thread::setAliveThreadName(const std::string& name) {
         pthread_setname_np(
             _inner.native_handle(),
             name.c_str()

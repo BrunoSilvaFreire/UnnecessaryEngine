@@ -97,6 +97,20 @@
         <entry>
           <key>
             <LocalCompilerPath>
+              <option name="path" value="/usr/bin/g++" />
+            </LocalCompilerPath>
+          </key>
+          <value>
+            <LocalCompilerSettings>
+              <option name="name" value="GCC" />
+              <option name="version" value="11.1.0" />
+              <option name="target" value="x86_64" />
+            </LocalCompilerSettings>
+          </value>
+        </entry>
+        <entry>
+          <key>
+            <LocalCompilerPath>
               <option name="path" value="/usr/bin/c++" />
             </LocalCompilerPath>
           </key>
@@ -117,6 +131,50 @@
     </option>
     <option name="compilerMatches">
       <map>
+        <entry>
+          <key>
+            <LocalCompilerPath>
+              <option name="path" value="/usr/bin/g++" />
+            </LocalCompilerPath>
+          </key>
+          <value>
+            <CompilerMatches>
+              <option name="chosenMatch">
+                <CompilerMatch>
+                  <option name="remoteCompilerInfo">
+                    <RemoteCompilerInfo>
+                      <option name="id" value="clangdefault" />
+                      <option name="name" value="clang default" />
+                      <option name="language" value="c++" />
+                    </RemoteCompilerInfo>
+                  </option>
+                </CompilerMatch>
+              </option>
+              <option name="otherMatches">
+                <list>
+                  <CompilerMatch>
+                    <option name="remoteCompilerInfo">
+                      <RemoteCompilerInfo>
+                        <option name="id" value="clangdefault" />
+                        <option name="name" value="clang default" />
+                        <option name="language" value="c++" />
+                      </RemoteCompilerInfo>
+                    </option>
+                  </CompilerMatch>
+                  <CompilerMatch>
+                    <option name="remoteCompilerInfo">
+                      <RemoteCompilerInfo>
+                        <option name="id" value="gdefault" />
+                        <option name="name" value="g++ default" />
+                        <option name="language" value="c++" />
+                      </RemoteCompilerInfo>
+                    </option>
+                  </CompilerMatch>
+                </list>
+              </option>
+            </CompilerMatches>
+          </value>
+        </entry>
         <entry>
           <key>
             <LocalCompilerPath>
@@ -163,7 +221,7 @@
         </entry>
       </map>
     </option>
-    <option name="additionalSwitches" value="-fverbose-asm -O5 -S -l" />
+    <option name="additionalSwitches" value="-fverbose-asm -S -l" />
     <option name="autoscrollFromSource" value="true" />
     <option name="autoscrollToSource" value="true" />
     <option name="shortenTemplates" value="true" />

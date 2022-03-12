@@ -11,18 +11,21 @@ add_unnecessary_module(
     include/unnecessary/jobs/misc/load_file_job.h
     include/unnecessary/jobs/misc/lambda_job.h
     include/unnecessary/jobs/workers/worker.h
-    include/unnecessary/jobs/profiler/event_history.h
-    include/unnecessary/jobs/profiler/job_system_profiler.h
-    include/unnecessary/jobs/profiler/profiler_events.h
-    include/unnecessary/jobs/profiler/worker_profiler.h
+    include/unnecessary/jobs/recorder/job_system_recorder.h
+    include/unnecessary/jobs/recorder/data/recorder_events.h
+    include/unnecessary/jobs/recorder/worker_recorder.h
+    include/unnecessary/jobs/recorder/data/event_history.h
+    include/unnecessary/jobs/recorder/data/events.h
     src/unnecessary/jobs/jobs.cpp
     src/unnecessary/jobs/load_file_job.cpp
     src/unnecessary/jobs/parallel_for_job.cpp
     src/unnecessary/jobs/worker.cpp
+    src/unnecessary/jobs/job_dispatch.cpp
     src/unnecessary/jobs/thread.cpp
-    src/unnecessary/jobs/profiler/event_history.cpp
-    src/unnecessary/jobs/profiler/job_system_profiler.cpp
-    src/unnecessary/jobs/profiler/profiler_events.cpp
+    src/unnecessary/jobs/recorder/data/event_history.cpp
+    src/unnecessary/jobs/recorder/job_system_recorder.cpp
+    src/unnecessary/jobs/recorder/data/recorder_events.cpp
+    src/unnecessary/jobs/recorder/data/events.cpp
 
     SOURCES_APPLE
     src/unnecessary/jobs/platform/thread.apple.cpp
@@ -45,3 +48,28 @@ unnecessary_target_resources(
     RESOURCES
     resources/dummy.txt
 )
+
+set(JOBS_MAZES_SIZES 3 5 10 15 25 35 50 100)
+add_custom_target(
+    unnecessary_jobs_generate_mazes
+    COMMAND
+    ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_BINDIR}/mazes
+)
+foreach (INDEX IN LISTS JOBS_MAZES_SIZES)
+    set(MAZE_OUTPUT ${CMAKE_INSTALL_BINDIR}/mazes/maze_${INDEX}.json)
+    add_custom_command(
+        TARGET
+        unnecessary_jobs_generate_mazes
+        COMMAND
+        ${Python_EXECUTABLE}
+        ${CMAKE_SOURCE_DIR}/thirdparty/grapphs/scripts/maze_gen.py
+        --size ${INDEX}
+        --monteMazes 10
+        --monteAttempts 10
+        --output ${MAZE_OUTPUT}
+        --reuse true
+        BYPRODUCTS ${MAZE_OUTPUT}
+        COMMENT "Generating maze of size ${INDEX}..."
+
+    )
+endforeach ()

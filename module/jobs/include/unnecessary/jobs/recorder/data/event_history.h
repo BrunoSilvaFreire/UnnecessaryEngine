@@ -5,34 +5,24 @@
 #include <vector>
 #include <chrono>
 #include <string>
+#include <unnecessary/jobs/recorder/data/events.h>
 
 namespace un {
-    class EventMeta {
-    public:
-        EventMeta(std::string label);
-
-        virtual ~EventMeta();
-
-        const std::string& getLabel() const;
-
-    private:
-        std::string label;
-    };
 
     class ProfilerEvent {
     public:
         ProfilerEvent(
             std::chrono::high_resolution_clock::time_point time,
-            EventMeta* meta
+            std::unique_ptr<un::EventMeta> meta
         );
 
-        ProfilerEvent(
-            ProfilerEvent&& moved
-        );
+        ProfilerEvent(ProfilerEvent&& moved);
 
-        ~ProfilerEvent();
+        ProfilerEvent(const ProfilerEvent& copy) = delete;
 
         std::chrono::high_resolution_clock::time_point getTime() const;
+
+        const std::unique_ptr<un::EventMeta>& getMeta() const;
 
         bool operator<(const ProfilerEvent& rhs) const;
 
@@ -44,17 +34,20 @@ namespace un {
 
     protected:
         std::chrono::high_resolution_clock::time_point time;
-        EventMeta* _meta;
+        std::unique_ptr<un::EventMeta> _meta;
 
     };
 
     class EventHistory {
     private:
+        std::mutex _queueMutex;
         std::vector<un::ProfilerEvent> _events;
     public:
         EventHistory();
 
-        void record(EventMeta* meta);
+        const std::vector<un::ProfilerEvent>& getEvents() const;
+
+        void record(std::unique_ptr<EventMeta>&& meta);
     };
 
 }

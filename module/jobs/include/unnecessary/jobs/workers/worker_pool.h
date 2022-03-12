@@ -124,7 +124,7 @@ namespace un {
          * Marks whether this worker pool accepting new jobs.
          */
         bool open = true;
-
+    private:
         bool tryRetrieveJob(JobType** job, JobHandle* handle) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
@@ -170,18 +170,11 @@ namespace un {
                     done(job, id);
                 }
             );
-            un::Thread* thread = pWorker->getThread();
-
-            if (pWorker->isRunning()) {
-                if (!thread->setCore(index)) {
-                    LOG(WARN) << "Unable to set worker " << index
-                              << " to it's respective core";
-                }
-                std::string threadName = un::type_name_of<WorkerType>();
-                threadName += "-";
-                threadName += std::to_string(index);
-                thread->setName(threadName);
-            }
+            pWorker->setCore(index);
+            std::string threadName = un::type_name_of<WorkerType>();
+            threadName += "-";
+            threadName += std::to_string(index);
+            pWorker->setName(threadName);
             return pWorker;
         }
 
@@ -201,11 +194,10 @@ namespace un {
             return numWorkersNeededToAwake;
         }
 
-
     public:
 
-        WorkerPool() : queueAccessMutex() {
-        }
+
+        WorkerPool() = default;
 
         ~WorkerPool() {
             for (WorkerType* worker : workers) {
@@ -248,6 +240,10 @@ namespace un {
             return handle;
         }
 
+        un::Job<WorkerType>* getJob(un::JobHandle localHandle) {
+            return jobs[localHandle].job;
+        }
+
         void dispatch(JobHandle jobIndex) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
@@ -255,7 +251,7 @@ namespace un {
             }
         }
 
-        void dispatch(std::set<JobHandle> handles) {
+        void dispatch(const std::set<JobHandle>& handles) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
                 for (JobHandle handle : handles) {

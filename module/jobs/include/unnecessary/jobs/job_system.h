@@ -45,7 +45,7 @@ namespace un {
         }
 
         template<typename Functor>
-        constexpr static auto for_each_archetype(Functor&& functor) {
+        constexpr static void for_each_archetype(Functor&& functor) {
             un::for_types_indexed<Archetypes...>(functor);
         }
 
@@ -97,9 +97,6 @@ namespace un {
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
                     auto& pool = getWorkerPool<WorkerType>();
                     auto& workerConfig = std::get<WorkerIndex>(numWorkersPerArchetype);
-//                    LOG(INFO) << "Allocating " << GREEN(workerConfig.getNumWorkers())
-//                              << " workers of archetype "
-//                              << PURPLE(un::type_name_of<WorkerType>());
                     totalNumberOfWorkers += workerConfig.getNumWorkers();
                     using JobType = typename WorkerType::JobType;
                     pool.allocateWorkers(workerConfig);
@@ -129,6 +126,18 @@ namespace un {
         template<typename TWorker>
         un::WorkerPool<TWorker>& getWorkerPool() {
             return ArchetypeMixin<TWorker>::_pool;
+        }
+
+        void setName(un::JobHandle handle, const std::string& name) {
+            for_types_indexed<Archetypes...>(
+                [&]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
+                    const auto& other = graph[handle];
+                    if (other->archetypeIndex == OtherWorkerIndex) {
+                        auto& pool = getWorkerPool<OtherWorkerType>();
+                        pool.getJob(other->poolLocalIndex)->setName(name);
+                    }
+                }
+            );
         }
 
         template<typename TJob>
@@ -174,10 +183,9 @@ namespace un {
 */
         void dispatch(DispatchTable handles) {
             for_types_indexed<Archetypes...>(
-                [&, this]<typename WorkerType, std::size_t WorkerIndex>() {
-                    ArchetypeMixin<WorkerType>::dispatchLocal(
-                        std::get<WorkerIndex>(handles)
-                    );
+                [this, &handles]<typename WorkerType, std::size_t WorkerIndex>() {
+                    const std::set<JobHandle>& toDispatch = handles.template getBatch<WorkerType>();
+                    ArchetypeMixin<WorkerType>::dispatchLocal(toDispatch);
                 }
             );
         }

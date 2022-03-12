@@ -15,21 +15,14 @@
 namespace un {
 #ifdef __GNUG__
 
+    std::string demangle(const char* value);
+
     template<typename T>
     std::string type_name_of() {
-        //https://stackoverflow.com/questions/281818/unmangling-the-result-of-stdtype-infoname
-        int status = -4;
-
-        // enable c++11 by passing the flag -std=c++11 to g++
-        std::unique_ptr<char, void (*)(void*)> res{
-            abi::__cxa_demangle(typeid(T).name(), NULL, NULL, &status),
-            std::free
-        };
-
-        return (status == 0) ? res.get() : typeid(T).name();
+        return demangle(typeid(T).name());
     }
 
-    std::string demangle(const char* value);
+    std::string type_name_of(const std::type_info& info);
 
 #else
     template<typename T>

@@ -37,7 +37,7 @@ namespace un {
         /**
          * Dispatch a set of local handles to the worker pool.
          */
-        void dispatchLocal(std::set<JobHandle> handles) {
+        void dispatchLocal(const std::set<JobHandle>& handles) {
             _pool.dispatch(handles);
         }
 

@@ -1,19 +1,21 @@
-#include <unnecessary/jobs/profiler/event_history.h>
+#include <unnecessary/jobs/recorder/data/event_history.h>
 
 namespace un {
 
-    ProfilerEvent::~ProfilerEvent() {
-        if (_meta != nullptr) {
-            delete _meta;
-        }
+    ProfilerEvent::ProfilerEvent(
+        std::chrono::high_resolution_clock::time_point time,
+        std::unique_ptr<EventMeta> meta
+    ) : time(time), _meta(std::move(meta)) {
+
     }
 
     ProfilerEvent::ProfilerEvent(
-        std::chrono::high_resolution_clock::time_point time,
-        EventMeta* meta
-    ) : time(time), _meta(meta) {
+        ProfilerEvent&& moved
+    ) : time(std::move(moved.time)),
+        _meta(std::move(moved._meta)) {
 
     }
+
 
     std::chrono::high_resolution_clock::time_point ProfilerEvent::getTime() const {
         return time;
@@ -35,30 +37,24 @@ namespace un {
         return !(*this < rhs);
     }
 
-    ProfilerEvent::ProfilerEvent(
-        ProfilerEvent&& moved
-    ) : time(std::move(moved.time)),
-        _meta(std::move(moved._meta)) {
-
+    const std::unique_ptr<un::EventMeta>& ProfilerEvent::getMeta() const {
+        return _meta;
     }
 
-    EventMeta::EventMeta(std::string label) : label(std::move(label)) {}
-
-    const std::string& EventMeta::getLabel() const {
-        return label;
-    }
-
-    EventMeta::~EventMeta() {
-
-    }
-
-    void EventHistory::record(EventMeta* meta) {
+    void EventHistory::record(std::unique_ptr<EventMeta>&& meta) {
         std::chrono::high_resolution_clock::time_point point = std::chrono::high_resolution_clock::now();
-        _events.emplace_back(point, meta);
+        {
+            std::lock_guard<std::mutex> lock(_queueMutex);
+            _events.emplace_back(point, std::move(meta));
+        }
     }
 
     EventHistory::EventHistory() : _events() {
 
+    }
+
+    const std::vector<un::ProfilerEvent>& EventHistory::getEvents() const {
+        return _events;
     }
 
 }

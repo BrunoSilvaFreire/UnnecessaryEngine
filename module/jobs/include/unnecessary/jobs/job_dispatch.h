@@ -6,36 +6,36 @@
 #include <unnecessary/misc/templates.h>
 
 namespace un {
-    template<typename TWorker>
     class DispatchBatch {
     protected:
         std::set<un::JobHandle> _batch;
     public:
-        void dispatch(un::JobHandle handle) {
-            _batch.emplace(handle);
-        }
+        void dispatch(JobHandle handle);
 
-        const std::set<un::JobHandle>& getDispatchBatch() {
-            return _batch;
-        }
+        void erase(JobHandle handle);
+
+        const std::set<JobHandle>& getBatch() const;
     };
 
-    /**
-     *
-     */
+    template<typename TWorker>
+    class DispatchBatchMixin : public DispatchBatch {};
+
     template<typename ...Archetypes>
-    class JobDispatchTable : public DispatchBatch<Archetypes> ... {
-    private:
-        un::repeat_tuple<std::set<un::JobHandle>, sizeof...(Archetypes)> _toDispatch;
+    class JobDispatchTable : private DispatchBatchMixin<Archetypes> ... {
     public:
         template<typename TWorker>
         void dispatch(un::JobHandle handle) {
-            DispatchBatch<TWorker>::dispatch(handle);
+            DispatchBatchMixin<TWorker>::dispatch(handle);
         }
 
         template<typename TWorker>
-        const std::set<un::JobHandle>& getDispatchBatch() {
-            return DispatchBatch<TWorker>::_batch;
+        void erase(un::JobHandle handle) {
+            DispatchBatchMixin<TWorker>::erase(handle);
+        }
+
+        template<typename TWorker>
+        const std::set<un::JobHandle>& getBatch() const {
+            return DispatchBatchMixin<TWorker>::getBatch();
         }
     };
 

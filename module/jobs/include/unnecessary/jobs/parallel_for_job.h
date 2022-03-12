@@ -25,6 +25,10 @@ namespace un {
             fromIndex(fromIndex),
             toIndex(toIndex) {
 
+            std::stringstream str;
+            str << "Parallelize " << parallelForJob->getName();
+            str << "(" << fromIndex << " -> " << toIndex << ")";
+            un::Job<Worker>::name = str.str();
         }
 
         void operator()(Worker* worker) override {
@@ -36,7 +40,20 @@ namespace un {
 
     template<typename TWorker>
     class ParallelForJob {
+        std::string name = "Unnamed Job";
     public:
+        ParallelForJob() {
+            name = un::type_name_of(typeid(this));
+        }
+
+        const std::string& getName() const {
+            return name;
+        }
+
+        void setName(const std::string& newName) {
+            name = newName;
+        }
+
         virtual void operator()(size_t index, TWorker* worker) = 0;
 
         template<typename J, typename ChainType>
@@ -65,7 +82,7 @@ namespace un {
             if (rest > 0) {
                 chain.template immediately<ParallelizeJob<J, TWorker>>(
                     job,
-                    rest,
+                    numEntries - rest,
                     numEntries
                 );
             }

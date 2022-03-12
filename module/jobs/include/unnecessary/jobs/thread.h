@@ -8,13 +8,23 @@
 #include <thread>
 #include <functional>
 #include <unnecessary/def.h>
+
 namespace un {
     class Thread {
     private:
         std::function<void()> _block;
+        std::string _name;
+        u32 _core;
         std::thread _inner;
+        std::mutex _dataMutex;
+        bool _alive;
+        bool _nameDirty, _coreDirty;
 
         void operator()();
+
+        void setAliveThreadName(const std::string& name);
+
+        bool setAliveThreadCore(u32 core);
 
     public:
         Thread(const std::function<void()>& block);
@@ -30,6 +40,8 @@ namespace un {
         bool setCore(u32 core);
 
         void join();
+
+        bool isAlive();
     };
 }
 #endif

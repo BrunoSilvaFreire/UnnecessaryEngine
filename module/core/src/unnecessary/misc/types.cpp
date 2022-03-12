@@ -14,6 +14,10 @@ namespace un {
         return (status == 0) ? res.get() : value;
     }
 
+    std::string type_name_of(const std::type_info& info) {
+        return demangle(info.name());
+    }
+
 #else
 
     std::string demangle(const char* value) {

@@ -22,6 +22,8 @@ namespace un {
         typedef _Job JobType;
     private:
         size_t index;
+        u32 core;
+        std::string name;
         un::Thread* thread;
         un::JobProvider<JobType> provider;
         un::JobNotifier<JobType> notifier;
@@ -122,6 +124,28 @@ namespace un {
             }
         }
 
+        u32 getCore() const {
+            return core;
+        }
+
+        void setCore(u32 core) {
+            AbstractJobWorker::core = core;
+            if (running) {
+                thread->setCore(core);
+            }
+        }
+
+        const std::string& getName() const {
+            return name;
+        }
+
+        void setName(const std::string& name) {
+            AbstractJobWorker::name = name;
+            if (running) {
+                thread->setName(name);
+            }
+        }
+
         void start() {
             {
                 std::lock_guard<std::mutex> lock(runningMutex);
@@ -136,6 +160,8 @@ namespace un {
                         this
                     )
                 );
+                thread->setCore(core);
+                thread->setName(name);
             }
         }
 

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Timeline</title>
+    <script
+            type="text/javascript"
+            src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"
+    ></script>
+    <link
+            href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css"
+            rel="stylesheet"
+            type="text/css"
+    />
+    <style type="text/css">
+        #visualization {
+            width: 100%;
+            height: 100%;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+<div id="visualization"></div>
+<script type="text/javascript">
+    // DOM element where the Timeline will be attached
+    const container = document.getElementById('visualization');
+
+    // Create a DataSet (allows two way data-binding)
+    var items = new vis.DataSet([
+        //Archetypes
+        {% set ns = namespace() %}
+        {% set ns.workerIndex = 0 %}
+        {% for archetype in workloads %}
+        {% for worker in archetype %}
+        {% set ns.workerIndex = ns.workerIndex + 1 %}
+        {% for job in worker %}
+        {
+            id: {{job.handle}},
+            group: {{ns.workerIndex}},
+            content: "{{job.label}}",
+            start: {{job.time_start}} / 1000,
+            end: {{job.time_end}} / 1000
+        },
+        {% endfor %}
+        {% endfor %}
+        {% endfor %}
+    ]);
+    var groups = [
+        {% set ns = namespace() %}
+        {% set ns.groupIndex = 0 %}
+        {% for archetype in workloads %}
+            {% set subGroups = [] %}
+            {% for worker in archetype %}
+                {% set subGroupIndex = ns.groupIndex + (loop.index) %}
+                {% set subGroups = subGroups.append(subGroupIndex) %}
+            {% endfor %}
+            {
+                id: {{ns.groupIndex}},
+                content: "Archetype: {{loop.index - 1}}",
+                nestedGroups: [
+                    {{subGroups}}
+                ],
+            },
+            {% for worker in archetype %}
+                {% set ns.groupIndex = ns.groupIndex + 1 %}
+                {
+                       id: {{ns.groupIndex}},
+                       content: "Worker: {{loop.index - 1}}",
+                },
+            {% endfor %}
+            {% set ns.groupIndex = ns.groupIndex + 1 %}
+        {% endfor %}
+    ];
+    // Configuration for the Timeline
+    var options = {
+        stack: false
+    };
+
+    // Create a Timeline
+    var timeline = new vis.Timeline(container, items, groups, options);
+</script>
+</body>
+</html>

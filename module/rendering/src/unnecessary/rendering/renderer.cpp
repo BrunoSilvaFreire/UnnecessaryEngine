@@ -72,7 +72,9 @@ namespace un {
         return _swapChain;
     }
 
+#if DEBUG
     const VulkanDebugger& Renderer::getDebugger() const {
         return _debugger;
     }
+#endif
 }

@@ -20,6 +20,7 @@
       <file path="$PROJECT_DIR$/module/jobs/include" />
       <file path="$PROJECT_DIR$/module/jobs/src" />
       <file path="$PROJECT_DIR$/module/jobs/tests" />
+      <file path="$PROJECT_DIR$/module/jobs/tools" />
       <file path="$PROJECT_DIR$/module/rendering/include" />
       <file path="$PROJECT_DIR$/module/rendering/pipelines/phong/include" />
       <file path="$PROJECT_DIR$/module/rendering/pipelines/phong/resources" />
