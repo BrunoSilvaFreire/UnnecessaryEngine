@@ -7,6 +7,7 @@
 
 #include <unnecessary/jobs/job_graph.h>
 #include <unnecessary/jobs/workers/worker.h>
+#include <cstring>
 #include <condition_variable>
 #include <semaphore>
 
@@ -115,7 +116,7 @@ namespace un {
         /**
          * Indices that have been freed and are available to be reused.
          */
-        std::queue<std::size_t> reusableIndices;
+        std::set<std::size_t> reusableIndices;
         // TODO: Minimize locks
         std::mutex queueAccessMutex;
         un::Event<JobType*, JobHandle> onJobCompleted;
@@ -143,7 +144,12 @@ namespace un {
         void done(JobType* job, JobHandle localHandle) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
-                reusableIndices.push(static_cast<size_t>(localHandle));
+#if DEBUG
+                if (reusableIndices.contains(localHandle)){
+                    throw std::runtime_error("Handle already included in reusable indices");
+                }
+#endif
+                reusableIndices.emplace(static_cast<size_t>(localHandle));
                 pending.erase(localHandle);
             }
             clear(localHandle);
@@ -152,10 +158,16 @@ namespace un {
         }
 
         void clear(JobHandle handle) {
+#if DEBUG
+            if (!isAllocated(handle)) {
+                throw std::runtime_error("Attempted to clear a handle out of scope");
+            }
+#endif
             ScheduledJob& reference = jobs[handle];
-            reference.job = nullptr;
-            reference.graphHandle = std::numeric_limits<un::JobHandle>::max();
+            std::memset(&reference, 0, sizeof(ScheduledJob));
         }
+
+        bool isAllocated(JobHandle handle) const { return handle < jobs.size(); }
 
         WorkerType* createWorker(
             const WorkerPoolConfiguration<WorkerType>& configuration,
@@ -226,8 +238,9 @@ namespace un {
                     handle = jobs.size();
                     jobs.emplace_back(job, graphHandle);
                 } else {
-                    handle = reusableIndices.front();
-                    reusableIndices.pop();
+                    const auto& it = reusableIndices.begin();
+                    handle = *it;
+                    reusableIndices.erase(it);
                     ScheduledJob& recycled = jobs[handle];
                     recycled.job = job;
                     recycled.graphHandle = graphHandle;

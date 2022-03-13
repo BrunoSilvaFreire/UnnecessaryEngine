@@ -1,10 +1,14 @@
 #include <gtest/gtest.h>
+#include <grapphs/dot.h>
+#include <grapphs/tests/mazes.h>
 #include <unnecessary/jobs/job_system.h>
 #include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/jobs/misc/load_file_job.h>
+#include <unnecessary/jobs/misc/graph_exploration.h>
 #include <unnecessary/jobs/recorder/job_system_recorder.h>
 #include <cmath>
 #include <random>
+#include <ostream>
 
 class DummyWorker : public un::AbstractJobWorker<un::SimpleJob> {
 public:
@@ -85,6 +89,82 @@ TEST(jobs, load_file) {
             }
         );
     }
+    jobSystem.complete();
+}
+
+struct ExplorationVertex {
+public:
+    std::size_t randomData;
+
+    friend std::ostream& operator<<(std::ostream& os, const ExplorationVertex& vertex) {
+        os << "randomData: " << vertex.randomData;
+        return os;
+    }
+};
+
+typedef gpp::AdjacencyList<ExplorationVertex, float> DummyExplorationGraph;
+
+#define NUM_GRAPH_ENTRIES 2000
+
+void populate(DummyExplorationGraph& graph) {
+    std::random_device device;
+
+    graph.reserve(NUM_GRAPH_ENTRIES);
+    for (int i = 0; i < NUM_GRAPH_ENTRIES; ++i) {
+        ExplorationVertex vertex;
+        vertex.randomData = device();
+        graph.push(vertex);
+    }
+    for (size_t x = 0; x < NUM_GRAPH_ENTRIES; ++x) {
+        for (size_t y = 0; y < NUM_GRAPH_ENTRIES; ++y) {
+            if (device()) {
+                uint32_t data = device();
+                float edge = *reinterpret_cast<float*>(&data);
+                graph.connect(x, y, edge);
+            }
+        }
+    }
+}
+
+TEST(jobs, graph_exploration) {
+
+
+    un::SimpleJobSystem jobSystem(true);
+    std::set<std::size_t> alreadyExplored;
+    gpp::test_mazes(
+        [&](gpp::Maze& maze) {
+            const gpp::AdjacencyList<gpp::Cell, int>& graph = maze.getGraph();
+            gpp::save_to_dot(
+                graph,
+                std::filesystem::current_path() / "exploration_graph.dot"
+            );
+            un::GraphExplorer<gpp::AdjacencyList<gpp::Cell, int>> explorer(
+                graph,
+                [&](u32 index, const gpp::Cell& vertex) {
+                    LOG(INFO) << index << " OK";
+                    ASSERT_FALSE(alreadyExplored.contains(index));
+                    alreadyExplored.emplace(index);
+                },
+                [](u32 from, u32 to, int edge) {
+                    LOG(INFO) << from << " -> " << to;
+                }
+            );
+
+            {
+                un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+                chain.immediately<un::ExploreGraphVertexJob<gpp::AdjacencyList<gpp::Cell, int>, un::SimpleJobSystem>>(
+                    0,
+                    &graph,
+                    &explorer,
+                    &jobSystem,
+                    true
+                );
+            }
+            explorer.complete();
+            LOG(INFO) << "Exploration completed!";
+        }
+    );
+
     jobSystem.complete();
 }
 

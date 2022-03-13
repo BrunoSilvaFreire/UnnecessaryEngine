@@ -10,6 +10,7 @@ add_unnecessary_module(
     include/unnecessary/jobs/parallel_for_job.h
     include/unnecessary/jobs/misc/load_file_job.h
     include/unnecessary/jobs/misc/lambda_job.h
+    include/unnecessary/jobs/misc/graph_exploration.h
     include/unnecessary/jobs/workers/worker.h
     include/unnecessary/jobs/recorder/job_system_recorder.h
     include/unnecessary/jobs/recorder/data/recorder_events.h
@@ -43,20 +44,27 @@ add_unnecessary_module(
     TESTS
     tests/job_dependencies_tests.cpp
 )
+target_link_libraries(
+    unnecessary_jobs_tests
+    PUBLIC
+    grapphs_visualization
+    grapphs_testlib
+)
 unnecessary_target_resources(
     TARGET unnecessary_jobs_tests
     RESOURCES
     resources/dummy.txt
 )
 
-set(JOBS_MAZES_SIZES 3 5 10 15 25 35 50 100)
+set(JOBS_MAZES_SIZES 30 50 100)
 add_custom_target(
     unnecessary_jobs_generate_mazes
     COMMAND
     ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_BINDIR}/mazes
 )
 foreach (INDEX IN LISTS JOBS_MAZES_SIZES)
-    set(MAZE_OUTPUT ${CMAKE_INSTALL_BINDIR}/mazes/maze_${INDEX}.json)
+    set(MAZE_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mazes/maze_${INDEX}.json)
+    message("Maze: ${MAZE_OUTPUT}")
     add_custom_command(
         TARGET
         unnecessary_jobs_generate_mazes
@@ -73,3 +81,7 @@ foreach (INDEX IN LISTS JOBS_MAZES_SIZES)
 
     )
 endforeach ()
+add_dependencies(
+    unnecessary_jobs_tests
+    unnecessary_jobs_generate_mazes
+)

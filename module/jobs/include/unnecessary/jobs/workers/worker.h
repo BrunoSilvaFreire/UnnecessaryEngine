@@ -51,6 +51,9 @@ namespace un {
             JobType* jobPtr;
             JobHandle id;
             while (nextJob(&jobPtr, &id)) {
+                if (jobPtr == nullptr){
+                    continue;
+                }
                 fetched(jobPtr, id);
                 execute(jobPtr, id);
             }

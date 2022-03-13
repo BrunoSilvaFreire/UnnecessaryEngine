@@ -138,7 +138,7 @@ namespace un {
             {
                 std::unique_lock<std::mutex> lock(jobSystem->graphAccessMutex);
                 constexpr std::size_t ArchetypeIndex = JobSystemType::template index_of_archetype<WorkerType>();
-                un::WorkerPool<WorkerType>* pool = std::get<ArchetypeIndex>(jobSystem->workerPools);
+                un::WorkerPool<WorkerType>& pool = jobSystem->template getWorkerPool<WorkerType>();
 
                 std::vector<un::JobHandle> transformedHandles(jobs.size());
                 for (std::size_t i = 0; i < jobs.size(); ++i) {
@@ -148,7 +148,7 @@ namespace un {
                         }
                     );
                     un::JobNode* node = jobSystem->graph[graphHandle];
-                    auto transformedIndex = node->poolLocalIndex = pool->enqueue(
+                    auto transformedIndex = node->poolLocalIndex = pool.enqueue(
                         jobs[i].job,
                         graphHandle,
                         false
@@ -168,7 +168,7 @@ namespace un {
                 for (un::JobHandle starter : independent) {
                     handles.emplace(transformedHandles[starter]);
                 }
-                pool->dispatch(handles);
+                pool.dispatch(handles);
             }
 
         }

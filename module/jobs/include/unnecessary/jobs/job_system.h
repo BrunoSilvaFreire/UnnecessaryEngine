@@ -294,6 +294,12 @@ namespace un {
 
         }
 
+        SimpleJobSystem(
+            bool autoStart
+        ) : SimpleJobSystem(std::thread::hardware_concurrency(), autoStart) {
+
+        }
+
         void start() {
             getWorkerPool<un::JobWorker>().start();
         }
