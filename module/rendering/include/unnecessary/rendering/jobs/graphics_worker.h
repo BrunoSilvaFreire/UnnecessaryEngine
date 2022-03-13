@@ -19,9 +19,7 @@ namespace un {
         GraphicsWorker(
             un::Renderer* renderer,
             size_t index,
-            bool autostart,
-            const JobProvider <JobType>& provider,
-            const JobNotifier <JobType>& notifier
+            bool autostart
         );
 
         un::CommandBuffer requestCommandBuffer() const;

@@ -54,7 +54,7 @@ namespace un {
                 const un::Material* pMaterial = materialBatch.getMaterial();
                 const un::Pipeline* pPipeline = pMaterial->getPipeline();
                 std::vector<vk::DescriptorSet> pipelineDescriptorSets;
-                std::array<uint32_t, 0> dynamicOffsets;
+                std::array<uint32_t, 0> dynamicOffsets{};
                 cmdBuffer->bindDescriptorSets(
                     vk::PipelineBindPoint::eGraphics,
                     pPipeline->getLayout(),

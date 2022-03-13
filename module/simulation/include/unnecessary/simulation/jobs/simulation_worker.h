@@ -13,9 +13,7 @@ namespace un {
     public:
         SimulationWorker(
             size_t index,
-            bool autostart,
-            const JobProvider <JobType>& provider,
-            const JobNotifier <JobType>& notifier
+            bool autostart
         );
     };
 }

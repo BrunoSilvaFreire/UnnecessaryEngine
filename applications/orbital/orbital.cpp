@@ -31,16 +31,12 @@ int main(int argc, char** argv) {
                 un::WorkerPoolConfiguration<un::GraphicsWorker>(
                     1,
                     [&renderer](
-                        std::size_t index,
-                        un::JobProvider<un::GraphicsJob> provider,
-                        un::JobNotifier<un::GraphicsJob> notifier
+                        std::size_t index
                     ) {
                         return new un::GraphicsWorker(
                             &renderer,
                             index,
-                            true,
-                            provider,
-                            notifier
+                            true
                         );
                     }
                 )

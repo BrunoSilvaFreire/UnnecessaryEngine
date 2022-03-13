@@ -13,10 +13,8 @@ namespace un {
     GraphicsWorker::GraphicsWorker(
         un::Renderer* renderer,
         size_t index,
-        bool autostart,
-        const JobProvider<JobType>& provider,
-        const JobNotifier<JobType>& notifier
-    ) : AbstractJobWorker(index, autostart, provider, notifier), _renderer(renderer) {
+        bool autostart
+    ) : AbstractJobWorker(index, autostart), _renderer(renderer) {
 
         vk::Device device = renderer->getVirtualDevice();
         _commandPool = device.createCommandPool(
