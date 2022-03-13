@@ -1,46 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
-  <component name="CidrRootsConfiguration">
-    <sourceRoots>
-      <file path="$PROJECT_DIR$/engine/include" />
-      <file path="$PROJECT_DIR$/engine/resources" />
-      <file path="$PROJECT_DIR$/engine/src" />
-      <file path="$PROJECT_DIR$/module/algorithms/include" />
-      <file path="$PROJECT_DIR$/module/algorithms/tests" />
-      <file path="$PROJECT_DIR$/module/application/include" />
-      <file path="$PROJECT_DIR$/module/application/src" />
-      <file path="$PROJECT_DIR$/module/core/include" />
-      <file path="$PROJECT_DIR$/module/core/src" />
-      <file path="$PROJECT_DIR$/module/core/tests" />
-      <file path="$PROJECT_DIR$/module/gltf/include" />
-      <file path="$PROJECT_DIR$/module/gltf/src" />
-      <file path="$PROJECT_DIR$/module/gltf/tests" />
-      <file path="$PROJECT_DIR$/module/graphs/include" />
-      <file path="$PROJECT_DIR$/module/jobs/include" />
-      <file path="$PROJECT_DIR$/module/jobs/src" />
-      <file path="$PROJECT_DIR$/module/jobs/tests" />
-      <file path="$PROJECT_DIR$/module/jobs/tools" />
-      <file path="$PROJECT_DIR$/module/rendering/include" />
-      <file path="$PROJECT_DIR$/module/rendering/pipelines/phong/include" />
-      <file path="$PROJECT_DIR$/module/rendering/pipelines/phong/resources" />
-      <file path="$PROJECT_DIR$/module/rendering/pipelines/phong/src" />
-      <file path="$PROJECT_DIR$/module/rendering/resources" />
-      <file path="$PROJECT_DIR$/module/rendering/src" />
-      <file path="$PROJECT_DIR$/module/rendering/tools" />
-      <file path="$PROJECT_DIR$/module/sdf/include" />
-      <file path="$PROJECT_DIR$/module/sdf/src" />
-      <file path="$PROJECT_DIR$/module/sdf/tests" />
-      <file path="$PROJECT_DIR$/module/sdf/tools" />
-      <file path="$PROJECT_DIR$/module/simulation/include" />
-      <file path="$PROJECT_DIR$/module/simulation/src" />
-      <file path="$PROJECT_DIR$/thirdparty/grapphs/include" />
-      <file path="$PROJECT_DIR$/tools/shader_preprocessor" />
-      <file path="$PROJECT_DIR$/tools/unpython" />
-    </sourceRoots>
-    <excludeRoots>
-      <file path="$PROJECT_DIR$/legacy" />
-      <file path="$PROJECT_DIR$/resources" />
-    </excludeRoots>
-  </component>
 </project>

@@ -6,6 +6,7 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
+#include <queue>
 #include <unnecessary/jobs/job.h>
 #include <unnecessary/jobs/thread.h>
 #include <unnecessary/logging.h>
@@ -14,19 +15,15 @@
 
 namespace un {
 
-    static const size_t arrLen = 512;
-
-    template<class _Job>
+    template<class TJob>
     class AbstractJobWorker {
     public:
-        typedef _Job JobType;
+        typedef TJob JobType;
     private:
         size_t index;
         u32 core;
         std::string name;
         un::Thread* thread;
-        un::JobProvider<JobType> provider;
-        un::JobNotifier<JobType> notifier;
         /**
          * Is this worker still processing it's tasks or should it exit?
          */
@@ -40,7 +37,10 @@ namespace un {
          * Has this worker been ordered to stop?
          */
         bool exiting = false;
-        std::mutex jobMutex;
+
+        std::queue<std::pair<un::JobHandle, JobType*>> pending;
+        std::mutex queueMutex;
+        std::mutex sleepingMutex;
         std::mutex runningMutex;
         std::condition_variable jobAvailable;
         un::EventVoid started, exited, sleeping, awaken;
@@ -51,51 +51,69 @@ namespace un {
             JobType* jobPtr;
             JobHandle id;
             while (nextJob(&jobPtr, &id)) {
-                if (jobPtr == nullptr){
-                    continue;
-                }
                 fetched(jobPtr, id);
                 execute(jobPtr, id);
             }
             exited();
         }
 
+        bool tryDequeue(JobType** jobPtr, JobHandle* id) {
+            bool hasJobs = !pending.empty();
+            if (hasJobs) {
+                const auto& pair = pending.front();
+                *id = pair.first;
+                *jobPtr = pair.second;
+//                LOG(INFO) << "Popped " << index << ", pending: " << pending.size();
+                pending.pop();
+                return true;
+            } else if (exiting) {
+                return false;
+            }
+            return false;
+        }
+
         bool nextJob(JobType** jobPtr, JobHandle* id) {
-            if (provider(jobPtr, id)) {
+            std::unique_lock<std::mutex> lock(queueMutex);
+//            LOG(INFO) << "Fetching " << index;
+            if (tryDequeue(jobPtr, id)) {
                 return true;
             } else if (exiting) {
                 return false;
             }
 
-            std::unique_lock<std::mutex> lock(jobMutex);
-            waiting = true;
-            sleeping();
+            {
+                std::lock_guard<std::mutex> sLock(sleepingMutex);
+                waiting = true;
+                sleeping();
+            }
+//            LOG(INFO) << "Sleeping " << index << " @ " << pending.size();
             jobAvailable.wait(lock);
-            waiting = false;
-            awaken();
-            return running && provider(jobPtr, id);
+            {
+                std::lock_guard<std::mutex> sLock(sleepingMutex);
+                waiting = false;
+                awaken();
+            }
+
+            return running && tryDequeue(jobPtr, id);
         }
 
         void execute(JobType* jobPtr, JobHandle id) {
             jobPtr->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
             executed(jobPtr, id);
-            notifier(jobPtr, id);
+//            LOG(INFO) << "Executed @ " << index << ", pending: " << pending.size();
+            delete jobPtr;
         }
 
     public:
         AbstractJobWorker(
             size_t index,
-            bool autostart,
-            un::JobProvider<JobType> provider,
-            un::JobNotifier<JobType> notifier
+            bool autostart
         ) : index(index),
             thread(nullptr),
             jobAvailable(),
             running(false),
             waiting(false),
-            exited(),
-            provider(provider),
-            notifier(notifier) {
+            exited() {
             if (autostart) {
                 start();
             }
@@ -112,7 +130,17 @@ namespace un {
             return !waiting;
         }
 
-        bool isSleeping() const {
+        bool tryAwake() {
+            if (isSleeping()) {
+//                LOG(INFO) << "Awaking " << index;
+                jobAvailable.notify_one();
+                return true;
+            }
+            return false;
+        }
+
+        bool isSleeping() {
+            std::lock_guard<std::mutex> lock(sleepingMutex);
             return waiting;
         }
 
@@ -120,10 +148,12 @@ namespace un {
             return exited;
         }
 
-        void notifyJobAvailable() {
+        void enqueue(un::JobHandle handle, JobType* job) {
             {
-                // std::lock_guard<std::mutex> lock(waitingMutex);
-                jobAvailable.notify_one();
+                std::lock_guard<std::mutex> lock(queueMutex);
+                pending.push(std::make_pair(handle, job));
+//                LOG(INFO) << "Enqueued " << handle << " @ " << index << ", " << pending.size();
+                tryAwake();
             }
         }
 
@@ -175,7 +205,7 @@ namespace un {
                     return;
                 }
                 exiting = completelyConsume;
-                notifyJobAvailable();
+                tryAwake();
             }
         }
 
@@ -233,9 +263,7 @@ namespace un {
     public:
         JobWorker(
             size_t index,
-            bool autostart,
-            const JobProvider<JobType>& provider,
-            const JobNotifier<JobType>& notifier
+            bool autostart
         );
     };
 }

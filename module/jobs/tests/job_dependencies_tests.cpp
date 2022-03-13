@@ -10,20 +10,8 @@
 #include <random>
 #include <ostream>
 
-class DummyWorker : public un::AbstractJobWorker<un::SimpleJob> {
-public:
-    DummyWorker(
-        size_t index,
-        bool autostart,
-        const un::JobProvider<JobType>& provider,
-        const un::JobNotifier<JobType>& notifier
-    ) : AbstractJobWorker(index, autostart, provider, notifier) {}
-};
-
-typedef un::JobSystem<un::JobWorker, DummyWorker> DummyJobSystem;
-
-TEST(jobs, openness) {
-    const std::size_t numTries = 24;
+TEST(jobs, completeness) {
+    const std::size_t numTries = 1 << 8;
     const std::size_t numWorkers = std::thread::hardware_concurrency();
     const std::size_t numJobs = numWorkers * 8;
     const std::size_t minDelay = 1;
@@ -129,8 +117,7 @@ void populate(DummyExplorationGraph& graph) {
 TEST(jobs, graph_exploration) {
 
 
-    un::SimpleJobSystem jobSystem(true);
-    std::set<std::size_t> alreadyExplored;
+    un::SimpleJobSystem jobSystem(4, true);
     gpp::test_mazes(
         [&](gpp::Maze& maze) {
             const gpp::AdjacencyList<gpp::Cell, int>& graph = maze.getGraph();
@@ -138,11 +125,18 @@ TEST(jobs, graph_exploration) {
                 graph,
                 std::filesystem::current_path() / "exploration_graph.dot"
             );
+            LOG(INFO) << "Exploring maze " << maze.getSize();
+            std::set<std::size_t> alreadyExplored;
             un::GraphExplorer<gpp::AdjacencyList<gpp::Cell, int>> explorer(
                 graph,
                 [&](u32 index, const gpp::Cell& vertex) {
-                    LOG(INFO) << index << " OK";
-                    ASSERT_FALSE(alreadyExplored.contains(index));
+                    bool isDuplicate = alreadyExplored.contains(index);
+                    if (!isDuplicate) {
+                        LOG(INFO) << index << " OK";
+                    } else {
+                        LOG(FUCK) << index << " Duplicate";
+                    }
+                    ASSERT_FALSE(isDuplicate);
                     alreadyExplored.emplace(index);
                 },
                 [](u32 from, u32 to, int edge) {
@@ -153,7 +147,7 @@ TEST(jobs, graph_exploration) {
             {
                 un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
                 chain.immediately<un::ExploreGraphVertexJob<gpp::AdjacencyList<gpp::Cell, int>, un::SimpleJobSystem>>(
-                    0,
+                    maze.getStart(),
                     &graph,
                     &explorer,
                     &jobSystem,

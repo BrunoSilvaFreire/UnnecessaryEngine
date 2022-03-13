@@ -90,14 +90,22 @@ namespace un {
 
         template<typename J>
         JobChain& immediately(J* job) {
-            auto handle = system->enqueue(job, false);
-            return immediately<typename J::WorkerType>(handle);
+            std::pair<un::JobHandle, un::JobNode*> pair = system->template create<typename J::WorkerType>(
+                job,
+                false
+            );
+            return immediately<typename J::WorkerType>(pair.second->poolLocalIndex);
         }
 
         template<typename J>
         JobChain& immediately(JobHandle* id, J* job) {
-            JobHandle handle = *id = system->enqueue(job, false);
-            immediately<typename J::WorkerType>(handle);
+            using WorkerType = typename J::WorkerType;
+            std::pair<un::JobHandle, un::JobNode*> pair = system->template create<WorkerType>(
+                job,
+                false
+            );
+            JobHandle handle = *id = pair.second->poolLocalIndex;
+            immediately<WorkerType>(handle);
             return *this;
         }
 

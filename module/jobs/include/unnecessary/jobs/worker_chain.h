@@ -139,7 +139,6 @@ namespace un {
                 std::unique_lock<std::mutex> lock(jobSystem->graphAccessMutex);
                 constexpr std::size_t ArchetypeIndex = JobSystemType::template index_of_archetype<WorkerType>();
                 un::WorkerPool<WorkerType>& pool = jobSystem->template getWorkerPool<WorkerType>();
-
                 std::vector<un::JobHandle> transformedHandles(jobs.size());
                 for (std::size_t i = 0; i < jobs.size(); ++i) {
                     un::JobHandle graphHandle = jobSystem->graph.add(

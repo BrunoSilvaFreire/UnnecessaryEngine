@@ -71,7 +71,7 @@ void un::sdf::process_sdf(
                 &job,
                 chain,
                 size * size,
-                64
+                128
             );
         }
         jobSystem.start();

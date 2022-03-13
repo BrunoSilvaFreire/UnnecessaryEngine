@@ -29,13 +29,7 @@ namespace un {
          * Function that creates workerPools of each archetype during
          * job system initialization.
          */
-        typedef std::function<
-            WorkerType*(
-                std::size_t,
-                un::JobProvider<JobType>,
-                un::JobNotifier<JobType>
-            )
-        > WorkerCreator;
+        typedef std::function<WorkerType*(std::size_t)> WorkerCreator;
     private:
         std::size_t numWorkers;
         WorkerCreator creator;
@@ -43,9 +37,7 @@ namespace un {
         WorkerPoolConfiguration(
             size_t numWorkers,
             const std::function<TWorker*(
-                std::size_t,
-                un::JobProvider<JobType>,
-                un::JobNotifier<JobType>
+                std::size_t
             )>& creator
         ) : numWorkers(numWorkers), creator(creator) {}
 
@@ -54,11 +46,9 @@ namespace un {
         ) {
             return WorkerPoolConfiguration(
                 numWorkers, [](
-                    std::size_t index,
-                    un::JobProvider<typename WorkerType::JobType> provider,
-                    un::JobNotifier<typename WorkerType::JobType> notifier
+                    std::size_t index
                 ) {
-                    return new WorkerType(index, true, provider, notifier);
+                    return new WorkerType(index, true);
                 }
             );
         }
@@ -97,6 +87,7 @@ namespace un {
             un::JobHandle graphHandle;
         };
 
+        std::size_t gatlingGun = 0;
         /**
          * Storage for workers.
          */
@@ -106,17 +97,9 @@ namespace un {
          */
         std::vector<ScheduledJob> jobs;
         /**
-         * Jobs that are ready to be executed by this pool.
-         */
-        std::queue<JobHandle> ready;
-        /**
-         * Jobs that are pending execution.
-         */
-        std::set<un::JobHandle> pending;
-        /**
          * Indices that have been freed and are available to be reused.
          */
-        std::set<std::size_t> reusableIndices;
+        std::queue<std::size_t> reusableIndices;
         // TODO: Minimize locks
         std::mutex queueAccessMutex;
         un::Event<JobType*, JobHandle> onJobCompleted;
@@ -126,35 +109,14 @@ namespace un {
          */
         bool open = true;
     private:
-        bool tryRetrieveJob(JobType** job, JobHandle* handle) {
-            {
-                std::lock_guard<std::mutex> lock(queueAccessMutex);
-                if (!ready.empty()) {
-                    JobHandle next = ready.front();
-                    ready.pop();
-                    const auto& reference = jobs[next];
-                    *job = reference.job;
-                    *handle = reference.graphHandle;
-                    return true;
-                }
-            }
-            return false;
-        }
 
         void done(JobType* job, JobHandle localHandle) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
-#if DEBUG
-                if (reusableIndices.contains(localHandle)){
-                    throw std::runtime_error("Handle already included in reusable indices");
-                }
-#endif
                 reusableIndices.emplace(static_cast<size_t>(localHandle));
-                pending.erase(localHandle);
+                clear(localHandle);
             }
-            clear(localHandle);
             onJobCompleted(job, localHandle);
-            delete job;
         }
 
         void clear(JobHandle handle) {
@@ -173,37 +135,23 @@ namespace un {
             const WorkerPoolConfiguration<WorkerType>& configuration,
             size_t index
         ) {
-            WorkerType* pWorker = configuration.creator(
-                index,
-                [&, this](JobType** pJob, JobHandle* pId) {
-                    return tryRetrieveJob(pJob, pId);
-                },
-                [&, this](JobType* job, JobHandle id) {
-                    done(job, id);
-                }
-            );
+            WorkerType* pWorker = configuration.creator(index);
             pWorker->setCore(index);
             std::string threadName = un::type_name_of<WorkerType>();
             threadName += "-";
             threadName += std::to_string(index);
             pWorker->setName(threadName);
+            pWorker->onExecuted() += [this](JobType* job, JobHandle handle) {
+                done(job, handle);
+            };
             return pWorker;
         }
 
-        size_t ensureNumWorkersAwake(size_t num) {
-            size_t numWorkersNeededToAwake = num;
-            std::size_t lastIndex = workers.size();
-            for (size_t i = 0; i < lastIndex; ++i) {
-                const auto& worker = workers[i];
-                if (worker->isSleeping()) {
-                    worker->notifyJobAvailable();
-                    numWorkersNeededToAwake--;
-                }
-                if (numWorkersNeededToAwake == 0) {
-                    return 0;
-                }
-            }
-            return numWorkersNeededToAwake;
+
+        WorkerType* nextWorker() {
+            std::size_t index = gatlingGun++;
+            gatlingGun %= workers.size();
+            return workers[index];
         }
 
     public:
@@ -238,9 +186,8 @@ namespace un {
                     handle = jobs.size();
                     jobs.emplace_back(job, graphHandle);
                 } else {
-                    const auto& it = reusableIndices.begin();
-                    handle = *it;
-                    reusableIndices.erase(it);
+                    handle = reusableIndices.front();
+                    reusableIndices.pop();
                     ScheduledJob& recycled = jobs[handle];
                     recycled.job = job;
                     recycled.graphHandle = graphHandle;
@@ -248,7 +195,6 @@ namespace un {
                 if (dispatch) {
                     unsafeDispatch(handle);
                 }
-                pending.emplace(handle);
             }
             return handle;
         }
@@ -268,9 +214,8 @@ namespace un {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
                 for (JobHandle handle : handles) {
-                    ready.push(handle);
+                    unsafeDispatch(handle);
                 }
-                ensureNumWorkersAwake(ready.size());
             }
         }
 
@@ -278,8 +223,17 @@ namespace un {
          * Dispatches the handle without locking the queueAccessMutex
          */
         void unsafeDispatch(JobHandle handle) {
-            ready.push(handle);
-            ensureNumWorkersAwake(ready.size());
+            WorkerType* worker = nextWorker();
+            JobType* pJob = getJob(handle);
+#if DEBUG
+            if (pJob == nullptr) {
+                throw std::runtime_error("Attempted to dispatch invalid handle");
+            }
+#endif
+            worker->enqueue(
+                handle,
+                pJob
+            );
         }
 
 
@@ -311,16 +265,10 @@ namespace un {
             return onJobCompleted;
         }
 
-        bool hasPendingJobs() {
-            return !pending.empty();
-        }
-
         void complete() {
             std::lock_guard lock(openMutex);
             open = false;
-            if (hasPendingJobs()) {
-                completeAllWorkers();
-            }
+            completeAllWorkers();
         }
 
         void completeAllWorkers() {

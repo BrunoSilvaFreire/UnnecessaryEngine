@@ -49,7 +49,7 @@ namespace un {
             un::for_types_indexed<Archetypes...>(functor);
         }
 
-    private:
+    protected:
         un::JobGraph graph;
         std::mutex graphAccessMutex;
         size_t totalNumberOfWorkers = 0;
@@ -85,6 +85,31 @@ namespace un {
             }
         }
 
+        template<typename JobWorkerType>
+        std::pair<un::JobHandle, un::JobNode*>
+        create(typename JobWorkerType::JobType* job, bool dispatch) {
+            constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, Archetypes...>();
+            un::WorkerPool<JobWorkerType>& pool = getWorkerPool<JobWorkerType>();
+            un::JobHandle graphHandle = graph.add(
+                un::JobNode{
+                    .archetypeIndex = ArchetypeIndex
+                }
+            );
+            un::JobNode* node = graph[graphHandle];
+            node->poolLocalIndex = pool.enqueue(job, graphHandle, dispatch);
+            return std::make_pair(graphHandle, node);
+        }
+
+        void dispatch(DispatchTable handles) {
+            for_types_indexed<Archetypes...>(
+                [this, &handles]<typename WorkerType, std::size_t WorkerIndex>() {
+                    const std::set<JobHandle>& toDispatch = handles.template getBatch<WorkerType>();
+                    ArchetypeMixin<WorkerType>::dispatchLocal(toDispatch);
+                }
+            );
+        }
+
+
     public:
 
 
@@ -110,6 +135,10 @@ namespace un {
             );
         };
 
+        template<typename TWorker>
+        un::WorkerPool<TWorker>& getWorkerPool() {
+            return ArchetypeMixin<TWorker>::_pool;
+        }
 
         void addDependency(JobHandle to, JobHandle from) {
 #ifdef DEBUG
@@ -123,10 +152,6 @@ namespace un {
             }
         }
 
-        template<typename TWorker>
-        un::WorkerPool<TWorker>& getWorkerPool() {
-            return ArchetypeMixin<TWorker>::_pool;
-        }
 
         void setName(un::JobHandle handle, const std::string& name) {
             for_types_indexed<Archetypes...>(
@@ -140,55 +165,6 @@ namespace un {
             );
         }
 
-        template<typename TJob>
-        JobHandle enqueue(TJob* job, bool dispatch) {
-            using JobWorkerType = typename TJob::WorkerType;
-            constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, Archetypes...>();
-            un::WorkerPool<JobWorkerType>& pool = getWorkerPool<JobWorkerType>();
-            un::JobHandle graphHandle = graph.add(
-                un::JobNode{
-                    .archetypeIndex = ArchetypeIndex
-                }
-            );
-            un::JobNode* node = graph[graphHandle];
-            node->poolLocalIndex = pool.enqueue(job, graphHandle, dispatch);
-            return graphHandle;
-        }
-
-/*
-
-        template<typename T, std::size_t ArchetypeIndex>
-        void dispatch(JobHandle handle) {
-            using JobWorkerType = typename T::WorkerType;
-            un::WorkerPool<JobWorkerType>* pool = std::get<ArchetypeIndex>(workerPools);
-            pool->dispatch(handle);
-        }
-
-
-        template<typename T>
-        void dispatch(JobHandle handle) {
-            using JobWorkerType = typename T::WorkerType;
-            constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, WorkerArchetypes...>();
-            dispatch<T, ArchetypeIndex>(handle);
-        }
-*/
-
-/*
-        template<typename WorkerType>
-        void dispatch(std::set<JobHandle> handles) {
-            constexpr auto ArchetypeIndex = index_of_archetype<WorkerType>();
-            un::WorkerPool<WorkerType>* pool = std::get<ArchetypeIndex>(workerPools);
-            pool->dispatch(handles);
-        }
-*/
-        void dispatch(DispatchTable handles) {
-            for_types_indexed<Archetypes...>(
-                [this, &handles]<typename WorkerType, std::size_t WorkerIndex>() {
-                    const std::set<JobHandle>& toDispatch = handles.template getBatch<WorkerType>();
-                    ArchetypeMixin<WorkerType>::dispatchLocal(toDispatch);
-                }
-            );
-        }
 
         /**
          * Immediately stops this job system.
@@ -283,11 +259,9 @@ namespace un {
             un::WorkerPoolConfiguration<un::JobWorker>(
                 numWorkers,
                 [=](
-                    std::size_t index,
-                    un::JobProvider<un::SimpleJob> provider,
-                    un::JobNotifier<un::SimpleJob> notifier
+                    std::size_t index
                 ) {
-                    return new un::JobWorker(index, autoStart, provider, notifier);
+                    return new un::JobWorker(index, autoStart);
                 }
             )
         ) {

@@ -9,12 +9,6 @@ namespace un {
 
     typedef u32 JobHandle;
 
-    template<typename T>
-    using JobProvider = std::function<bool(T** jobPtr, JobHandle* id)>;
-
-    template<typename T>
-    using JobNotifier = std::function<void(T* jobPtr, JobHandle id)>;
-
     template<typename _Worker>
     class Job {
     protected:

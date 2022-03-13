@@ -7,7 +7,9 @@ namespace un {
     Thread::Thread(
         const std::function<void()>& block
     ) : _block(block),
-        _inner(&Thread::operator(), this) {
+        _inner(&Thread::operator(), this),
+        _name(),
+        _core(0) {
         if (block == nullptr) {
             throw std::runtime_error("Thread created with empty block.");
         }
