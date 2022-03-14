@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <string>
+#include <mutex>
 #include <unnecessary/jobs/recorder/data/events.h>
 
 namespace un {

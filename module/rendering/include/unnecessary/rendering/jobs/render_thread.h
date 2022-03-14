@@ -1,10 +1,11 @@
 #ifndef UNNECESSARYENGINE_RENDER_THREAD_H
 #define UNNECESSARYENGINE_RENDER_THREAD_H
 
+#include <unnecessary/misc/benchmark.h>
+#include <unnecessary/application/loop.h>
 #include <unnecessary/application/application.h>
 #include <unnecessary/rendering/renderer.h>
 #include <unnecessary/rendering/jobs/render_job.h>
-#include "unnecessary/misc/benchmark.h"
 
 namespace un {
 
@@ -13,6 +14,7 @@ namespace un {
     private:
         bool _rendering = false;
         std::size_t _frame;
+        un::SteadyLoop _loop;
         JobSystemType* _jobSystem;
         un::Renderer* _renderer;
         un::Thread* _thread;
@@ -47,7 +49,7 @@ namespace un {
                     passesDependencies[to].emplace(from);
                 }
             );
-            for (auto[passIndex, passDependencies] : passesDependencies) {
+            for (auto [passIndex, passDependencies] : passesDependencies) {
                 un::JobHandle passHandle = vertexIndex2JobHandle[passIndex];
                 for (u32 dependencyIndex : passDependencies) {
                     un::JobHandle dependencyHandle = vertexIndex2JobHandle[dependencyIndex];
@@ -143,6 +145,7 @@ namespace un {
             un::SwapChain& swapChain = _renderer->getSwapChain();
             while (_rendering) {
                 un::Chronometer chronometer;
+                _loop.enter();
                 un::SwapChain::ChainSynchronizer& synchronizer = swapChain.acquireSynchronizer();
                 synchronizer.access();
                 vk::Fence fence = synchronizer.getFence();
@@ -195,7 +198,7 @@ namespace un {
                     _jobSystem,
                     synchronizer
                 );
-                size_t msTime = chronometer.stop();
+                _loop.exit();
                 _frame++;
             }
         }
@@ -205,6 +208,7 @@ namespace un {
             if (_rendering) {
                 return;
             }
+            _loop.setFrequency(165);
             _rendering = true;
             _thread = new un::Thread(
                 "RenderThread",

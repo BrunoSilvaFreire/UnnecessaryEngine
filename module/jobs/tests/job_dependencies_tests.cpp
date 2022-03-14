@@ -61,7 +61,7 @@ TEST(jobs, load_file) {
     un::Buffer buf;
     {
         un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
-        un::JobHandle loadHandle, lambdaHandle;
+        un::JobHandle loadHandle;
         std::filesystem::path filePath = "resources/dummy.txt";
         chain.immediately<un::LoadFileJob>(
             &loadHandle,
@@ -219,7 +219,7 @@ TEST(jobs, sequence_test) {
 
 TEST(jobs, benchmark) {
     un::SimpleJobSystem jobSystem(std::thread::hardware_concurrency(), true);
-    const size_t numJobs = std::pow(2, 16);
+    const auto numJobs = static_cast<size_t>(std::pow(2, 16));
     un::Buffer buf(numJobs, false);
 
     {

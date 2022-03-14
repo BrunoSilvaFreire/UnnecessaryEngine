@@ -104,7 +104,7 @@ namespace un {
             for_types_indexed<Archetypes...>(
                 [this, &handles]<typename WorkerType, std::size_t WorkerIndex>() {
                     const std::set<JobHandle>& toDispatch = handles.template getBatch<WorkerType>();
-                    ArchetypeMixin<WorkerType>::dispatchLocal(toDispatch);
+                    this->ArchetypeMixin<WorkerType>::dispatchLocal(toDispatch);
                 }
             );
         }
