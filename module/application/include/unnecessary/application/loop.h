@@ -37,7 +37,7 @@ namespace un {
             std::chrono::nanoseconds sleepDuration =
                 getLoopTimeFrame() - lastLoopDuration;
             if (sleepDuration.count() > 0) {
-                LOG(INFO) << "Sleeping for " << sleepDuration;
+                LOG(INFO) << "Sleeping for " << sleepDuration.count()<<" nano";
                 std::this_thread::sleep_for(sleepDuration);
             }
             startTime = std::chrono::high_resolution_clock::now();

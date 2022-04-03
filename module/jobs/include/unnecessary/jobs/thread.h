@@ -28,7 +28,7 @@ namespace un {
         bool setAliveThreadCore(u32 core);
 
     public:
-        Thread(const std::function<void()>& block);
+        explicit Thread(const std::function<void()>& block);
 
         Thread(const std::string& name, const std::function<void()>& block);
 

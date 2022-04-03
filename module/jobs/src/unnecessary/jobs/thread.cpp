@@ -7,9 +7,12 @@ namespace un {
     Thread::Thread(
         const std::function<void()>& block
     ) : _block(block),
-        _inner(&Thread::operator(), this),
         _name(),
-        _core(0) {
+        _core(0),
+        _alive(false),
+        _nameDirty(false),
+        _coreDirty(false),
+        _inner(&Thread::operator(), this) {
         if (block == nullptr) {
             throw std::runtime_error("Thread created with empty block.");
         }
@@ -19,9 +22,7 @@ namespace un {
         const std::string& name,
         const std::function<void()>& block
     ) : Thread(block) {
-        _alive = false;
-        _nameDirty = false;
-        _coreDirty = false;
+
         setName(name);
     }
 

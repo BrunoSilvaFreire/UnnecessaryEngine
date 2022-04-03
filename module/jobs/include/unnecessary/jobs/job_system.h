@@ -71,7 +71,7 @@ namespace un {
                     if (ready) {
                         // TODO: Ewww.
                         for_types_indexed<Archetypes...>(
-                            [&]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
+                            [&, otherIndex]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
                                 const auto& other = graph[otherIndex];
                                 if (other->archetypeIndex == OtherWorkerIndex) {
                                     auto& pool = getWorkerPool<OtherWorkerType>();

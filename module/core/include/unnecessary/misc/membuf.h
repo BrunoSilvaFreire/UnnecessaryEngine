@@ -38,7 +38,7 @@ namespace un {
         }
 
         /**
-         * @return The number of elements in this buffer
+         * @return The number of allElements in this buffer
          */
         std::size_t getCount() const {
             return count;
