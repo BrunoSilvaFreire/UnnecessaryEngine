@@ -14,7 +14,7 @@ namespace un {
     private:
         std::string name;
         /**
-         * How many elements there are
+         * How many allElements there are
          */
         u8 count;
         /**

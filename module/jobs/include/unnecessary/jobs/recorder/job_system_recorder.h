@@ -21,6 +21,12 @@ namespace un {
         const std::vector<un::WorkerRecorder<TWorker>*>& getProfilers() const {
             return profilers;
         }
+
+        virtual ~ProfilerPool() {
+            for (const auto& item : profilers){
+                delete item;
+            }
+        }
     };
 
     template<typename TJobSystem>

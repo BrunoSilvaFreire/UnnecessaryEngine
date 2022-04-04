@@ -6,19 +6,14 @@
 
 #ifndef UNNECESSARYENGINE_SDF_GENERATOR_H
 #define UNNECESSARYENGINE_SDF_GENERATOR_H
-namespace un {
-
-    namespace sdf {
-
-        void process_sdf(
-            int size,
-            int nThreads,
-            const std::string& imageFile,
-            const std::string& outputFile,
-            float min,
-            float max
-        );
-
-    }
+namespace un::sdf {
+    void process_sdf(
+        int size,
+        int nThreads,
+        const std::string& imageFile,
+        const std::string& outputFile,
+        float min,
+        float max
+    );
 }
 #endif
