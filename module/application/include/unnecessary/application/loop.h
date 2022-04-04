@@ -34,10 +34,11 @@ namespace un {
 
         void enter() {
             auto lastLoopDuration = endTime - startTime;
-            std::chrono::nanoseconds sleepDuration =
-                getLoopTimeFrame() - lastLoopDuration;
+            std::chrono::nanoseconds timeFrame = getLoopTimeFrame();
+            std::chrono::nanoseconds sleepDuration = timeFrame - lastLoopDuration;
             if (sleepDuration.count() > 0) {
-                LOG(INFO) << "Sleeping for " << sleepDuration;
+                std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    sleepDuration);
                 std::this_thread::sleep_for(sleepDuration);
             }
             startTime = std::chrono::high_resolution_clock::now();

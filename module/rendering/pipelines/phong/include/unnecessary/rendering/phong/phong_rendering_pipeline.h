@@ -48,7 +48,7 @@ namespace un {
                 attachmentSize,
                 std::vector<vk::ClearValue>(
                     {
-                        vk::ClearColorValue(std::array<float, 4>({0, 0, 0, 1})),
+                        vk::ClearColorValue(std::array<float, 4>({1, 0, 0, 1})),
                         vk::ClearDepthStencilValue(0, 0),
                     }
                 ),

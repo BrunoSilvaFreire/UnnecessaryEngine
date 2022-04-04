@@ -49,7 +49,8 @@ namespace un {
             running = true;
             onStart();
             while (running) {
-                //fixedLoop.step();
+                fixedLoop.step();
+                variableLoop.step();
             }
         }
 
@@ -68,6 +69,8 @@ namespace un {
         void extend(E& extension) {
             extension.apply(*this);
         }
+
+        void stop();
     };
 }
 #endif

@@ -6,6 +6,7 @@
 #include <unnecessary/application/application.h>
 #include <unnecessary/rendering/renderer.h>
 #include <unnecessary/rendering/jobs/render_job.h>
+#include <grapphs/algorithms/rlo_traversal.h>
 
 namespace un {
 
@@ -26,8 +27,7 @@ namespace un {
             JobSystemType* jobSystem,
             un::SwapChain::ChainSynchronizer& synchronizer
         ) {
-            const RenderGraph& graph = _renderer->getRenderGraph();
-
+            const un::RenderGraph& graph = _renderer->getRenderGraph();
             un::GraphicsChain chain;
             std::unordered_map<u32, un::JobHandle> vertexIndex2JobHandle;
             std::unordered_map<u32, std::set<u32>> passesDependencies;
@@ -130,11 +130,13 @@ namespace un {
                     framebufferIndex
                 }
             );
-            _renderer->getDevice().getPresent()->presentKHR(
-                vk::PresentInfoKHR(
-                    imageReady,
-                    swapchain,
-                    imageIndices
+            vkCall(
+                _renderer->getDevice().getPresent()->presentKHR(
+                    vk::PresentInfoKHR(
+                        imageReady,
+                        swapchain,
+                        imageIndices
+                    )
                 )
             );
             synchronizer.unlock();
@@ -143,7 +145,9 @@ namespace un {
         void renderThread() {
             const vk::Device& device = _renderer->getVirtualDevice();
             un::SwapChain& swapChain = _renderer->getSwapChain();
+            Window* pWindow = _renderer->getWindow();
             while (_rendering) {
+                glfwPollEvents();
                 un::Chronometer chronometer;
                 _loop.enter();
                 un::SwapChain::ChainSynchronizer& synchronizer = swapChain.acquireSynchronizer();
@@ -152,14 +156,11 @@ namespace un {
                 std::array<vk::Fence, 1> fencesToWait(
                     {fence}
                 );
-                std::chrono::milliseconds timeout(1000 / 60);
-                u64 timeoutNano = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                    timeout
-                ).count();
+                std::chrono::nanoseconds timeout = _loop.getLoopTimeFrame();
                 vk::Result waitForFences = device.waitForFences(
                     fencesToWait,
                     true,
-                    timeoutNano
+                    timeout.count()
                 );
                 if (waitForFences != vk::Result::eSuccess) {
                     LOG(WARN)
@@ -175,7 +176,7 @@ namespace un {
 
                 auto result = device.acquireNextImageKHR(
                     swapChain.getSwapChain(),
-                    timeoutNano,
+                    timeout.count(),
                     synchronizer.getImageReady()
                 );
                 if (result.result != vk::Result::eSuccess) {
@@ -200,6 +201,7 @@ namespace un {
                 );
                 _loop.exit();
                 _frame++;
+                _rendering = !pWindow->shouldClose();
             }
         }
 
@@ -217,8 +219,9 @@ namespace un {
         }
 
         void stop() {
-            delete _thread;
             _rendering = false;
+            _thread->join();
+            delete _thread;
         }
 
         RenderThread(

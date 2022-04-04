@@ -57,4 +57,9 @@ namespace un {
     un::EventVoid& Application::getOnStart() {
         return onStart;
     }
+
+    void Application::stop() {
+        onStop();
+        running = false;
+    }
 }

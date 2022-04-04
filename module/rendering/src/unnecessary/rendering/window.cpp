@@ -35,6 +35,7 @@ namespace un {
         un::Size2D size
     ) {
         initGLFW();
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         auto window = glfwCreateWindow(
             size.x, size.y,
             title.c_str(),
@@ -71,5 +72,14 @@ namespace un {
 
     bool Window::shouldClose() {
         return glfwWindowShouldClose(_window);
+    }
+
+    void Window::apply(Application& application) {
+        application.getVariableLoop().early([this, &application]() {
+            pool();
+            if (shouldClose()){
+                application.stop();
+            }
+        });
     }
 }

@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
         un::Simulator<un::UnnecessaryJobSystem> simulator(&jobSystem, &world);
         app.extend(simulator);
         app.extend(renderThread);
+        app.extend(window);
         app.start();
         app.waitExit();
     }

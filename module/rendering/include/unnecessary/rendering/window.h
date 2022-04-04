@@ -10,7 +10,7 @@
 namespace un {
     typedef glm::u16vec2 Size2D;
 
-    class Window {
+    class Window : Extension {
     private:
         GLFWwindow* _window;
         un::Size2D _windowSize;
@@ -20,6 +20,8 @@ namespace un {
         static void initGLFW();
 
     public:
+        void apply(Application& application) override;
+
         static Window
         withSize(std::string title, un::Application& application, un::Size2D size);
 
