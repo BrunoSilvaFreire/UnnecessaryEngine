@@ -42,47 +42,32 @@ function(add_unnecessary_tool NAME)
     if ("${LISTCOUNT}" GREATER 0)
         target_link_libraries(${NAME} PUBLIC "${UN_MODULE_DEPENDENCIES}")
     endif ()
-    target_compile_definitions(
-            ${NAME}
-            PUBLIC
-            NOMINMAX
-            VULKAN_HPP_TYPESAFE_CONVERSION
-            VULKAN_HPP_NO_SPACESHIP_OPERATOR
-    )
+    configure_unnecessary_module(${NAME})
     LIST(LENGTH UN_MODULE_TESTS NUMTESTS)
     if ("${NUMTESTS}" GREATER 0)
         list(APPEND TEST_ALL_SOURCES ${UN_MODULE_TESTS})
         list(APPEND TEST_ALL_SOURCES ${UN_MODULE_SOURCES})
         add_executable(
-            ${NAME}_tests
-            ${TEST_ALL_SOURCES}
+                ${NAME}_tests
+                ${TEST_ALL_SOURCES}
         )
         message("All: ${TEST_ALL_SOURCES}")
+        configure_unnecessary_module(${NAME}_tests)
         target_compile_definitions(
-            ${NAME}_tests
-            PUBLIC
-            DEBUG
-            NOMINMAX
-            UN_TESTING
-            VULKAN_HPP_TYPESAFE_CONVERSION
-            VULKAN_HPP_NO_SPACESHIP_OPERATOR
-            SOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}
+                ${NAME}_tests
+                PUBLIC
+                UN_TESTING
         )
         target_include_directories(
-            ${NAME}_tests
-            PUBLIC
-            ${CMAKE_CURRENT_SOURCE_DIR}/tools
+                ${NAME}_tests
+                PUBLIC
+                ${CMAKE_CURRENT_SOURCE_DIR}/tools
         )
         target_link_libraries(
-            ${NAME}_tests
-            PUBLIC
-            GTest::GTest
-            ${UN_MODULE_DEPENDENCIES}
-        )
-        set_target_properties(
-            ${NAME}_tests
-            PROPERTIES
-            LINKER_LANGUAGE CXX
+                ${NAME}_tests
+                PUBLIC
+                GTest::GTest
+                ${UN_MODULE_DEPENDENCIES}
         )
     endif ()
 endfunction()

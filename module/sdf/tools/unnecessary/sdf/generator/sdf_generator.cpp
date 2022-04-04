@@ -51,8 +51,8 @@ void un::sdf::process_sdf(
     float min,
     float max
 ) {
-    png::image <png::rgba_pixel> img(imageFile);
-    png::image <png::gray_pixel> sdf(size, size);
+    png::image<png::rgba_pixel> img(imageFile);
+    png::image<png::gray_pixel> sdf(size, size);
     LOG(INFO) << "Creating image of size " << size << "x" << size << "(" << size * size
               << " pixels)";
     {
@@ -74,8 +74,11 @@ void un::sdf::process_sdf(
                 128
             );
         }
+        un::Chronometer<std::chrono::milliseconds> chronometer;
         jobSystem.start();
         jobSystem.complete();
+        std::chrono::milliseconds duration = chronometer.stop();
+        LOG(INFO) << "Took " << duration.count() << "ms.";
         profiler.saveToFile(std::filesystem::current_path() / "sdf_generator.csv");
     }
     LOG(INFO) << "Saving image to '" << outputFile << "'";

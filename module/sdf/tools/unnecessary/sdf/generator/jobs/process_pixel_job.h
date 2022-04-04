@@ -13,7 +13,7 @@
 
 namespace un {
 
-    class ProcessPixelJob : public un::ParallelForJob<un::JobWorker> {
+    class ProcessPixelJob final : public un::ParallelForJob<un::JobWorker> {
     private:
         png::image<png::rgba_pixel>* input;
         png::image<png::gray_pixel>* output;
@@ -41,13 +41,13 @@ namespace un {
             float maxDistance
         );
 
-        UN_AGGRESSIVE_INLINE void batchStarted(size_t start, size_t end) override {
+        void batchStarted(size_t start, size_t end) override {
             LOG(INFO) << "Starting batch " << start << " -> " << end << " (" << (end - start + 1)
                       << " pixels)";
         }
 
 
-        UN_AGGRESSIVE_INLINE void batchFinished(size_t start, size_t end) override {
+        void batchFinished(size_t start, size_t end) override {
             LOG(INFO) << "Finished batch " << start << " -> " << end << " (" << (end - start + 1)
                       << " pixels)";
         }
@@ -66,12 +66,6 @@ namespace un {
                 1 - distance01
             );
             output->set_pixel(ox, oy, pixel);
-            LOG(INFO) << "Pixel " << index << " (" << ox << ", " << oy << ") processed @ "
-                      << (int) pixel
-                      << " (dist: " << distance01 << ", " << fullDistance << " @ hex: "
-                      << std::hex << (int) pixel
-                      << std::dec
-                      << ")";
         }
 
         static UN_AGGRESSIVE_INLINE bool isOutOfBounds(
