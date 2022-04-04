@@ -51,8 +51,8 @@ void un::sdf::process_sdf(
     float min,
     float max
 ) {
-    png::image<png::rgba_pixel> img(imageFile);
-    png::image<png::gray_pixel> sdf(size, size);
+    png::image <png::rgba_pixel> img(imageFile);
+    png::image <png::gray_pixel> sdf(size, size);
     LOG(INFO) << "Creating image of size " << size << "x" << size << "(" << size * size
               << " pixels)";
     {
@@ -78,6 +78,6 @@ void un::sdf::process_sdf(
         jobSystem.complete();
         profiler.saveToFile(std::filesystem::current_path() / "sdf_generator.csv");
     }
-
+    LOG(INFO) << "Saving image to '" << outputFile << "'";
     sdf.write(outputFile);
 }

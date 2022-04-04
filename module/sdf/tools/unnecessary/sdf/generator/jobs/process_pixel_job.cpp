@@ -93,4 +93,14 @@ namespace un {
         return nx < 0 || ny < 0 || nx >= width || ny >= height;
     }
 
+    void ProcessPixelJob::batchStarted(size_t start, size_t end) {
+        LOG(INFO) << "Starting batch " << start << " -> " << end << " (" << (end - start + 1)
+                  << " pixels)";
+    }
+
+    void ProcessPixelJob::batchFinished(size_t start, size_t end) {
+        LOG(INFO) << "Finished batch " << start << " -> " << end << " (" << (end - start + 1)
+                  << " pixels)";
+    }
+
 }

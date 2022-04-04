@@ -24,6 +24,10 @@ namespace un {
         return value;
     }
 
+    std::string un::type_name_of(const type_info& info) {
+        return info.name();
+    }
+
 #endif
 
 }

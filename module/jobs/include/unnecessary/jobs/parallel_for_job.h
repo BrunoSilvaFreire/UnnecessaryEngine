@@ -32,9 +32,11 @@ namespace un {
         }
 
         void operator()(Worker* worker) override {
+            parallelForJob->batchStarted(fromIndex, toIndex);
             for (size_t i = fromIndex; i < toIndex; ++i) {
                 parallelForJob->operator()(i, worker);
             }
+            parallelForJob->batchFinished(fromIndex, toIndex);
         }
     };
 
@@ -53,6 +55,15 @@ namespace un {
         void setName(const std::string& newName) {
             name = newName;
         }
+
+        /**
+         * Called before a batch is processed by a parallelize job
+         * @param start The batch start
+         * @param end The batch end
+         */
+        virtual void batchStarted(size_t start, size_t end) {};
+
+        virtual void batchFinished(size_t start, size_t end) {};
 
         virtual void operator()(size_t index, TWorker* worker) = 0;
 

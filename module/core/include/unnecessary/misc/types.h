@@ -29,6 +29,7 @@ namespace un {
     std::string type_name_of() {
         return typeid(T).name();
     }
+    std::string type_name_of(const std::type_info& info);
 
     std::string demangle(const char* value);
 #endif

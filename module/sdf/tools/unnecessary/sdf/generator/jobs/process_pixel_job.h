@@ -29,6 +29,10 @@ namespace un {
             float maxDistance
         );
 
+        void batchStarted(size_t start, size_t end) override;
+
+        void batchFinished(size_t start, size_t end) override;
+
         void operator()(size_t index, JobWorker* worker) override;
 
         bool isOutOfBounds(int nx, int ny, size_t width, size_t height);
