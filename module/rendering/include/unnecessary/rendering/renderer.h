@@ -43,7 +43,7 @@ namespace un {
         Renderer(Window* window, std::string string, Version version);
 
         void usePipeline(un::RenderingPipeline* pipeline) {
-            pipeline->configure(_graph);
+            pipeline->configure(*this, _graph);
             _graph.bake(*this);
 #ifdef DEBUG
             auto cwd = std::filesystem::current_path();

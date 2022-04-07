@@ -29,17 +29,9 @@ function(add_unnecessary_tool NAME)
             PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}/tools
     )
-    set_target_properties(
-            ${NAME}
-            PROPERTIES
-            LINKER_LANGUAGE CXX
-            ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
-            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
-    )
-    LIST(LENGTH UN_MODULE_DEPENDENCIES LISTCOUNT)
+    LIST(LENGTH UN_MODULE_DEPENDENCIES NUM_DEPENDENCIES)
     LIST(LENGTH UN_MODULE_TESTS NUMTESTS)
-    if ("${LISTCOUNT}" GREATER 0)
+    if ("${NUM_DEPENDENCIES}" GREATER 0)
         target_link_libraries(${NAME} PUBLIC "${UN_MODULE_DEPENDENCIES}")
     endif ()
     configure_unnecessary_module(${NAME})
@@ -47,12 +39,10 @@ function(add_unnecessary_tool NAME)
     if ("${NUMTESTS}" GREATER 0)
         list(APPEND TEST_ALL_SOURCES ${UN_MODULE_TESTS})
         list(APPEND TEST_ALL_SOURCES ${UN_MODULE_SOURCES})
-        add_executable(
-                ${NAME}_tests
-                ${TEST_ALL_SOURCES}
+        create_unnecessary_tests_for_target(
+                ${NAME}
+                "${TEST_ALL_SOURCES}"
         )
-        message("All: ${TEST_ALL_SOURCES}")
-        configure_unnecessary_module(${NAME}_tests)
         target_compile_definitions(
                 ${NAME}_tests
                 PUBLIC

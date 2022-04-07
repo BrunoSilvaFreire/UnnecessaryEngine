@@ -136,7 +136,7 @@ namespace un {
             size_t index
         ) {
             WorkerType* pWorker = configuration.creator(index);
-            pWorker->setCore(index);
+            pWorker->setCore(static_cast<u32>(index));
             std::string threadName = un::type_name_of<WorkerType>();
             threadName += "-";
             threadName += std::to_string(index);
@@ -183,10 +183,10 @@ namespace un {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
                 if (reusableIndices.empty()) {
-                    handle = jobs.size();
+                    handle = static_cast<JobHandle>(jobs.size());
                     jobs.emplace_back(job, graphHandle);
                 } else {
-                    handle = reusableIndices.front();
+                    handle = static_cast<JobHandle>(reusableIndices.front());
                     reusableIndices.pop();
                     ScheduledJob& recycled = jobs[handle];
                     recycled.job = job;

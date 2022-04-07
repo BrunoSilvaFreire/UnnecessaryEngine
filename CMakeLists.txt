@@ -1,5 +1,5 @@
 project(UnnecessaryEngine LANGUAGES CXX)
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
 if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
     message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
@@ -9,7 +9,10 @@ endif ()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 include(CMakePrintHelpers)
 include(cmake/Unnecessary.cmake)
+find_package(Python REQUIRED)
+
 option(UN_DISALLOW_AGGRESSIVE_INLINING DEFAULT OFF)
+
 conan_cmake_configure(
     REQUIRES
     glm/0.9.9.8

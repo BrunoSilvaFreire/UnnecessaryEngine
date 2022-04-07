@@ -1,3 +1,5 @@
+include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryTests.cmake)
+
 function(configure_unnecessary_module NAME)
     target_compile_definitions(
             ${NAME}
@@ -17,6 +19,14 @@ function(configure_unnecessary_module NAME)
             ${NAME}
             PROPERTIES
             LINKER_LANGUAGE CXX
+    )
+    set_target_properties(
+        ${NAME}
+        PROPERTIES
+        LINKER_LANGUAGE CXX
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
     )
 endfunction()
 
@@ -87,22 +97,6 @@ function(
         )
     endif ()
     if ("${NUMTESTS}" GREATER 0)
-        add_executable(
-                ${NAME}_tests
-                ${UN_MODULE_TESTS}
-        )
-        configure_unnecessary_module(${NAME}_tests)
-
-        target_link_libraries(
-                ${NAME}_tests
-                PUBLIC
-                ${NAME}
-                GTest::GTest
-        )
-        set_target_properties(
-                ${NAME}_tests
-                PROPERTIES
-                LINKER_LANGUAGE CXX
-        )
+        create_unnecessary_tests_for_target(${NAME} "${UN_MODULE_TESTS}")
     endif ()
 endfunction()

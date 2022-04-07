@@ -7,7 +7,7 @@
 namespace un {
     template<typename T>
     static constexpr T lerp(T x, T y, float t) {
-        return (x + (y - x) * t);
+        return static_cast<T>((x + (y - x) * t));
     }
 
     template<typename T>

@@ -20,9 +20,9 @@ namespace un {
     public:
         Chronometer() = default;
 
-        inline size_t stop() const {
+        Resolution stop() const {
             const auto end = Clock::now();
-            return std::chrono::duration_cast<Resolution>(end - start).count();
+            return std::chrono::duration_cast<Resolution>(end - start);
         }
     };
 }

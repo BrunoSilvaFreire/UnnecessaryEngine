@@ -7,6 +7,11 @@
       <option name="SPACE_BEFORE_REFERENCE_IN_DECLARATION" value="false" />
       <option name="SPACE_AFTER_REFERENCE_IN_DECLARATION" value="true" />
     </Objective-C>
+    <codeStyleSettings language="CMake">
+      <indentOptions>
+        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+      </indentOptions>
+    </codeStyleSettings>
     <codeStyleSettings language="ObjectiveC">
       <indentOptions>
         <option name="CONTINUATION_INDENT_SIZE" value="4" />

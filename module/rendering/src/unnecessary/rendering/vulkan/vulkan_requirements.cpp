@@ -10,11 +10,11 @@ namespace un {
         );
     }
 
-    VulkanQueueAvailableRequirement::VulkanQueueAvailableRequirement(vk::QueueFlagBits bits) : bits(
-        bits
-    ) {}
+    VulkanQueueAvailableRequirement::VulkanQueueAvailableRequirement(
+        vk::QueueFlagBits bits
+    ) : bits(bits) {}
 
-    bool VulkanDeviceTypeRequirement::isMet(const vk::PhysicalDeviceProperties& value) {
+    bool VulkanDeviceTypeRequirement::isMet(const vk::PhysicalDeviceProperties &value) {
 
         return value.deviceType == requiredType;
     }

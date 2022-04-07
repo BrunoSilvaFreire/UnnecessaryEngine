@@ -70,7 +70,7 @@ namespace un {
                     layout += un::VertexAttribute(
                         name,
                         pType->getNumElements(),
-                        pType->getSingleSize(),
+                        static_cast<u8>(pType->getSingleSize()),
                         pType->getFormat()
                     );
                 }

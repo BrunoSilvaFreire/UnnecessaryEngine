@@ -7,6 +7,7 @@ target_link_libraries(
     unnecessary_gltf
 )
 include_unnecessary_shader(orbital phong)
+include_unnecessary_shader(orbital triangle)
 includeResource(
     orbital
     ../../legacy/resources/models/teapot_normal.fbx

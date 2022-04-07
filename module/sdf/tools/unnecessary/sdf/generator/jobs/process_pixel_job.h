@@ -53,18 +53,18 @@ namespace un {
         }
 
         UN_AGGRESSIVE_INLINE void operator()(size_t index, JobWorker* worker) override {
-            int ow = output->get_width();
-            int oh = output->get_height();
-            int ox = index % ow;
-            int oy = index / oh;
+            int ow = static_cast<int>(output->get_width());
+            int oh = static_cast<int>(output->get_height());
+            int ox = static_cast<int>(index % ow);
+            int oy = static_cast<int>(index / oh);
             glm::uvec2 inputCoords = outputToInputCoordinates(ox, oy);
             float fullDistance = computeDistanceOfPixel(inputCoords);
             float distance01 = un::inv_lerp(minDistance, maxDistance, fullDistance);
-            png::gray_pixel pixel = un::lerp(
+            auto pixel = static_cast<png::gray_pixel>(un::lerp(
                 std::numeric_limits<png::gray_pixel>::min(),
                 std::numeric_limits<png::gray_pixel>::max(),
                 1 - distance01
-            );
+            ));
             output->set_pixel(ox, oy, pixel);
         }
 

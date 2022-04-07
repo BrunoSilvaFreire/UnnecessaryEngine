@@ -12,7 +12,7 @@ namespace un {
     class RenderingPipeline {
     private:
     public:
-        virtual void configure(un::RenderGraph& graph) = 0;
+        virtual void configure(un::Renderer& renderer, RenderGraph& graph) = 0;
     };
 }
 #endif

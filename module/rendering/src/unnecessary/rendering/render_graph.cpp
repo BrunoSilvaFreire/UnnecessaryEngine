@@ -64,7 +64,7 @@ namespace un {
     }
 
     bool RenderGraph::isAttachmentBorrowed(std::size_t index) const {
-        return borrowedAttachments.contains(index);
+        return borrowedAttachments.contains(static_cast<u32>(index));
     }
 
     const std::vector<un::Attachment>& RenderGraph::getAttachments() const {

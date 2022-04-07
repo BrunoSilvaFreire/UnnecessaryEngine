@@ -44,10 +44,10 @@ namespace un {
             );
             std::vector<vk::VertexInputBindingDescription> inputBindings;
             std::vector<vk::VertexInputAttributeDescription> inputAttributes;
-            u32 stride = vertexLayout->getStride();
+            u32 stride = static_cast<u32>(vertexLayout->getStride());
             const std::vector<un::VertexAttribute>& elements = vertexLayout->getElements();
-            u32 count = elements.size();
-            u32 offset = 0;
+            u32 count = static_cast<u32>(elements.size());
+            std::size_t offset = 0;
             u32 binding = 0; //TODO: Allow for multiple vertex streams
             inputBindings.emplace_back(binding, stride);
             for (u32 i = 0; i < count; ++i) {
@@ -56,7 +56,7 @@ namespace un {
                     i,
                     binding,
                     input.getFormat(),
-                    offset
+                    static_cast<u32>(offset)
                 );
                 offset += input.getSize();
             }

@@ -20,7 +20,6 @@ function(add_unnecessary_shader PATH)
     string(JSON SHADER_NAME GET "${SHADER_JSON}" name)
     get_unnecessary_shader_target_name(${SHADER_NAME} TARGET)
     list(APPEND SHADER_SOURCES ${PATH})
-
     string(JSON SHADER_NUM_STAGES LENGTH "${SHADER_JSON}" stages)
     math(EXPR SHADER_STAGES_RANGE "${SHADER_NUM_STAGES}-1")
     add_custom_target(
@@ -90,7 +89,7 @@ function(add_unnecessary_shader PATH)
     set_target_properties(
         ${TARGET}
         PROPERTIES
-        SOURCES ${SHADER_SOURCES}
+        SOURCES "${SHADER_SOURCES}"
     )
 endfunction()
 

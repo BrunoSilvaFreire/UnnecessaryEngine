@@ -90,6 +90,9 @@ add_unnecessary_tool(
     cxxopts::cxxopts
     nlohmann_json::nlohmann_json
 )
+add_unnecessary_shader(
+    resources/shaders/triangle.shader.json
+)
 add_subdirectory(
     pipelines/phong
 )

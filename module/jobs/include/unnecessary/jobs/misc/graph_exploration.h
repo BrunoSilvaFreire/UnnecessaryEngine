@@ -138,7 +138,7 @@ namespace un {
                     false
                 );
             }
-            chain.template submit(jobSystem);
+            chain.template submit<TJobSystem>(jobSystem);
         }
     };
 }
