@@ -73,8 +73,10 @@ namespace un {
     }
 
 #if DEBUG
+
     const VulkanDebugger& Renderer::getDebugger() const {
         return _debugger;
     }
+
 #endif
 }

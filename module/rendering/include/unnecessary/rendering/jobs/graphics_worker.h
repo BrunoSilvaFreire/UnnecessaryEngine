@@ -26,6 +26,7 @@ namespace un {
 
         Renderer* getRenderer() const;
     };
+
     typedef un::WorkerChain<un::GraphicsWorker> GraphicsChain;
 
 

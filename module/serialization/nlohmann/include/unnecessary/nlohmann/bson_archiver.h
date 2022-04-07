@@ -7,6 +7,7 @@ namespace un {
     class BsonArchiver final : public Archiver {
     public:
         un::Buffer write(const Serialized& serialized) override;
+
         void read(const Buffer& buffer, Serialized& into) override;
     };
 }

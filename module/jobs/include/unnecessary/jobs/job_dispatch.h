@@ -18,7 +18,7 @@ namespace un {
     };
 
     template<typename TWorker>
-    class DispatchBatchMixin : public DispatchBatch {};
+    class DispatchBatchMixin : public DispatchBatch { };
 
     template<typename ...Archetypes>
     class JobDispatchTable : private DispatchBatchMixin<Archetypes> ... {

@@ -77,7 +77,7 @@ namespace un {
     void Window::apply(Application& application) {
         application.getVariableLoop().early([this, &application]() {
             pool();
-            if (shouldClose()){
+            if (shouldClose()) {
                 application.stop();
             }
         });

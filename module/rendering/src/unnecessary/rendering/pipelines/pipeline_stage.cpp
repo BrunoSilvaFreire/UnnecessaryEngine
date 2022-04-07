@@ -4,5 +4,5 @@ namespace un {
 
     PipelineStage::PipelineStage(
         const vk::ShaderModule& module
-    ) : module(module) {}
+    ) : module(module) { }
 }

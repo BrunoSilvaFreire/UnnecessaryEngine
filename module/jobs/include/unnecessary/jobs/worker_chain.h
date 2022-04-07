@@ -29,7 +29,7 @@ namespace un {
              */
             JobType* job;
         public:
-            BookedJob(JobType* job) : job(job) {}
+            BookedJob(JobType* job) : job(job) { }
 
             friend class WorkerChain<WorkerType>;
 
@@ -45,7 +45,7 @@ namespace un {
         std::set<un::JobHandle> leafs;
         std::vector<BookedJob> jobs;
     public:
-        WorkerChain() : independent(), jobs() {}
+        WorkerChain() : independent(), jobs() { }
 
         un::JobHandle immediately(JobType* job) {
             un::JobHandle handle = jobs.size();

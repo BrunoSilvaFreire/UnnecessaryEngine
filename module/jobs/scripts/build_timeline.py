@@ -34,6 +34,7 @@ class EventType(enum.Enum):
 data = pd.read_csv(file)
 type_column = data["type"]
 
+
 def compute_workloads(df: pd.DataFrame):
     is_job_started = type_column == EventType.JOB_STARTED.value
     is_job_finished = type_column == EventType.JOB_FINISHED.value
@@ -53,6 +54,7 @@ def compute_workloads(df: pd.DataFrame):
 def compute_worker_states(df: pd.DataFrame):
     only_workers = df.loc[(type_column != EventType.JOB_STARTED.value) & (type_column != EventType.JOB_FINISHED.value)]
     return only_workers[["archetype", "worker", "label", "type", "time"]]
+
 
 workloads = compute_workloads(data)
 states = compute_worker_states(data)

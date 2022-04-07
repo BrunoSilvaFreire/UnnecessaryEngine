@@ -21,7 +21,7 @@ namespace un {
     class DependencyGraph {
     public:
         typedef std::function<void(IndexType index, const VertexType& vertex)> Explorer;
-        typedef gpp::AdjacencyList<VertexType, DependencyType, IndexType> InnerGraph;
+        typedef gpp::AdjacencyList <VertexType, DependencyType, IndexType> InnerGraph;
     protected:
         InnerGraph graph;
         std::set<IndexType> independent;
@@ -33,7 +33,7 @@ namespace un {
             std::set<IndexType>& currentlyEnqueued,
             const Explorer& explorer
         ) const {
-            for (auto[neighbor, edge] : DependencyGraph<VertexType>::edges_from(index)) {
+            for (auto [neighbor, edge] : DependencyGraph<VertexType>::edges_from(index)) {
                 if (visited.contains(neighbor)) {
                     continue;
                 }
@@ -60,7 +60,7 @@ namespace un {
             un::DependencyType expected
         ) const {
             std::vector<IndexType> dependencies;
-            for (auto[dependency, edge] : graph.node(index).connections()) {
+            for (auto [dependency, edge] : graph.node(index).connections()) {
                 if (edge != expected) {
                     continue;
                 }
@@ -131,7 +131,7 @@ namespace un {
 
         DependencyView allConnectionsOf(IndexType index) {
             std::vector<IndexType> all;
-            for (auto[dependency, edge] : this->node(index).connections()) {
+            for (auto [dependency, edge] : this->node(index).connections()) {
                 all.emplace_back(dependency);
             }
             return DependencyView(

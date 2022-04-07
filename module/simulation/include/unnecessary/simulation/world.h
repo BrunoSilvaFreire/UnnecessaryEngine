@@ -41,7 +41,7 @@ namespace un {
         un::World* world;
     public:
         Simulator(JobSystemType* jobSystem, World* world)
-            : _jobSystem(jobSystem), world(world) {}
+            : _jobSystem(jobSystem), world(world) { }
 
         void apply(un::Application& application) {
             application.getFixedLoop().early(

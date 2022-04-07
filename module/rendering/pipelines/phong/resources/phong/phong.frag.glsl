@@ -15,6 +15,6 @@ void main() {
     lighting.intensity = 1;
     lighting.color = vec3(0, 1, 1);
     vec3 diff = diffuse(lightDir, normal, lighting);*/
-//    gl_Color = vec4(diff + spec, 1.0);
+    //    gl_Color = vec4(diff + spec, 1.0);
 }
 

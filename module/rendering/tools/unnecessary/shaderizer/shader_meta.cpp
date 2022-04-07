@@ -14,7 +14,7 @@ namespace un {
         return inputs;
     }
 
-    ShaderMeta::ShaderMeta(const std::string& name) : name(name) {}
+    ShaderMeta::ShaderMeta(const std::string& name) : name(name) { }
 
     void ShaderMeta::addInput(un::InputScope scope, Input&& input) {
         inputs[scope] += std::move(input);
@@ -76,7 +76,7 @@ namespace un {
         usedInputs.emplace(input);
     }
 
-    ShaderStageMeta::ShaderStageMeta(const std::string& name) : name(name) {}
+    ShaderStageMeta::ShaderStageMeta(const std::string& name) : name(name) { }
 
     const std::string& ShaderStageMeta::getName() const {
         return name;
@@ -112,7 +112,7 @@ namespace un {
         size_t index,
         std::string type,
         const VertexAttribute& attribute
-    ) : index(index), attribute(attribute), type(type) {}
+    ) : index(index), attribute(attribute), type(type) { }
 
 
     size_t VertexAttributeMeta::getIndex() const {
@@ -138,5 +138,5 @@ namespace un {
     InputUsage::InputUsage(
         const std::string& name,
         const std::string& modifier
-    ) : name(name), modifier(modifier) {}
+    ) : name(name), modifier(modifier) { }
 }

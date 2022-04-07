@@ -39,7 +39,7 @@ namespace un {
             const std::function<TWorker*(
                 std::size_t
             )>& creator
-        ) : numWorkers(numWorkers), creator(creator) {}
+        ) : numWorkers(numWorkers), creator(creator) { }
 
         static WorkerPoolConfiguration<WorkerType> forwarding(
             size_t numWorkers

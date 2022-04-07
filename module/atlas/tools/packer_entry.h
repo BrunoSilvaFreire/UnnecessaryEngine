@@ -1,9 +1,10 @@
-#ifndef UNNECESSARYENGINE_IMAGE_RECT_H
-#define UNNECESSARYENGINE_IMAGE_RECT_H
+#ifndef UNNECESSARYENGINE_PACKER_ENTRY_H
+#define UNNECESSARYENGINE_PACKER_ENTRY_H
 
 #include <unnecessary/def.h>
 #include <filesystem>
-namespace un {
+
+namespace un::packer {
     class PackerEntry {
     private:
         std::filesystem::path path;

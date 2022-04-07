@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <unnecessary/misc/templates.h>
-#include "unnecessary/misc/membuf.h"
+#include "unnecessary/memory/membuf.h"
 #include "unnecessary/misc/types.h"
 
 TEST(templates, for_types_test) {

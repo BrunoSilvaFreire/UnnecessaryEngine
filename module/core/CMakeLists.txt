@@ -6,9 +6,12 @@ add_unnecessary_module(
     include/unnecessary/logging.h
     include/unnecessary/misc/event.h
     include/unnecessary/misc/types.h
-    include/unnecessary/misc/membuf.h
-    include/unnecessary/misc/binary_writer.h
+    include/unnecessary/memory/membuf.h
+    include/unnecessary/memory/binary_writer.h
+    include/unnecessary/memory/buffer_stream.h
     include/unnecessary/misc/historic.h
+    include/unnecessary/misc/files.h
+    include/unnecessary/misc/indexing.h
     include/unnecessary/misc/benchmark.h
     src/unnecessary/logging.cpp
     src/unnecessary/strings.cpp
@@ -18,6 +21,7 @@ add_unnecessary_module(
     src/unnecessary/misc/binary_writer.cpp
     src/unnecessary/misc/historic.cpp
     src/unnecessary/misc/benchmark.cpp
+    src/unnecessary/misc/files.cpp
 
     TESTS
     tests/membuf_tests.cpp

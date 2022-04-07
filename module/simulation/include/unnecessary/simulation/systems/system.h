@@ -20,7 +20,7 @@ namespace un {
             un::SimulationChain& chain
         ) = 0;
 
-        virtual void describe(un::SystemDescriptor& descriptor) {}
+        virtual void describe(un::SystemDescriptor& descriptor) { }
     };
 }
 #endif

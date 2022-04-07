@@ -21,7 +21,8 @@ namespace un {
     const std::vector<un::Drawable>& GeometryBatch::getDrawables() const {
         return drawables;
     }
-    MaterialBatch::MaterialBatch(Material* material) : material(material) {}
+
+    MaterialBatch::MaterialBatch(Material* material) : material(material) { }
 
     Material* MaterialBatch::getMaterial() const {
         return material;

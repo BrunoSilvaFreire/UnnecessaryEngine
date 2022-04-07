@@ -33,7 +33,7 @@ namespace un {
         JobStartedMeta(const TJob* const job, JobHandle jobHandle) : JobMeta<TJob>(
             job,
             jobHandle
-        ) {}
+        ) { }
 
 
         ProfilerEventType getEventType() const override {
@@ -47,7 +47,7 @@ namespace un {
         JobFinishedMeta(const TJob* const job, JobHandle jobHandle) : JobMeta<TJob>(
             job,
             jobHandle
-        ) {}
+        ) { }
 
         ProfilerEventType getEventType() const override {
             return un::ProfilerEventType::eJobFinished;

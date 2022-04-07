@@ -3,7 +3,7 @@
 
 #include <filesystem>
 #include <fstream>
-#include <unnecessary/misc/membuf.h>
+#include "unnecessary/memory/membuf.h"
 #include <unnecessary/jobs/workers/worker.h>
 
 namespace un {
@@ -13,8 +13,6 @@ namespace un {
         std::ios::openmode openMode;
         un::Buffer* buffer;
         typedef std::basic_ifstream<un::Buffer::ElementType> StreamType;
-
-        bool isText() const;
 
     public:
         LoadFileJob(

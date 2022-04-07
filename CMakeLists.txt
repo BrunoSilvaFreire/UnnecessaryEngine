@@ -28,9 +28,16 @@ conan_cmake_configure(
     tinygltf/2.5.0
     freetype/2.11.1
     stduuid/1.2.2
+    zlib/1.2.12
+    stb/20200203
 
     GENERATORS
     cmake_find_package
+
+    OPTIONS
+    stduuid:with_cxx20_span=True
+    freetype:with_brotli=False
+    tinygltf:stb_image=False
 )
 
 conan_cmake_autodetect(settings)
@@ -54,11 +61,10 @@ find_package(Vulkan REQUIRED)
 find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(termcolor REQUIRED)
+find_package(glfw3 REQUIRED)
 if (WIN32)
-    find_package(glfw REQUIRED)
     find_package(freetype REQUIRED)
 elseif (UNIX)
-    find_package(glfw3 REQUIRED)
     find_package(Freetype REQUIRED)
 endif ()
 find_package(tinyobjloader REQUIRED)

@@ -10,5 +10,5 @@ namespace un {
         return !last && current;
     }
 
-    BooleanHistoric::BooleanHistoric() : Historic<bool>(false, false) {}
+    BooleanHistoric::BooleanHistoric() : Historic<bool>(false, false) { }
 }

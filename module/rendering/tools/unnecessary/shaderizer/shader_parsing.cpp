@@ -32,7 +32,7 @@ namespace un {
             for (const auto& item : inputs.items()) {
                 std::string name = item.key();
                 const nlohmann::json& input = item.value().get<nlohmann::json>();
-                const auto[parsed, scope] = un::shader_tool::parseInput(
+                const auto [parsed, scope] = un::shader_tool::parseInput(
                     name,
                     input
                 );

@@ -31,7 +31,6 @@ namespace un {
     std::string to_string(const un::InputScope& scope);
 
 
-
     namespace inputs {
         std::unordered_map<
             std::string,

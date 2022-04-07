@@ -8,6 +8,7 @@ namespace un {
     void Serialized::set(const std::string& key, const std::shared_ptr<un::SerializedNode>& result) {
         namedProperties[key] = result;
     }
+
     void Serialized::set(const uuids::uuid& key, const std::shared_ptr<un::SerializedNode>& result) {
         uuidProperties[key] = result;
     }

@@ -67,7 +67,7 @@ namespace un {
                     pPipeline->operator*()
                 );
 
-                for (const auto &[geometry, batch] : materialBatch.getGeometryBatches()) {
+                for (const auto& [geometry, batch] : materialBatch.getGeometryBatches()) {
                     std::array<vk::Buffer, 1> vertexBufs = {
                         *geometry->getVertexBuffer()
                     };

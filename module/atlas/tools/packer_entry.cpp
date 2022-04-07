@@ -1,5 +1,6 @@
-#include "image_rect.h"
-namespace un {
+#include "packer_entry.h"
+
+namespace un::packer {
 
     u32 PackerEntry::getArea() const {
         return width * height;

@@ -7,7 +7,7 @@
 int main() {
     un::SimpleJobSystem system(4, true);
     {
-        un::WorkerChain <un::JobWorker> chain;
+        un::WorkerChain<un::JobWorker> chain;
         auto dragon = std::filesystem::current_path() / "dragon.glb";
         LOG(INFO) << "Expecting dragon @ " << std::filesystem::absolute(dragon);
         chain.immediately<un::LoadGLTFJob>(dragon, un::GLTFType::eBinary);

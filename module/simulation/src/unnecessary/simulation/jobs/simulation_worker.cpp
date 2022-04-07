@@ -5,5 +5,5 @@ namespace un {
     SimulationWorker::SimulationWorker(
         size_t index,
         bool autostart
-    ) : AbstractJobWorker(index, autostart) {}
+    ) : AbstractJobWorker(index, autostart) { }
 }

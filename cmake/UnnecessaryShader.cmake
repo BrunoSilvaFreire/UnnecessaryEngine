@@ -53,7 +53,7 @@ function(add_unnecessary_shader PATH)
             MAIN_DEPENDENCY ${SHADER_STAGE_FILE}
 
             COMMAND
-            unnecessary_shader_tool
+            unnecessary_shaderizer
             ${PATH_ABS}
             --glsl
             --output ${SHADER_OUTPUT_DIR}
@@ -80,7 +80,7 @@ function(add_unnecessary_shader PATH)
             MAIN_DEPENDENCY ${SHADER_STAGE_FILE}
 
             COMMAND
-            unnecessary_shader_tool
+            unnecessary_shaderizer
             ${PATH_ABS}
             --cpp
             --output ${SHADER_OUTPUT_DIR}

@@ -67,6 +67,7 @@ namespace un {
             const vk::Semaphore& getRenderFinished() const;
 
             const vk::Fence& getFence() const;
+
 #ifdef DEBUG
         private:
             std::size_t innerIndex;
@@ -74,6 +75,7 @@ namespace un {
             size_t getInnerIndex() const;
 
             void setInnerIndex(size_t innerIndex);
+
 #endif
         };
 

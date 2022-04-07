@@ -68,5 +68,5 @@ namespace un {
         u8 mipLevels,
         vk::SampleCountFlagBits sampleCountFlag,
         vk::ImageTiling tiling
-    ) : mipLevels(mipLevels), sampleCountFlag(sampleCountFlag), tiling(tiling) {}
+    ) : mipLevels(mipLevels), sampleCountFlag(sampleCountFlag), tiling(tiling) { }
 }

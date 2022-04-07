@@ -5,7 +5,7 @@ namespace un {
 
     Version::Version(u8 major, u8 minor, u8 patch) : major(major),
                                                      minor(minor),
-                                                     patch(patch) {}
+                                                     patch(patch) { }
 
     u8 Version::getMajor() const {
         return major;

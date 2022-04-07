@@ -212,7 +212,7 @@ namespace un {
     SwapChain::ChainImage::ChainImage(
         const vk::Image& image,
         const ImageView& imageView
-    ) : image(image), imageView(imageView) {}
+    ) : image(image), imageView(imageView) { }
 
     const vk::Image& SwapChain::ChainImage::getImage() const {
         return image;

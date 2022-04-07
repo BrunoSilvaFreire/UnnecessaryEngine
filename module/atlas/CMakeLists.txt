@@ -18,21 +18,26 @@ add_unnecessary_tool(
     SOURCES
     tools/packer.h
     tools/packer.cpp
-    tools/image_rect.h
-    tools/image_rect.cpp
+    tools/packer_entry.h
+    tools/packer_entry.cpp
+    tools/packing_algorithm.h
+    tools/jobs/pack_texture_job.h
+    tools/jobs/pack_texture_job.cpp
 
     DEPENDENCIES
     unnecessary_atlas
     pngpp::pngpp
+    glm::glm
 
     TESTS
     tests/packer_tests.cpp
 )
 set(IMG_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/bin/images)
-message(${IMG_OUT_DIR})
+
 add_custom_command(
     TARGET unnecessary_atlas_packer_tests
     POST_BUILD
+
     COMMAND
     ${CMAKE_COMMAND} -E make_directory ${IMG_OUT_DIR}
 

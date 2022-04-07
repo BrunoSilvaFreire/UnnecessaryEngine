@@ -1,4 +1,3 @@
-
 struct PerObjectData
 {
     mat4 model;

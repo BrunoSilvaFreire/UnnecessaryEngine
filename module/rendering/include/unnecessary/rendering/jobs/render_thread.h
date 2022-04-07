@@ -112,7 +112,7 @@ namespace un {
                     }
                     submits.push_back(submit);
                 },
-                [&](u32 from, u32 to, const DependencyType& type) {}
+                [&](u32 from, u32 to, const DependencyType& type) { }
             );
 
             vk::Queue queue = *_renderer->getDevice().getGraphics();

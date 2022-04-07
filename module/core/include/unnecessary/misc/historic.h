@@ -6,9 +6,9 @@ namespace un {
     protected:
         T current, last;
     public:
-        Historic(T current, T last) : current(current), last(last) {}
+        Historic(T current, T last) : current(current), last(last) { }
 
-        Historic() : current(), last() {}
+        Historic() : current(), last() { }
 
         void set(T value) {
             last = current;

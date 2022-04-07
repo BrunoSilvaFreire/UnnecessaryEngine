@@ -1,8 +1,8 @@
 #ifndef UNNECESSARYENGINE_BINARY_WRITER_H
 #define UNNECESSARYENGINE_BINARY_WRITER_H
 
-#include <unnecessary/def.h>
-#include <unnecessary/misc/membuf.h>
+#include "unnecessary/def.h"
+#include "membuf.h"
 
 namespace un {
     class BinaryWriter {

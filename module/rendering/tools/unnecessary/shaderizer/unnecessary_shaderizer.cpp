@@ -38,15 +38,15 @@ void generateCPP(
 
 int main(int argc, char** argv) {
     cxxopts::Options options(
-        "unnecessary_shader_tool",
+        "unnecessary_shaderizer",
         "Shader preprocessor for unnecessary engine"
     );
     bool cpp, glsl;
     options.add_options()
-               (kShaderFileName, "Shader json file", cxxopts::value<std::string>())
-               (kOutput, "Output directory", cxxopts::value<std::string>())
-               (kCpp, "Generate CPP", cxxopts::value(cpp))
-               (kGlsl, "Generate kGlsl", cxxopts::value(glsl));
+        (kShaderFileName, "Shader json file", cxxopts::value<std::string>())
+        (kOutput, "Output directory", cxxopts::value<std::string>())
+        (kCpp, "Generate CPP", cxxopts::value(cpp))
+        (kGlsl, "Generate kGlsl", cxxopts::value(glsl));
     options.parse_positional(kShaderFileName);
     const auto& result = options.parse(argc, argv);
     size_t a = result.count(kShaderFileName);
@@ -121,7 +121,7 @@ void generateCPP(
     cppSrc << "return layout;" << std::endl;
     cppSrc << "}" << std::endl;
 
-    for (const auto&[scope, inputPack] : meta.getInputs()) {
+    for (const auto& [scope, inputPack] : meta.getInputs()) {
         std::string stageFlags;
         for (const auto& item : meta.getStages()) {
             if (!item.isUsingInputPack(inputPack)) {

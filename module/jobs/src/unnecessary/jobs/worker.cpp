@@ -8,5 +8,5 @@ namespace un {
     JobWorker::JobWorker(
         size_t index,
         bool autostart
-    ) : AbstractJobWorker(index, autostart) {}
+    ) : AbstractJobWorker(index, autostart) { }
 }

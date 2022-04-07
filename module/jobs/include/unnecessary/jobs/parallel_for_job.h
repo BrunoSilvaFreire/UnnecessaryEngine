@@ -61,9 +61,9 @@ namespace un {
          * @param start The batch start
          * @param end The batch end
          */
-        virtual void batchStarted(size_t start, size_t end) {};
+        virtual void batchStarted(size_t start, size_t end) { };
 
-        virtual void batchFinished(size_t start, size_t end) {};
+        virtual void batchFinished(size_t start, size_t end) { };
 
         virtual void operator()(size_t index, TWorker* worker) = 0;
 

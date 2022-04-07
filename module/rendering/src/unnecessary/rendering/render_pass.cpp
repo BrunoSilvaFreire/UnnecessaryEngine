@@ -5,7 +5,7 @@ namespace un {
     un::RenderPass::RenderPass(
         const std::basic_string<char, std::char_traits<char>, std::allocator<char>>& name,
         const vk::Flags<vk::PipelineStageFlagBits>& stageFlags
-    ) : name(name), stageFlags(stageFlags) {}
+    ) : name(name), stageFlags(stageFlags) { }
 
     const std::string& RenderPass::getName() const {
         return name;

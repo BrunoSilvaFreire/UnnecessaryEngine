@@ -4,10 +4,17 @@
 #include <cstddef>
 #include <unnecessary/strings.h>
 
+#ifdef WIN32
+typedef unsigned __int8 u8;
+typedef unsigned __int16 u16;
+typedef unsigned __int32 u32;
+typedef unsigned __int64 u64;
+#else
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 typedef unsigned long u64;
+#endif
 
 typedef char i8;
 typedef short i16;

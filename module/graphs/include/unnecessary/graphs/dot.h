@@ -2,6 +2,7 @@
 #define UNNECESSARYENGINE_DOT_H
 
 #include <string>
+
 #in
 namespace un {
     namespace graphs {
@@ -9,15 +10,15 @@ namespace un {
         std::string toDot() const {
             std::stringstream dot;
             dot << "digraph {" << std::endl;
-            for (auto[vertexPtr, index] : DependencyGraph<VertexType>::all_vertices()) {
+            for (auto [vertexPtr, index] : DependencyGraph<VertexType>::all_vertices()) {
                 dot << index << "[label =\"#" << index << ": "
                     << un::to_string(*vertexPtr)
                     << "\" fontname=\"monospace\"" <<
                     vertex_properties(vertexPtr) <<
                     "];" << std::endl;
             }
-            for (auto[vertex, index] : DependencyGraph<VertexType>::all_vertices()) {
-                for (auto[otherIndex, edge] : DependencyGraph<VertexType>::edges_from(
+            for (auto [vertex, index] : DependencyGraph<VertexType>::all_vertices()) {
+                for (auto [otherIndex, edge] : DependencyGraph<VertexType>::edges_from(
                     index
                 )) {
                     if (edge == un::DependencyType::eUses) {

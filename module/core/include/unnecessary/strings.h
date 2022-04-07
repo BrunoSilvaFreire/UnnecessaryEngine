@@ -12,6 +12,7 @@ namespace un {
     std::string capitalize(std::string value);
 
     std::string upper(std::string value);
+
     std::string lower(std::string value);
 }
 #endif

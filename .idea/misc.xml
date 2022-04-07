@@ -3,8 +3,41 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <sourceRoots>
+      <file path="$PROJECT_DIR$/module/algorithms/include" />
+      <file path="$PROJECT_DIR$/module/algorithms/src" />
+      <file path="$PROJECT_DIR$/module/algorithms/tests" />
+      <file path="$PROJECT_DIR$/module/application/include" />
+      <file path="$PROJECT_DIR$/module/application/src" />
+      <file path="$PROJECT_DIR$/module/atlas/include" />
+      <file path="$PROJECT_DIR$/module/atlas/src" />
+      <file path="$PROJECT_DIR$/module/atlas/tests" />
+      <file path="$PROJECT_DIR$/module/atlas/tools" />
+      <file path="$PROJECT_DIR$/module/core/include" />
+      <file path="$PROJECT_DIR$/module/core/src" />
+      <file path="$PROJECT_DIR$/module/core/tests" />
+      <file path="$PROJECT_DIR$/module/gameplay/include" />
+      <file path="$PROJECT_DIR$/module/gameplay/src" />
+      <file path="$PROJECT_DIR$/module/gltf/include" />
+      <file path="$PROJECT_DIR$/module/gltf/src" />
+      <file path="$PROJECT_DIR$/module/gltf/tests" />
+      <file path="$PROJECT_DIR$/module/graphs/include" />
+      <file path="$PROJECT_DIR$/module/graphs/src" />
+      <file path="$PROJECT_DIR$/module/jobs/include" />
+      <file path="$PROJECT_DIR$/module/jobs/src" />
+      <file path="$PROJECT_DIR$/module/jobs/tests" />
+      <file path="$PROJECT_DIR$/module/rendering/include" />
+      <file path="$PROJECT_DIR$/module/rendering/src" />
+      <file path="$PROJECT_DIR$/module/rendering/tools" />
+      <file path="$PROJECT_DIR$/module/sdf/include" />
+      <file path="$PROJECT_DIR$/module/sdf/src" />
+      <file path="$PROJECT_DIR$/module/sdf/tests" />
+      <file path="$PROJECT_DIR$/module/sdf/tools" />
       <file path="$PROJECT_DIR$/module/serialization/include" />
+      <file path="$PROJECT_DIR$/module/serialization/nlohmann/include" />
+      <file path="$PROJECT_DIR$/module/serialization/nlohmann/src" />
+      <file path="$PROJECT_DIR$/module/serialization/nlohmann/tests" />
       <file path="$PROJECT_DIR$/module/serialization/src" />
+      <file path="$PROJECT_DIR$/module/serialization/tests" />
     </sourceRoots>
   </component>
   <component name="SwUserDefinedSpecifications">

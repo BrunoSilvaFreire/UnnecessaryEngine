@@ -17,12 +17,12 @@ int main(int argc, char** argv) {
     int size = 64;
     int nThreads = std::thread::hardware_concurrency();
     options.add_options()
-               (kInputName, "PNG input", cxxopts::value<std::string>())
-               ("output", "PNG output", cxxopts::value<std::string>())
-               ("size", "Generate CPP", cxxopts::value<int>(size))
-               (kMinName, "Minimum SDF distance", cxxopts::value<float>())
-               (kMaxName, "Maximum SDF distance", cxxopts::value<float>())
-               (kThreadsName, "Number of threads", cxxopts::value<int>(nThreads));
+        (kInputName, "PNG input", cxxopts::value<std::string>())
+        ("output", "PNG output", cxxopts::value<std::string>())
+        ("size", "Generate CPP", cxxopts::value<int>(size))
+        (kMinName, "Minimum SDF distance", cxxopts::value<float>())
+        (kMaxName, "Maximum SDF distance", cxxopts::value<float>())
+        (kThreadsName, "Number of threads", cxxopts::value<int>(nThreads));
     options.parse_positional(kInputName);
     const auto& result = options.parse(argc, argv);
     size_t a = result.count(kInputName);

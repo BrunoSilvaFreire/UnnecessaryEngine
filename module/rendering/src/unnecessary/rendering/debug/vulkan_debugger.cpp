@@ -11,9 +11,11 @@
 
 namespace un {
 #ifdef WIN32
+
     void debug_break() {
         __debugbreak();
     }
+
 #else
     void debug_break() {
         __builtin_trap();

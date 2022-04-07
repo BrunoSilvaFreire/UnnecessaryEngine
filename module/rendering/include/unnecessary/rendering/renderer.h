@@ -76,8 +76,11 @@ namespace un {
         }
 
 #if DEBUG
+
         const un::VulkanDebugger& getDebugger() const;
+
 #endif
+
         const un::SwapChain& getSwapChain() const;
 
         un::SwapChain& getSwapChain();

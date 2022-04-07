@@ -10,7 +10,9 @@
 #include <cxxabi.h>
 
 #else
+
 #include <typeinfo>
+
 #endif
 namespace un {
 #ifdef __GNUG__
@@ -25,13 +27,16 @@ namespace un {
     std::string type_name_of(const std::type_info& info);
 
 #else
+
     template<typename T>
     std::string type_name_of() {
         return typeid(T).name();
     }
+
     std::string type_name_of(const std::type_info& info);
 
     std::string demangle(const char* value);
+
 #endif
 }
 #endif

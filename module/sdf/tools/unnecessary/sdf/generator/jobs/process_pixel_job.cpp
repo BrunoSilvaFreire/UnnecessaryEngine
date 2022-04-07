@@ -11,6 +11,6 @@ namespace un {
         : input(input),
           output(output),
           minDistance(minDistance),
-          maxDistance(maxDistance) {}
+          maxDistance(maxDistance) { }
 
 }

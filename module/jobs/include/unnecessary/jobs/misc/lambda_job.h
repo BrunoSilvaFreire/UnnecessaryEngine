@@ -14,7 +14,7 @@ namespace un {
         Callback callback;
         VoidCallback voidCallback;
     public:
-        LambdaJob(const Callback& callback) : callback(callback), voidCallback(nullptr) {}
+        LambdaJob(const Callback& callback) : callback(callback), voidCallback(nullptr) { }
 
 
         LambdaJob(const VoidCallback& callback) : voidCallback(callback), callback() {

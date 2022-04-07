@@ -5,7 +5,7 @@
 #ifndef UNNECESSARYENGINE_GEOMETRY_H
 #define UNNECESSARYENGINE_GEOMETRY_H
 
-#include <unnecessary/misc/membuf.h>
+#include "unnecessary/memory/membuf.h"
 #include <unnecessary/rendering/buffers/gpu_buffer.h>
 #include <unnecessary/rendering/layout/vertex_layout.h>
 #include <cstdint>

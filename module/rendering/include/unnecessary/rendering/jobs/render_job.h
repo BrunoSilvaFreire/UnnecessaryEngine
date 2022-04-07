@@ -22,7 +22,7 @@ namespace un {
             const std::size_t passIndex
         ) : _data(data),
             _pass(pass),
-            _passIndex(passIndex) {}
+            _passIndex(passIndex) { }
 
         void operator()(un::GraphicsWorker* worker) override {
             un::CommandBuffer buf = _data->requestCommandBuffer(worker, _passIndex);

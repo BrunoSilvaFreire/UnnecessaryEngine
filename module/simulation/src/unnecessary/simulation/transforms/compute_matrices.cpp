@@ -24,6 +24,6 @@ namespace un {
     ComputeLocalToWorldJob::ComputeLocalToWorldJob(
         World* world,
         const std::vector<entt::entity>& entities
-    ) : world(world), entities(entities) {}
+    ) : world(world), entities(entities) { }
 
 }

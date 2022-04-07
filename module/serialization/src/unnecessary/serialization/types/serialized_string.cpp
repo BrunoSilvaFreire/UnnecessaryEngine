@@ -5,5 +5,5 @@ namespace un {
         return un::SerializedType::eString;
     }
 
-    SerializedString::SerializedString(const std::string& value) : SerializedPrimitive(value) {}
+    SerializedString::SerializedString(const std::string& value) : SerializedPrimitive(value) { }
 }

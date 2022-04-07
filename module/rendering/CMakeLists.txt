@@ -71,10 +71,10 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
     )
 endif ()
 add_unnecessary_tool(
-    unnecessary_shader_tool
+    unnecessary_shaderizer
 
     SOURCES
-    tools/unnecessary/shaderizer/unnecessary_shader_tool.cpp
+    tools/unnecessary/shaderizer/unnecessary_shaderizer.cpp
     tools/unnecessary/shaderizer/shader_meta.h
     tools/unnecessary/shaderizer/shader_meta.cpp
     tools/unnecessary/shaderizer/shader_parsing.h

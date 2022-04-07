@@ -2,7 +2,7 @@
 #include <unnecessary/shaderizer/inputs/glsl_type.h>
 
 namespace un {
-    GlslType::GlslType() {}
+    GlslType::GlslType() { }
 
     GlslType::GlslType(
         size_t singleSize,
@@ -10,7 +10,7 @@ namespace un {
         vk::Format format
     ) : singleSize(
         singleSize
-    ), numElements(numElements), format(format) {}
+    ), numElements(numElements), format(format) { }
 
     size_t GlslType::getSingleSize() const {
         return singleSize;

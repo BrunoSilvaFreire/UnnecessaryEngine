@@ -8,8 +8,9 @@ TEST(packer_tool, pack_random_images) {
     GTEST_LOG_(INFO) << "Looking for images in " << std::filesystem::absolute(imagesDir);
     std::filesystem::directory_iterator iterator(imagesDir);
     for (auto entry : iterator) {
-        files.emplace_back(entry.path());
-        GTEST_LOG_(INFO) << "Discovered file " << entry.path();
+        files.emplace_back(entry.path().string());
+        GTEST_LOG_(INFO) << "Discovered file " << entry.path()
+                         << " (" << std::filesystem::absolute(entry.path()).string() << ").";
     }
     un::packer::pack(files);
 }

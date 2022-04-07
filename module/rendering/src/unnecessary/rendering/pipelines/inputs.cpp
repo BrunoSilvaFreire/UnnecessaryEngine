@@ -5,7 +5,7 @@ namespace un {
         const std::string& name,
         const std::string& type
     ) : name(name),
-        type(type) {}
+        type(type) { }
 
     const std::string& Input::getName() const {
         return name;

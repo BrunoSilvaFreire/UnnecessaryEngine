@@ -7,6 +7,7 @@
 
 namespace un {
     class System;
+
     typedef un::WorkerChain<un::SimulationWorker> SimulationChain;
 
     struct SimulationNode {

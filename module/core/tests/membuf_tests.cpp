@@ -3,8 +3,8 @@
 //
 
 #include <gtest/gtest.h>
-#include <unnecessary/misc/membuf.h>
-#include <unnecessary/misc/binary_writer.h>
+#include "unnecessary/memory/membuf.h"
+#include "unnecessary/memory/binary_writer.h"
 
 TEST(memory, binary_writer_overflow) {
     const size_t length = 64;

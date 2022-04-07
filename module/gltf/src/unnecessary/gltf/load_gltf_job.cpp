@@ -28,13 +28,13 @@ namespace un {
         }
         _output = new un::LocalGeometry();
         for (const auto& buf : model.buffers) {
-            
+
         }
     }
 
     LoadGLTFJob::LoadGLTFJob(
         std::filesystem::path path,
         GLTFType type
-    ) : _path(path), _type(type) {}
+    ) : _path(path), _type(type) { }
 
 }

@@ -13,7 +13,7 @@ namespace un {
         const std::string& name,
         vk::DescriptorType type
     ) : name(name),
-        type(type) {}
+        type(type) { }
 
     vk::DescriptorSetLayout DescriptorSetLayout::build(vk::Device device) {
         std::vector<vk::DescriptorSetLayoutBinding> items;

@@ -1,11 +1,12 @@
 #ifndef UNNECESSARYENGINE_MEMBUF_H
 #define UNNECESSARYENGINE_MEMBUF_H
 
-#include <unnecessary/def.h>
+#include "unnecessary/def.h"
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 #include <vector>
+#include <ostream>
 
 namespace un {
     template<typename T>
@@ -43,6 +44,10 @@ namespace un {
          */
         std::size_t getCount() const {
             return count;
+        }
+
+        const T* offset(std::size_t offsetInBytes) const {
+            return data() + offsetInBytes;
         }
 
         u8* operator->() {
@@ -121,6 +126,11 @@ namespace un {
             assertWithinBounds(index);
 #endif
             return ptr[index];
+        }
+
+        friend std::ostream& operator<<(std::ostream& os, const MemoryBuffer& buffer) {
+            os.write(buffer.ptr, buffer.size());
+            return os;
         }
     };
 

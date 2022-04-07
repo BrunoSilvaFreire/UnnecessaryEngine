@@ -23,7 +23,7 @@ namespace un {
         }
 
         virtual ~ProfilerPool() {
-            for (const auto& item : profilers){
+            for (const auto& item : profilers) {
                 delete item;
             }
         }
