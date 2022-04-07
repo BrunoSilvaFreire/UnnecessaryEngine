@@ -2,9 +2,9 @@
 #include <iostream>
 #include <unnecessary/strings.h>
 #include <unnecessary/rendering/vulkan/vulkan_utils.h>
-#include <unnecessary/shader_tool/shader_meta.h>
-#include <unnecessary/shader_tool/shader_parsing.h>
-#include <unnecessary/shader_tool/inputs/glsl_type.h>
+#include <unnecessary/shaderizer/shader_meta.h>
+#include <unnecessary/shaderizer/shader_parsing.h>
+#include <unnecessary/shaderizer/inputs/glsl_type.h>
 #include <fstream>
 
 static const char* const kShaderFileName = "shader_json";

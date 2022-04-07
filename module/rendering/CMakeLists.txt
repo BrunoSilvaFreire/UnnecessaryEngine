@@ -74,13 +74,13 @@ add_unnecessary_tool(
     unnecessary_shader_tool
 
     SOURCES
-    tools/unnecessary/shader_tool/unnecessary_shader_tool.cpp
-    tools/unnecessary/shader_tool/shader_meta.h
-    tools/unnecessary/shader_tool/shader_meta.cpp
-    tools/unnecessary/shader_tool/shader_parsing.h
-    tools/unnecessary/shader_tool/shader_parsing.cpp
-    tools/unnecessary/shader_tool/inputs/glsl_type.h
-    tools/unnecessary/shader_tool/inputs/glsl_type.cpp
+    tools/unnecessary/shaderizer/unnecessary_shader_tool.cpp
+    tools/unnecessary/shaderizer/shader_meta.h
+    tools/unnecessary/shaderizer/shader_meta.cpp
+    tools/unnecessary/shaderizer/shader_parsing.h
+    tools/unnecessary/shaderizer/shader_parsing.cpp
+    tools/unnecessary/shaderizer/inputs/glsl_type.h
+    tools/unnecessary/shaderizer/inputs/glsl_type.cpp
 
     DEPENDENCIES
     unnecessary_core

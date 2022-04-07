@@ -4,7 +4,6 @@ target_link_libraries(
     unnecessary_rendering
     unnecessary_phong_pipeline
     unnecessary_simulation
-    unnecessary_gltf
 )
 include_unnecessary_shader(orbital phong)
 include_unnecessary_shader(orbital triangle)

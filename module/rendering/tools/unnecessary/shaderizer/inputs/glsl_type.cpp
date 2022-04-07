@@ -1,5 +1,5 @@
 
-#include <unnecessary/shader_tool/inputs/glsl_type.h>
+#include <unnecessary/shaderizer/inputs/glsl_type.h>
 
 namespace un {
     GlslType::GlslType() {}

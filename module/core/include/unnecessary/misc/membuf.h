@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
+#include <vector>
 
 namespace un {
     template<typename T>
@@ -67,18 +68,20 @@ namespace un {
             }
         }
 
-        MemoryBuffer(std::size_t count) {
+        explicit MemoryBuffer(std::size_t count) : count(count), ptr(nullptr) {
             allocate(count);
         }
 
-        MemoryBuffer(const un::MemoryBuffer<T>& other) {
+        MemoryBuffer(const un::MemoryBuffer<T>& other) : ptr(nullptr), count(0) {
             allocate(other.count);
             std::memcpy(ptr, other.ptr, size());
         }
 
+        MemoryBuffer(
+            un::MemoryBuffer<T>&& moved
+        ) noexcept: ptr(std::move(moved.ptr)), count(std::move(moved.count)) { }
 
-        MemoryBuffer() : ptr(nullptr) {
-        }
+        MemoryBuffer() : ptr(nullptr), count(0) { }
 
         bool isAllocated() const {
             return count > 0;
@@ -123,11 +126,15 @@ namespace un {
 
     class Buffer : public MemoryBuffer<u8> {
     public:
-        Buffer(const MemoryBuffer<u8>& other);
+        explicit Buffer(const std::vector<u8>& vector);
+
+        explicit Buffer(const MemoryBuffer<u8>& other);
 
         Buffer();
 
-        Buffer(size_t size, bool zero = true);
+        Buffer(un::Buffer&& other) noexcept;
+
+        explicit Buffer(size_t size, bool zero = true);
 
         template<typename T>
         void write(std::size_t index, const T& value) {
@@ -137,6 +144,10 @@ namespace un {
         template<typename T>
         T read(std::size_t index) {
             return ptr[index];
+        }
+
+        void copy(u8* data) {
+            std::memcpy(ptr, data, count);
         }
 
     };

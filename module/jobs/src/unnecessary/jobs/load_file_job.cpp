@@ -31,7 +31,7 @@ namespace un {
         buffer->resize(fileSize);
         buffer->setZero();
         if (text) {
-            buffer[fileSize - 1] = 0; // Null terminator
+            buffer->operator[](fileSize - 1) = 0; // Null terminator
         }
         stream.seekg(0, std::ios::beg);
         size_t pos = 0;

@@ -27,6 +27,7 @@ conan_cmake_configure(
     pngpp/0.2.10
     tinygltf/2.5.0
     freetype/2.11.1
+    stduuid/1.2.2
 
     GENERATORS
     cmake_find_package
@@ -64,6 +65,7 @@ find_package(tinyobjloader REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(assimp REQUIRED)
 find_package(GTest REQUIRED)
+find_package(stduuid REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(TinyGLTF REQUIRED)
 target_compile_definitions(
@@ -114,7 +116,8 @@ add_subdirectory(module/application)
 add_subdirectory(module/rendering)
 add_subdirectory(module/simulation)
 add_subdirectory(module/sdf)
-add_subdirectory(module/gltf)
+add_subdirectory(module/serialization)
+add_subdirectory(module/atlas)
 
 
 add_subdirectory(applications/orbital)

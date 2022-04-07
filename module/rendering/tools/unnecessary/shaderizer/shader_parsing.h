@@ -2,7 +2,7 @@
 #define UNNECESSARYENGINE_SHADER_PARSING_H
 
 #include <unnecessary/rendering/pipelines/inputs.h>
-#include <unnecessary/shader_tool/shader_meta.h>
+#include <unnecessary/shaderizer/shader_meta.h>
 #include <nlohmann/json.hpp>
 
 namespace un {

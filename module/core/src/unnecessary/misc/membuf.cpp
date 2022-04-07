@@ -13,6 +13,15 @@ namespace un {
 
     }
 
+    Buffer::Buffer(const std::vector<u8>& vector) {
+        auto len = vector.size();
+        resize(len);
+        std::memcpy(ptr, vector.data(), len);
+    }
+
+    Buffer::Buffer(Buffer&& other) noexcept: un::MemoryBuffer<u8>(std::move(other)) {
+
+    }
 
 
 }
