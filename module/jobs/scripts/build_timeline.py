@@ -29,6 +29,7 @@ class EventType(enum.Enum):
     WORKER_AWAKEN = 3
     JOB_STARTED = 4
     JOB_FINISHED = 5
+    JOB_ENQUEUED = 6
 
 
 data = pd.read_csv(file)

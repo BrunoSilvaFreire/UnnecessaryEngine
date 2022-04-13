@@ -14,19 +14,14 @@ namespace un {
     class BufferStream final : public std::streambuf {
     private:
         std::size_t index;
-        std::shared_ptr<TBuffer> buffer = 0;
+        std::shared_ptr<TBuffer> buffer;
+        using TElement = typename TBuffer::ElementType;
     public:
-        BufferStream(const std::shared_ptr<TBuffer>& buffer) : std::streambuf(), buffer(buffer) { }
-
-        template<typename TElement>
-        un::BufferStream<TBuffer>& read(TElement* s, std::streamsize n) {
-            std::memcpy(s, buffer->offset(index), n);
-            index += n;
-            return *this;
-        }
-
-        bool good() const {
-            return index < buffer->size();
+        BufferStream(const std::shared_ptr<TBuffer>& buffer) : std::streambuf(), buffer(buffer) {
+            TBuffer& buf = *buffer;
+            auto start = reinterpret_cast<char*>(buf.begin());
+            auto end = reinterpret_cast<char*>(buf.end());
+            setg(start, start, end);
         }
     };
 

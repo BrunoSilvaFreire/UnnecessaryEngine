@@ -68,7 +68,7 @@ namespace un {
         virtual void operator()(size_t index, TWorker* worker) = 0;
 
         template<typename J, typename ChainType>
-        static void parallelize(
+        static std::vector<un::JobHandle> parallelize(
             J* job,
             ChainType& chain,
             size_t numEntries,
@@ -85,18 +85,26 @@ namespace un {
             size_t numFullJobs = numEntries / numEntriesPerJob;
             size_t totalFullyProcessedLoops = numFullJobs * numEntriesPerJob;
             size_t rest = numEntries - totalFullyProcessedLoops;
+            using Parallelizer = un::ParallelizeJob<J, TWorker>;
+            std::vector<un::JobHandle> handles;
             for (size_t i = 0; i < numFullJobs; ++i) {
                 size_t from = i * numEntriesPerJob;
                 size_t to = (i + 1) * numEntriesPerJob;
-                chain.template immediately<ParallelizeJob<J, TWorker>>(job, from, to);
+                un::JobHandle handle;
+                chain.template immediately<Parallelizer>(&handle, job, from, to);
+                handles.emplace_back(handle);
             }
             if (rest > 0) {
-                chain.template immediately<ParallelizeJob<J, TWorker>>(
+                un::JobHandle handle;
+                chain.template immediately<Parallelizer>(
+                    &handle,
                     job,
                     numEntries - rest,
                     numEntries
                 );
+                handles.emplace_back(handle);
             }
+            return handles;
         }
     };
 }

@@ -19,6 +19,7 @@ namespace un {
     class AbstractJobWorker {
     public:
         typedef TJob JobType;
+        typedef JobType* JobPointer;
     private:
         size_t index;
         u32 core;
@@ -29,14 +30,14 @@ namespace un {
          */
         bool running = false;
         /**
-         * Is this worker complete all of them and is currently sleeping while waiting for more?
+         * Is this worker currently idle, waiting for jobs?
          */
         bool waiting = false;
 
         /**
-         * Has this worker been ordered to stop?
+         * Has this worker been ordered to immediately stop?
          */
-        bool exiting = false;
+        bool evacuating = false;
 
         std::queue<std::pair<un::JobHandle, JobType*>> pending;
         std::mutex queueMutex;
@@ -44,7 +45,7 @@ namespace un {
         std::mutex runningMutex;
         std::condition_variable jobAvailable;
         un::EventVoid started, exited, sleeping, awaken;
-        un::Event<JobType*, JobHandle> fetched, executed;
+        un::Event<JobType*, JobHandle> enqueued, fetched, executed;
 
         void workerThread() {
             started();
@@ -58,6 +59,7 @@ namespace un {
         }
 
         bool tryDequeue(JobType** jobPtr, JobHandle* id) {
+            std::unique_lock<std::mutex> lock(queueMutex);
             bool hasJobs = !pending.empty();
             if (hasJobs) {
                 const auto& pair = pending.front();
@@ -66,41 +68,38 @@ namespace un {
 //                LOG(INFO) << "Popped " << index << ", pending: " << pending.size();
                 pending.pop();
                 return true;
-            } else if (exiting) {
+            } else if (evacuating) {
                 return false;
             }
             return false;
         }
 
+        bool canDequeue() const {
+            return !evacuating && running;
+        }
+
         bool nextJob(JobType** jobPtr, JobHandle* id) {
-            std::unique_lock<std::mutex> lock(queueMutex);
-//            LOG(INFO) << "Fetching " << index;
-            if (tryDequeue(jobPtr, id)) {
-                return true;
-            } else if (exiting) {
+            if (!canDequeue()) {
                 return false;
             }
-
+            if (tryDequeue(jobPtr, id)) {
+                return true;
+            }
             {
-                std::lock_guard<std::mutex> sLock(sleepingMutex);
+                std::unique_lock<std::mutex> sLock(sleepingMutex);
                 waiting = true;
                 sleeping();
-            }
-//            LOG(INFO) << "Sleeping " << index << " @ " << pending.size();
-            jobAvailable.wait(lock);
-            {
-                std::lock_guard<std::mutex> sLock(sleepingMutex);
+                jobAvailable.wait(sLock);
                 waiting = false;
                 awaken();
             }
 
-            return running && tryDequeue(jobPtr, id);
+            return canDequeue() && tryDequeue(jobPtr, id);
         }
 
         void execute(JobType* jobPtr, JobHandle id) {
             jobPtr->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
             executed(jobPtr, id);
-//            LOG(INFO) << "Executed @ " << index << ", pending: " << pending.size();
             delete jobPtr;
         }
 
@@ -124,6 +123,10 @@ namespace un {
                 thread->join();
                 delete thread;
             }
+        }
+
+        bool hasPending() const {
+            return !pending.empty();
         }
 
         bool isAwake() const {
@@ -152,7 +155,6 @@ namespace un {
             {
                 std::lock_guard<std::mutex> lock(queueMutex);
                 pending.push(std::make_pair(handle, job));
-//                LOG(INFO) << "Enqueued " << handle << " @ " << index << ", " << pending.size();
                 tryAwake();
             }
         }
@@ -198,13 +200,13 @@ namespace un {
             }
         }
 
-        void stop(bool completelyConsume) {
+        void stop() {
             {
                 std::lock_guard<std::mutex> lock(runningMutex);
                 if (!running) {
                     return;
                 }
-                exiting = completelyConsume;
+                evacuating = true;
                 tryAwake();
             }
         }
@@ -218,7 +220,7 @@ namespace un {
         }
 
         bool isExiting() const {
-            return exiting;
+            return evacuating;
         }
 
         un::Thread* getThread() const {
@@ -251,6 +253,10 @@ namespace un {
 
         un::Event<JobType*, JobHandle>& onExecuted() {
             return executed;
+        }
+
+        un::Event<JobType*, JobHandle>& onEnqueued() {
+            return enqueued;
         }
 
     };

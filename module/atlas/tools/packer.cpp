@@ -4,13 +4,17 @@
 #include <unnecessary/def.h>
 #include "packer_entry.h"
 #include "packer.h"
+#include "unnecessary/jobs/recorder/job_system_recorder.h"
 #include <unnecessary/logging.h>
 #include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/jobs/misc/load_file_job.h>
 #include <unnecessary/misc/files.h>
 #include <unnecessary/memory/buffer_stream.h>
-#include <packing_algorithm.h>
+#include <algorithms/max_rectangles_algorithm.h>
+#include <jobs/pack_texture_job.h>
+#include <grapphs/dot.h>
 #include <sstream>
+#include <istream>
 
 #ifndef UN_TESTING
 
@@ -69,30 +73,66 @@ namespace un::packer {
             LOG(INFO) << item.getPath() << ": " << item.getWidth() << "x" << item.getHeight() << " (" << item.getArea()
                       << " pixels)";
         }
-        un::packer::PackingAlgorithm* algorithm = nullptr;
-        auto strategy = algorithm->operator()(entries);
+        un::packer::MaxRectanglesAlgorithm algorithm(
+            glm::uvec2(
+                std::numeric_limits<u32>::max(),
+                std::numeric_limits<u32>::max()
+            )
+        );
+        auto strategy = algorithm(entries);
         {
-            un::SimpleJobSystem jobSystem(false);
+            auto packed = std::make_shared<png::image<png::rgba_pixel>>(
+                strategy.getWidth(),
+                strategy.getHeight()
+            );
+            un::SimpleJobSystem jobSystem(4, false);
+            un::JobSystemRecorder<decltype(jobSystem)> recorder(&jobSystem);
             {
                 un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
                 for (const auto& operation : strategy.getOperations()) {
-                    un::JobHandle loadImageJob, parseImageJob, packImageJob;
+                    un::JobHandle loadImageJob, parseImageJob;
                     auto buf = std::make_shared<un::Buffer>();
-                    std::shared_ptr<png::image<png::rgba_pixel>> src = nullptr;
-                    chain
-                        .immediately<un::LoadFileJob>(&loadImageJob, operation.getPath(), buf.get(), std::ios::binary)
+                    auto src = std::make_shared<png::image<png::rgba_pixel>>();
+                    const std::filesystem::path& imgPath = operation.getPath();
+                    chain.immediately<un::LoadFileJob>(&loadImageJob, imgPath, buf.get(), std::ios::binary)
                         .after<un::LambdaJob<>>(
-                            loadImageJob, &packImageJob,
+                            loadImageJob, &parseImageJob,
                             [src, buf]() {
-                                un::BufferStream<> stream(buf);
-                                png::image<png::rgba_pixel> image(stream);
+                                un::BufferStream<> sbuf(buf);
+                                std::istream stream(&sbuf);
+                                png::image<png::rgba_pixel> img(stream);
+                                *src = img;
                             }
                         );
 
-                }
+                    chain.setName(parseImageJob, std::string("Parse Image ") + imgPath.string());
+                    const Rect<u32>& rect = operation.getDestination();
+                    glm::uvec2 origin = rect.getOrigin();
+                    auto* job = new un::PackTextureJob<png::rgba_pixel>(
+                        src,
+                        packed,
+                        rect
+                    );
+                    std::stringstream name;
+                    name << "Pack image " << imgPath;
+                    job->setName(name.str());
+                    auto handles = un::PackTextureJob<png::rgba_pixel>::parallelize(
+                        job,
+                        chain,
+                        rect.getArea(),
+                        512
+                    );
+                    for (un::JobHandle handle : handles) {
+                        chain.after<un::JobWorker>(parseImageJob, handle);
+                    }
+                };
             }
             jobSystem.start();
             jobSystem.complete();
+            recorder.saveToFile("packing.csv");
+            std::filesystem::path path = std::filesystem::absolute("packed.png");
+            packed->write(path);
+            LOG(INFO) << "Result written to " << path;
         }
     }
 }

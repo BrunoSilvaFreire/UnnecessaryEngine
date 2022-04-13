@@ -69,17 +69,18 @@ namespace un {
     public:
         typedef TWorker WorkerType;
         typedef typename TWorker::JobType JobType;
+        typedef typename TWorker::JobPointer JobPointer;
     private:
         struct ScheduledJob {
             ScheduledJob(
-                JobType* job,
+                JobPointer job,
                 JobHandle graphHandle
             ) : job(job),
                 graphHandle(graphHandle) {
 
             }
 
-            JobType* job;
+            JobPointer job;
 
             /**
              * The handle of this job in the job system graph
@@ -102,19 +103,21 @@ namespace un {
         std::queue<std::size_t> reusableIndices;
         // TODO: Minimize locks
         std::mutex queueAccessMutex;
-        un::Event<JobType*, JobHandle> onJobCompleted;
+        un::Event<JobPointer, JobHandle> onJobCompleted;
         std::mutex openMutex;
+        std::size_t numPendingJobs;
         /**
          * Marks whether this worker pool accepting new jobs.
          */
         bool open = true;
     private:
 
-        void done(JobType* job, JobHandle localHandle) {
+        void done(JobPointer job, JobHandle localHandle) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
                 reusableIndices.emplace(static_cast<size_t>(localHandle));
                 clear(localHandle);
+                numPendingJobs--;
             }
             onJobCompleted(job, localHandle);
         }
@@ -141,7 +144,7 @@ namespace un {
             threadName += "-";
             threadName += std::to_string(index);
             pWorker->setName(threadName);
-            pWorker->onExecuted() += [this](JobType* job, JobHandle handle) {
+            pWorker->onExecuted() += [this](JobPointer job, JobHandle handle) {
                 done(job, handle);
             };
             return pWorker;
@@ -161,7 +164,7 @@ namespace un {
 
         ~WorkerPool() {
             for (WorkerType* worker : workers) {
-                worker->stop(true);
+                worker->stop();
                 delete worker;
             }
         }
@@ -173,7 +176,7 @@ namespace un {
          * @param dispatch Should this immediately be dispatched.
          * @return The index where the given job is stored inside the pool.
          */
-        JobHandle enqueue(JobType* job, JobHandle graphHandle, bool dispatch) {
+        JobHandle enqueue(JobPointer job, JobHandle graphHandle, bool dispatch) {
             if (!open) {
                 throw std::runtime_error(
                     "This worker pool is closed and is not accepting new jobs."
@@ -192,6 +195,7 @@ namespace un {
                     recycled.job = job;
                     recycled.graphHandle = graphHandle;
                 }
+                numPendingJobs++;
                 if (dispatch) {
                     unsafeDispatch(handle);
                 }
@@ -199,7 +203,7 @@ namespace un {
             return handle;
         }
 
-        un::Job<WorkerType>* getJob(un::JobHandle localHandle) {
+        JobPointer getJob(un::JobHandle localHandle) {
             return jobs[localHandle].job;
         }
 
@@ -224,7 +228,7 @@ namespace un {
          */
         void unsafeDispatch(JobHandle handle) {
             WorkerType* worker = nextWorker();
-            JobType* pJob = getJob(handle);
+            JobPointer pJob = getJob(handle);
 #if DEBUG
             if (pJob == nullptr) {
                 throw std::runtime_error("Attempted to dispatch invalid handle");
@@ -253,27 +257,31 @@ namespace un {
             return workers;
         }
 
-        std::atomic_size_t getNumWorkers() const {
+        std::size_t getNumWorkers() const {
             return workers.size();
         }
 
-        un::Event<JobType*, JobHandle>& getOnJobCompleted() {
+        un::Event<JobPointer, JobHandle>& getOnJobCompleted() {
             return onJobCompleted;
         }
 
-        const un::Event<JobType*, JobHandle>& getOnJobCompleted() const {
+        const un::Event<JobPointer, JobHandle>& getOnJobCompleted() const {
             return onJobCompleted;
         }
 
         void complete() {
             std::lock_guard lock(openMutex);
             open = false;
-            completeAllWorkers();
+            onJobCompleted += [this](JobType* job, un::JobHandle handle) {
+                if (numPendingJobs == 0) {
+                    stopAllWorkers();
+                }
+            };
         }
 
-        void completeAllWorkers() {
+        void stopAllWorkers() {
             for (auto worker : workers) {
-                worker->stop(true);
+                worker->stop();
             }
         }
 

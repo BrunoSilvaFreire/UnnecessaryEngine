@@ -4,40 +4,45 @@
 #include <cstddef>
 #include <filesystem>
 #include <png++/png.hpp>
+#include <utility>
 #include <packer_entry.h>
 
 namespace un::packer {
     struct PackingOperation {
     private:
         std::filesystem::path path;
-        std::size_t x, y;
+        un::Rect<u32> destination;
     public:
+        PackingOperation(
+            const std::filesystem::path& path,
+            const Rect<u32>& destination
+        ) : path(path),
+            destination(destination) { }
+
+        const Rect<u32>& getDestination() const {
+            return destination;
+        }
+
         const std::filesystem::path& getPath() const {
             return path;
         }
 
-        size_t getX() const {
-            return x;
-        }
-
-        size_t getY() const {
-            return y;
-        }
     };
+
 
     struct PackingStrategy {
     private:
-        std::size_t width, height;
+        u32 width, height;
         std::vector<un::packer::PackingOperation> operations;
     public:
-        PackingStrategy(size_t width, size_t height, const std::vector<un::packer::PackingOperation>& operations)
+        PackingStrategy(u32 width, u32 height, const std::vector<un::packer::PackingOperation>& operations)
             : width(width), height(height), operations(operations) { }
 
-        size_t getWidth() const {
+        u32 getWidth() const {
             return width;
         }
 
-        size_t getHeight() const {
+        u32 getHeight() const {
             return height;
         }
 

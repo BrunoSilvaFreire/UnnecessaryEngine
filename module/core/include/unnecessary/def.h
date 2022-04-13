@@ -23,12 +23,27 @@ typedef long i64;
 
 typedef float f32;
 typedef double f64;
-
-#ifdef GNU
+#ifdef UN_PLATFORM_UNIX
 #define UN_AGGRESSIVE_INLINE __attribute__((always_inline)) inline
-#elif _MSC_VER
+#elif UN_PLATFORM_WINDOWS
 #define UN_AGGRESSIVE_INLINE __forceinline
 #else
 #define UN_AGGRESSIVE_INLINE inline
 #endif
+
+namespace un {
+#ifdef WIN32
+
+    UN_AGGRESSIVE_INLINE void debug_break() {
+        __debugbreak();
+    }
+
+#else
+
+    UN_AGGRESSIVE_INLINE void debug_break() {
+        __builtin_trap();
+    }
+
+#endif
+}
 #endif

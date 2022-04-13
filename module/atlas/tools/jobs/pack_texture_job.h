@@ -13,28 +13,29 @@ namespace un {
     private:
         std::shared_ptr<png::image<TPixel>> source;
         std::shared_ptr<png::image<TPixel>> destination;
-        std::size_t destX, destY;
-        std::size_t sourceWidth;
+        un::Rect<u32> rect;
     public:
         PackTextureJob(
             const std::shared_ptr<png::image<TPixel>>& source,
             const std::shared_ptr<png::image<TPixel>>& destination,
-            size_t destX,
-            size_t destY
+            un::Rect<u32> rect
         ) : source(source),
             destination(destination),
-            destX(destX),
-            destY(destY),
-            sourceWidth(source->get_width()) {
+            rect(rect) {
 
         }
 
-    public:
-        UN_AGGRESSIVE_INLINE void operator()(size_t index, JobWorker* worker) override {
-            auto [x0, y0] = un::indexing::position_of(index, sourceWidth);
+        UN_AGGRESSIVE_INLINE void operator()(std::size_t index, JobWorker* worker) override {
+            auto pos = un::indexing::position_of(index, static_cast<std::size_t>(rect.getWidth()));
+            auto[x0, y0] = pos;
+
             const TPixel& pixel = source->get_pixel(x0, y0);
-            std::size_t x1 = destX + x0;
-            std::size_t y1 = destY + y0;
+            const auto& origin = rect.getOrigin();
+            u32 x1 = origin.x + x0;
+            u32 y1 = origin.y + y0;
+            if (index == 0) {
+                LOG(INFO) << "Zero index";
+            }
             destination->set_pixel(x1, y1, pixel);
         }
     };

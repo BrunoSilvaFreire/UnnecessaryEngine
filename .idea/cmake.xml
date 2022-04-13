@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeSharedSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G Ninja -DPython_ROOT_DIR=/opt/homebrew/bin -DCMAKE_CXX_FLAGS=&quot;-fsanitize=address&quot; -DCMAKE_INSTALL_PREFIX=../installed" />
+      <configuration PROFILE_NAME="RelWithDebInfo" ENABLED="true" CONFIG_NAME="RelWithDebInfo" GENERATION_OPTIONS="-G Ninja --trace-source=UnnecessaryModules.cmake --trace-expand -DPython_ROOT_DIR=/opt/homebrew/bin -DCMAKE_CXX_FLAGS=&quot;-fsanitize=address&quot; -DCMAKE_INSTALL_PREFIX=../installed" />
+    </configurations>
+  </component>
+</project>

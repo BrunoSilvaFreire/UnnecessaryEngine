@@ -128,6 +128,22 @@ namespace un {
             return ptr[index];
         }
 
+        const T* const begin() const {
+            return ptr;
+        }
+
+        const T* const end() const {
+            return ptr + count;
+        }
+
+        T* const begin() {
+            return ptr;
+        }
+
+        T* const end() {
+            return ptr + count;
+        }
+
         friend std::ostream& operator<<(std::ostream& os, const MemoryBuffer& buffer) {
             os.write(buffer.ptr, buffer.size());
             return os;

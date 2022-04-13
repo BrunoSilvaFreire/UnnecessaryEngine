@@ -7,7 +7,7 @@ add_unnecessary_module(
     src/unnecessary/atlas/atlas_serialization.cpp
 
     DEPENDENCIES
-    glm::glm
+    unnecessary_math
     unnecessary_jobs
     unnecessary_serialization
 )
@@ -21,6 +21,8 @@ add_unnecessary_tool(
     tools/packer_entry.h
     tools/packer_entry.cpp
     tools/packing_algorithm.h
+    tools/algorithms/max_rectangles_algorithm.h
+    tools/algorithms/max_rectangles_algorithm.cpp
     tools/jobs/pack_texture_job.h
     tools/jobs/pack_texture_job.cpp
 
@@ -28,6 +30,7 @@ add_unnecessary_tool(
     unnecessary_atlas
     pngpp::pngpp
     glm::glm
+    grapphs_visualization
 
     TESTS
     tests/packer_tests.cpp

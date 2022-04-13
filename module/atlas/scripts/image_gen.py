@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import pathlib
 from colorsys import hsv_to_rgb
 from random import randrange
 
@@ -12,7 +13,9 @@ parser.add_argument('--num_images', metavar='N', type=int, )
 parser.add_argument('--output', metavar='N', type=str, )
 parser.add_argument('--reuse', nargs='?', type=bool, default=False)
 args = parser.parse_args()
-if args.output is not None and args.reuse is not None and args.reuse:
+if args.output is None:
+    exit(1)
+if args.reuse is not None and args.reuse:
     marker = os.path.join(args.output, "generated")
     if os.path.exists(marker):
         exit(0)
@@ -29,3 +32,5 @@ for i in range(num_images):
     img.paste(color, [0, 0, size_x, size_y])
     out = os.path.join(args.output, f"image_{i}.png")
     img.save(out)
+
+pathlib.Path(marker).touch();

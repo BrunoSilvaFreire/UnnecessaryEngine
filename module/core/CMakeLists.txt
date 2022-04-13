@@ -4,11 +4,12 @@ add_unnecessary_module(
     SOURCES
     include/unnecessary/def.h
     include/unnecessary/logging.h
-    include/unnecessary/misc/event.h
-    include/unnecessary/misc/types.h
+    include/unnecessary/algorithms/quad_tree.h
     include/unnecessary/memory/membuf.h
     include/unnecessary/memory/binary_writer.h
     include/unnecessary/memory/buffer_stream.h
+    include/unnecessary/misc/event.h
+    include/unnecessary/misc/types.h
     include/unnecessary/misc/historic.h
     include/unnecessary/misc/files.h
     include/unnecessary/misc/indexing.h

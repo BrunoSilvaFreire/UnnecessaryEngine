@@ -6,9 +6,12 @@
 #include <unnecessary/jobs/misc/load_file_job.h>
 #include <unnecessary/jobs/misc/graph_exploration.h>
 #include <unnecessary/jobs/recorder/job_system_recorder.h>
+#include <unnecessary/misc/benchmark.h>
+#include <unnecessary/jobs/parallel_for_job.h>
 #include <cmath>
 #include <random>
 #include <ostream>
+#include <utility>
 
 TEST(jobs, completeness) {
     const std::size_t numTries = 1 << 8;
@@ -217,26 +220,46 @@ TEST(jobs, sequence_test) {
     jobSystem.complete();
 }
 
+class PopulateBufferJob final : public un::ParallelForJob<un::JobWorker> {
+private:
+    std::shared_ptr<un::Buffer> buf;
+public:
+    explicit PopulateBufferJob(
+        std::shared_ptr<un::Buffer> buf
+    ) : buf(std::move(buf)) { }
+
+    UN_AGGRESSIVE_INLINE void operator()(size_t index, un::JobWorker* worker) override {
+        int r;
+        for (int j = 0; j < 2000; ++j) {
+            r = rand();
+        }
+        buf->operator[](index) = r;
+    }
+};
+
 TEST(jobs, benchmark) {
-    un::SimpleJobSystem jobSystem(std::thread::hardware_concurrency(), true);
-    const auto numJobs = static_cast<size_t>(std::pow(2, 16));
-    un::Buffer buf(numJobs, false);
+    const auto bufferSize = static_cast<size_t>(std::pow(2, 20));
+    GTEST_LOG_(INFO) << "Generating buffer of length " << bufferSize;
+    for (int i = 1; i <= std::thread::hardware_concurrency(); ++i) {
+        un::Chronometer<std::chrono::nanoseconds> chronometer;
+        un::SimpleJobSystem jobSystem(i, true);
 
-    {
-        un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+        auto buf = std::make_shared<un::Buffer>(bufferSize, false);
+        {
+            un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
 
-        for (size_t i = 0; i < numJobs; i++) {
-            chain.immediately<un::LambdaJob<>>(
-                [&, i]() {
-                    int r;
-                    for (int j = 0; j < 2000; ++j) {
-                        r = rand();
-                    }
-                    buf[i] = r;
-                }
+            PopulateBufferJob::parallelize(
+                new PopulateBufferJob(buf),
+                chain,
+                bufferSize,
+                bufferSize / i
             );
         }
-
+        jobSystem.complete();
+        std::chrono::nanoseconds duration = chronometer.stop();
+        GTEST_LOG_(INFO) << "Parallel buffer population took " << duration.count() << "ns ("
+                         << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() << "ms) with "
+                         << i << " threads.";
     }
-    jobSystem.complete();
+
 }
