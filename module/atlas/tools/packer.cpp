@@ -131,7 +131,7 @@ namespace un::packer {
             jobSystem.complete();
             recorder.saveToFile("packing.csv");
             std::filesystem::path path = std::filesystem::absolute("packed.png");
-            packed->write(path);
+            packed->write(path.string());
             LOG(INFO) << "Result written to " << path;
         }
     }

@@ -240,7 +240,7 @@ public:
 TEST(jobs, benchmark) {
     const auto bufferSize = static_cast<size_t>(std::pow(2, 20));
     GTEST_LOG_(INFO) << "Generating buffer of length " << bufferSize;
-    for (int i = 1; i <= std::thread::hardware_concurrency(); ++i) {
+    for (int i = std::thread::hardware_concurrency(); i > 0; --i) {
         un::Chronometer<std::chrono::nanoseconds> chronometer;
         un::SimpleJobSystem jobSystem(i, true);
 

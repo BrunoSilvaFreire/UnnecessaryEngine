@@ -16,12 +16,12 @@ option(UN_DISALLOW_AGGRESSIVE_INLINING DEFAULT OFF)
 conan_cmake_configure(
     REQUIRES
     glm/0.9.9.8
-    termcolor/1.0.1
-    entt/3.8.1
-    glfw/3.3.2
+    termcolor/2.0.0
+    entt/3.9.0
+    glfw/3.3.7
     tinyobjloader/1.0.6
-    cxxopts/2.2.1
-    assimp/5.1.0
+    cxxopts/3.0.0
+    assimp/5.2.2
     gtest/1.11.0
     nlohmann_json/3.10.4
     pngpp/0.2.10
@@ -38,14 +38,19 @@ conan_cmake_configure(
     stduuid:with_cxx20_span=True
     freetype:with_brotli=False
     tinygltf:stb_image=False
+    assimp:with_opengex=False
 )
 
 conan_cmake_autodetect(settings)
 
-list(
-    APPEND
-    settings
-)
+
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+    list(
+        APPEND
+        settings
+        compiler.version=13
+    )
+endif ()
 
 message("Conan cmake settings: ${settings}")
 conan_cmake_install(
@@ -55,6 +60,8 @@ conan_cmake_install(
     ENV
     CMAKE_GENERATOR=${CMAKE_GENERATOR}
     CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+    CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
 )
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 find_package(Vulkan REQUIRED)

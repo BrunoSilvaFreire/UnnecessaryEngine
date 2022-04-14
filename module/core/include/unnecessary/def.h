@@ -32,7 +32,7 @@ typedef double f64;
 #endif
 
 namespace un {
-#ifdef WIN32
+#ifdef UN_PLATFORM_WINDOWS
 
     UN_AGGRESSIVE_INLINE void debug_break() {
         __debugbreak();

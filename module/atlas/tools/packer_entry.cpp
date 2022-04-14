@@ -28,6 +28,6 @@ namespace un::packer {
     float PackerEntry::getScore(Rect<u32>& rect) const {
         auto area = rect.getArea();
         auto aspectRatio = rect.getAspectRatio();
-        return (1.0F / aspectRatio) / static_cast<float>(area);
+        return (1.0F / static_cast<float>(area));
     }
 }

@@ -19,5 +19,23 @@ namespace un {
         }
         return (value - x) / (y - x);
     }
+
+    template<typename TValue>
+    static bool within_inclusive(
+        TValue min,
+        TValue max,
+        TValue value
+    ) {
+        return value >= min && value <= max;
+    }
+
+    template<typename TValue>
+    static bool within_exclusive(
+        TValue min,
+        TValue max,
+        TValue value
+    ) {
+        return value > min && value < max;
+    }
 }
 #endif

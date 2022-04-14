@@ -33,9 +33,6 @@ namespace un {
             const auto& origin = rect.getOrigin();
             u32 x1 = origin.x + x0;
             u32 y1 = origin.y + y0;
-            if (index == 0) {
-                LOG(INFO) << "Zero index";
-            }
             destination->set_pixel(x1, y1, pixel);
         }
     };

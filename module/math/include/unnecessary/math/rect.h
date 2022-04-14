@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <unnecessary/def.h>
+#include <unnecessary/misc/math.h>
 #include <unnecessary/misc/types.h>
 #include <ostream>
 
@@ -50,11 +51,19 @@ namespace un {
         }
 
         TValue getMaxX() const {
-            return origin.x + size.x;
+            if constexpr(std::is_integral<TValue>()) {
+                return origin.x + size.x - 1;
+            } else {
+                return origin.x + size.x;
+            }
         }
 
         TValue getMaxY() const {
-            return origin.y + size.y;
+            if constexpr(std::is_integral<TValue>()) {
+                return origin.y + size.y - 1;
+            } else {
+                return origin.y + size.y;
+            }
         }
 
         void setMinX(TValue value) {
@@ -68,11 +77,19 @@ namespace un {
         }
 
         void setMaxX(TValue value) {
-            size.x = value - origin.x;
+            if constexpr(std::is_integral<TValue>()) {
+                size.x = value - origin.x + 1;
+            } else {
+                size.x = value - origin.x;
+            }
         }
 
         void setMaxY(TValue value) {
-            size.y = value - origin.y;
+            if constexpr(std::is_integral<TValue>()) {
+                size.y = value - origin.y + 1;
+            } else {
+                size.y = value - origin.y;
+            }
         }
 
         UN_AGGRESSIVE_INLINE TValue getArea() const {
@@ -88,6 +105,31 @@ namespace un {
             setMinY(newMinY);
             setMaxX(newMaxX);
             setMaxY(newMaxY);
+        }
+
+        void exclude(const Rect<TValue>& rect) {
+            TValue minX = getMinX();
+            TValue minY = getMinY();
+            TValue maxX = getMaxX();
+            TValue maxY = getMaxY();
+            TValue rMinX = rect.getMinX();
+            TValue rMinY = rect.getMinY();
+            TValue rMaxX = rect.getMaxX();
+            TValue rMaxY = rect.getMaxY();
+            bool intersectsX = un::within_inclusive(rMinX, rMaxX, minX) || un::within_inclusive(rMinX, rMaxX, maxX);
+            bool intersectsY = un::within_inclusive(rMinY, rMaxY, minY) || un::within_inclusive(rMinY, rMaxY, maxY);
+            if (intersectsX) {
+                TValue newMaxY = std::max(getMaxY(), rect.getMaxY());
+                TValue newMinY = std::min(getMinY(), rect.getMinY());
+                setMinY(newMinY);
+                setMaxY(newMaxY);
+            }
+            if (intersectsY) {
+                TValue newMaxX = std::max(getMaxX(), rect.getMaxX());
+                TValue newMinX = std::min(getMinX(), rect.getMinX());
+                setMinX(newMinX);
+                setMaxX(newMaxX);
+            }
         }
 
         un::Rect<TValue> addMinY(TValue value) const {
@@ -109,7 +151,7 @@ namespace un {
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Rect& rect) {
-            os << "un::Rect<" << un::type_name_of<TValue>() << ">(origin: ("
+            os << "un::Rect(origin: ("
                << rect.origin.x << "," << rect.origin.y
                << "), size: ("
                << rect.size.x << "," << rect.size.y
