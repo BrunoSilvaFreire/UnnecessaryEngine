@@ -6,6 +6,7 @@ if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
     file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
         "${CMAKE_BINARY_DIR}/conan.cmake")
 endif ()
+message("Including @ ${CMAKE_BINARY_DIR}/conan.cmake")
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 include(CMakePrintHelpers)
 include(cmake/Unnecessary.cmake)

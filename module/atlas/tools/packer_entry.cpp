@@ -26,8 +26,10 @@ namespace un::packer {
     }
 
     float PackerEntry::getScore(Rect<u32>& rect) const {
-        auto area = rect.getArea();
-        auto aspectRatio = rect.getAspectRatio();
-        return (1.0F / static_cast<float>(area));
+        /*
+         * Use the rectangle with the biggest area difference available, so that we can
+         * use a better evenly distributed rectangle
+         */
+        return static_cast<float>(getArea() - rect.getArea());
     }
 }

@@ -17,7 +17,8 @@ namespace un::packer {
         PackingStrategy operator()(std::vector<un::packer::PackerEntry> entries) override;
 
 
-        void removeOverlaps(Rect<u32>& rect, const Rect<u32>& other);
+        void removeOverlaps(Rect<u32>& rect, const Rect<u32>& designated);
+
     };
 }
 #endif

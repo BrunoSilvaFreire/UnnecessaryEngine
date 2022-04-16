@@ -1,6 +1,8 @@
 #include <algorithms/max_rectangles_algorithm.h>
 #include <unnecessary/math/rect.h>
 #include <unnecessary/misc/random.h>
+#include <unnecessary/logging.h>
+#include <sstream>
 
 namespace un::packer {
     union Color32 {
@@ -48,81 +50,42 @@ namespace un::packer {
             );
             un::Rect<u32> rect = *result;
             auto selectedIndex = result - availablePoints.begin();
-            availablePoints.erase(result);
-
-            const glm::uvec2& pos = rect.getOrigin();
-            un::Rect<u32> allocatedRect(
+            un::Rect<u32> destinated(
                 rect.getOrigin(),
                 item.getSize()
             );
+            availablePoints.erase(result);
+
+            const glm::uvec2& pos = rect.getOrigin();
+
             const auto& operation = operations.emplace_back(
                 item.getPath(),
-                allocatedRect
+                destinated
             );
 
             glm::uvec2 sizeLeft = rect.getSize() - item.getSize();
 
-            for (auto& toCorrect : availablePoints) {
-                removeOverlaps(toCorrect, allocatedRect);
-                toCorrect.clip(allocatedRect);
-            }
-            un::Rect<u32> topPoint = rect.addMinY(allocatedRect.getHeight());
-            un::Rect<u32> rightPoint = rect.addMinX(allocatedRect.getWidth());
+            un::Rect<u32> topPoint = rect.addMinY(destinated.getHeight());
+            un::Rect<u32> rightPoint = rect.addMinX(destinated.getWidth());
             availablePoints.push_back(topPoint);
             availablePoints.push_back(rightPoint);
-            w = std::max(w, allocatedRect.getMaxX() + 1);
-            h = std::max(h, allocatedRect.getMaxY() + 1);
-            std::stringstream svg;
-            svg << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-            svg
-                << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
-                   "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";
-            u32 box = w * 3;
-            u32 boxY = h * 3;
-            svg << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" << box << "\" height=\""
-                << boxY
-                << "\">";
-            svg << "<rect width=\"" << box << "\" "
-                << "height=\"" << boxY << "\" fill=\"black\"/>";
-            for (const auto& item : availablePoints) {
-                Color32 color{
-                    .rgba = un::random::value<u32>()
-                };
-                color.a = 255;
-                u32 svgYPos = item.getMinY();
-                u32 svgXPos = item.getMinX();
-                svg << "<rect width=\"" << item.getWidth() - 300 << "\" "
-                    << "height=\"" << item.getWidth() - 300 << "\" "
-                    << "x=\"" << svgXPos << "\" "
-                    << "y=\"" << svgYPos << "\" "
-                    << "stroke=\"#" << color
-                    << std::dec << "\" "
-                    << "stroke-width=\"2\""
-                    << " fill=\"none\"/>";
-                svg << "<text "
-                    << "x=\"" << svgXPos << "\" "
-                    << "y=\"" << svgYPos << "\" "
-                    << "fill=\"white\">"
-                    << item << "</text>";
-
+            for (auto& toCorrect : availablePoints) {
+                removeOverlaps(toCorrect, destinated);
             }
-            svg << "<rect width=\"" << std::min(item.getWidth(), w) << "\" "
-                << "height=\"" << std::min(item.getHeight(), h) << "\" "
-                << "x=\"" << allocatedRect.getMinX() << "\" "
-                << "y=\"" << allocatedRect.getMinY() << "\" "
-                << "fill=\"#ff0000\" opacity=\"0.5\"/>";
-
-            svg << "<text "
-                << "x=\"" << allocatedRect.getMinX() << "\" "
-                << "y=\"" << allocatedRect.getMinY() << "\" "
-                << "fill=\"white\">"
-                << allocatedRect << "</text>";
-            svg << "</svg>";
-            auto path = std::string("image_") + std::to_string(pass++) + ".svg";
-            std::ofstream file(path);
-            auto content = svg.str();
-            file << content;
-            file.close();
+            availablePoints.erase(
+                std::remove_if(availablePoints.begin(), availablePoints.end(), [&](const auto& item) {
+                    return std::any_of(
+                        availablePoints.begin(), availablePoints.end(),
+                        [&](const auto& other) {
+                            return item != other && other.contains(item);
+                        }
+                    );
+                }),
+                availablePoints.end()
+            );
+            w = std::max(w, destinated.getMaxX() + 1);
+            h = std::max(h, destinated.getMaxY() + 1);
+            pass++;
         }
         return PackingStrategy(w, h, operations);
     }
@@ -131,16 +94,35 @@ namespace un::packer {
 
     }
 
-    void MaxRectanglesAlgorithm::removeOverlaps(Rect<u32>& rect, const Rect<u32>& other) {
+    void MaxRectanglesAlgorithm::removeOverlaps(Rect<u32>& rect, const Rect<u32>& designated) {
         un::Rect<u32> cutout(
-            other.getMinX(),
-            other.getMinY(),
-            std::numeric_limits<u32>::max() - other.getMinX(),
-            std::numeric_limits<u32>::max() - other.getMinY()
+            designated.getMinX(),
+            designated.getMinY(),
+            std::numeric_limits<u32>::max() - designated.getMinX(),
+            std::numeric_limits<u32>::max() - designated.getMinY()
         );
-
-        rect.exclude(other);
-
-
+        const auto& toUse = designated;
+        auto minX = rect.getMinX();
+        auto maxX = rect.getMaxX();
+        auto minY = rect.getMinY();
+        auto maxY = rect.getMaxY();
+        auto rMinX = toUse.getMinX();
+        auto rMaxX = toUse.getMaxX();
+        auto rMinY = toUse.getMinY();
+        auto rMaxY = toUse.getMaxY();
+        bool intersectsX = un::within_inclusive(rMinX, rMaxX, minX) || un::within_inclusive(rMinX, rMaxX, maxX);
+        bool intersectsY = un::within_inclusive(rMinY, rMaxY, minY) || un::within_inclusive(rMinY, rMaxY, maxY);
+        if (maxX >= rMinX && rMaxX > maxX) {
+            rect.setMaxX(rMinX);
+        }
+        if (minX <= rMaxX && minX > rMinX) {
+            rect.setMinX(rMaxX);
+        }
+        if (maxY >= rMinY && rMaxY > maxY) {
+            rect.setMaxY(rMinY);
+        }
+        if (minY <= rMaxY && minY > rMinY) {
+            rect.setMinY(rMaxY);
+        }
     }
 }

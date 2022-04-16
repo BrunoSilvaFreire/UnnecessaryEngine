@@ -38,7 +38,7 @@ namespace un {
         __debugbreak();
     }
 
-#else
+#elifdef UN_PLATFORM_UNIX
 
     UN_AGGRESSIVE_INLINE void debug_break() {
         __builtin_trap();

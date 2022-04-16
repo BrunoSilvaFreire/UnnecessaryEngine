@@ -46,7 +46,7 @@ add_custom_command(
 
     COMMAND ${Python_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/scripts/image_gen.py
-    --num_images 32
+    --num_images 64
     --reuse true
     --output ${IMG_OUT_DIR}
     BYPRODUCTS ${IMG_OUT_DIR}

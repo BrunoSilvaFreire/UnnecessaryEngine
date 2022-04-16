@@ -24,7 +24,8 @@ sizes = [
     32,
     64,
     128,
-    256
+    256,
+    512
 ]
 print(f"Generating {num_images} images.")
 for i in range(num_images):

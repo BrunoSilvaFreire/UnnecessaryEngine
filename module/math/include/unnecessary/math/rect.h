@@ -107,6 +107,34 @@ namespace un {
             setMaxY(newMaxY);
         }
 
+        bool contains(const un::Rect<TValue>& other) const {
+            TValue minX = getMinX();
+            TValue minY = getMinY();
+            TValue maxX = getMaxX();
+            TValue maxY = getMaxY();
+            TValue rMinX = other.getMinX();
+            TValue rMinY = other.getMinY();
+            TValue rMaxX = other.getMaxX();
+            TValue rMaxY = other.getMaxY();
+            return minX <= rMinX && maxX >= rMaxX && minY <= rMinY && maxY >= rMaxY;
+        }
+
+        bool intersects(const un::Rect<TValue>& other) const {
+            TValue minX = getMinX();
+            TValue minY = getMinY();
+            TValue maxX = getMaxX();
+            TValue maxY = getMaxY();
+
+            TValue rMinX = other.getMinX();
+            TValue rMinY = other.getMinY();
+            TValue rMaxX = other.getMaxX();
+            TValue rMaxY = other.getMaxY();
+            return un::within_inclusive(rMinX, rMaxX, getMinX()) ||
+                   un::within_inclusive(rMinX, rMaxX, getMaxX()) ||
+                   un::within_inclusive(rMinY, rMaxY, minY) ||
+                   un::within_inclusive(rMinY, rMaxY, maxY);
+        }
+
         void exclude(const Rect<TValue>& rect) {
             TValue minX = getMinX();
             TValue minY = getMinY();
@@ -146,8 +174,16 @@ namespace un {
             );
         }
 
-        float getAspectRatio() const {
+        f32 getAspectRatio() const {
             return std::max(getWidth(), getHeight()) / std::min(getWidth(), getHeight());
+        }
+
+        bool operator==(const Rect& rhs) const {
+            return origin == rhs.origin && size == rhs.size;
+        }
+
+        bool operator!=(const Rect& rhs) const {
+            return !(rhs == *this);
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Rect& rect) {
