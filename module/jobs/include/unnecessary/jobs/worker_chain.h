@@ -64,7 +64,8 @@ namespace un {
 
         un::JobHandle after(un::JobHandle dependsOn, JobType* job) {
             un::JobHandle handle = jobs.size();
-            BookedJob& booked = jobs.push_back(job);
+            jobs.push_back(job);
+            BookedJob& booked = jobs[handle];
             leafs.erase(dependsOn);
             booked.localDependencies.emplace(dependsOn);
             return handle;

@@ -18,8 +18,6 @@ add_unnecessary_tool(
     tools/unnecessary/sdf/generator/sdf_generator.cpp
     tools/unnecessary/sdf/generator/jobs/process_pixel_job.h
     tools/unnecessary/sdf/generator/jobs/process_pixel_job.cpp
-    tools/unnecessary/sdf/generator/files/freetype_adaptor.h
-    tools/unnecessary/sdf/generator/files/freetype_adaptor.cpp
 
     DEPENDENCIES
     unnecessary_jobs

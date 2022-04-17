@@ -2,10 +2,11 @@
 #include <filesystem>
 #include <packer.h>
 
-TEST(packer_tool, pack_random_images) {
+void pack(
+    const std::filesystem::path& imagesDir
+) {
+
     std::vector<std::string> files;
-    std::filesystem::path imagesDir = "images";
-    GTEST_LOG_(INFO) << "Looking for images in " << std::filesystem::absolute(imagesDir);
     std::filesystem::directory_iterator iterator(imagesDir);
     for (const auto& entry : iterator) {
         if (!entry.is_regular_file()) {
@@ -13,5 +14,25 @@ TEST(packer_tool, pack_random_images) {
         }
         files.emplace_back(entry.path().string());
     }
-    un::packer::pack(files);
+    GTEST_LOG_(INFO) << "Found " << files.size() << " images in " << std::filesystem::absolute(imagesDir);
+    un::packer::pack(
+        un::packer::MaxRectanglesAlgorithm<un::bottomLeftHeuristic>(),
+        files,
+        imagesDir / "bottom_left.png");
+    un::packer::pack(un::packer::MaxRectanglesAlgorithm<un::bestAreaFitHeuristic>(), files,
+                     imagesDir / "best_area.png");
+    un::packer::pack(un::packer::MaxRectanglesAlgorithm<un::bestShortSideFitHeuristic>(), files,
+                     imagesDir / "short_side.png");
+    un::packer::pack(un::packer::MaxRectanglesAlgorithm<un::bestLongSideFitHeuristic>(), files,
+                     imagesDir / "long_side.png");
+}
+
+TEST(packer_tool, pack_uniform_images) {
+    std::filesystem::path imagesDir = "images/packed";
+    pack(imagesDir);
+}
+
+TEST(packer_tool, pack_random_images) {
+    std::filesystem::path imagesDir = "images/random";
+    pack(imagesDir);
 }

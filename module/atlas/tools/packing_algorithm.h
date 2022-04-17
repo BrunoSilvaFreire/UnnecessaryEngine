@@ -53,7 +53,7 @@ namespace un::packer {
 
     class PackingAlgorithm {
     public:
-        virtual un::packer::PackingStrategy operator()(std::vector<un::packer::PackerEntry> entries) = 0;
+        virtual un::packer::PackingStrategy operator()(std::vector<un::packer::PackerEntry> entries) const = 0;
     };
 }
 #endif

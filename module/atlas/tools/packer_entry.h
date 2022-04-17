@@ -28,7 +28,6 @@ namespace un::packer {
             return getWidth() <= rect.getWidth() && getHeight() <= rect.getHeight();
         }
 
-        float getScore(Rect<u32>& rect) const;
     };
 }
 #endif

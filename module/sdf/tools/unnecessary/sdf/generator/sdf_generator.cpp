@@ -1,6 +1,6 @@
 #include <cxxopts.hpp>
 #include <unnecessary/sdf/generator/sdf_generator.h>
-#include "unnecessary/jobs/recorder/job_system_recorder.h"
+#include <unnecessary/jobs/recorder/job_system_recorder.h>
 
 static const char* const kInputName = "input";
 static const char* const kThreadsName = "threads";
@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     int size = 64;
     int nThreads = std::thread::hardware_concurrency();
     options.add_options()
-        (kInputName, "PNG input", cxxopts::value<std::string>())
+        (kInputName, "Input file", cxxopts::value<std::string>())
         ("output", "PNG output", cxxopts::value<std::string>())
         ("size", "Generate CPP", cxxopts::value<int>(size))
         (kMinName, "Minimum SDF distance", cxxopts::value<float>())
@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
         float min = result[kMinName].as<float>();
         float max = result[kMaxName].as<float>();
         nThreads = result[kThreadsName].as<int>();
-
         un::sdf::process_sdf(size, nThreads, imageFile, outputFile, min, max);
     } else {
         options.help();
@@ -51,6 +50,9 @@ void un::sdf::process_sdf(
     float min,
     float max
 ) {
+    std::filesystem::path inputPath(imageFile);
+    auto extension = inputPath.extension();
+
     png::image<png::rgba_pixel> img(imageFile);
     png::image<png::gray_pixel> sdf(size, size);
     LOG(INFO) << "Creating image of size " << size << "x" << size << "(" << size * size
