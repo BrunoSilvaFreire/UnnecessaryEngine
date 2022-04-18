@@ -1,5 +1,7 @@
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_atlas
+
+    MODULE atlas
 
     SOURCES
     include/unnecessary/atlas/atlas.h
@@ -14,6 +16,8 @@ add_unnecessary_module(
 
 add_unnecessary_tool(
     unnecessary_atlas_packer
+
+    MODULE atlas
 
     SOURCES
     tools/packer.h

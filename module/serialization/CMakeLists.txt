@@ -1,5 +1,7 @@
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_serialization
+
+    MODULE serialization
 
     SOURCES
     include/unnecessary/serialization/serialized.h

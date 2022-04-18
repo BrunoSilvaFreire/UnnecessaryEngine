@@ -1,6 +1,7 @@
 
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_gltf
+    MODULE graphics
 
     SOURCES
     include/unnecessary/gltf/load_gltf_job.h

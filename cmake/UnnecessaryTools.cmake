@@ -4,6 +4,7 @@ function(add_unnecessary_tool NAME)
     )
     set(
         SINGLE_VALUES
+        MODULE
     )
     set(
         MULTI_VALUES
@@ -24,6 +25,13 @@ function(add_unnecessary_tool NAME)
         ${NAME}
         ${UN_MODULE_SOURCES}
     )
+    if (NOT ${UN_MODULE_MODULE} STREQUAL "")
+        set_target_properties(
+            ${NAME}
+            PROPERTIES
+            UNNECESSARY_MODULE ${UN_MODULE_MODULE}
+        )
+    endif ()
     target_include_directories(
         ${NAME}
         PUBLIC
@@ -39,7 +47,7 @@ function(add_unnecessary_tool NAME)
     if ("${NUM_DEPENDENCIES}" GREATER 0)
         target_link_libraries(${NAME} PUBLIC "${UN_MODULE_DEPENDENCIES}")
     endif ()
-    configure_unnecessary_module(${NAME} TRUE)
+    configure_unnecessary_target(${NAME} TRUE)
     LIST(LENGTH UN_MODULE_TESTS NUMTESTS)
     if ("${NUMTESTS}" GREATER 0)
         list(APPEND TEST_ALL_SOURCES ${UN_MODULE_TESTS})

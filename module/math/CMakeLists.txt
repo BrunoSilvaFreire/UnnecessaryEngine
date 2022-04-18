@@ -1,5 +1,6 @@
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_math
+    MODULE core
 
     SOURCES
     include/unnecessary/math/rect.h

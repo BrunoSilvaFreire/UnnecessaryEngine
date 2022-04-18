@@ -1,6 +1,6 @@
 
 #[[
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_sdf
 
     SOURCES
@@ -12,6 +12,8 @@ add_unnecessary_module(
 
 add_unnecessary_tool(
     unnecessary_sdf_generator
+
+    MODULE text
 
     SOURCES
     tools/unnecessary/sdf/generator/sdf_generator.h

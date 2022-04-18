@@ -3,7 +3,7 @@ add_unnecessary_shader(
 )
 
 
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_phong_pipeline
 
     SOURCES

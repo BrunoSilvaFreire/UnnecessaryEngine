@@ -8,7 +8,6 @@ if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
 endif ()
 message("Including @ ${CMAKE_BINARY_DIR}/conan.cmake")
 include(${CMAKE_BINARY_DIR}/conan.cmake)
-include(CMakePrintHelpers)
 include(cmake/Unnecessary.cmake)
 find_package(Python REQUIRED)
 
@@ -65,7 +64,6 @@ conan_cmake_install(
     CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
 )
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
-find_package(Vulkan REQUIRED)
 find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(termcolor REQUIRED)

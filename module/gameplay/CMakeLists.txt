@@ -1,5 +1,7 @@
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_gameplay
+
+    MODULE engine
 
     SOURCES
     include/unnecessary/simulation/world.h

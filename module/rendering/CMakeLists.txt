@@ -1,8 +1,9 @@
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_rendering
 
-    SOURCES
+    MODULE graphics
 
+    SOURCES
     include/unnecessary/rendering/renderer.h
     include/unnecessary/rendering/render_graph.h
     include/unnecessary/rendering/render_pass.h
@@ -72,6 +73,8 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
 endif ()
 add_unnecessary_tool(
     unnecessary_shaderizer
+
+    MODULE graphics
 
     SOURCES
     tools/unnecessary/shaderizer/unnecessary_shaderizer.cpp

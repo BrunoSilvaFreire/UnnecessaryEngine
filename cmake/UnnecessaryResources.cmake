@@ -4,7 +4,6 @@ function(
     FILE
     DESTINATION
 )
-    message("${TARGET} Copying ${FILE} to ${DESTINATION}...")
     add_custom_command(
         TARGET ${TARGET} POST_BUILD
         COMMENT "Copying ${FILE} to ${DESTINATION}..."

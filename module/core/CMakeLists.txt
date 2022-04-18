@@ -1,5 +1,8 @@
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_core
+
+    MODULE
+    core
 
     SOURCES
     include/unnecessary/def.h

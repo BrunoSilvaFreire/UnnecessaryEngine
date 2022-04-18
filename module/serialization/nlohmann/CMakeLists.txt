@@ -1,5 +1,7 @@
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_nlohmann_archiver
+
+    MODULE serialization
 
     SOURCES
     include/unnecessary/nlohmann/adapter.h

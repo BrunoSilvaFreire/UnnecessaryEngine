@@ -1,5 +1,7 @@
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_graphs
+
+    MODULE core
 
     SOURCES
     include/unnecessary/graphs/dependency_graph.h

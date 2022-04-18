@@ -1,7 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryTests.cmake)
 
 function(
-    configure_unnecessary_module
+    configure_unnecessary_target
     NAME
     SHOULD_INSTALL
 )
@@ -46,17 +46,30 @@ function(
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
     )
     if (SHOULD_INSTALL)
+        get_target_property(
+            MODULE
+            ${NAME}
+            UNNECESSARY_MODULE
+        )
+        if (MODULE STREQUAL "MODULE-NOTFOUND")
+            set(MODULE "miscellaneous")
+        endif ()
         install(
             TARGETS ${NAME}
             EXPORT ${NAME}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/modules/${NAME}/bin
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/modules/${NAME}/lib
+            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/modules/${MODULE}/bin
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/modules/${MODULE}/lib
         )
         get_target_property(target_type ${NAME} TYPE)
         if (NOT target_type STREQUAL EXECUTABLE)
+            get_target_property(
+                INC_DIR
+                ${NAME}
+                INTERFACE_INCLUDE_DIRECTORIES
+            )
             install(
                 DIRECTORY ${INC_DIR}
-                DESTINATION modules/${NAME}
+                DESTINATION modules/${MODULE}
             )
         endif ()
 
@@ -66,12 +79,15 @@ endfunction()
 
 
 function(
-    add_unnecessary_module
+    add_unnecessary_library
     NAME
 )
 
     set(FLAGS)
-    set(SINGLE_VALUES)
+    set(
+        SINGLE_VALUES
+        MODULE
+    )
     set(
         MULTI_VALUES
         SOURCES
@@ -91,6 +107,7 @@ function(
         ${ARG_N}
     )
     set(ALL_SOURCES ${UN_MODULE_SOURCES})
+
     if (APPLE)
         list(APPEND ALL_SOURCES ${UN_MODULE_SOURCES_APPLE})
     elseif (WIN32)
@@ -102,7 +119,13 @@ function(
         ${NAME}
         ${ALL_SOURCES}
     )
-
+    if (NOT ${UN_MODULE_MODULE} STREQUAL "")
+        set_target_properties(
+            ${NAME}
+            PROPERTIES
+            UNNECESSARY_MODULE ${UN_MODULE_MODULE}
+        )
+    endif ()
     target_include_directories(
         ${NAME}
         PUBLIC
@@ -122,7 +145,7 @@ function(
     if ("${LISTCOUNT}" GREATER 0)
         target_link_libraries(${NAME} PUBLIC "${UN_MODULE_DEPENDENCIES}")
     endif ()
-    configure_unnecessary_module(${NAME} TRUE)
+    configure_unnecessary_target(${NAME} TRUE)
     if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
         target_compile_definitions(
             ${NAME}

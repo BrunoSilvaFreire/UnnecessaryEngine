@@ -12,7 +12,7 @@ function(
         ${TEST_TARGET_NAME}
         "${TEST_SOURCES}"
     )
-    configure_unnecessary_module(${NAME}_tests FALSE)
+    configure_unnecessary_target(${NAME}_tests FALSE)
     list(LENGTH TEST_SOURCES NUM_TESTS)
     message(STATUS "Target ${TARGET} has ${NUM_TESTS} test source files.")
     target_link_libraries(

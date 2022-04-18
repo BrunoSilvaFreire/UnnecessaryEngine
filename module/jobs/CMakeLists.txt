@@ -1,6 +1,8 @@
 
-add_unnecessary_module(
+add_unnecessary_library(
     unnecessary_jobs
+
+    MODULE core
 
     SOURCES
     include/unnecessary/jobs/job.h

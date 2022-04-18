@@ -63,14 +63,14 @@ function(add_unnecessary_shader PATH)
             BYPRODUCTS ${SHADER_OUTPUT}
             COMMENT "Compiling stage '${SHADER_STAGE_NAME}' (${SHADER_OUTPUT})"
             COMMAND
-            glslc
+            ${GLSLC_EXEC}
             -fshader-stage=${SHADER_STAGE_NAME}
             ${SHADER_STAGE_FILE}
             -I "${RENDERING_SRC_DIR}/resources/shaders"
             -I "${SHADER_OUTPUT_DIR}"
             -o ${SHADER_OUTPUT}
             COMMAND
-            spirv-cross ${SHADER_OUTPUT}
+            ${SPIRV_EXEC} ${SHADER_OUTPUT}
             --reflect
             --output ${SHADER_REFLECTION_OUTPUT}
         )
