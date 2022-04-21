@@ -126,7 +126,7 @@ namespace un::packer {
                 h = std::max(h, destinated.getMaxY() + 1);
                 pass++;
             }
-            return PackingStrategy(w, h, operations);
+            return PackingStrategy(operations);
         }
 
     };

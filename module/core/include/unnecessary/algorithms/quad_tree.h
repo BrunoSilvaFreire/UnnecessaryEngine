@@ -19,7 +19,6 @@ namespace un {
         } children;
     public:
         explicit QuadTree(TData data) : data(data) {
-
         }
 
     };

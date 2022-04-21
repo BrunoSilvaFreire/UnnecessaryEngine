@@ -35,8 +35,14 @@ namespace un::packer {
         u32 width, height;
         std::vector<un::packer::PackingOperation> operations;
     public:
-        PackingStrategy(u32 width, u32 height, const std::vector<un::packer::PackingOperation>& operations)
-            : width(width), height(height), operations(operations) { }
+        PackingStrategy(const std::vector<un::packer::PackingOperation>& operations)
+            : width(0), height(0), operations(operations) {
+            for (const auto& operation : operations) {
+                const auto& destination = operation.getDestination();
+                width = std::max(width, destination.getMaxX() + 1);
+                height = std::max(height, destination.getMaxY() + 1);
+            }
+        }
 
         u32 getWidth() const {
             return width;

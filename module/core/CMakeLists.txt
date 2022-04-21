@@ -31,6 +31,7 @@ add_unnecessary_library(
     tests/membuf_tests.cpp
     tests/historic_tests.cpp
     tests/template_tests.cpp
+    tests/allocators_tests.cpp
 
     DEPENDENCIES
     termcolor::termcolor
