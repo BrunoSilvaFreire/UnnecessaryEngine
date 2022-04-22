@@ -6,12 +6,13 @@
 #include <memory>
 #include <vector>
 #include <concepts>
+#include <unnecessary/application/validator.h>
 
 namespace un {
     template<typename T>
     class Requirement {
     public:
-        virtual bool isMet(const T& value) = 0;
+        virtual void check(const T& value, un::Validator& validator) = 0;
     };
 
     template<typename A, typename B, B (* Transformer)(const A&)>
@@ -23,23 +24,16 @@ namespace un {
 
         template<typename E, typename ...Args>
         E& emplace(Args&& ... args) {
-            std::shared_ptr<E> ptr = std::make_shared<E, Args&& ...>(
-                std::forward<Args&& ...>(
-                    args...
-                ));
+            std::shared_ptr<E> ptr = std::make_shared<E, Args&& ...>(std::forward<Args&& ...>(args...));
             children.push_back(ptr);
             return *ptr;
         }
 
-        bool isMet(const A& value) override {
+        void check(const A& value, un::Validator& validator) override {
             const B transformed = Transformer(value);
-            return std::all_of(
-                children.begin(),
-                children.end(),
-                [&](const std::shared_ptr<Requirement<B>>& ptr) {
-                    return ptr->isMet(transformed);
-                }
-            );
+            for (const std::shared_ptr<Requirement<B>>& ptr : children) {
+                ptr->check(transformed, validator);
+            }
         }
     };
 
@@ -65,12 +59,12 @@ namespace un {
             return *ptr;
         }
 
-        bool isMet(const T& value) override {
-            return std::all_of(
+        void check(const T& value, un::Validator& validator) override {
+            std::for_each(
                 children.begin(),
                 children.end(),
                 [&](const std::shared_ptr<Requirement<T>>& ptr) {
-                    return ptr->isMet(value);
+                    return ptr->check(value, validator);
                 }
             );
         }

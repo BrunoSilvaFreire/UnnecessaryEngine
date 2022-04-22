@@ -48,13 +48,23 @@ namespace un {
 #pragma clang diagnostic ignored "-Wstring-plus-int"
 
 #endif
-#define UN_USE_ABS_PATH_FOR_LOGGING
+#ifdef DEBUG
+//#define UN_USE_ABS_PATH_FOR_LOGGING
+#endif
+
 #ifdef UN_USE_ABS_PATH_FOR_LOGGING
-#define __FILENAME__ __FILE__
+#ifndef UN_CURRENT_FILE
+#define UN_CURRENT_FILE __FILE__
+#endif
 #else
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wstring-plus-int"
-#define __FILENAME__ (__FILE__ + SOURCE_PATH_SIZE)
+
+#ifdef UN_CMAKE_FILE_NAME
+#define UN_CURRENT_FILE UN_CMAKE_FILE_NAME
+#else
+#define UN_CURRENT_FILE __FILE__
+#endif
 #endif
 
 #ifdef __clang__
@@ -65,6 +75,6 @@ namespace un {
 #define RED(MSG) COLORED(MSG, termcolor::red)
 #define PURPLE(MSG) COLORED(MSG, termcolor::magenta)
 #define YELLOW(MSG) COLORED(MSG, termcolor::yellow)
-#define LOG(LEVEL) un::Log(LEVEL, __LINE__, __FILENAME__).stream()
+#define LOG(LEVEL) un::Log(LEVEL, __LINE__, UN_CURRENT_FILE).stream()
 
 #endif

@@ -18,7 +18,7 @@ namespace un {
     public:
         explicit VulkanQueueAvailableRequirement(vk::QueueFlagBits bits);
 
-        bool isMet(const std::vector<vk::QueueFamilyProperties>& value) override;
+        void check(const std::vector<vk::QueueFamilyProperties>& value, un::Validator& validator) override;
     };
 
     class VulkanDeviceTypeRequirement
@@ -28,7 +28,7 @@ namespace un {
     public:
         explicit VulkanDeviceTypeRequirement(vk::PhysicalDeviceType requiredType);
 
-        bool isMet(const vk::PhysicalDeviceProperties& value) override;
+        void check(const vk::PhysicalDeviceProperties& value, un::Validator& validator) override;
     };
 }
 #endif //UNNECESSARYENGINE_VULKAN_REQUIREMENTS_H

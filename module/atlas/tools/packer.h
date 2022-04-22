@@ -20,7 +20,11 @@
 #include <istream>
 
 namespace un::packer {
-    void pack(const std::filesystem::path& output, size_t usedArea, const un::packer::PackingStrategy& strategy);
+    void pack(
+        const std::filesystem::path& output,
+        size_t usedArea,
+        const un::packer::PackingStrategy& strategy
+    );
 
     template<typename Algorithm>
     void pack(
@@ -63,63 +67,5 @@ namespace un::packer {
         pack(output, usedArea, strategy);
     }
 
-    void pack(const std::filesystem::path& output, size_t usedArea, const un::packer::PackingStrategy& strategy) {
-        size_t totalArea = strategy.getWidth() * strategy.getHeight();
-        size_t unused = totalArea - usedArea;
-        f32 efficiency = (static_cast<f32>(usedArea) / static_cast<f32>(totalArea)) * 100;
-        LOG(INFO) << "Packed with " << efficiency << "% efficiency. (packedArea: "
-                  << usedArea << ", totalArea: " << totalArea << ", unusedArea: " << unused << ").";
-        {
-            auto packed = std::__1::make_shared<png::image<png::rgba_pixel>>(
-                strategy.getWidth(),
-                strategy.getHeight()
-            );
-            SimpleJobSystem jobSystem(false);
-            {
-                JobChain<SimpleJobSystem> chain(&jobSystem);
-                for (const auto& operation : strategy.getOperations()) {
-                    JobHandle loadImageJob, parseImageJob;
-                    auto buf = std::__1::make_shared<Buffer>();
-                    auto src = std::__1::make_shared<png::image<png::rgba_pixel>>();
-                    const std::filesystem::path& imgPath = operation.getPath();
-                    chain.immediately<LoadFileJob>(&loadImageJob, imgPath, buf.get(), std::ios::binary)
-                        .after<LambdaJob<>>(
-                            loadImageJob, &parseImageJob,
-                            [src, buf]() {
-                                BufferStream<> sbuf(buf);
-                                std::istream stream(&sbuf);
-                                png::image<png::rgba_pixel> img(stream);
-                                *src = img;
-                            }
-                        );
-
-                    chain.setName(parseImageJob, std::string("Parse Image ") + imgPath.string());
-                    const Rect<u32>& rect = operation.getDestination();
-                    glm::uvec2 origin = rect.getOrigin();
-                    auto* job = new PackTextureJob<png::rgba_pixel>(
-                        src,
-                        packed,
-                        rect
-                    );
-                    std::stringstream name;
-                    name << "Pack image " << imgPath;
-                    job->setName(name.str());
-                    auto handles = ParallelForJob<::un::JobWorker> < png::rgba_pixel > ::parallelize(
-                        job,
-                        chain,
-                        rect.getArea(),
-                        512
-                    );
-                    for (JobHandle handle : handles) {
-                        chain.after<JobWorker>(parseImageJob, handle);
-                    }
-                };
-            }
-            jobSystem.start();
-            jobSystem.complete();
-            LOG(INFO) << "Result written to " << std::filesystem::absolute(output);
-            packed->write(output.string());
-        }
-    }
 }
 #endif

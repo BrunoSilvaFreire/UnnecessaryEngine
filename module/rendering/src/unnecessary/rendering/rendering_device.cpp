@@ -101,9 +101,15 @@ namespace un {
         for (u32 i = 0; i < devices.size(); ++i) {
             const vk::PhysicalDevice& device = devices[i];
             vk::PhysicalDeviceProperties properties = device.getProperties();
-            if (!deviceRequirements.isMet(device)) {
-                LOG(INFO) << "Device " << RED(properties.deviceName)
-                          << " is not suitable.";
+            un::Validator validator;
+            deviceRequirements.check(device, validator);
+            if (!validator.isValid()) {
+                LOG(INFO) << "Device " << RED(properties.deviceName) << " is not suitable.";
+                const auto& problems = validator.getProblems();
+                LOG(INFO) << "Problems (" << problems.size() << "):";
+                for (const un::Problem& problem : problems) {
+                    LOG(INFO) << RED(problem.getDescription());
+                }
                 //Not suitable
                 continue;
             }

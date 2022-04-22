@@ -46,12 +46,29 @@ function(
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
     )
-    if (SHOULD_INSTALL)
-        get_target_property(
-            MODULE
-            ${NAME}
-            UNNECESSARY_MODULE
+    get_target_property(MODULE_SRC ${NAME} SOURCES)
+    get_target_property(
+        MODULE
+        ${NAME}
+        UNNECESSARY_MODULE
+    )
+    foreach (src ${MODULE_SRC})
+        message("src: ${src}")
+        if (NOT ${MODULE} STREQUAL "MODULE-NOTFOUND")
+            string(
+                APPEND
+                src
+                "${MODULE}:"
+            )
+        endif ()
+        set_source_files_properties(
+            ${src}
+            PROPERTIES
+            COMPILE_DEFINITIONS "UN_CMAKE_FILE_NAME=\"${src}\""
         )
+    endforeach ()
+    if (SHOULD_INSTALL)
+
         if (MODULE STREQUAL "MODULE-NOTFOUND")
             set(MODULE "miscellaneous")
         endif ()

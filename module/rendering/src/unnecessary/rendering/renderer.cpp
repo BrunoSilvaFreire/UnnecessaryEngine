@@ -26,6 +26,11 @@ namespace un {
         for (u32 i = 0; i < count; ++i) {
             instanceExtensions.emplace_back(requiredExtensions[i]);
         }
+        auto layers = vk::enumerateInstanceLayerProperties();
+        auto extensions = vk::enumerateInstanceExtensionProperties();
+        for (const auto& layer : layers) {
+            LOG(INFO) << "Found layer " << GREEN(layer.layerName);
+        }
         return vk::createInstance(
             vk::InstanceCreateInfo(
                 static_cast<vk::InstanceCreateFlags>(0),
