@@ -94,10 +94,14 @@ namespace un {
         queueRequirements.emplace<un::VulkanQueueAvailableRequirement>(vk::QueueFlagBits::eTransfer);
 
         auto& propertiesRequirements = deviceRequirements.emplace<un::DevicePropertiesRequirements>();
-        propertiesRequirements.emplace<VulkanDeviceTypeRequirement>(vk::PhysicalDeviceType::eDiscreteGpu);
+        propertiesRequirements.emplace<VulkanDeviceTypeRequirement>(
+            (std::initializer_list<vk::PhysicalDeviceType>) {
+                vk::PhysicalDeviceType::eDiscreteGpu, vk::PhysicalDeviceType::eIntegratedGpu
+            }
+        );
 
 
-        std::unordered_map<u32, u32> scores;
+        std::unordered_map < u32, u32 > scores;
         for (u32 i = 0; i < devices.size(); ++i) {
             const vk::PhysicalDevice& device = devices[i];
             vk::PhysicalDeviceProperties properties = device.getProperties();
@@ -133,14 +137,10 @@ namespace un {
 
         auto physicalDevice = elected;
         auto deviceProperties = physicalDevice.getProperties();
-        LOG(INFO) << "Elected " << GREEN(deviceProperties.deviceName) << " with score: "
-                  << PURPLE(score);
+        LOG(INFO) << "Elected " << GREEN(deviceProperties.deviceName) << " with score: " << PURPLE(score);
         vk::DeviceCreateInfo deviceCreateInfo;
         std::vector<vk::QueueFamilyProperties> queueProperties = physicalDevice.getQueueFamilyProperties();
-        auto graphicsInfo = makeQueueCreateInfoFor(
-            vk::QueueFlagBits::eGraphics,
-            queueProperties
-        );
+        auto graphicsInfo = makeQueueCreateInfoFor(vk::QueueFlagBits::eGraphics, queueProperties);
         float priority = 1.0;
 
         std::optional<u32> graphicsQueue, presentQueue;
@@ -181,7 +181,7 @@ namespace un {
         }
         deviceCreateInfo.setPEnabledExtensionNames(deviceExtensions);
         vk::PhysicalDeviceFeatures features;
-        features.geometryShader = true;
+//        features.geometryShader = true;
         deviceCreateInfo.setPEnabledFeatures(&features);
         auto virtualDevice = physicalDevice.createDevice(deviceCreateInfo);
         auto graphics = Queue(

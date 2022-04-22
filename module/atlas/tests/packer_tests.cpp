@@ -15,16 +15,23 @@ void pack(
         files.emplace_back(entry.path().string());
     }
     GTEST_LOG_(INFO) << "Found " << files.size() << " images in " << std::filesystem::absolute(imagesDir);
+    std::string prefix = imagesDir.filename().string() + '_';
     un::packer::pack(
         un::packer::MaxRectanglesAlgorithm<un::bottomLeftHeuristic>(),
         files,
-        imagesDir / "bottom_left.png");
-    un::packer::pack(un::packer::MaxRectanglesAlgorithm<un::bestAreaFitHeuristic>(), files,
-                     imagesDir / "best_area.png");
-    un::packer::pack(un::packer::MaxRectanglesAlgorithm<un::bestShortSideFitHeuristic>(), files,
-                     imagesDir / "short_side.png");
+        imagesDir.parent_path() / (prefix + "bottom_left.png"));
+
+    un::packer::pack(
+        un::packer::MaxRectanglesAlgorithm<un::bestAreaFitHeuristic>(),
+        files,
+        imagesDir.parent_path() / (prefix + "best_area.png")
+    );
+    un::packer::pack(
+        un::packer::MaxRectanglesAlgorithm<un::bestShortSideFitHeuristic>(), files,
+        imagesDir.parent_path() / (prefix + "short_side.png"
+        ));
     un::packer::pack(un::packer::MaxRectanglesAlgorithm<un::bestLongSideFitHeuristic>(), files,
-                     imagesDir / "long_side.png");
+                     imagesDir.parent_path() / (prefix + "long_side.png"));
 }
 
 TEST(packer_tool, pack_uniform_images) {

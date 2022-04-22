@@ -46,9 +46,6 @@ TEST(jobs, completeness) {
         }
         jobSystem.start();
         jobSystem.complete();
-
-        GTEST_LOG_(INFO) << "Execution " << i << ": " << numJobs << " vs "
-                         << numCompletedJobs;
         ASSERT_EQ(numJobs, numCompletedJobs);
         auto outputFile = std::filesystem::current_path() /
                           (std::string("execution_") + std::to_string(i) + ".csv");

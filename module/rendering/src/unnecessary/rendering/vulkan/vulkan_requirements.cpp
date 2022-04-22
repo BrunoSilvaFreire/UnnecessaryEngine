@@ -1,4 +1,5 @@
 #include <unnecessary/rendering/vulkan/vulkan_requirements.h>
+#include <unnecessary/strings.h>
 
 namespace un {
 
@@ -24,15 +25,26 @@ namespace un {
 
     void VulkanDeviceTypeRequirement::check(const vk::PhysicalDeviceProperties& value, un::Validator& validator) {
 
-        if (value.deviceType != requiredType) {
+        bool compatible = std::any_of(acceptableTypes.begin(), acceptableTypes.end(),
+                                      [&](vk::PhysicalDeviceType type) {
+                                          return value.deviceType == type;
+                                      }
+        );
+        if (!compatible) {
             std::stringstream ss;
             ss << "Device " << value.deviceName << " is " << vk::to_string(value.deviceType);
-            ss << ", but type " << vk::to_string(requiredType) << " is required.";
+            ss << ", but only the types "
+               << un::join_strings(acceptableTypes.begin(), acceptableTypes.end(), [](vk::PhysicalDeviceType type) {
+                   return vk::to_string(type);
+               })
+               << " are acceptable.";
             validator.addProblem(ss.str());
         }
     }
 
-    VulkanDeviceTypeRequirement::VulkanDeviceTypeRequirement(vk::PhysicalDeviceType requiredType) : requiredType(
-        requiredType
+    VulkanDeviceTypeRequirement::VulkanDeviceTypeRequirement(
+        const std::initializer_list<vk::PhysicalDeviceType>& acceptableTypes
+    ) : acceptableTypes(
+        acceptableTypes
     ) { }
 }

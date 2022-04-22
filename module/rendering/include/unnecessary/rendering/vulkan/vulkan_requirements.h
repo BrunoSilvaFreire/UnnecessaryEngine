@@ -21,12 +21,11 @@ namespace un {
         void check(const std::vector<vk::QueueFamilyProperties>& value, un::Validator& validator) override;
     };
 
-    class VulkanDeviceTypeRequirement
-        : public Requirement<vk::PhysicalDeviceProperties> {
+    class VulkanDeviceTypeRequirement : public Requirement<vk::PhysicalDeviceProperties> {
     private:
-        vk::PhysicalDeviceType requiredType;
+        std::vector<vk::PhysicalDeviceType> acceptableTypes;
     public:
-        explicit VulkanDeviceTypeRequirement(vk::PhysicalDeviceType requiredType);
+        explicit VulkanDeviceTypeRequirement(const std::initializer_list<vk::PhysicalDeviceType>& acceptableTypes);
 
         void check(const vk::PhysicalDeviceProperties& value, un::Validator& validator) override;
     };

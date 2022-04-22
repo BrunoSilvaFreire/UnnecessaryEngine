@@ -53,7 +53,6 @@ function(
         UNNECESSARY_MODULE
     )
     foreach (src ${MODULE_SRC})
-        message("src: ${src}")
         if (NOT ${MODULE} STREQUAL "MODULE-NOTFOUND")
             string(
                 APPEND
