@@ -1,7 +1,7 @@
 #include <unnecessary/application/application.h>
 
 namespace un {
-    void AppLoop::late(un::EventVoid::EventListener listener) {
+    void AppLoop::late(un::EventVoid::Listener listener) {
         lateStep += listener;
     }
 
@@ -10,7 +10,7 @@ namespace un {
         lateStep();
     }
 
-    void AppLoop::early(un::EventVoid::EventListener listener) {
+    void AppLoop::early(un::EventVoid::Listener listener) {
         earlyStep += listener;
     }
 

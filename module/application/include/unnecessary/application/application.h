@@ -11,9 +11,9 @@ namespace un {
 
     public:
 
-        void early(un::EventVoid::EventListener listener);
+        void early(un::EventVoid::Listener listener);
 
-        void late(un::EventVoid::EventListener listener);
+        void late(un::EventVoid::Listener listener);
 
         void step();
     };

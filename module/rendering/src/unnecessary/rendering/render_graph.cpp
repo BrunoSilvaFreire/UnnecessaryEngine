@@ -173,14 +173,14 @@ namespace un {
     }
 
     un::CommandBuffer
-    FrameData::requestCommandBuffer(un::GraphicsWorker* graphicsWorker, const size_t i) {
+    FrameData::requestCommandBuffer(un::GraphicsWorker* graphicsWorker, const size_t renderPassIndex) {
         un::CommandBuffer buffer = graphicsWorker->requestCommandBuffer();
 #if DEBUG
         std::stringstream stream;
-        stream << "RenderPass-" << i << "-CommandBuffer";
+        stream << "RenderPass-" << renderPassIndex << "-CommandBuffer";
         graphicsWorker->getRenderer()->tag(*buffer, stream.str());
 #endif
-        passesOutputs[i].passCommands = *buffer;
+        passesOutputs[renderPassIndex].passCommands = *buffer;
         return buffer;
     }
 }

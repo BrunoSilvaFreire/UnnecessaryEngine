@@ -147,7 +147,6 @@ namespace un {
             un::SwapChain& swapChain = _renderer->getSwapChain();
             Window* pWindow = _renderer->getWindow();
             while (_rendering) {
-                glfwPollEvents();
                 un::Chronometer chronometer;
                 _loop.enter();
                 un::SwapChain::ChainSynchronizer& synchronizer = swapChain.acquireSynchronizer();

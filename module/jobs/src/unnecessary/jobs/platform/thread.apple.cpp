@@ -8,4 +8,8 @@ namespace un {
 
     void Thread::setAliveThreadName(const std::string& name) {
     }
+
+    void Thread::start() {
+        _inner = std::thread(&Thread::operator(), this);
+    }
 }

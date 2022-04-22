@@ -52,5 +52,6 @@ int main(int argc, char** argv) {
         app.extend(window);
         app.start();
         app.waitExit();
+        app.stop();
     }
 }

@@ -32,7 +32,7 @@ namespace un {
 
         un::CommandBuffer requestCommandBuffer(
             un::GraphicsWorker* graphicsWorker,
-            const size_t i
+            const size_t renderPassIndex
         );
     };
 

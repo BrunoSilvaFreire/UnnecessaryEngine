@@ -7,12 +7,8 @@ namespace un {
     Thread::Thread(
         const std::function<void()>& block
     ) : _block(block),
-        _name(),
-        _core(0),
         _alive(false),
-        _nameDirty(false),
-        _coreDirty(false),
-        _inner(&Thread::operator(), this) {
+        _inner() {
         if (block == nullptr) {
             throw std::runtime_error("Thread created with empty block.");
         }
@@ -28,15 +24,8 @@ namespace un {
 
     void Thread::operator()() {
         {
+            std::unique_lock<std::mutex> lock(_dataMutex);
             _alive = true;
-            if (_nameDirty) {
-                setAliveThreadName(_name);
-                _nameDirty = false;
-            }
-            if (_coreDirty) {
-                setAliveThreadCore(_core);
-                _coreDirty = false;
-            }
         }
         _block();
         {
@@ -55,26 +44,10 @@ namespace un {
     }
 
     bool Thread::setCore(u32 core) {
-        std::unique_lock<std::mutex> lock(_dataMutex);
-        _core = core;
-        if (_alive) {
-            bool result = setAliveThreadCore(core);
-            _coreDirty = false;
-            return result;
-        } else {
-            _coreDirty = true;
-            return false;
-        }
+        return setAliveThreadCore(core);
     }
 
     void Thread::setName(const std::string& name) {
-        std::unique_lock<std::mutex> lock(_dataMutex);
-        _name = name;
-        if (_alive) {
-            setAliveThreadName(name);
-            _nameDirty = false;
-        } else {
-            _nameDirty = true;
-        }
+        setAliveThreadName(name);
     }
 }

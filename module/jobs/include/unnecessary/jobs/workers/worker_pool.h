@@ -70,6 +70,7 @@ namespace un {
         typedef TWorker WorkerType;
         typedef typename TWorker::JobType JobType;
         typedef typename TWorker::JobPointer JobPointer;
+        typedef un::Event<JobPointer, JobHandle> JobEvent;
     private:
         struct ScheduledJob {
             ScheduledJob(
@@ -103,13 +104,15 @@ namespace un {
         std::queue<std::size_t> reusableIndices;
         // TODO: Minimize locks
         std::mutex queueAccessMutex;
-        un::Event<JobPointer, JobHandle> onJobCompleted;
+        std::mutex onJobCompletedMutex;
+        JobEvent onJobCompleted;
         std::mutex openMutex;
-        std::size_t numPendingJobs;
         /**
          * Marks whether this worker pool accepting new jobs.
          */
         bool open = true;
+
+        std::atomic_size_t numPendingJobs;
     private:
 
         void done(JobPointer job, JobHandle localHandle) {
@@ -119,7 +122,10 @@ namespace un {
                 clear(localHandle);
                 numPendingJobs--;
             }
-            onJobCompleted(job, localHandle);
+            {
+                std::lock_guard<std::mutex> lock(onJobCompletedMutex);
+                onJobCompleted(job, localHandle);
+            }
         }
 
         void clear(JobHandle handle) {
@@ -261,8 +267,19 @@ namespace un {
             return workers.size();
         }
 
-        un::Event<JobPointer, JobHandle>& getOnJobCompleted() {
-            return onJobCompleted;
+        void addJobCompletedListener(const typename JobEvent::Listener& listener) {
+            {
+                std::lock_guard<std::mutex> lock(onJobCompletedMutex);
+                onJobCompleted += listener;
+            }
+        }
+
+
+        void removeJobCompletedListener(const typename JobEvent::Listener& listener) {
+            {
+                std::lock_guard<std::mutex> lock(onJobCompletedMutex);
+                onJobCompleted -= listener;
+            }
         }
 
         const un::Event<JobPointer, JobHandle>& getOnJobCompleted() const {
@@ -272,11 +289,13 @@ namespace un {
         void complete() {
             std::lock_guard lock(openMutex);
             open = false;
-            onJobCompleted += [this](JobType* job, un::JobHandle handle) {
-                if (numPendingJobs == 0) {
-                    stopAllWorkers();
+            addJobCompletedListener(
+                [this](JobType* job, un::JobHandle handle) {
+                    if (numPendingJobs == 0) {
+                        stopAllWorkers();
+                    }
                 }
-            };
+            );
         }
 
         void stopAllWorkers() {

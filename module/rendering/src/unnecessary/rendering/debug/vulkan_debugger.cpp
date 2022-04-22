@@ -79,7 +79,7 @@ namespace un {
     ) {
         auto debugger = static_cast<un::VulkanDebugger*>(pUserData);
         std::stringstream ostream;
-        ostream << "Vulkan Error-"
+        ostream << "Vulkan-"
                 << vk::to_string(static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(messageSeverity))
                 << "-"
                 << vk::to_string(static_cast<vk::DebugUtilsMessageTypeFlagBitsEXT>(messageTypes))

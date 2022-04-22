@@ -68,13 +68,17 @@ namespace un {
 //                LOG(INFO) << "Popped " << index << ", pending: " << pending.size();
                 pending.pop();
                 return true;
-            } else if (evacuating) {
-                return false;
+            } else {
+                std::lock_guard<std::mutex> runningLock(runningMutex);
+                if (evacuating) {
+                    return false;
+                }
             }
             return false;
         }
 
-        bool canDequeue() const {
+        bool canDequeue() {
+            std::lock_guard<std::mutex> lock(runningMutex);
             return !evacuating && running;
         }
 
@@ -197,6 +201,7 @@ namespace un {
                 );
                 thread->setCore(core);
                 thread->setName(name);
+                thread->start();
             }
         }
 

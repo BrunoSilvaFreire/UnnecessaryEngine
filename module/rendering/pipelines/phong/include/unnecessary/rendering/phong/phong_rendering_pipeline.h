@@ -17,7 +17,7 @@ namespace un {
                     std::array<float, 4>({0, 0, 0, 1})
                 ),
                 static_cast<vk::AttachmentDescriptionFlags>(0),
-                vk::Format::eB8G8R8A8Unorm,
+                vk::Format::eB8G8R8A8Srgb,
                 vk::SampleCountFlagBits::e1,
                 vk::AttachmentLoadOp::eClear,
                 vk::AttachmentStoreOp::eStore,

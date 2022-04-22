@@ -125,12 +125,11 @@ namespace un {
                     totalNumberOfWorkers += workerConfig.getNumWorkers();
                     using JobType = typename WorkerType::JobType;
                     pool.allocateWorkers(workerConfig);
-                    pool.getOnJobCompleted() += [&](
-                        JobType* job,
-                        un::JobHandle graphHandle
-                    ) {
-                        done<WorkerType, WorkerIndex>(job, graphHandle);
-                    };
+                    pool.addJobCompletedListener(
+                        [&](JobType* job, un::JobHandle graphHandle) {
+                            done<WorkerType, WorkerIndex>(job, graphHandle);
+                        }
+                    );
                 }
             );
         };
@@ -212,7 +211,7 @@ namespace un {
         }
 
         void complete() {
-            std::size_t remaining = totalNumberOfWorkers;
+            std::atomic_size_t remaining = totalNumberOfWorkers;
             std::condition_variable allExited;
             std::mutex remainingLock;
             for_types_indexed<Archetypes...>(

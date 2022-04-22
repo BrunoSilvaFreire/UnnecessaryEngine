@@ -14,12 +14,9 @@ namespace un {
     class Thread {
     private:
         std::function<void()> _block;
-        std::string _name;
-        u32 _core;
         std::thread _inner;
         std::mutex _dataMutex;
         bool _alive;
-        bool _nameDirty, _coreDirty;
 
         void operator()();
 
@@ -39,6 +36,8 @@ namespace un {
         void setName(const std::string& name);
 
         bool setCore(u32 core);
+
+        void start();
 
         void join();
 
