@@ -80,6 +80,8 @@ namespace un {
         UN_AGGRESSIVE_INLINE float computeDistanceOfPixel(const glm::uvec2& inputCoords) {
             int iw = input->get_width();
             int ih = input->get_height();
+            float outTexelX = 1.0F / static_cast<f32>(output->get_width());
+            float outTexelY = 1.0F / static_cast<f32>(output->get_height());
             float d = maxDistance;
             for (int dy = -iw; dy < iw; ++dy) {
                 if (abs(dy) > maxDistance) {

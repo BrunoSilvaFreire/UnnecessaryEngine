@@ -71,7 +71,7 @@ TEST(jobs, load_file) {
         );
         chain.finally(
             [&]() {
-                char* string = reinterpret_cast<char*>(buf.data());
+                char *string = reinterpret_cast<char *>(buf.data());
 //                LOG(INFO) << "Finished reading file: " << string;
                 ASSERT_STREQ(string, "Hello World!");
             }
@@ -84,7 +84,7 @@ struct ExplorationVertex {
 public:
     std::size_t randomData;
 
-    friend std::ostream& operator<<(std::ostream& os, const ExplorationVertex& vertex) {
+    friend std::ostream &operator<<(std::ostream &os, const ExplorationVertex &vertex) {
         os << "randomData: " << vertex.randomData;
         return os;
     }
@@ -94,7 +94,7 @@ typedef gpp::AdjacencyList<ExplorationVertex, float> DummyExplorationGraph;
 
 #define NUM_GRAPH_ENTRIES 2000
 
-void populate(DummyExplorationGraph& graph) {
+void populate(DummyExplorationGraph &graph) {
     std::random_device device;
 
     graph.reserve(NUM_GRAPH_ENTRIES);
@@ -107,7 +107,7 @@ void populate(DummyExplorationGraph& graph) {
         for (size_t y = 0; y < NUM_GRAPH_ENTRIES; ++y) {
             if (device()) {
                 uint32_t data = device();
-                float edge = *reinterpret_cast<float*>(&data);
+                float edge = *reinterpret_cast<float *>(&data);
                 graph.connect(x, y, edge);
             }
         }
@@ -119,8 +119,8 @@ TEST(jobs, graph_exploration) {
 
     un::SimpleJobSystem jobSystem(4, true);
     gpp::test_mazes(
-        [&](gpp::Maze& maze) {
-            const gpp::AdjacencyList<gpp::Cell, int>& graph = maze.getGraph();
+        [&](gpp::Maze &maze) {
+            const gpp::AdjacencyList<gpp::Cell, int> &graph = maze.getGraph();
             gpp::save_to_dot(
                 graph,
                 std::filesystem::current_path() / "exploration_graph.dot"
@@ -129,7 +129,7 @@ TEST(jobs, graph_exploration) {
             std::set<std::size_t> alreadyExplored;
             un::GraphExplorer<gpp::AdjacencyList<gpp::Cell, int>> explorer(
                 graph,
-                [&](u32 index, const gpp::Cell& vertex) {
+                [&](u32 index, const gpp::Cell &vertex) {
                     bool isDuplicate = alreadyExplored.contains(index);
                     if (!isDuplicate) {
                         LOG(INFO) << index << " OK";
@@ -165,10 +165,10 @@ TEST(jobs, graph_exploration) {
 TEST(jobs, set_affinity) {
     std::size_t numWorkers = std::thread::hardware_concurrency();
     un::SimpleJobSystem jobSystem(numWorkers, true);
-    auto& workers = jobSystem.getWorkerPool<un::JobWorker>().getWorkers();
+    auto &workers = jobSystem.getWorkerPool<un::JobWorker>().getWorkers();
     for (std::size_t i = 0; i < numWorkers; ++i) {
-        un::Thread* thread = workers[i]->getThread();
-        ASSERT_TRUE(thread->setCore(i));
+        un::Thread *thread = workers[i]->getThread();
+        EXPECT_TRUE(thread->setCore(i)) << "Unable to set thread " << i << " affinity";
     }
     jobSystem.complete();
 }
@@ -223,9 +223,9 @@ private:
 public:
     explicit PopulateBufferJob(
         std::shared_ptr<un::Buffer> buf
-    ) : buf(std::move(buf)) { }
+    ) : buf(std::move(buf)) {}
 
-    UN_AGGRESSIVE_INLINE void operator()(size_t index, un::JobWorker* worker) override {
+    UN_AGGRESSIVE_INLINE void operator()(size_t index, un::JobWorker *worker) override {
         int r;
         for (int j = 0; j < 2000; ++j) {
             r = rand();

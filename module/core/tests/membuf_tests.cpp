@@ -6,6 +6,8 @@
 #include "unnecessary/memory/membuf.h"
 #include "unnecessary/memory/binary_writer.h"
 
+#if DEBUG
+
 TEST(memory, binary_writer_overflow) {
     const size_t length = 64;
     un::BinaryWriter writer(length);
@@ -22,3 +24,5 @@ TEST(memory, buffer_overflow) {
         std::runtime_error
     );
 }
+
+#endif

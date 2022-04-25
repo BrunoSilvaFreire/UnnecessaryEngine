@@ -29,17 +29,17 @@ namespace un {
          * Function that creates workerPools of each archetype during
          * job system initialization.
          */
-        typedef std::function<WorkerType*(std::size_t)> WorkerCreator;
+        typedef std::function<WorkerType *(std::size_t)> WorkerCreator;
     private:
         std::size_t numWorkers;
         WorkerCreator creator;
     public:
         WorkerPoolConfiguration(
             size_t numWorkers,
-            const std::function<TWorker*(
+            const std::function<TWorker *(
                 std::size_t
-            )>& creator
-        ) : numWorkers(numWorkers), creator(creator) { }
+            )> &creator
+        ) : numWorkers(numWorkers), creator(creator) {}
 
         static WorkerPoolConfiguration<WorkerType> forwarding(
             size_t numWorkers
@@ -93,7 +93,7 @@ namespace un {
         /**
          * Storage for workers.
          */
-        std::vector<WorkerType*> workers;
+        std::vector<WorkerType *> workers;
         /**
          * Storage for all jobs scheduled for this pool
          */
@@ -134,17 +134,17 @@ namespace un {
                 throw std::runtime_error("Attempted to clear a handle out of scope");
             }
 #endif
-            ScheduledJob& reference = jobs[handle];
+            ScheduledJob &reference = jobs[handle];
             std::memset(&reference, 0, sizeof(ScheduledJob));
         }
 
         bool isAllocated(JobHandle handle) const { return handle < jobs.size(); }
 
-        WorkerType* createWorker(
-            const WorkerPoolConfiguration<WorkerType>& configuration,
+        WorkerType *createWorker(
+            const WorkerPoolConfiguration<WorkerType> &configuration,
             size_t index
         ) {
-            WorkerType* pWorker = configuration.creator(index);
+            WorkerType *pWorker = configuration.creator(index);
             pWorker->setCore(static_cast<u32>(index));
             std::string threadName = un::type_name_of<WorkerType>();
             threadName += "-";
@@ -157,7 +157,7 @@ namespace un {
         }
 
 
-        WorkerType* nextWorker() {
+        WorkerType *nextWorker() {
             std::size_t index = gatlingGun++;
             gatlingGun %= workers.size();
             return workers[index];
@@ -169,7 +169,7 @@ namespace un {
         WorkerPool() = default;
 
         ~WorkerPool() {
-            for (WorkerType* worker : workers) {
+            for (WorkerType *worker: workers) {
                 worker->stop();
                 delete worker;
             }
@@ -197,7 +197,7 @@ namespace un {
                 } else {
                     handle = static_cast<JobHandle>(reusableIndices.front());
                     reusableIndices.pop();
-                    ScheduledJob& recycled = jobs[handle];
+                    ScheduledJob &recycled = jobs[handle];
                     recycled.job = job;
                     recycled.graphHandle = graphHandle;
                 }
@@ -220,10 +220,10 @@ namespace un {
             }
         }
 
-        void dispatch(const std::set<JobHandle>& handles) {
+        void dispatch(const std::set<JobHandle> &handles) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);
-                for (JobHandle handle : handles) {
+                for (JobHandle handle: handles) {
                     unsafeDispatch(handle);
                 }
             }
@@ -233,7 +233,7 @@ namespace un {
          * Dispatches the handle without locking the queueAccessMutex
          */
         void unsafeDispatch(JobHandle handle) {
-            WorkerType* worker = nextWorker();
+            WorkerType *worker = nextWorker();
             JobPointer pJob = getJob(handle);
 #if DEBUG
             if (pJob == nullptr) {
@@ -255,11 +255,11 @@ namespace un {
             }
         }
 
-        std::vector<WorkerType*>& getWorkers() {
+        std::vector<WorkerType *> &getWorkers() {
             return workers;
         }
 
-        const std::vector<WorkerType*>& getWorkers() const {
+        const std::vector<WorkerType *> &getWorkers() const {
             return workers;
         }
 
@@ -267,7 +267,7 @@ namespace un {
             return workers.size();
         }
 
-        void addJobCompletedListener(const typename JobEvent::Listener& listener) {
+        void addJobCompletedListener(const typename JobEvent::Listener &listener) {
             {
                 std::lock_guard<std::mutex> lock(onJobCompletedMutex);
                 onJobCompleted += listener;
@@ -275,22 +275,26 @@ namespace un {
         }
 
 
-        void removeJobCompletedListener(const typename JobEvent::Listener& listener) {
+        void removeJobCompletedListener(const typename JobEvent::Listener &listener) {
             {
                 std::lock_guard<std::mutex> lock(onJobCompletedMutex);
                 onJobCompleted -= listener;
             }
         }
 
-        const un::Event<JobPointer, JobHandle>& getOnJobCompleted() const {
+        const un::Event<JobPointer, JobHandle> &getOnJobCompleted() const {
             return onJobCompleted;
         }
 
         void complete() {
             std::lock_guard lock(openMutex);
             open = false;
+            if (numPendingJobs == 0) {
+                stopAllWorkers();
+                return;
+            }
             addJobCompletedListener(
-                [this](JobType* job, un::JobHandle handle) {
+                [this](JobType *job, un::JobHandle handle) {
                     if (numPendingJobs == 0) {
                         stopAllWorkers();
                     }
@@ -299,13 +303,13 @@ namespace un {
         }
 
         void stopAllWorkers() {
-            for (auto worker : workers) {
+            for (auto worker: workers) {
                 worker->stop();
             }
         }
 
         void start() {
-            for (auto worker : getWorkers()) {
+            for (auto worker: getWorkers()) {
                 worker->start();
             }
         }

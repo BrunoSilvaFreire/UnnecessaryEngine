@@ -13,6 +13,7 @@ add_unnecessary_library(
     include/unnecessary/jobs/misc/load_file_job.h
     include/unnecessary/jobs/misc/lambda_job.h
     include/unnecessary/jobs/misc/graph_exploration.h
+    include/unnecessary/jobs/misc/fence.h
     include/unnecessary/jobs/workers/worker.h
     include/unnecessary/jobs/recorder/job_system_recorder.h
     include/unnecessary/jobs/recorder/data/recorder_events.h

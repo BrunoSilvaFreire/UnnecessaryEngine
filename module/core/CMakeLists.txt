@@ -7,7 +7,7 @@ add_unnecessary_library(
     SOURCES
     include/unnecessary/def.h
     include/unnecessary/logging.h
-    include/unnecessary/algorithms/quad_tree.h
+    include/unnecessary/algorithms/n_tree.h
     include/unnecessary/memory/membuf.h
     include/unnecessary/memory/binary_writer.h
     include/unnecessary/memory/buffer_stream.h
@@ -32,6 +32,7 @@ add_unnecessary_library(
     tests/historic_tests.cpp
     tests/template_tests.cpp
     tests/allocators_tests.cpp
+    tests/tree_tests.cpp
 
     DEPENDENCIES
     termcolor::termcolor
