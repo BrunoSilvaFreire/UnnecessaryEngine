@@ -20,6 +20,8 @@ add_unnecessary_tool(
     MODULE atlas
 
     SOURCES
+    tools/algorithm_registry.h
+    tools/packing.h
     tools/packer.h
     tools/packer.cpp
     tools/packer_entry.h

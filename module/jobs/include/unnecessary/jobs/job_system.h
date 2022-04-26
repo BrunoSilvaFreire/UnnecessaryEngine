@@ -241,7 +241,9 @@ namespace un {
             );
             completionFence.wait();
         }
+        void join() {
 
+        }
         template<typename TWorker>
         friend
         class WorkerChain;
@@ -278,6 +280,7 @@ namespace un {
         void start() {
             getWorkerPool<un::JobWorker>().start();
         }
+
 
     };
 }

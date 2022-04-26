@@ -3,6 +3,7 @@
 #include <png++/png.hpp>
 #include "packer_entry.h"
 #include "packer.h"
+#include <packing.h>
 #include <algorithms/heuristics.h>
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
