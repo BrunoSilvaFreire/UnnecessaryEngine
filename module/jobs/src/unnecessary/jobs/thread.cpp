@@ -50,4 +50,8 @@ namespace un {
     void Thread::setName(const std::string& name) {
         setAliveThreadName(name);
     }
+
+    void Thread::start() {
+        _inner = std::thread(&Thread::operator(), this);
+    }
 }

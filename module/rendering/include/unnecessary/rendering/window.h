@@ -39,7 +39,7 @@ namespace un {
         }
 
         void pool() {
-            glfwWaitEvents();
+//            glfwWaitEvents();
             glfwPollEvents();
         }
 

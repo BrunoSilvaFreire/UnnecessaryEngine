@@ -19,7 +19,7 @@ namespace un {
 #ifdef DEBUG
         LOG(INFO) << "Using validation layers";
         instanceLayers.emplace_back("VK_LAYER_KHRONOS_validation");
-        instanceLayers.emplace_back("VK_LAYER_LUNARG_api_dump");
+//        instanceLayers.emplace_back("VK_LAYER_LUNARG_api_dump");
         instanceExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
         u32 count;

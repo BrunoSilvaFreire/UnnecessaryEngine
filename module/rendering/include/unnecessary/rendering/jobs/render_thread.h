@@ -215,6 +215,7 @@ namespace un {
                 "RenderThread",
                 std::bind(&RenderThread::renderThread, this)
             );
+            _thread->start();
         }
 
         void stop() {

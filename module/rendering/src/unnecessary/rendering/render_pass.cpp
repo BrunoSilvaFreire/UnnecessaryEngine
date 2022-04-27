@@ -3,7 +3,7 @@
 namespace un {
 
     un::RenderPass::RenderPass(
-        const std::basic_string<char, std::char_traits<char>, std::allocator<char>>& name,
+        const std::string& name,
         const vk::Flags<vk::PipelineStageFlagBits>& stageFlags
     ) : name(name), stageFlags(stageFlags) { }
 
@@ -28,8 +28,8 @@ namespace un {
         return resolveAttachments;
     }
 
-    const std::vector<vk::AttachmentReference>& RenderPass::getDepthAttachments() const {
-        return depthAttachments;
+    const std::optional<vk::AttachmentReference>& RenderPass::getDepthAttachment() const {
+        return depthAttachment;
     }
 
     std::ostream& operator<<(std::ostream& os, const RenderPass& pass) {

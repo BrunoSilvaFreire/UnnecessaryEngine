@@ -12,12 +12,13 @@ namespace un {
         un::RenderGroup opaqueGroup;
     public:
         void configure(un::Renderer& renderer, RenderGraph& graph) override {
+
             size_t color = graph.addBorrowedAttachment(
                 vk::ClearColorValue(
-                    std::array<float, 4>({0, 0, 0, 1})
+                    std::array<float, 4>({1, 0, 0, 1})
                 ),
                 static_cast<vk::AttachmentDescriptionFlags>(0),
-                vk::Format::eB8G8R8A8Srgb,
+                vk::Format::eB8G8R8A8Unorm,
                 vk::SampleCountFlagBits::e1,
                 vk::AttachmentLoadOp::eClear,
                 vk::AttachmentStoreOp::eStore,

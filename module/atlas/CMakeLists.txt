@@ -60,5 +60,5 @@ add_custom_command(
     --num_images 64
     --reuse true
     --output ${IMG_OUT_DIR}/random
-    BYPRODUCTS ${IMG_OUT_DIR}/packed/* ${IMG_OUT_DIR}/random/*
+    BYPRODUCTS ${IMG_OUT_DIR}/packed ${IMG_OUT_DIR}/random
 )

@@ -28,7 +28,7 @@ namespace un {
             renderArea(renderArea),
             clears(clears) {
             usesColorAttachment(colorAttachmentIndex, vk::ImageLayout::eColorAttachmentOptimal);
-            usesDepthAttachment(depthAttachmentIndex, vk::ImageLayout::eDepthAttachmentOptimal);
+            usesDepthAttachment(depthAttachmentIndex, vk::ImageLayout::eDepthStencilAttachmentOptimal);
         }
 
     private:

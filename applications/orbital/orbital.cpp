@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
     un::Application app;
 
     {
-        un::Window window = un::Window::withSize("Orbital", app, un::Size2D(400, 600));
+        un::Window window = un::Window::withSize("Orbital", app, un::Size2D(1080, 900));
         un::Renderer renderer = un::Renderer(
             &window,
             "Orbital",

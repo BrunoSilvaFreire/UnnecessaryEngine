@@ -56,7 +56,7 @@ namespace un::packer {
         LOG(INFO) << "Packed with " << efficiency << "% efficiency. (packedArea: "
                   << usedArea << ", totalArea: " << totalArea << ", unusedArea: " << unused << ").";
         {
-            auto packed = std::__1::make_shared<png::image<png::rgba_pixel>>(
+            auto packed = std::make_shared<png::image<png::rgba_pixel>>(
                 strategy.getWidth(),
                 strategy.getHeight()
             );
@@ -65,8 +65,8 @@ namespace un::packer {
                 JobChain<SimpleJobSystem> chain(&jobSystem);
                 for (const auto& operation : strategy.getOperations()) {
                     JobHandle loadImageJob, parseImageJob;
-                    auto buf = std::__1::make_shared<Buffer>();
-                    auto src = std::__1::make_shared<png::image<png::rgba_pixel>>();
+                    auto buf = std::make_shared<Buffer>();
+                    auto src = std::make_shared<png::image<png::rgba_pixel>>();
                     const std::filesystem::path& imgPath = operation.getPath();
                     chain.immediately<LoadFileJob>(&loadImageJob, imgPath, buf.get(), std::ios::binary)
                         .after<LambdaJob<>>(

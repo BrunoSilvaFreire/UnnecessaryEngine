@@ -10,13 +10,20 @@ namespace un {
         subPasses.reserve(getSize());
         for (size_t i = 0; i < getSize(); ++i) {
             RenderPass* vertex = *(operator[](i));
+            const std::optional<vk::AttachmentReference>& depthAttachment = vertex->getDepthAttachment();
+            const vk::AttachmentReference* depth;
+            if (depthAttachment.has_value()) {
+                depth = depthAttachment.operator->();
+            } else {
+                depth = nullptr;
+            }
             subPasses.emplace_back(
                 (vk::SubpassDescriptionFlags) 0,
                 vk::PipelineBindPoint::eGraphics,
                 vertex->getUsedAttachments(),
                 vertex->getColorAttachments(),
                 vertex->getResolveAttachments(),
-                vertex->getDepthAttachments().data()
+                depth
             );
             for (auto neighborIndex : dependenciesOf(i)) {
                 auto neighbor = *operator[](neighborIndex);

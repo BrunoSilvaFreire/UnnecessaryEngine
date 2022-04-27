@@ -19,19 +19,15 @@ namespace un {
         std::vector<vk::AttachmentReference> colorAttachments;
         std::vector<vk::AttachmentReference> usedAttachments;
         std::vector<vk::AttachmentReference> resolveAttachments;
-        std::vector<vk::AttachmentReference> depthAttachments;
+        std::optional<vk::AttachmentReference> depthAttachment;
     protected:
 
-        void usesAttachment(std::size_t attachmentIndex, vk::ImageLayout layout) {
-
-        }
-
         void usesColorAttachment(std::size_t attachmentIndex, vk::ImageLayout layout) {
-
+            colorAttachments.emplace_back(static_cast<u32>(attachmentIndex), layout);
         }
 
         void usesDepthAttachment(std::size_t attachmentIndex, vk::ImageLayout layout) {
-
+            depthAttachment = vk::AttachmentReference(static_cast<u32>(attachmentIndex), layout);
         }
 
     public:
@@ -54,7 +50,7 @@ namespace un {
 
         const std::vector<vk::AttachmentReference>& getResolveAttachments() const;
 
-        const std::vector<vk::AttachmentReference>& getDepthAttachments() const;
+        const std::optional<vk::AttachmentReference>& getDepthAttachment() const;
 
         friend std::ostream& operator<<(std::ostream& os, const RenderPass& pass);
 

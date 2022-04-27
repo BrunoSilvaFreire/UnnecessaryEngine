@@ -11,7 +11,7 @@ namespace un {
     template<typename TData>
     concept TreeData = std::is_default_constructible<TData>();
 
-    template<TreeData TData, std::size_t NChildren>
+    template<typename TData, std::size_t NChildren>
     class NTree {
     public:
         typedef NTree<TData, NChildren> TSelf;
@@ -27,7 +27,7 @@ namespace un {
         TContainer children;
 
         std::size_t findFirstFreeIndex() {
-            for (std::size_t i = 0; i < std::numeric_limits<std::size_t>::max(); ++i) {
+            for (std::size_t i = 0; i < NChildren; ++i) {
                 if (children[i] == nullptr) {
                     return i;
                 }

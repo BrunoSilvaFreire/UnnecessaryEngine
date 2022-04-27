@@ -95,13 +95,16 @@ namespace un {
 
         auto& propertiesRequirements = deviceRequirements.emplace<un::DevicePropertiesRequirements>();
         propertiesRequirements.emplace<VulkanDeviceTypeRequirement>(
-            (std::initializer_list<vk::PhysicalDeviceType>) {
-                vk::PhysicalDeviceType::eDiscreteGpu, vk::PhysicalDeviceType::eIntegratedGpu
-            }
+            std::initializer_list<vk::PhysicalDeviceType>(
+                {
+                    vk::PhysicalDeviceType::eDiscreteGpu,
+                    vk::PhysicalDeviceType::eIntegratedGpu
+                }
+            )
         );
 
 
-        std::unordered_map < u32, u32 > scores;
+        std::unordered_map<u32, u32> scores;
         for (u32 i = 0; i < devices.size(); ++i) {
             const vk::PhysicalDevice& device = devices[i];
             vk::PhysicalDeviceProperties properties = device.getProperties();

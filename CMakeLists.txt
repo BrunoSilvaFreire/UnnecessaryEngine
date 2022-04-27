@@ -43,15 +43,6 @@ conan_cmake_configure(
 
 conan_cmake_autodetect(settings)
 
-
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-    list(
-        APPEND
-        settings
-        compiler.version=13
-    )
-endif ()
-
 message("Conan cmake settings: ${settings}")
 conan_cmake_install(
     PATH_OR_REFERENCE .
@@ -62,6 +53,8 @@ conan_cmake_install(
     CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
     CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
     CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    CC=${CMAKE_C_COMPILER}
+    CXX=${CMAKE_CXX_COMPILER}
 )
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
 find_package(glm REQUIRED)
