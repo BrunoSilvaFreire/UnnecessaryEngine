@@ -6,6 +6,7 @@
 #include <unnecessary/shaderizer/shader_parsing.h>
 #include <unnecessary/shaderizer/inputs/glsl_type.h>
 #include <fstream>
+#include "shader_stage_meta.h"
 
 static const char* const kShaderFileName = "shader_json";
 static const char* const kOutput = "output";

@@ -1,6 +1,7 @@
 #include <unnecessary/rendering/pipelines/inputs.h>
 #include <unnecessary/shaderizer/shader_parsing.h>
 #include "unnecessary/shaderizer/inputs/glsl_type.h"
+#include "shader_stage_meta.h"
 
 
 namespace un {
@@ -82,9 +83,9 @@ namespace un {
         return meta;
     }
 
-    un::ShaderStageMeta
+    ShaderStageMeta
     shader_tool::parseStage(const std::string& name, const nlohmann::json& jsonStage) {
-        un::ShaderStageMeta meta(name);
+        ShaderStageMeta meta(name);
         if (jsonStage.contains(kInputsKey)) {
             auto inputs = jsonStage[kInputsKey].get<std::vector<std::string>>();
             for (const auto& item : inputs) {

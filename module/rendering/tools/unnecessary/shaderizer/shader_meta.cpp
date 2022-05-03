@@ -2,31 +2,6 @@
 #include "shader_parsing.h"
 
 namespace un {
-    RichInput::RichInput(
-        const std::string& name,
-        const std::string& type
-    ) : name(name),
-        type(type) { }
-
-    const std::string& RichInput::getName() const {
-        return name;
-    }
-
-    const std::string& RichInput::getType() const {
-        return type;
-    }
-
-    void InputPack::operator+=(RichInput&& other) {
-        inputs.emplace_back(std::move(other));
-    }
-
-    const std::vector<RichInput>& InputPack::getInputs() const {
-        return inputs;
-    }
-
-    std::vector<RichInput>& InputPack::getInputs() {
-        return inputs;
-    }
 
     ShaderMeta::ShaderMeta(const std::string& name) : name(name) { }
 
@@ -47,7 +22,7 @@ namespace un {
         return inputs;
     }
 
-    const std::vector<un::ShaderStageMeta>& ShaderMeta::getStages() const {
+    const std::vector<ShaderStageMeta>& ShaderMeta::getStages() const {
         return stages;
     }
 
@@ -83,42 +58,6 @@ namespace un {
             vertexStreamTypes[index],
             vertexStreamLayout[index]
         );
-    }
-
-    void ShaderStageMeta::usesInput(const std::string& input) {
-        usedInputs.emplace(input);
-    }
-
-    ShaderStageMeta::ShaderStageMeta(const std::string& name) : name(name) { }
-
-    const std::string& ShaderStageMeta::getName() const {
-        return name;
-    }
-
-    const std::set<std::string>& ShaderStageMeta::getUsedInputs() const {
-        return usedInputs;
-    }
-
-    void ShaderStageMeta::usesVertexAttribute(
-        const std::string& vertex,
-        const std::string& modifier
-    ) {
-        usedVertexAttributes.emplace_back(vertex, modifier);
-    }
-
-    const std::vector<un::InputUsage>& ShaderStageMeta::getUsedVertexAttributes() const {
-        return usedVertexAttributes;
-    }
-
-    bool ShaderStageMeta::isUsingInputPack(const un::InputPack& scope) const {
-        for (const auto& item : usedInputs) {
-            for (const auto& other : scope.getInputs()) {
-                if (other.getName() == item) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     VertexAttributeMeta::VertexAttributeMeta(

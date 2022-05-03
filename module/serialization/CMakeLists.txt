@@ -23,4 +23,10 @@ add_unnecessary_library(
     TESTS
     tests/serialization_tests.cpp
 )
+add_unnecessary_tool(
+    unnecessary_serializer_generator
+
+    SOURCES
+    tools/unnecessary/serializer/serializer_generator.cpp
+)
 add_subdirectory(nlohmann)

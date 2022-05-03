@@ -23,7 +23,7 @@ namespace un {
             const nlohmann::json& jsonInput
         );
 
-        un::ShaderStageMeta parseStage(
+        ShaderStageMeta parseStage(
             const std::string& name,
             const nlohmann::json& jsonStage
         );

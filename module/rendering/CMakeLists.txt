@@ -22,6 +22,7 @@ add_unnecessary_library(
     include/unnecessary/rendering/layout/vertex_layout.h
     include/unnecessary/rendering/layout/descriptor_set_layout.h
     include/unnecessary/rendering/pipelines/inputs.h
+    include/unnecessary/rendering/pipelines/pipeline_description.h
     include/unnecessary/rendering/pipelines/pipeline.h
     include/unnecessary/rendering/pipelines/pipeline_stage.h
 
@@ -80,10 +81,14 @@ add_unnecessary_tool(
     tools/unnecessary/shaderizer/unnecessary_shaderizer.cpp
     tools/unnecessary/shaderizer/shader_meta.h
     tools/unnecessary/shaderizer/shader_meta.cpp
+    tools/unnecessary/shaderizer/shader_stage_meta.h
+    tools/unnecessary/shaderizer/shader_stage_meta.cpp
     tools/unnecessary/shaderizer/shader_parsing.h
     tools/unnecessary/shaderizer/shader_parsing.cpp
     tools/unnecessary/shaderizer/inputs/glsl_type.h
     tools/unnecessary/shaderizer/inputs/glsl_type.cpp
+    tools/unnecessary/shaderizer/inputs/shader_input.h
+    tools/unnecessary/shaderizer/inputs/shader_input.cpp
 
     DEPENDENCIES
     unnecessary_core

@@ -7,67 +7,10 @@
 #include <set>
 #include <unnecessary/rendering/pipelines/inputs.h>
 #include <unnecessary/rendering/layout/vertex_layout.h>
+#include <unnecessary/shaderizer/shader_stage_meta.h>
 
 namespace un {
 
-    class RichInput {
-    private:
-        std::string name;
-        std::string type;
-    public:
-        RichInput(const std::string& name, const std::string& type);
-
-        const std::string& getName() const;
-
-        const std::string& getType() const;
-    };
-
-    class InputPack {
-    private:
-        std::vector<RichInput> inputs;
-    public:
-        void operator+=(RichInput&& other);
-
-        const std::vector<RichInput>& getInputs() const;
-
-        std::vector<RichInput>& getInputs();
-    };
-
-    class InputUsage {
-    private:
-        std::string name;
-        /**
-         * Either in or out
-         */
-        std::string modifier;
-    public:
-        InputUsage(const std::string& name, const std::string& modifier);
-
-        const std::string& getName() const;
-
-        const std::string& getModifier() const;
-    };
-
-    class ShaderStageMeta {
-    private:
-        std::string name;
-        std::set<std::string> usedInputs;
-        std::vector<un::InputUsage> usedVertexAttributes;
-    public:
-        ShaderStageMeta(const std::string& name);
-
-        void usesInput(const std::string& input);
-
-        void usesVertexAttribute(const std::string& vertex, const std::string& modifier);
-
-        const std::string& getName() const;
-
-        const std::set<std::string>& getUsedInputs() const;
-
-        const std::vector<un::InputUsage>& getUsedVertexAttributes() const;
-
-        bool isUsingInputPack(const un::InputPack& scope) const;
-    };
 
     struct VertexAttributeMeta {
     private:
@@ -99,7 +42,7 @@ namespace un {
     private:
         std::string name;
         std::unordered_map<un::InputScope, un::InputPack> inputs;
-        std::vector<un::ShaderStageMeta> stages;
+        std::vector<ShaderStageMeta> stages;
         std::vector<std::string> vertexStreamTypes;
         un::VertexLayout vertexStreamLayout;
     public:
@@ -108,7 +51,7 @@ namespace un {
 
         void addInput(un::InputScope scope, RichInput&& input);
 
-        void addStage(const un::ShaderStageMeta& meta);
+        void addStage(const ShaderStageMeta& meta);
 
         const VertexLayout& getVertexStreamLayout() const;
 
@@ -123,7 +66,7 @@ namespace un {
 
         const std::unordered_map<un::InputScope, un::InputPack>& getInputs() const;
 
-        const std::vector<un::ShaderStageMeta>& getStages() const;
+        const std::vector<ShaderStageMeta>& getStages() const;
 
         un::ShaderInputMeta getShaderInputMeta(
             std::string inputName
