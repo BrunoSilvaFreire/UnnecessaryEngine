@@ -24,9 +24,9 @@
 int main(int argc, char* args[]) {
     cxxopts::Options options("UnnecessaryPacker");
     options.add_options()
-        ("input_files", "Input file(s) to concatenate", cxxopts::value<std::vector<std::string>>());
+        ("input_files", "RichInput file(s) to concatenate", cxxopts::value<std::vector<std::string>>());
     options.add_options()
-        ("output", "Input file(s) to concatenate", cxxopts::value<std::vector<std::string>>());
+        ("output", "RichInput file(s) to concatenate", cxxopts::value<std::vector<std::string>>());
     options.parse_positional("input_files");
     try {
         cxxopts::ParseResult result = options.parse(argc, args);

@@ -10,7 +10,7 @@ namespace un {
         nlohmann::json obj = un::serialization::adapt(serialized);
         std::string string = nlohmann::to_string(obj);
         un::Buffer buf(string.size());
-        buf.copy(reinterpret_cast<u8*>(string.data()));
+        buf.copyFrom(reinterpret_cast<u8*>(string.data()));
         return buf;
     }
 

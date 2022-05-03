@@ -1,21 +1,23 @@
+#include <unnecessary/rendering/pipelines/inputs.h>
 #include <unnecessary/shaderizer/shader_parsing.h>
 #include "unnecessary/shaderizer/inputs/glsl_type.h"
 
+
 namespace un {
 
-    std::pair<un::Input, un::InputScope> shader_tool::parseInput(
+    std::pair<RichInput, un::InputScope> shader_tool::parseInput(
         const std::string& name,
         const nlohmann::json& jsonInput
     ) {
         un::InputScope scope = un::InputScope::eGlobal;
         if (jsonInput.contains("scope")) {
             auto scopeName = jsonInput["scope"].get<std::string>();
-            if (un::inputs::kStringIdsToLessonTypes.contains(scopeName)) {
-                scope = un::inputs::kStringIdsToLessonTypes.at(scopeName);
+            if (un::inputs::kStringIdsToInputScope.contains(scopeName)) {
+                scope = un::inputs::kStringIdsToInputScope.at(scopeName);
             }
         }
         return std::make_pair(
-            un::Input(
+            RichInput(
                 name,
                 jsonInput["type"].get<std::string>()
             ),
@@ -38,7 +40,7 @@ namespace un {
                 );
                 meta.addInput(
                     scope,
-                    std::move(const_cast<un::Input&&>(parsed))
+                    std::move(const_cast<RichInput&&>(parsed))
                 );
             }
         }

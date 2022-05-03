@@ -32,10 +32,10 @@ namespace un {
             std::unordered_map<u32, un::JobHandle> vertexIndex2JobHandle;
             std::unordered_map<u32, std::set<u32>> passesDependencies;
             graph.each(
-                [&](u32 index, const un::RenderPass* const& pass) {
+                [&](u32 index, const std::unique_ptr<un::RenderPass>& pass) {
                     un::JobHandle handle = chain.immediately<un::RecordPassJob>(
                         &frameData,
-                        pass,
+                        pass.get(), //TODO: ONO http://open-std.org/JTC1/sc22/wg21/docs/papers/2014/n4282.pdf
                         index
                     );
                     std::string jobName = "Record Pass: \"";
@@ -83,7 +83,7 @@ namespace un {
         ) const {
             std::vector<vk::SubmitInfo> submits;
             graph.each(
-                [&](u32 index, const RenderPass* const& pass) {
+                [&](u32 index, const std::unique_ptr<RenderPass>& pass) {
                     const PassOutput& passOutput = frameData.passesOutputs[index];
 
                     std::vector<u32> dependencies = graph
@@ -187,7 +187,7 @@ namespace un {
                 }
                 u32 value = result.value;
                 u32 imageIndex = value;
-                auto graph = _renderer->getRenderGraph();
+                const auto& graph = _renderer->getRenderGraph();
                 un::FrameData& data = _inFlightFrames[imageIndex];
                 data.renderPass = graph.getVulkanPass();
                 data.passesOutputs.resize(graph.getSize());

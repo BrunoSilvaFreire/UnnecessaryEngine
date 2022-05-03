@@ -8,7 +8,7 @@ namespace un {
 
     Buffer::Buffer(size_t size, bool zero) : MemoryBuffer(size) {
         if (zero) {
-            setZero();
+            zeroBuffer();
         }
 
     }

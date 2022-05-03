@@ -99,3 +99,6 @@ add_unnecessary_shader(
 add_subdirectory(
     pipelines/phong
 )
+add_subdirectory(
+    pipelines/basic
+)

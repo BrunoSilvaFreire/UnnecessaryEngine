@@ -55,13 +55,16 @@ namespace un {
                 const un::Pipeline* pPipeline = pMaterial->getPipeline();
                 std::vector<vk::DescriptorSet> pipelineDescriptorSets;
                 std::array<uint32_t, 0> dynamicOffsets{};
-                cmdBuffer->bindDescriptorSets(
-                    vk::PipelineBindPoint::eGraphics,
-                    pPipeline->getLayout(),
-                    0,
-                    pipelineDescriptorSets,
-                    dynamicOffsets
-                );
+                if (!pipelineDescriptorSets.empty()) {
+                    cmdBuffer->bindDescriptorSets(
+                        vk::PipelineBindPoint::eGraphics,
+                        pPipeline->getLayout(),
+                        0,
+                        pipelineDescriptorSets,
+                        dynamicOffsets
+                    );
+                }
+
                 cmdBuffer->bindPipeline(
                     vk::PipelineBindPoint::eGraphics,
                     pPipeline->operator*()

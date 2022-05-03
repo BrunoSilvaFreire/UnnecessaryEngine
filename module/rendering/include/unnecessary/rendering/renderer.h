@@ -43,13 +43,18 @@ namespace un {
         Renderer(Window* window, std::string string, Version version);
 
         void usePipeline(un::RenderingPipeline* pipeline) {
-            pipeline->configure(*this, _graph);
+            pipeline->setup(*this, _graph);
             _graph.bake(*this);
+            auto vkPass = _graph.getVulkanPass();
+            DependencyGraph<std::unique_ptr<un::RenderPass>>::InnerGraph& innerGraph = _graph.getInnerGraph();
+            for (auto [passPtr, index] : innerGraph.all_vertices()) {
+                (*passPtr)->onVulkanPassCreated(vkPass, *this);
+            }
 #ifdef DEBUG
             auto cwd = std::filesystem::current_path();
             auto output = cwd / "render_graph.dot";
             LOG(INFO) << "Printing pipeline render graph to " << output;
-            gpp::save_to_dot(_graph.getInnerGraph(), output);
+            gpp::save_to_dot(innerGraph, output);
 #endif
         }
 

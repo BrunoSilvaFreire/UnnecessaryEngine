@@ -174,3 +174,70 @@ function(
         create_unnecessary_tests_for_target(${NAME} "${UN_MODULE_TESTS}")
     endif ()
 endfunction()
+
+
+function(
+    add_unnecessary_application
+    NAME
+)
+
+    set(FLAGS)
+    set(
+        SINGLE_VALUES
+        MODULE
+    )
+    set(
+        MULTI_VALUES
+        SOURCES
+        DEPENDENCIES
+        TESTS
+        SOURCES_APPLE
+        SOURCES_WIN
+        SOURCES_LINUX
+    )
+    cmake_parse_arguments(
+        PARSE_ARGV 0
+        UN_MODULE # Prefix
+        # Options
+        "${FLAGS}"
+        "${SINGLE_VALUES}"
+        "${MULTI_VALUES}"
+        ${ARG_N}
+    )
+    set(ALL_SOURCES ${UN_MODULE_SOURCES})
+
+    if (APPLE)
+        list(APPEND ALL_SOURCES ${UN_MODULE_SOURCES_APPLE})
+    elseif (WIN32)
+        list(APPEND ALL_SOURCES ${UN_MODULE_SOURCES_WIN})
+    elseif (UNIX)
+        list(APPEND ALL_SOURCES ${UN_MODULE_SOURCES_LINUX})
+    endif ()
+    add_executable(
+        ${NAME}
+        ${ALL_SOURCES}
+    )
+    if (NOT ${UN_MODULE_MODULE} STREQUAL "")
+        set_target_properties(
+            ${NAME}
+            PROPERTIES
+            UNNECESSARY_MODULE ${UN_MODULE_MODULE}
+        )
+    endif ()
+    LIST(LENGTH UN_MODULE_DEPENDENCIES LISTCOUNT)
+    LIST(LENGTH UN_MODULE_TESTS NUMTESTS)
+    if ("${LISTCOUNT}" GREATER 0)
+        target_link_libraries(${NAME} PUBLIC "${UN_MODULE_DEPENDENCIES}")
+    endif ()
+    configure_unnecessary_target(${NAME} TRUE)
+    if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+        target_compile_definitions(
+            ${NAME}
+            PUBLIC
+            DEBUG
+        )
+    endif ()
+    if ("${NUMTESTS}" GREATER 0)
+        create_unnecessary_tests_for_target(${NAME} "${UN_MODULE_TESTS}")
+    endif ()
+endfunction()

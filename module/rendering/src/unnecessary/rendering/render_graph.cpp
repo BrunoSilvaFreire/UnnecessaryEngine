@@ -1,6 +1,7 @@
 #include <unnecessary/rendering/renderer.h>
 #include <unnecessary/rendering/render_graph.h>
 #include <unnecessary/rendering/render_pass.h>
+#include <grapphs/algorithms/rlo_traversal.h>
 
 namespace un {
     void RenderGraph::bake(Renderer& renderer) {
@@ -9,7 +10,7 @@ namespace un {
         std::vector<vk::SubpassDependency> subPassesDependencies;
         subPasses.reserve(getSize());
         for (size_t i = 0; i < getSize(); ++i) {
-            RenderPass* vertex = *(operator[](i));
+            const auto& vertex = *(operator[](i));
             const std::optional<vk::AttachmentReference>& depthAttachment = vertex->getDepthAttachment();
             const vk::AttachmentReference* depth;
             if (depthAttachment.has_value()) {
@@ -26,7 +27,7 @@ namespace un {
                 depth
             );
             for (auto neighborIndex : dependenciesOf(i)) {
-                auto neighbor = *operator[](neighborIndex);
+                const auto& neighbor = *operator[](neighborIndex);
                 // TODO: Compute these
                 vk::AccessFlags srcFlags;
                 vk::AccessFlags dstFlags;
@@ -177,6 +178,10 @@ namespace un {
 
     void RenderGraph::setAttachmentName(size_t attachment, std::string name) {
         attachments[attachment].setName(name);
+    }
+
+    const un::Attachment& RenderGraph::getAttachment(std::size_t index) const {
+        return attachments[index];
     }
 
     un::CommandBuffer

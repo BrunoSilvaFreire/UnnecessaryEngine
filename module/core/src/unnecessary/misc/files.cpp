@@ -14,7 +14,7 @@ namespace un::files {
             fileSize += 1; // Null terminator
         }
         buffer.resize(fileSize);
-        buffer.setZero();
+        buffer.zeroBuffer();
         if (text) {
             buffer.operator[](fileSize - 1) = 0; // Null terminator
         }

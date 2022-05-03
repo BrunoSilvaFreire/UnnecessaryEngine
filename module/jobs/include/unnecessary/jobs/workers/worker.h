@@ -167,10 +167,10 @@ namespace un {
             return core;
         }
 
-        void setCore(u32 core) {
-            AbstractJobWorker::core = core;
+        void setCore(u32 newCore) {
+            AbstractJobWorker::core = newCore;
             if (running) {
-                thread->setCore(core);
+                thread->setCore(newCore);
             }
         }
 

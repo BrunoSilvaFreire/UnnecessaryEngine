@@ -1,22 +1,36 @@
 #include <unnecessary/shaderizer/shader_meta.h>
+#include "shader_parsing.h"
 
 namespace un {
+    RichInput::RichInput(
+        const std::string& name,
+        const std::string& type
+    ) : name(name),
+        type(type) { }
 
-    void InputPack::operator+=(un::Input&& other) {
+    const std::string& RichInput::getName() const {
+        return name;
+    }
+
+    const std::string& RichInput::getType() const {
+        return type;
+    }
+
+    void InputPack::operator+=(RichInput&& other) {
         inputs.emplace_back(std::move(other));
     }
 
-    const std::vector<un::Input>& InputPack::getInputs() const {
+    const std::vector<RichInput>& InputPack::getInputs() const {
         return inputs;
     }
 
-    std::vector<un::Input>& InputPack::getInputs() {
+    std::vector<RichInput>& InputPack::getInputs() {
         return inputs;
     }
 
     ShaderMeta::ShaderMeta(const std::string& name) : name(name) { }
 
-    void ShaderMeta::addInput(un::InputScope scope, Input&& input) {
+    void ShaderMeta::addInput(un::InputScope scope, RichInput&& input) {
         inputs[scope] += std::move(input);
     }
 
@@ -49,8 +63,7 @@ namespace un {
         ShaderMeta::vertexStreamTypes = vertexStreamTypes;
     }
 
-    un::VertexAttributeMeta
-    ShaderMeta::getVertexAttributeMeta(const std::string& vertexName) {
+    un::VertexAttributeMeta ShaderMeta::getVertexAttributeMeta(const std::string& vertexName) const {
         std::size_t index = 0;
         while (index < vertexStreamLayout.getLength()) {
             if (vertexStreamLayout[index].getName() == vertexName) {

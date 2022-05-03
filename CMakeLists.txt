@@ -7,10 +7,10 @@ if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
         "${CMAKE_BINARY_DIR}/conan.cmake")
 endif ()
 message("Including @ ${CMAKE_BINARY_DIR}/conan.cmake")
+set(CONAN_DISABLE_CHECK_COMPILER On)
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 include(cmake/Unnecessary.cmake)
 find_package(Python REQUIRED)
-
 option(UN_DISALLOW_AGGRESSIVE_INLINING DEFAULT OFF)
 
 conan_cmake_configure(
@@ -21,7 +21,6 @@ conan_cmake_configure(
     glfw/3.3.7
     tinyobjloader/1.0.6
     cxxopts/3.0.0
-    assimp/5.2.2
     gtest/1.11.0
     nlohmann_json/3.10.4
     pngpp/0.2.10
@@ -49,10 +48,8 @@ conan_cmake_install(
     BUILD missing
     SETTINGS ${settings}
     ENV
-    CMAKE_GENERATOR=${CMAKE_GENERATOR}
-    CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
-    CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-    CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    CONAN_DISABLE_CHECK_COMPILER=On
+    CONAN_CMAKE_GENERATOR=${CMAKE_GENERATOR}
     CC=${CMAKE_C_COMPILER}
     CXX=${CMAKE_CXX_COMPILER}
 )
@@ -68,7 +65,6 @@ elseif (UNIX)
 endif ()
 find_package(tinyobjloader REQUIRED)
 find_package(cxxopts REQUIRED)
-find_package(assimp REQUIRED)
 find_package(GTest REQUIRED)
 find_package(stduuid REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -92,8 +88,8 @@ add_unnecessary_thirdparty_library(grapphs)
 add_compile_options(
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
 )
+
 if (MINGW)
-    message("Added options")
     add_compile_options(
         -static
         -static-libgcc
@@ -110,7 +106,16 @@ if (MINGW)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif ()
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL Clang)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcolor-diagnostics")
+    if ("${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa")
+        message("Appending /EHa to compile flags because we're using clang-cl (${CMAKE_CXX_FLAGS})")
+    endif ()
+
 endif ()
 add_subdirectory(editor)
 add_subdirectory(module/core)
@@ -123,6 +128,8 @@ add_subdirectory(module/simulation)
 add_subdirectory(module/sdf)
 add_subdirectory(module/serialization)
 add_subdirectory(module/atlas)
+add_subdirectory(module/baf)
 
 
 add_subdirectory(applications/orbital)
+add_subdirectory(applications/triangle)

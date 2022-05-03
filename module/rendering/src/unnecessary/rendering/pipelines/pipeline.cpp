@@ -13,4 +13,10 @@ namespace un {
     const vk::PipelineLayout& Pipeline::getLayout() const {
         return layout;
     }
+
+    Pipeline::Pipeline(
+        const vk::Pipeline& pipeline,
+        const vk::PipelineCache& cache,
+        const vk::PipelineLayout& layout
+    ) : pipeline(pipeline), cache(cache), layout(layout) { }
 }

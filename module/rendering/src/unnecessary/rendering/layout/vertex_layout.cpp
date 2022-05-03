@@ -30,7 +30,7 @@ namespace un {
         return name;
     }
 
-    std::size_t VertexLayout::getStride() {
+    std::size_t VertexLayout::getStride() const {
         std::size_t stride = 0;
         for (const auto& element : elements) {
             stride += element.getSize();

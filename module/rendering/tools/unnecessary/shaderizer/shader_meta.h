@@ -10,15 +10,27 @@
 
 namespace un {
 
+    class RichInput {
+    private:
+        std::string name;
+        std::string type;
+    public:
+        RichInput(const std::string& name, const std::string& type);
+
+        const std::string& getName() const;
+
+        const std::string& getType() const;
+    };
+
     class InputPack {
     private:
-        std::vector<un::Input> inputs;
+        std::vector<RichInput> inputs;
     public:
-        void operator+=(un::Input&& other);
+        void operator+=(RichInput&& other);
 
-        const std::vector<un::Input>& getInputs() const;
+        const std::vector<RichInput>& getInputs() const;
 
-        std::vector<un::Input>& getInputs();
+        std::vector<RichInput>& getInputs();
     };
 
     class InputUsage {
@@ -80,8 +92,7 @@ namespace un {
     public:
         size_t index;
         un::InputScope scope;
-        un::Input* input;
-
+        const RichInput* input;
     };
 
     class ShaderMeta {
@@ -95,7 +106,7 @@ namespace un {
 
         ShaderMeta(const std::string& name);
 
-        void addInput(un::InputScope scope, un::Input&& input);
+        void addInput(un::InputScope scope, RichInput&& input);
 
         void addStage(const un::ShaderStageMeta& meta);
 
@@ -106,7 +117,7 @@ namespace un {
             const std::vector<std::string>& vertexStreamTypes
         );
 
-        un::VertexAttributeMeta getVertexAttributeMeta(const std::string& vertexName);
+        un::VertexAttributeMeta getVertexAttributeMeta(const std::string& vertexName) const;
 
         const std::string& getName() const;
 
@@ -116,17 +127,21 @@ namespace un {
 
         un::ShaderInputMeta getShaderInputMeta(
             std::string inputName
-        ) {
+        ) const {
             constexpr std::array<un::InputScope, 3> scopes = {
                 un::InputScope::eGlobal,
                 un::InputScope::ePipeline,
                 un::InputScope::eInstance
             };
             for (un::InputScope scope : scopes) {
-                un::InputPack& pack = inputs[scope];
-                std::vector<un::Input>& packInputs = pack.getInputs();
+                auto found = inputs.find(scope);
+                if (found == inputs.end()) {
+                    continue;
+                }
+                const un::InputPack& pack = found->second;
+                const std::vector<RichInput>& packInputs = pack.getInputs();
                 for (std::size_t i = 0; i < packInputs.size(); ++i) {
-                    un::Input& input = packInputs[i];
+                    const RichInput& input = packInputs[i];
                     if (input.getName() != inputName) {
                         continue;
                     }

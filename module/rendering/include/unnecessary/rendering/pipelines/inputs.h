@@ -9,6 +9,8 @@
 #include <vector>
 #include <unordered_map>
 #include <unnecessary/strings.h>
+#include <unnecessary/rendering/layout/descriptor_set_layout.h>
+#include <initializer_list>
 
 namespace un {
 
@@ -32,26 +34,31 @@ namespace un {
 
 
     namespace inputs {
-        std::unordered_map<
-            std::string,
-            un::InputScope
-        > const kStringIdsToLessonTypes = {
+        std::unordered_map<std::string, un::InputScope> const kStringIdsToInputScope = {
             std::make_pair("global", un::InputScope::eGlobal),
             std::make_pair("pipeline", un::InputScope::ePipeline),
             std::make_pair("instance", un::InputScope::eInstance)
         };
 
     }
-    class Input {
+    class PipelineLayout {
     private:
-        std::string name;
-        std::string type;
+        std::unordered_map<un::InputScope, un::DescriptorSetLayout> inputs;
     public:
-        Input(const std::string& name, const std::string& type);
+        PipelineLayout(
+            const std::initializer_list<decltype(inputs)::value_type>& layouts
+        ) : inputs(layouts) {
+        }
+        PipelineLayout() = default;
 
-        const std::string& getName() const;
+        const std::unordered_map<un::InputScope, un::DescriptorSetLayout>& getDescriptorsLayout() const {
+            return inputs;
+        }
 
-        const std::string& getType() const;
+        std::unordered_map<un::InputScope, un::DescriptorSetLayout>& getDescriptorsLayout() {
+            return inputs;
+        }
+
     };
 }
 #endif //UNNECESSARYENGINE_INPUTS_H

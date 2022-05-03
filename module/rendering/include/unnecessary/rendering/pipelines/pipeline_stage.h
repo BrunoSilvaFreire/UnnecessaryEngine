@@ -7,6 +7,7 @@
 
 #include <filesystem>
 #include <unnecessary/strings.h>
+#include <unnecessary/misc/files.h>
 #include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/jobs/misc/load_file_job.h>
 #include <vulkan/vulkan.hpp>
@@ -14,41 +15,40 @@
 namespace un {
     class PipelineStage {
     private:
+        vk::ShaderStageFlagBits stage;
         vk::ShaderModule module;
     public:
-        PipelineStage(const vk::ShaderModule& module);
+        PipelineStage(vk::ShaderStageFlagBits stage, const vk::ShaderModule& module);
 
-        template<typename JobSystemType>
-        static un::JobHandle loadFromPathAsync(
-            un::JobChain<JobSystemType>& chain,
-            vk::Device device,
-            std::filesystem::path path,
-            un::PipelineStage* result
-        ) {
-            un::Buffer buffer;
-            un::JobHandle loadFile;
-            chain.template immediately<un::LoadFileJob>(
-                &loadFile,
-                path,
-                &buffer
-            );
-            un::JobHandle final;
-            chain.template after<un::LambdaJob<>>(
-                loadFile,
-                &final,
-                [&]() {
+        const vk::ShaderModule& getModule() const;
 
-                    vk::ShaderModule vulkanModule = device.createShaderModule(
-                        vk::ShaderModuleCreateInfo(
-                            (vk::ShaderModuleCreateFlags) 0,
-                            buffer.size(),
-                            reinterpret_cast<const uint32_t*>(buffer.data())
-                        )
-                    );
-                    *result = un::PipelineStage(vulkanModule);
-                }
+        vk::ShaderStageFlagBits getStageFlags() const;
+
+        static PipelineStage fromBuffer(vk::Device device, const un::Buffer& buffer, vk::ShaderStageFlagBits flags) {
+            size_t size = buffer.size();
+            size_t rest = size % 4;
+            if (rest != 0) {
+                size += 4 - rest;
+            }
+            vk::ShaderModule vulkanModule = device.createShaderModule(
+                vk::ShaderModuleCreateInfo(
+                    (vk::ShaderModuleCreateFlags) 0,
+                    size,
+                    reinterpret_cast<const uint32_t*>(buffer.data())
+                )
             );
+            return un::PipelineStage(flags, vulkanModule);
         }
+
+        static PipelineStage fromFile(
+            vk::Device device,
+            const std::filesystem::path& path,
+            vk::ShaderStageFlagBits flags
+        ) {
+            un::Buffer spirv;
+            un::files::read_file_into_buffer(path, spirv, std::ios::binary);
+            return fromBuffer(device, spirv, flags);
+        };
     };
 }
 #endif

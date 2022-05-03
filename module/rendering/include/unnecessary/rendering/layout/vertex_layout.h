@@ -49,7 +49,7 @@ namespace un {
 
     class VertexLayout : public un::Layout<un::VertexAttribute> {
     public:
-        std::size_t getStride();
+        std::size_t getStride() const;
     };
 }
 #endif

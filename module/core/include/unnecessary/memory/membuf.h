@@ -50,6 +50,10 @@ namespace un {
             return data() + offsetInBytes;
         }
 
+        T* offset(std::size_t offsetInBytes) {
+            return data() + offsetInBytes;
+        }
+
         u8* operator->() {
             return ptr;
         }
@@ -109,7 +113,7 @@ namespace un {
             }
         }
 
-        void setZero() const {
+        void zeroBuffer() const {
             std::memset(ptr, 0, count * sizeof(T));
         }
 
@@ -160,6 +164,14 @@ namespace un {
 
         Buffer(un::Buffer&& other) noexcept;
 
+        template<typename TElement>
+        static un::Buffer fromVector(const std::vector<TElement>& vector) {
+            std::size_t bufSize = vector.size() * sizeof(TElement);
+            un::Buffer buf(bufSize, false);
+            buf.copyFrom(vector.data());
+            return buf;
+        }
+
         explicit Buffer(size_t size, bool zero = true);
 
         template<typename T>
@@ -172,8 +184,12 @@ namespace un {
             return ptr[index];
         }
 
-        void copy(u8* data) {
+        void copyFrom(void* data) {
             std::memcpy(ptr, data, count);
+        }
+
+        void copyFrom(void* data, std::size_t offset, std::size_t length) {
+            std::memcpy(ptr + offset, data, length);
         }
 
     };

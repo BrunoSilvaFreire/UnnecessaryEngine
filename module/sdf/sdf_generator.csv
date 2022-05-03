@@ -1,0 +1,145 @@
+archetype,worker,handle,label,time,type
+0,0,,"worker_started",54604485113300,0
+0,0,0,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(0 -> 2730)",54604485124600,4
+0,0,0,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(0 -> 2730)",54606242337200,5
+0,0,24,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(65520 -> 65536)",54606242348100,4
+0,0,24,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(65520 -> 65536)",54606251274400,5
+0,0,,"worker_sleeping",54606251280400,2
+0,0,,"worker_awake",54606404027200,3
+0,0,,"worker_exited",54606404034500,1
+0,1,,"worker_started",54604485118800,0
+0,1,1,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(2730 -> 5460)",54604485129700,4
+0,1,1,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(2730 -> 5460)",54606219900200,5
+0,1,,"worker_sleeping",54606219907400,2
+0,1,,"worker_awake",54606404029100,3
+0,1,,"worker_exited",54606404035800,1
+0,2,,"worker_started",54604485172200,0
+0,2,2,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(5460 -> 8190)",54604485188000,4
+0,2,2,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(5460 -> 8190)",54606214333400,5
+0,2,,"worker_sleeping",54606214342500,2
+0,2,,"worker_awake",54606404031100,3
+0,2,,"worker_exited",54606404038500,1
+0,3,,"worker_started",54604485216100,0
+0,3,3,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(8190 -> 10920)",54604485230700,4
+0,3,3,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(8190 -> 10920)",54606232290200,5
+0,3,,"worker_sleeping",54606232297200,2
+0,3,,"worker_awake",54606404036200,3
+0,3,,"worker_exited",54606404047700,1
+0,4,,"worker_started",54604485268300,0
+0,4,4,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(10920 -> 13650)",54604485273100,4
+0,4,4,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(10920 -> 13650)",54606165844400,5
+0,4,,"worker_sleeping",54606165853400,2
+0,4,,"worker_awake",54606404047400,3
+0,4,,"worker_exited",54606404542700,1
+0,5,,"worker_started",54604485053500,0
+0,5,5,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(13650 -> 16380)",54604485129500,4
+0,5,5,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(13650 -> 16380)",54606243091600,5
+0,5,,"worker_sleeping",54606243097900,2
+0,5,,"worker_awake",54606404047400,3
+0,5,,"worker_exited",54606404068300,1
+0,6,,"worker_started",54604485314700,0
+0,6,6,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(16380 -> 19110)",54604485320200,4
+0,6,6,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(16380 -> 19110)",54606245968000,5
+0,6,,"worker_sleeping",54606245973700,2
+0,6,,"worker_awake",54606404047900,3
+0,6,,"worker_exited",54606404057700,1
+0,7,,"worker_started",54604485361000,0
+0,7,7,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(19110 -> 21840)",54604485366000,4
+0,7,7,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(19110 -> 21840)",54606358206600,5
+0,7,,"worker_sleeping",54606358210600,2
+0,7,,"worker_awake",54606404052400,3
+0,7,,"worker_exited",54606404069600,1
+0,8,,"worker_started",54604485401800,0
+0,8,8,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(21840 -> 24570)",54604485420200,4
+0,8,8,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(21840 -> 24570)",54606404602600,5
+0,8,,"worker_exited",54606404609500,1
+0,9,,"worker_started",54604485450600,0
+0,9,9,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(24570 -> 27300)",54604485454600,4
+0,9,9,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(24570 -> 27300)",54606342888100,5
+0,9,,"worker_sleeping",54606342892600,2
+0,9,,"worker_awake",54606404056700,3
+0,9,,"worker_exited",54606404064900,1
+0,10,,"worker_started",54604485506600,0
+0,10,10,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(27300 -> 30030)",54604485513500,4
+0,10,10,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(27300 -> 30030)",54606298467800,5
+0,10,,"worker_sleeping",54606298474400,2
+0,10,,"worker_awake",54606404056100,3
+0,10,,"worker_exited",54606404075400,1
+0,11,,"worker_started",54604485589700,0
+0,11,11,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(30030 -> 32760)",54604485595400,4
+0,11,11,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(30030 -> 32760)",54606343055900,5
+0,11,,"worker_sleeping",54606343060900,2
+0,11,,"worker_awake",54606404092000,3
+0,11,,"worker_exited",54606404415500,1
+0,12,,"worker_started",54604485651800,0
+0,12,12,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(32760 -> 35490)",54604485657900,4
+0,12,12,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(32760 -> 35490)",54606364101700,5
+0,12,,"worker_sleeping",54606364105900,2
+0,12,,"worker_awake",54606404103500,3
+0,12,,"worker_exited",54606404114100,1
+0,13,,"worker_started",54604485708300,0
+0,13,13,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(35490 -> 38220)",54604485716900,4
+0,13,13,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(35490 -> 38220)",54606384899200,5
+0,13,,"worker_sleeping",54606384903500,2
+0,13,,"worker_awake",54606404070600,3
+0,13,,"worker_exited",54606404078600,1
+0,14,,"worker_started",54604485755400,0
+0,14,14,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(38220 -> 40950)",54604485763900,4
+0,14,14,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(38220 -> 40950)",54606294504200,5
+0,14,,"worker_sleeping",54606294514200,2
+0,14,,"worker_awake",54606404089100,3
+0,14,,"worker_exited",54606404126300,1
+0,15,,"worker_started",54604485804100,0
+0,15,15,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(40950 -> 43680)",54604485809300,4
+0,15,15,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(40950 -> 43680)",54606379679300,5
+0,15,,"worker_sleeping",54606379684700,2
+0,15,,"worker_awake",54606404079000,3
+0,15,,"worker_exited",54606404094000,1
+0,16,,"worker_started",54604485872100,0
+0,16,16,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(43680 -> 46410)",54604485877600,4
+0,16,16,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(43680 -> 46410)",54606341250900,5
+0,16,,"worker_sleeping",54606341255800,2
+0,16,,"worker_awake",54606404089300,3
+0,16,,"worker_exited",54606404119400,1
+0,17,,"worker_started",54604485934300,0
+0,17,17,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(46410 -> 49140)",54604485940400,4
+0,17,17,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(46410 -> 49140)",54606216735500,5
+0,17,,"worker_sleeping",54606216747500,2
+0,17,,"worker_awake",54606404121100,3
+0,17,,"worker_exited",54606404126800,1
+0,18,,"worker_started",54604485986000,0
+0,18,18,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(49140 -> 51870)",54604485993700,4
+0,18,18,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(49140 -> 51870)",54606160042000,5
+0,18,,"worker_sleeping",54606160051000,2
+0,18,,"worker_awake",54606404128900,3
+0,18,,"worker_exited",54606404489900,1
+0,19,,"worker_started",54604486048500,0
+0,19,19,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(51870 -> 54600)",54604486055500,4
+0,19,19,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(51870 -> 54600)",54606243995500,5
+0,19,,"worker_sleeping",54606244002000,2
+0,19,,"worker_awake",54606404117100,3
+0,19,,"worker_exited",54606404349500,1
+0,20,,"worker_started",54604486098300,0
+0,20,20,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(54600 -> 57330)",54604486105700,4
+0,20,20,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(54600 -> 57330)",54606225756900,5
+0,20,,"worker_sleeping",54606225764700,2
+0,20,,"worker_awake",54606404121500,3
+0,20,,"worker_exited",54606404607400,1
+0,21,,"worker_started",54604486213700,0
+0,21,21,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(57330 -> 60060)",54604486221600,4
+0,21,21,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(57330 -> 60060)",54606186158400,5
+0,21,,"worker_sleeping",54606186165000,2
+0,21,,"worker_awake",54606404128600,3
+0,21,,"worker_exited",54606404355600,1
+0,22,,"worker_started",54604486296900,0
+0,22,22,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(60060 -> 62790)",54604486302300,4
+0,22,22,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(60060 -> 62790)",54606196444500,5
+0,22,,"worker_sleeping",54606196449700,2
+0,22,,"worker_awake",54606404130900,3
+0,22,,"worker_exited",54606404543100,1
+0,23,,"worker_started",54604518153700,0
+0,23,23,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(62790 -> 65520)",54604518160700,4
+0,23,23,"Parallelize class un::ParallelForJob<class un::JobWorker> * __ptr64(62790 -> 65520)",54606255497400,5
+0,23,,"worker_sleeping",54606255502100,2
+0,23,,"worker_awake",54606404259800,3
+0,23,,"worker_exited",54606404357000,1

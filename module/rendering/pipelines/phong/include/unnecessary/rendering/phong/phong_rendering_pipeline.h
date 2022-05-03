@@ -15,7 +15,7 @@ namespace un {
 
             size_t color = graph.addBorrowedAttachment(
                 vk::ClearColorValue(
-                    std::array<float, 4>({1, 0, 0, 1})
+                    std::array<float, 4>({0, 1, 0, 1})
                 ),
                 static_cast<vk::AttachmentDescriptionFlags>(0),
                 vk::Format::eB8G8R8A8Unorm,
@@ -52,8 +52,8 @@ namespace un {
                 attachmentSize,
                 std::vector<vk::ClearValue>(
                     {
-                        vk::ClearColorValue(std::array<float, 4>({1, 0, 0, 1})),
-                        vk::ClearDepthStencilValue(0, 0),
+                        graph.getAttachment(color).getClear(),
+                        graph.getAttachment(depth).getClear()
                     }
                 ),
                 color,

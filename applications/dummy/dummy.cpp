@@ -129,18 +129,18 @@ int main(int argc, char** argv) {
             [&](un::JobWorker* worker) {
                 un::BoundVertexLayout boundLayout(vertexLayout);
                 auto* vertex = new un::ShaderStage(
-                    "phong.vert",
+                    "basic.vert",
                     vk::ShaderStageFlagBits::eVertex, vk::Device(),
                     device,
                     un::PushConstants(0, sizeof(un::PerObjectData))
                 );
                 auto* geometry = new un::ShaderStage(
-                    "phong.geom",
+                    "basic.geom",
                     vk::ShaderStageFlagBits::eGeometry,
                     device
                 );
                 auto* fragment = new un::ShaderStage(
-                    "phong.frag",
+                    "basic.frag",
                     vk::ShaderStageFlagBits::eFragment,
                     device
                 );

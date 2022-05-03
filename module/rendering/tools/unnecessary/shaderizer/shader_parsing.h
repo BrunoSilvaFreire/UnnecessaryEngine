@@ -1,9 +1,15 @@
 #ifndef UNNECESSARYENGINE_SHADER_PARSING_H
 #define UNNECESSARYENGINE_SHADER_PARSING_H
 
+
 #include <unnecessary/rendering/pipelines/inputs.h>
 #include <unnecessary/shaderizer/shader_meta.h>
 #include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <unnecessary/strings.h>
+#include "shader_meta.h"
 
 namespace un {
     namespace shader_tool {
@@ -12,7 +18,7 @@ namespace un {
         static const char* const kVertexStreamKey = "vertex_stream";
         static const char* const kTypeKey = "type";
 
-        std::pair<un::Input, un::InputScope> parseInput(
+        std::pair<RichInput, un::InputScope> parseInput(
             const std::string& name,
             const nlohmann::json& jsonInput
         );

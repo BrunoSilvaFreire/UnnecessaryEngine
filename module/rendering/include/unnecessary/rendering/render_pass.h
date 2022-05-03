@@ -35,6 +35,10 @@ namespace un {
 
         virtual ~RenderPass() = default;
 
+        virtual void onVulkanPassCreated(vk::RenderPass renderPass, un::Renderer& renderer) {
+
+        }
+
         virtual void record(
             const un::FrameData& data,
             un::CommandBuffer& cmdBuffer

@@ -36,7 +36,7 @@ namespace un {
         );
     };
 
-    class RenderGraph : public un::DependencyGraph<un::RenderPass*> {
+    class RenderGraph : public un::DependencyGraph<std::unique_ptr<un::RenderPass>> {
     private:
         std::optional<vk::RenderPass> renderPass;
         std::vector<un::FrameBuffer> frameBuffers;
@@ -49,7 +49,11 @@ namespace un {
     public:
         template<typename T, typename ...Args>
         void enqueuePass(Args... args) {
-            add(new T(args...));
+            enqueuePass(std::make_unique<T>(args...));
+        }
+
+        void enqueuePass(std::unique_ptr<un::RenderPass>&& pass) {
+            add(std::move(pass));
         }
 
         void bake(un::Renderer& renderer);
@@ -102,6 +106,8 @@ namespace un {
             vk::ImageLayout initialLayout = vk::ImageLayout::eUndefined,
             vk::ImageLayout finalLayout = vk::ImageLayout::eUndefined
         );
+
+        const un::Attachment& getAttachment(std::size_t index) const;
 
         void setAttachmentName(size_t attachment, std::string name);
 

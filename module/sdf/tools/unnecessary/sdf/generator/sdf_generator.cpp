@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     int size = 64;
     int nThreads = std::thread::hardware_concurrency();
     options.add_options()
-        (kInputName, "Input file", cxxopts::value<std::string>())
+        (kInputName, "RichInput file", cxxopts::value<std::string>())
         ("output", "PNG output", cxxopts::value<std::string>())
         ("size", "Generate CPP", cxxopts::value<int>(size))
         (kMinName, "Minimum SDF distance", cxxopts::value<float>())
