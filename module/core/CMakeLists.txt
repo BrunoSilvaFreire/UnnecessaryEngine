@@ -8,6 +8,7 @@ add_unnecessary_library(
     include/unnecessary/def.h
     include/unnecessary/logging.h
     include/unnecessary/algorithms/n_tree.h
+    include/unnecessary/algorithms/index_recycler.h
     include/unnecessary/memory/membuf.h
     include/unnecessary/memory/binary_writer.h
     include/unnecessary/memory/buffer_stream.h

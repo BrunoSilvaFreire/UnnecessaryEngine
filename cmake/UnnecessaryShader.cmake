@@ -101,13 +101,11 @@ function(include_unnecessary_shader TARGET SHADER)
     get_unnecessary_shader_target_name(${SHADER} SHADER_TARGET)
     add_dependencies(${TARGET} ${SHADER_TARGET})
     get_target_property(TARGET_BINDIR ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
-    print_target_properties(${TARGET})
     get_target_property(SHADER_OUTPUT_DIR ${SHADER_TARGET} SHADER_OUTPUT_DIR)
     get_target_property(SHADER_NAME ${SHADER_TARGET} SHADER_NAME)
     get_target_property(SHADER_ALL_STAGES ${SHADER_TARGET} SHADER_ALL_STAGES)
     target_include_directories(${TARGET} PUBLIC ${SHADER_OUTPUT_DIR})
     foreach (stage ${SHADER_ALL_STAGES})
-        message("Stages of: ${SHADER_TARGET}:  ${SHADER_OUTPUT_DIR}/${SHADER_NAME}.${stage}.spirv")
         unnecessary_copy_on_build(
             ${TARGET}
             "${SHADER_OUTPUT_DIR}/${SHADER_NAME}.${stage}.spirv"

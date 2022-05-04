@@ -52,12 +52,14 @@ add_unnecessary_library(
     src/unnecessary/rendering/pipelines/inputs.cpp
     src/unnecessary/rendering/pipelines/pipeline.cpp
     src/unnecessary/rendering/pipelines/pipeline_stage.cpp
+    src/unnecessary/rendering/pipelines/pipeline_description.cpp
 
     DEPENDENCIES
     unnecessary_core
     unnecessary_jobs
     unnecessary_graphs
     unnecessary_simulation
+    unnecessary_serialization
     unnecessary_application
     Vulkan::Vulkan
     glm::glm

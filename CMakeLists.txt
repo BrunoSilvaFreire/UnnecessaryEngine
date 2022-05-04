@@ -1,12 +1,13 @@
 project(UnnecessaryEngine LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
+
 if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
     message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
     file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
         "${CMAKE_BINARY_DIR}/conan.cmake")
 endif ()
-message("Including @ ${CMAKE_BINARY_DIR}/conan.cmake")
+
 set(CONAN_DISABLE_CHECK_COMPILER On)
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 include(cmake/Unnecessary.cmake)
@@ -53,7 +54,11 @@ conan_cmake_install(
     CC=${CMAKE_C_COMPILER}
     CXX=${CMAKE_CXX_COMPILER}
 )
-set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}")
+list(
+    APPEND
+    CMAKE_MODULE_PATH
+    "${CMAKE_BINARY_DIR}"
+)
 find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(termcolor REQUIRED)
@@ -129,6 +134,7 @@ add_subdirectory(module/sdf)
 add_subdirectory(module/serialization)
 add_subdirectory(module/atlas)
 add_subdirectory(module/baf)
+add_subdirectory(module/source_analysis)
 
 
 add_subdirectory(applications/orbital)

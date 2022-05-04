@@ -20,10 +20,11 @@ struct MyStruct {
 };
 
 TEST(allocators, pool_allocator) {
-    un::PoolAllocator<MyStruct> allocator(32);
-    const std::size_t numAllocs = 1 << 12;
+    std::size_t pageSize = 32;
+    std::size_t numAllocs = pageSize * 4;
+    un::PoolAllocator<MyStruct> allocator(pageSize);
     for (std::size_t i = 0; i < numAllocs; ++i) {
-        MyStruct& aStruct = allocator.construct(0, 0, i, i);
+        MyStruct& aStruct = *allocator.construct(0, 0, i, i);
         ASSERT_EQ(aStruct.a, 0);
         ASSERT_EQ(aStruct.b, 0);
         ASSERT_EQ(aStruct.c, i);

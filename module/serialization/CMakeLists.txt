@@ -28,5 +28,8 @@ add_unnecessary_tool(
 
     SOURCES
     tools/unnecessary/serializer/serializer_generator.cpp
+
+    DEPENDENCIES
+    unnecessary_source_analysis
 )
 add_subdirectory(nlohmann)
