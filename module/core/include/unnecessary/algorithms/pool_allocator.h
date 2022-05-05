@@ -12,42 +12,46 @@ namespace un {
     template<typename TElement>
     class PoolAllocator {
     private:
-        class Page;
-
-        struct Allocation {
-            /**
-             * Which page is this allocated in?
-             */
-            std::size_t page;
-            TElement block;
-        };
-
         class Page {
         private:
-            Page* nextPage;
-            Allocation* block;
+            TElement* block;
             std::size_t size;
             std::size_t head;
             un::IndexRecycler<std::size_t> recycler;
         public:
+            bool operator<(const Page& rhs) const {
+                return block < rhs.block;
+            }
+
+            bool operator>(const Page& rhs) const {
+                return rhs < *this;
+            }
+
+            bool operator<=(const Page& rhs) const {
+                return !(rhs < *this);
+            }
+
+            bool operator>=(const Page& rhs) const {
+                return !(*this < rhs);
+            }
+
+        public:
             explicit Page(
-                std::size_t numElements,
-                std::size_t pageIndex
+                std::size_t numElements
             ) : size(numElements),
                 head(0),
-                block(static_cast<Allocation*>(std::malloc(numElements * sizeof(Allocation)))),
-                nextPage(nullptr) {
+                block(static_cast<TElement*>(std::malloc(numElements * sizeof(TElement)))) {
             }
 
             ~Page() {
                 std::free(block);
             }
 
-            Page* getNextPage() const {
-                return nextPage;
+            TElement* getBlock() const {
+                return block;
             }
 
-            Allocation* allocate() {
+            TElement* allocate() {
                 if (isFull()) {
                     throw std::runtime_error("Page is full, cannot allocate any more.");
                 }
@@ -58,7 +62,7 @@ namespace un {
                 return block + head++;
             }
 
-            void free(Allocation* allocation) {
+            void free(TElement* allocation) {
                 std::size_t index = allocation - block;
                 recycler.recycle(index);
             }
@@ -70,46 +74,38 @@ namespace un {
             size_t getSize() const {
                 return size;
             }
-
-            void setNextPage(Page* next) {
-                nextPage = next;
-            }
         };
 
-        Page root;
+        std::set<Page*> pages;
+        std::queue<Page*> freePages;
+        Page* root;
         Page* current;
-        std::size_t numPages;
         std::size_t pageSize;
 
         Page* constructPage() {
-            return new Page(pageSize, numPages++);
-        }
-
-        Page* findPage(std::size_t index) {
-            Page* page = &root;
-            std::size_t i = 0;
-            while (i++ < index) {
-                page = page->getNextPage();
-            }
-            return page;
+            Page* pPage = new Page(pageSize);
+            pages.emplace(pPage);
+            freePages.emplace(pPage);
+            return pPage;
         }
 
     public:
 
         explicit PoolAllocator(
             std::size_t numElementsPerPage
-        ) : numPages(1),
+        ) :
             pageSize(numElementsPerPage),
-            root(numElementsPerPage, 0),
-            current(&root) {
+            pages(),
+            freePages(),
+            root(nullptr),
+            current(nullptr) {
+            current = root = constructPage();
+
         }
 
         ~PoolAllocator() {
-            Page* page = root.getNextPage();
-            for (std::size_t i = 0; i < numPages - 1; ++i) {
-                auto next = page->getNextPage();
+            for (Page* page : pages) {
                 delete page;
-                page = next;
             }
         }
 
@@ -117,21 +113,45 @@ namespace un {
         TElement* construct(Args... args) {
             if (current->isFull()) {
                 auto next = constructPage();
-                current->setNextPage(next);
                 current = next;
             }
-            Allocation* allocation = current->allocate();
-            TElement* allocated = &allocation->block;
-            return new(allocated) TElement(std::forward<Args>(args)...);
+            TElement* ptr = current->allocate();
+            return new(ptr) TElement(std::forward<Args>(args)...);
         }
 
-        void free(TElement* element) {
-            auto allocation = reinterpret_cast<Allocation*>(element - sizeof(Allocation::page));
-            (&allocation->block)->~TElement();
-            Page* page = findPage(allocation->page);
-            page->free(allocation);
+        void dispose(TElement* element) {
+            element->~TElement();
+            Page* page = findPage(element);
+            page->free(element);
         }
 
+        Page* getRoot() const {
+            return root;
+        }
+
+        Page* findPage(TElement* element) {
+            // O(Log(N))
+            auto it = std::lower_bound(
+                pages.begin(),
+                pages.end(),
+                element,
+                [](Page* page, TElement* element) {
+                    TElement* start = page->getBlock();
+                    TElement* end = start + page->getSize();
+                    bool contains = element >= start && element < end;
+                    std::cout << "start: " << start
+                              << ", end: " << end
+                              << ", element: " << element
+                              << " contains: " << contains
+                              << std::endl;
+                    return page->getBlock() < element;
+                }
+            );
+            if (it != pages.end()) {
+                return *it;
+            }
+            return nullptr;
+        }
     };
 }
 #endif

@@ -19,9 +19,9 @@ struct MyStruct {
     }
 };
 
-TEST(allocators, pool_allocator) {
+TEST(allocators, multiple_allocations) {
     std::size_t pageSize = 32;
-    std::size_t numAllocs = pageSize * 4;
+    std::size_t numAllocs = pageSize * 32;
     un::PoolAllocator<MyStruct> allocator(pageSize);
     for (std::size_t i = 0; i < numAllocs; ++i) {
         MyStruct& aStruct = *allocator.construct(0, 0, i, i);
@@ -30,4 +30,17 @@ TEST(allocators, pool_allocator) {
         ASSERT_EQ(aStruct.c, i);
         ASSERT_EQ(aStruct.d, i);
     }
+}
+
+TEST(allocators, find_correct_page) {
+    std::size_t pageSize = 32;
+    std::size_t numPagesToFill = (pageSize * 4);
+    un::PoolAllocator<MyStruct> allocator(pageSize);
+    auto first = allocator.construct(1, 2, 3, 4);
+    for (std::size_t i = 0; i < numPagesToFill; ++i) {
+        allocator.construct(i, i, i, i);
+    }
+    auto page = allocator.findPage(first);
+    EXPECT_EQ(page, allocator.getRoot());
+    allocator.dispose(first);
 }
