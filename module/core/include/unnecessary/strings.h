@@ -28,6 +28,7 @@ namespace un {
         }
         return ss.str();
     }
+
     template<typename TIterator>
     std::string join_strings(TIterator begin, TIterator end) {
         std::stringstream ss;
@@ -36,6 +37,19 @@ namespace un {
             ss << *it;
             if (it != end - 1) {
                 ss << ", ";
+            }
+        }
+        return ss.str();
+    }
+
+    template<typename TIterator>
+    std::string join_strings(const std::string& separator, TIterator begin, TIterator end) {
+        std::stringstream ss;
+        TIterator it = begin;
+        for (; it != end; it++) {
+            ss << *it;
+            if (it != end - 1) {
+                ss << separator;
             }
         }
         return ss.str();

@@ -3,8 +3,15 @@
 
 #include <vulkan/vulkan.hpp>
 #include <unnecessary/serialization/serialization_types.h>
+
 #define SERIALIZE(...)
 
+namespace un::rendering::bruh {
+    struct OtherOptions {
+        SERIALIZE()
+        bool enabled;
+    };
+}
 namespace un {
 
     struct PipelineDepthOptions {
@@ -16,6 +23,9 @@ namespace un {
 
         SERIALIZE()
         float depthMax;
+
+        SERIALIZE()
+        std::string name;
     };
 
     struct PipelineDescription {

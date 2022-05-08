@@ -9,7 +9,7 @@ namespace un {
     CXXMacroExpansion::CXXMacroExpansion(const std::string& macro, const std::string& value) : macro(macro),
                                                                                                value(value) { }
 
-    CXXComposite::CXXComposite(std::string name) : fields(), name(std::move(name)) { }
+    CXXComposite::CXXComposite(std::string name, std::string ns) : fields(), name(std::move(name)), ns(ns) { }
 
     void CXXComposite::addField(CXXField&& field) {
         fields.emplace_back(std::move(field));
@@ -21,7 +21,8 @@ namespace un {
 
     CXXField::CXXField(
         CXXAccessModifier accessModifier,
-        const std::string& name,
-        const std::string& type
-    ) : accessModifier(accessModifier), name(name), type(type), macros() { }
+        std::string name,
+        std::string type,
+        std::vector<un::CXXMacroExpansion> expansions
+    ) : accessModifier(accessModifier), name(std::move(name)), type(std::move(type)), macros(std::move(expansions)) { }
 }

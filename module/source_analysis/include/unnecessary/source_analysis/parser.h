@@ -7,8 +7,9 @@
 
 #include <filesystem>
 #include <functional>
-#include <clang-c/Index.h>
 #include <stack>
+#include <clang/AST/AST.h>
+#include <clang/Frontend/ASTUnit.h>
 #include <unnecessary/source_analysis/structures.h>
 #include <unnecessary/logging.h>
 
@@ -17,6 +18,7 @@ namespace un::parsing {
     private:
         std::filesystem::path file;
         std::vector<std::string> includes;
+
     public:
         ParsingOptions(std::filesystem::path file, std::vector<std::string> includes);
 
@@ -27,66 +29,69 @@ namespace un::parsing {
 
     class Parser {
     private:
+        // Clang stuff
+        std::unique_ptr<clang::ASTUnit> clangUnit;
+        // Parsing stuff
+
         un::CXXTranslationUnit translationUnit;
         un::CXXAccessModifier currentAccess = un::CXXAccessModifier::eNone;
         std::shared_ptr<un::CXXComposite> currentComposite;
+        std::vector<un::CXXMacroExpansion> macros;
 
-        static CXChildVisitResult visitor_func(CXCursor first, CXCursor second, CXClientData data) {
-            return reinterpret_cast<Parser*>(data)->visit(first, second);
-        }
+        bool check_equal(CXToken* first, CXToken* second);
 
-        std::string to_string(const CXString& cursor) {
-            return std::string(clang_getCString(cursor));
-        }
+        static CXChildVisitResult visitor_func(CXCursor first, CXCursor second, CXClientData data);
 
-        std::string to_string(const CXCursor& cursor) {
-            return to_string(clang_getCursorDisplayName(cursor));
+        std::string to_string(const CXString& cursor);
+
+        std::string to_string(const CXCursor& cursor);
+
+        void setSpecifier(CX_CXXAccessSpecifier specifier);
+/*
+        std::string getCurrentNamespace() const {
+            return un::join_strings("::", namespaces.begin(), namespaces.end());
+
         }
 
         CXChildVisitResult visit(CXCursor cursor, CXCursor parent) {
             CXCursorKind kind = clang_getCursorKind(cursor);
             CXCursorKind parentKind = clang_getCursorKind(parent);
+            auto loc = clang_getCursorLocation(cursor);
+            if (clang_Location_isInSystemHeader(loc)) {
+                return CXChildVisit_Continue;
+            }
             std::string nameStr = to_string(clang_getCursorSpelling(cursor));
-            if (kind == CXCursor_MacroDefinition) {
-                return CXChildVisit_Continue;
-            }
-            if (kind == CXCursor_ClassDecl) {
-                currentAccess = un::CXXAccessModifier::eNone;
-                currentComposite = std::make_shared<un::CXXComposite>(nameStr);
-            }
-            if (kind == CXCursor_CXXAccessSpecifier) {
-                auto specifier = clang_getCXXAccessSpecifier(cursor);
-                switch (specifier) {
-                    case CX_CXXInvalidAccessSpecifier:
-                        break;
-                    case CX_CXXPublic:
-                        currentAccess = un::CXXAccessModifier::ePublic;
-                        break;
-                    case CX_CXXProtected:
-                        currentAccess = un::CXXAccessModifier::eProtected;
-                        break;
-                    case CX_CXXPrivate:
-                        currentAccess = un::CXXAccessModifier::ePrivate;
-                        break;
-                }
-                return CXChildVisit_Continue;
-            }
-            if (kind == CXCursor_FieldDecl) {
+            LOG(INFO) << "Found " << nameStr << " (" << to_string(clang_getCursorKindSpelling(kind)) << ").";
+            switch (kind) {
+                case CXCursor_MacroDefinition:
+                    return CXChildVisit_Continue;
+                case CXCursor_Namespace:
+                case CXCursor_NamespaceRef:
+                case CXCursor_NamespaceAlias:
+                    namespaces.push_back(nameStr);
 
-                CXType cType = clang_getCursorType(cursor);
-                CXSourceLocation loc = clang_getCursorLocation(cursor);
-                std::string semantic = to_string(clang_getCursorSemanticParent(cursor));
-                std::string definition = to_string(clang_getCursorDefinition(cursor));
-                std::string reference = to_string(clang_getCursorReferenced(cursor));
-                std::string canonical = to_string(clang_getCanonicalCursor(cursor));
-                std::string typedefName = to_string(clang_getTypeSpelling(clang_getElementType(cType)));
-                std::string spelling = to_string(clang_getTypeSpelling(cType));
-                un::CXXField field(currentAccess, nameStr, "unknownType");
-                return CXChildVisit_Continue;
+                    return CXChildVisit_Recurse;
+                case CXCursor_ClassDecl:
+                    currentAccess = un::CXXAccessModifier::eNone;
+
+                    currentComposite = std::make_shared<un::CXXComposite>(nameStr, getCurrentNamespace());
+                    return CXChildVisit_Continue;
+                case CXCursor_CXXAccessSpecifier:
+                    setSpecifier(clang_getCXXAccessSpecifier(cursor));
+                    return CXChildVisit_Continue;
+                case CXCursor_FieldDecl:
+                    addField(cursor, nameStr);
+                    return CXChildVisit_Continue;
+
+                default:
+                    return CXChildVisit_Recurse;
+
             }
 
             return CXChildVisit_Recurse;
-        }
+        }*/
+
+        void addField(CXCursor cursor, std::string nameStr);
 
     public:
 

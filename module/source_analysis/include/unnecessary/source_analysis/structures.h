@@ -40,7 +40,11 @@ namespace un {
         std::string name;
         std::string type;
     public:
-        CXXField(CXXAccessModifier accessModifier, const std::string& name, const std::string& type);
+        CXXField(
+            CXXAccessModifier accessModifier,
+            std::string name, std::string type,
+            std::vector<un::CXXMacroExpansion> expansions
+        );
     };
 
     class CXXScope {
@@ -56,19 +60,14 @@ namespace un {
     class CXXComposite : public CXXSymbol, public CXXNamed {
     private:
         std::string name;
+        std::string ns;
         std::vector<CXXField> fields;
     public:
-        explicit CXXComposite(std::string name);
+        explicit CXXComposite(std::string name, std::string ns);
 
         void addField(CXXField&& field);
 
         std::string getName() override;
-    };
-
-    class CXXNamespace : public CXXScope {
-    private:
-        std::string value;
-    public:
     };
 
     class CXXTranslationUnit : public CXXScope {

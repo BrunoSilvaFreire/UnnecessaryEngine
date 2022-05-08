@@ -50,9 +50,6 @@ conan_cmake_install(
     SETTINGS ${settings}
     ENV
     CONAN_DISABLE_CHECK_COMPILER=On
-    CONAN_CMAKE_GENERATOR=${CMAKE_GENERATOR}
-    CC=${CMAKE_C_COMPILER}
-    CXX=${CMAKE_CXX_COMPILER}
 )
 list(
     APPEND

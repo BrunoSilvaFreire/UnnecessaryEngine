@@ -12,6 +12,8 @@
       <file path="$PROJECT_DIR$/module/atlas/src" />
       <file path="$PROJECT_DIR$/module/atlas/tests" />
       <file path="$PROJECT_DIR$/module/atlas/tools" />
+      <file path="$PROJECT_DIR$/module/baf/include" />
+      <file path="$PROJECT_DIR$/module/baf/src" />
       <file path="$PROJECT_DIR$/module/core/include" />
       <file path="$PROJECT_DIR$/module/core/src" />
       <file path="$PROJECT_DIR$/module/core/tests" />
@@ -25,6 +27,9 @@
       <file path="$PROJECT_DIR$/module/jobs/include" />
       <file path="$PROJECT_DIR$/module/jobs/src" />
       <file path="$PROJECT_DIR$/module/jobs/tests" />
+      <file path="$PROJECT_DIR$/module/math/include" />
+      <file path="$PROJECT_DIR$/module/math/src" />
+      <file path="$PROJECT_DIR$/module/math/tests" />
       <file path="$PROJECT_DIR$/module/rendering/include" />
       <file path="$PROJECT_DIR$/module/rendering/src" />
       <file path="$PROJECT_DIR$/module/rendering/tools" />
@@ -38,7 +43,14 @@
       <file path="$PROJECT_DIR$/module/serialization/nlohmann/tests" />
       <file path="$PROJECT_DIR$/module/serialization/src" />
       <file path="$PROJECT_DIR$/module/serialization/tests" />
+      <file path="$PROJECT_DIR$/module/simulation/include" />
+      <file path="$PROJECT_DIR$/module/simulation/src" />
+      <file path="$PROJECT_DIR$/module/source_analysis/include" />
+      <file path="$PROJECT_DIR$/module/source_analysis/src" />
     </sourceRoots>
+    <excludeRoots>
+      <file path="$PROJECT_DIR$/legacy" />
+    </excludeRoots>
   </component>
   <component name="SwUserDefinedSpecifications">
     <option name="specTypeByUrl">
