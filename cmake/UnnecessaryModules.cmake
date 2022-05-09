@@ -1,5 +1,30 @@
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryTests.cmake)
 
+macro(collect_target_includes TARGET VAR)
+    if (TARGET ${TARGET})
+        get_target_property(MODULE_DEPENDENCIES ${TARGET} INTERFACE_LINK_LIBRARIES)
+        foreach (dependency ${MODULE_DEPENDENCIES})
+            collect_target_includes(${dependency} ${VAR})
+        endforeach ()
+        get_target_property(SELF_INCLUDE ${TARGET} INTERFACE_INCLUDE_DIRECTORIES)
+        list(APPEND ${VAR} ${SELF_INCLUDE})
+    endif ()
+endmacro()
+
+macro(collect_unnecessary_includes TARGET VAR)
+    if (TARGET ${TARGET})
+        get_target_property(IS_UN_MODULE ${TARGET} UNNECESSARY_MODULE)
+        if (IS_UN_MODULE)
+            get_target_property(MODULE_DEPENDENCIES ${TARGET} INTERFACE_LINK_LIBRARIES)
+            foreach (dependency ${MODULE_DEPENDENCIES})
+                collect_unnecessary_includes(${dependency} ${VAR})
+            endforeach ()
+            get_target_property(SRC ${TARGET} SOURCE_DIR)
+            list(APPEND ${VAR} ${SRC}/include)
+        endif ()
+    endif ()
+endmacro()
+
 function(
     configure_unnecessary_target
     NAME
@@ -35,6 +60,7 @@ function(
     set_target_properties(
         ${NAME}
         PROPERTIES
+        UNNECESSARY_MODULE On
         LINKER_LANGUAGE CXX
     )
     set_target_properties(

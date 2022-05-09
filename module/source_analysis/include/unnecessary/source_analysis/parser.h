@@ -8,8 +8,7 @@
 #include <filesystem>
 #include <functional>
 #include <stack>
-#include <clang/AST/AST.h>
-#include <clang/Frontend/ASTUnit.h>
+#include <cppast/libclang_parser.hpp>
 #include <unnecessary/source_analysis/structures.h>
 #include <unnecessary/logging.h>
 
@@ -30,68 +29,14 @@ namespace un::parsing {
     class Parser {
     private:
         // Clang stuff
-        std::unique_ptr<clang::ASTUnit> clangUnit;
         // Parsing stuff
 
         un::CXXTranslationUnit translationUnit;
         un::CXXAccessModifier currentAccess = un::CXXAccessModifier::eNone;
         std::shared_ptr<un::CXXComposite> currentComposite;
-        std::vector<un::CXXMacroExpansion> macros;
+        std::vector<un::CXXAttribute> macros;
 
-        bool check_equal(CXToken* first, CXToken* second);
 
-        static CXChildVisitResult visitor_func(CXCursor first, CXCursor second, CXClientData data);
-
-        std::string to_string(const CXString& cursor);
-
-        std::string to_string(const CXCursor& cursor);
-
-        void setSpecifier(CX_CXXAccessSpecifier specifier);
-/*
-        std::string getCurrentNamespace() const {
-            return un::join_strings("::", namespaces.begin(), namespaces.end());
-
-        }
-
-        CXChildVisitResult visit(CXCursor cursor, CXCursor parent) {
-            CXCursorKind kind = clang_getCursorKind(cursor);
-            CXCursorKind parentKind = clang_getCursorKind(parent);
-            auto loc = clang_getCursorLocation(cursor);
-            if (clang_Location_isInSystemHeader(loc)) {
-                return CXChildVisit_Continue;
-            }
-            std::string nameStr = to_string(clang_getCursorSpelling(cursor));
-            LOG(INFO) << "Found " << nameStr << " (" << to_string(clang_getCursorKindSpelling(kind)) << ").";
-            switch (kind) {
-                case CXCursor_MacroDefinition:
-                    return CXChildVisit_Continue;
-                case CXCursor_Namespace:
-                case CXCursor_NamespaceRef:
-                case CXCursor_NamespaceAlias:
-                    namespaces.push_back(nameStr);
-
-                    return CXChildVisit_Recurse;
-                case CXCursor_ClassDecl:
-                    currentAccess = un::CXXAccessModifier::eNone;
-
-                    currentComposite = std::make_shared<un::CXXComposite>(nameStr, getCurrentNamespace());
-                    return CXChildVisit_Continue;
-                case CXCursor_CXXAccessSpecifier:
-                    setSpecifier(clang_getCXXAccessSpecifier(cursor));
-                    return CXChildVisit_Continue;
-                case CXCursor_FieldDecl:
-                    addField(cursor, nameStr);
-                    return CXChildVisit_Continue;
-
-                default:
-                    return CXChildVisit_Recurse;
-
-            }
-
-            return CXChildVisit_Recurse;
-        }*/
-
-        void addField(CXCursor cursor, std::string nameStr);
 
     public:
 
@@ -100,6 +45,12 @@ namespace un::parsing {
         const CXXTranslationUnit& getTranslationUnit() const {
             return translationUnit;
         }
+
+        void parse_class(const cppast::cpp_class& clazz);
+
+        CXXTypeKind toPrimitiveType(const cppast::cpp_type& type) const;
+
+        CXXType toUnType(const cppast::cpp_type& type);
     };
 }
 #endif

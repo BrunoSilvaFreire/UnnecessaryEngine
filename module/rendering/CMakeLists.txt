@@ -97,9 +97,16 @@ add_unnecessary_tool(
     unnecessary_rendering
     unnecessary_simulation
     unnecessary_application
+    unnecessary_serialization
     cxxopts::cxxopts
     nlohmann_json::nlohmann_json
 )
+add_unnecessary_serialization(
+    TARGET unnecessary_rendering
+    FILES
+    include/unnecessary/rendering/pipelines/pipeline_description.h
+)
+
 add_unnecessary_shader(
     resources/shaders/triangle.shader.json
 )

@@ -3,6 +3,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryShader.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryDebug.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryTools.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryResources.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/UnnecessarySerialization.cmake)
 include(GNUInstallDirs)
 include(CPack)
 include(CMakePrintHelpers)
@@ -24,7 +25,7 @@ find_program(
 )
 
 function(add_unnecessary_thirdparty_library NAME)
-    add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/${NAME} EXCLUDE_FROM_ALL)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/${NAME} ${CMAKE_BINARY_DIR}/thirdparty/${NAME} EXCLUDE_FROM_ALL)
 endfunction()
 
 function(set_unnecessary_compile_definitions TARGET)

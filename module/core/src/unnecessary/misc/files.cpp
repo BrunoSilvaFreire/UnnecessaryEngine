@@ -37,4 +37,17 @@ namespace un::files {
 
         stream.close();
     }
+
+    void ensure_directory_exists(const std::filesystem::path& path) {
+        if (!std::filesystem::exists(path)) {
+            std::filesystem::create_directories(path);
+        }
+    }
+
+    void safe_write_file(const std::filesystem::path& path, std::stringstream& stream, std::ios::openmode openMode) {
+        ensure_directory_exists(path.parent_path());
+        std::ofstream file(path);
+        file << stream.str();
+        file.close();
+    }
 }

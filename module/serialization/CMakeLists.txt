@@ -27,7 +27,9 @@ add_unnecessary_tool(
     unnecessary_serializer_generator
 
     SOURCES
+    tools/unnecessary/serializer/generation.h
     tools/unnecessary/serializer/serializer_generator.cpp
+    tools/unnecessary/serializer/generation.cpp
 
     DEPENDENCIES
     unnecessary_source_analysis

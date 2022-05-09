@@ -1,6 +1,5 @@
 include(${CMAKE_SOURCE_DIR}/cmake/ClangUtils.cmake)
-
-setup_llvm()
+setup_libast()
 add_unnecessary_library(
     unnecessary_source_analysis
 
@@ -14,6 +13,5 @@ add_unnecessary_library(
 
     DEPENDENCIES
     unnecessary_core
-    clangAST
-    libclang
+    cppast
 )

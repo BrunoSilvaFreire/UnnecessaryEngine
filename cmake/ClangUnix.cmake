@@ -1,0 +1,8 @@
+macro(setup_llvm)
+    find_program(LLVM_CONFIG llvm-config)
+    if (LLVM_CONFIG STREQUAL LLVM_CONFIG-NOTFOUND)
+        message(WARNING "Unable to find local llvm-config")
+    else ()
+        message("Using local clang")
+    endif ()
+endmacro()

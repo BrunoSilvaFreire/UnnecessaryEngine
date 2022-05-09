@@ -12,7 +12,7 @@
 
 #include "draw_triangle_pass.h"
 #include <triangle.gen.h>
-
+#include <pipelinedescription.serializer.generated.h>
 namespace un {
     typedef un::JobSystem<un::JobWorker, un::SimulationWorker, un::GraphicsWorker> UnnecessaryJobSystem;
 }
@@ -20,7 +20,6 @@ namespace un {
 int main(int argc, char** argv) {
     un::World world;
     un::Application app;
-
     {
         un::Window window = un::Window::withSize("Triangle", app, un::Size2D(1080, 900));
         un::Renderer renderer = un::Renderer(

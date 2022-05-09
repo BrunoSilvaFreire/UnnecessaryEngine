@@ -79,5 +79,19 @@ namespace un {
         }
     };
 
+    template<>
+    void Serialized::set<bool>(const std::string& key, const bool& value) {
+        set(key, static_cast<u8>(value));
+    }
+
+    template<>
+    void Serialized::set<bool>(const uuids::uuid& key, const bool& value) {
+        set(key, static_cast<u8>(value));
+    }
+
+    template<>
+    bool Serialized::try_get<bool>(const std::string& key, bool& result) const {
+        try_get(key, reinterpret_cast<u8&>(result));
+    }
 }
 #endif
