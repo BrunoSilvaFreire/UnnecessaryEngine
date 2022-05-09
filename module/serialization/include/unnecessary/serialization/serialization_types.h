@@ -17,6 +17,15 @@ namespace un {
     class SerializedNode {
     public:
         virtual SerializedType getType() = 0;
+
+        template<typename TNode>
+        TNode& as() {
+            auto node = dynamic_cast<TNode*>(this);
+            if (node == nullptr){
+                throw std::runtime_error("Invalid cast.");
+            }
+            return *node;
+        }
     };
 }
 

@@ -16,4 +16,8 @@ namespace un {
     const std::unordered_map<std::string, std::shared_ptr<un::SerializedNode>>& Serialized::getNamedProperties() const {
         return namedProperties;
     }
+
+    const std::unordered_map<uuids::uuid, std::shared_ptr<un::SerializedNode>>& Serialized::getUUIDProperties() const {
+        return uuidProperties;
+    }
 }

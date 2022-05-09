@@ -1,8 +1,8 @@
 #ifndef UNNECESSARYENGINE_PIPELINE_DESCRIPTION_H
 #define UNNECESSARYENGINE_PIPELINE_DESCRIPTION_H
 
-#include <vulkan/vulkan.hpp>
 #include <string>
+#include <vector>
 
 namespace un {
     struct VertexStreamUsageEntry {
@@ -18,22 +18,24 @@ namespace un {
     };
 
     struct PipelineDepthOptions {
-        [[un::serialize(optional, defaultValue=true)]]
+        [[un::serialize(optional)]]
         bool enabled = true;
 
         [[un::serialize(optional)]]
         float depthMin = 0;
         [[un::serialize(optional)]]
         float depthMax = 1;
-
-
     };
 
     struct PipelineDescription {
         [[un::serialize(optional)]]
         PipelineDepthOptions depth;
-
-        std::vector<un::PipelineStageDescription> pipelineStageDescription;
+        [[un::serialize(
+            optional,
+            serializer=un::serialization::pipeline_stages_serializer,
+            deserializer=un::serialization::pipeline_stages_deserializer
+        )]]
+        std::vector<un::PipelineStageDescription> stages;
     };
 }
 #endif

@@ -1,5 +1,6 @@
 #include <utility>
 #include <unnecessary/source_analysis/parser.h>
+#include <unnecessary/misc/benchmark.h>
 #include <cppast/cpp_entity_kind.hpp>
 #include <cppast/cpp_class.hpp>
 #include <cppast/cpp_namespace.hpp>
@@ -26,18 +27,24 @@ namespace un::parsing {
         auto work = std::filesystem::current_path();
         cppast::libclang_parser parser;
         cppast::libclang_compile_config config;
+        std::string fileName = options.getFile().string();
+        LOG(INFO) << "Parsing file: " << fileName;
         for (const std::string& item : options.getIncludes()) {
+            LOG(INFO) << "include: " << item;
             config.add_include_dir(item);
         }
         cppast::cpp_entity_index index;
+        un::Chronometer<> chronometer;
+        auto result = parser.parse(index, fileName, config);
+        auto ms = chronometer.stop();
+        LOG(INFO) << "Parsing of file " << options.getFile().filename() << " took " << ms;
 
-        auto result = parser.parse(index, options.getFile().string(), config);
         if (result == nullptr) {
             LOG(FUCK) << "cppast returned null entity.";
             return;
         }
-        LOG(INFO) << "Result name: " << result->name();
         const cppast::cpp_file& file = *result;
+        std::set<std::string> alreadyParsed;
         cppast::visit(
             file,
             [](const cppast::cpp_entity& e) {
@@ -60,6 +67,10 @@ namespace un::parsing {
             },
             [&](const cppast::cpp_entity& e, cppast::visitor_info info) {
                 if (e.kind() == cppast::cpp_entity_kind::class_t) {
+                    if (alreadyParsed.contains(e.name())) {
+                        return;
+                    }
+                    alreadyParsed.emplace(e.name());
                     parse_class(dynamic_cast<const cppast::cpp_class&>(e));
                 }
             }

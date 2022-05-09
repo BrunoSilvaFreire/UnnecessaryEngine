@@ -52,7 +52,7 @@ namespace un {
 
         std::string getName() const override;
 
-        CXXTypeKind getInnerType() const;
+        CXXTypeKind getKind() const;
     };
 
     enum CXXAccessModifier {
@@ -76,6 +76,8 @@ namespace un {
         const std::set<std::string>& getArguments() const;
 
         bool hasArgument(const std::string& arg) const;
+
+        std::string getArgumentValue(const std::string& arg) const;
     };
 
     class CXXField : public CXXSymbol {
@@ -94,6 +96,17 @@ namespace un {
         const std::string& getName() const;
 
         const std::vector<un::CXXAttribute>& getAttributes() const;
+
+        const un::CXXAttribute& getAttribute(std::string name) const {
+            for (const auto& att : attributes) {
+                if (att.getName() == name) {
+                    return att;
+                }
+            }
+            std::stringstream ss;
+            ss << "Unable to find attribute " << name;
+            throw std::runtime_error(ss.str());
+        }
 
         const un::CXXAttribute* findAttribute(std::string name) const {
             for (const auto& att : attributes) {
@@ -115,6 +128,25 @@ namespace un {
     public:
         void addSymbol(const std::shared_ptr<CXXSymbol>& symbol) {
             symbols.emplace_back(symbol);
+        }
+
+        template<typename TSymbol>
+        bool findSymbol(std::string type, std::shared_ptr<TSymbol>& out) const {
+            for (const auto& item : symbols) {
+                std::shared_ptr<TSymbol> ptr = std::dynamic_pointer_cast<TSymbol>(item);
+                if (ptr == nullptr) {
+                    continue;
+                }
+                std::shared_ptr<un::CXXNamed> named = std::dynamic_pointer_cast<un::CXXNamed>(item);
+                if (named == nullptr) {
+                    continue;
+                }
+                if (named->getName() == type) {
+                    out = ptr;
+                    return true;
+                }
+            }
+            return false;
         }
 
         template<typename TSymbol>
@@ -155,6 +187,7 @@ namespace un {
         bool searchType(std::string type, un::CXXType& out) {
             return un::maps::search(_typeIndex, type, out);
         }
+
 
         void addType(std::string key, const un::CXXType& type) {
             _typeIndex.emplace(key, type);

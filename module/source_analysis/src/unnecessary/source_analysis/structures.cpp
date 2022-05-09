@@ -19,6 +19,9 @@ namespace un {
                 current.append(item);
             }
         }
+        if (!current.empty()) {
+            arguments.emplace(current);
+        }
     }
 
     CXXAttribute::CXXAttribute(std::string name) : name(std::move(name)), arguments() {
@@ -30,7 +33,37 @@ namespace un {
     }
 
     bool CXXAttribute::hasArgument(const std::string& arg) const {
-        return std::find(arguments.begin(), arguments.end(), arg) != arguments.end();
+        for (const std::string& argument : arguments) {
+            auto eqIt = argument.find('=');
+            if (eqIt == std::string::npos) {
+                if (argument == arg) {
+                    return true;
+                }
+            } else {
+                std::string argKey = argument.substr(0, eqIt);
+                if (argKey == arg) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    std::string CXXAttribute::getArgumentValue(const std::string& arg) const {
+        for (const std::string& argument : arguments) {
+            auto eqIt = argument.find('=');
+            if (eqIt == std::string::npos) {
+                if (argument == arg) {
+                    return std::string();
+                }
+            } else {
+                std::string argKey = argument.substr(0, eqIt);
+                if (argKey == arg) {
+                    return argument.substr(eqIt + 1);
+                }
+            }
+        }
+        return std::string();
     }
 
     CXXComposite::CXXComposite(std::string name, std::string ns) : fields(), name(std::move(name)), ns(ns) { }
@@ -85,7 +118,7 @@ namespace un {
         return name;
     }
 
-    CXXTypeKind CXXType::getInnerType() const {
+    CXXTypeKind CXXType::getKind() const {
         return innerType;
     }
 }

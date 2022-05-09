@@ -28,10 +28,11 @@ namespace un {
 
         const std::unordered_map<std::string, std::shared_ptr<un::SerializedNode>>& getNamedProperties() const;
 
+        const std::unordered_map<uuids::uuid, std::shared_ptr<un::SerializedNode>>& getUUIDProperties() const;
+
         void set(const std::string& key, const std::shared_ptr<un::SerializedNode>& result);
 
         void set(const uuids::uuid& key, const std::shared_ptr<un::SerializedNode>& result);
-
 
         template<typename TValue>
         void set(const std::string& key, const TValue& result) {
@@ -73,6 +74,15 @@ namespace un {
             std::shared_ptr<SerializedType> ptr;
             if (try_get_node<SerializedType>(key, ptr)) {
                 result = static_cast<T>(*ptr);
+                return true;
+            }
+            return false;
+        }
+        template<typename T>
+        bool try_get(const std::string& key, un::SerializedArray<T>& result) const {
+            std::shared_ptr<un::SerializedArray<T>> ptr;
+            if (try_get_node<un::SerializedArray<T>>(key, ptr)) {
+                result = *ptr;
                 return true;
             }
             return false;

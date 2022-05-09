@@ -15,6 +15,10 @@ namespace un {
             elements.emplace_back(std::move(entry));
         }
 
+        operator std::vector<TValue>() {
+            return elements;
+        };
+
         TValue& add() {
             return elements.emplace_back();
         }

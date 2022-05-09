@@ -27,6 +27,14 @@ add_unnecessary_tool(
     unnecessary_serializer_generator
 
     SOURCES
+    tools/unnecessary/serializer/writers/writer.h
+    tools/unnecessary/serializer/writers/writer.cpp
+    tools/unnecessary/serializer/writers/default_writer.h
+    tools/unnecessary/serializer/writers/default_writer.cpp
+    tools/unnecessary/serializer/writers/complex_writer.h
+    tools/unnecessary/serializer/writers/complex_writer.cpp
+    tools/unnecessary/serializer/writers/delegate_writer.h
+    tools/unnecessary/serializer/writers/delegate_writer.cpp
     tools/unnecessary/serializer/generation.h
     tools/unnecessary/serializer/serializer_generator.cpp
     tools/unnecessary/serializer/generation.cpp

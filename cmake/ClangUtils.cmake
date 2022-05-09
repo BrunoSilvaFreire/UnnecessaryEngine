@@ -1,5 +1,5 @@
-if (WINDOWS)
-    include(ClangWindows.cmake)
+if (WIN32)
+    include(${CMAKE_SOURCE_DIR}/cmake/ClangWindows.cmake)
 else()
     include(${CMAKE_SOURCE_DIR}/cmake/ClangUnix.cmake)
 endif ()

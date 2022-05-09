@@ -3,6 +3,7 @@
 
 static const char* const kFileArgName = "file";
 static const char* const kRelativeToName = "relative_to";
+static const char* const kGlobalIncludeName = "global_include";
 
 static const char* const kIncludeArgName = "include";
 static const char* const kOutputDir = "output";
@@ -21,18 +22,25 @@ int main(int argc, char** args) {
         (kOutputDir, "Directory where to write the generated files",
          cxxopts::value<std::string>());
     options.add_options()
+        (kGlobalIncludeName, "Specifies an include that will be added to all generated files",
+         cxxopts::value<std::vector<std::string>>());
+    options.add_options()
         (kRelativeToName, "Directory where to write the generated files",
          cxxopts::value<std::string>());
     options.parse_positional(kFileArgName);
     try {
         cxxopts::ParseResult result = options.parse(argc, args);
         auto includes = result[kIncludeArgName].as<std::vector<std::string>>();
+        std::vector<std::string> globalIncludes;
+        if (result.count(kGlobalIncludeName) > 0) {
+            globalIncludes = result[kGlobalIncludeName].as<std::vector<std::string>>();
+        }
+
         auto file = result[kFileArgName].as<std::string>();
         std::string ownInclude;
         std::string relativeTo;
         if (result.count(kRelativeToName) > 0) {
             relativeTo = result[kRelativeToName].as<std::string>();
-
         } else {
             relativeTo = std::filesystem::current_path().string();
         }
@@ -45,23 +53,34 @@ int main(int argc, char** args) {
             if (!un::isSerializable(composite)) {
                 continue;
             }
+            LOG(INFO) << "Generating " << composite->getFullName();
             un::GenerationInfo info;
             std::vector<std::string> additionalIncludes;
             for (const auto& item : composite->getFields()) {
                 const un::CXXType& type = item.getType();
-                if (type.getInnerType() != un::CXXTypeKind::eComplex) {
+                if (type.getKind() != un::CXXTypeKind::eComplex) {
                     continue;
                 }
-                un::CXXType other;
-                if (translationUnit.searchType(type.getName(), other)) {
-                    std::string name = other.getName();
-                    auto lastName = name.find_last_of(':');
-                    if (lastName > 0) {
-                        name = name.substr(lastName + 1);
-                    }
-                    std::string include = un::getGeneratedIncludeName(name);
-                    additionalIncludes.emplace_back(include);
+                std::shared_ptr<un::CXXComposite> other;
+                std::string typeName = type.getName();
+                if (!translationUnit.findSymbol<un::CXXComposite>(typeName, other)) {
+                    LOG(WARN) << "Unable to find type " << typeName << " for field " << item.getName();
+                    continue;
                 }
+                if (!un::isSerializable(other)) {
+                    LOG(WARN) << "Type " << typeName << " for field " << item.getName() << " isn't serializable";
+                    continue;
+                }
+                std::string name = other->getName();
+                auto lastName = name.find_last_of(':');
+                if (lastName > 0) {
+                    name = name.substr(lastName + 1);
+                }
+                std::string include = un::getGeneratedIncludeName(name);
+                additionalIncludes.emplace_back(include);
+            }
+            for (const std::string& include : globalIncludes) {
+                additionalIncludes.emplace_back(include);
             }
             std::string name = composite->getName();
             info.name = name;

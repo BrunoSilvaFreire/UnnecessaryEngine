@@ -1,104 +1,23 @@
 set(
     CLANG_REQUIRED_TARGETS
-    install-clangAST
-    install-clangFrontend
-    install-clangBasic
+    install-clangAST-stripped
+    install-clangFrontend-stripped
+    install-clangBasic-stripped
+    install-libclang-stripped
+    install-clang-stripped
+    install-llvm-config-stripped
+
     install-clang-headers
     install-llvm-headers
-    install-llvm-libraries
-    install-libclang
     install-libclang-headers
 )
 
 set(LLVM_LOCAL_DIR ${CMAKE_SOURCE_DIR}/.cache/llvm)
-set(LLVM_BUILDTYPE_DIR ${LLVM_LOCAL_DIR}/${CMAKE_BUILD_TYPE}/)
+set(LLVM_BUILDTYPE_DIR ${LLVM_LOCAL_DIR})
 set(CLANG_GIT_DIRECTORY ${LLVM_LOCAL_DIR}/git)
 set(CLANG_BUILD_DIRECTORY ${LLVM_BUILDTYPE_DIR}/build)
 set(CLANG_INSTALL_DIRECTORY ${LLVM_BUILDTYPE_DIR}/install)
-
-set(
-    LLVM_LIBRARIES
-    clangFrontend
-    clangBasic
-    LLVM-C
-    LLVMAggressiveInstCombine
-    LLVMAnalysis
-    LLVMAsmParser
-    LLVMAsmPrinter
-    LLVMBinaryFormat
-    LLVMBitReader
-    LLVMBitWriter
-    LLVMBitstreamReader
-    LLVMCFGuard
-    LLVMCFIVerify
-    LLVMCodeGen
-    LLVMCore
-    LLVMCoroutines
-    LLVMCoverage
-    LLVMDWARFLinker
-    LLVMDWP
-    LLVMDebugInfoCodeView
-    LLVMDebugInfoDWARF
-    LLVMDebugInfoGSYM
-    LLVMDebugInfoMSF
-    LLVMDebugInfoPDB
-    LLVMDemangle
-    LLVMDlltoolDriver
-    LLVMExecutionEngine
-    LLVMExegesis
-    LLVMExegesisX86
-    LLVMExtensions
-    LLVMFileCheck
-    LLVMFrontendOpenACC
-    LLVMFrontendOpenMP
-    LLVMFuzzMutate
-    LLVMGlobalISel
-    LLVMIRReader
-    LLVMInstCombine
-    LLVMInstrumentation
-    LLVMInterfaceStub
-    LLVMInterpreter
-    LLVMJITLink
-    LLVMLTO
-    LLVMLibDriver
-    LLVMLineEditor
-    LLVMLinker
-    LLVMMC
-    LLVMMCA
-    LLVMMCDisassembler
-    LLVMMCJIT
-    LLVMMCParser
-    LLVMMIRParser
-    LLVMObjCARCOpts
-    LLVMObject
-    LLVMObjectYAML
-    LLVMOption
-    LLVMOrcJIT
-    LLVMOrcShared
-    LLVMOrcTargetProcess
-    LLVMPasses
-    LLVMProfileData
-    LLVMRemarks
-    LLVMRuntimeDyld
-    LLVMScalarOpts
-    LLVMSelectionDAG
-    LLVMSupport
-    LLVMSymbolize
-    LLVMTableGen
-    LLVMTableGenGlobalISel
-    LLVMTarget
-    LLVMTextAPI
-    LLVMTransformUtils
-    LLVMVectorize
-    LLVMWindowsManifest
-    LLVMX86AsmParser
-    LLVMX86CodeGen
-    LLVMX86Desc
-    LLVMX86Disassembler
-    LLVMX86Info
-    LLVMXRay
-    LLVMipo
-)
+set(LLVM_DOWNLOAD_DIR ${CLANG_INSTALL_DIRECTORY})
 list(
     TRANSFORM
     LLVM_LIBRARIES
@@ -149,7 +68,7 @@ macro(build_llvm)
         COMMAND
         ${CMAKE_COMMAND}
         -G ${LLVM_GENERATOR}
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_BUILD_TYPE=Release
         -DLLVM_TARGETS_TO_BUILD=X86
         -DLLVM_ENABLE_PROJECTS=clang
         -DCMAKE_INSTALL_PREFIX=${CLANG_INSTALL_DIRECTORY}

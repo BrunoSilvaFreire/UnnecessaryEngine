@@ -12,7 +12,7 @@ namespace un {
     public:
         explicit SerializedPrimitive(TValue value) : value(value) { }
 
-        explicit operator TValue() const {
+        operator TValue() const {
             return value;
         }
     };
