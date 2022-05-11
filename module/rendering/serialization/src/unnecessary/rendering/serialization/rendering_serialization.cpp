@@ -1,2 +1,1 @@
-#include <pipelinedepthoptions.serializer.generated.h>
-#include <pipelinedescription.serializer.generated.h>
+#include <unnecessary/rendering/serialization/rendering_serialization.h>

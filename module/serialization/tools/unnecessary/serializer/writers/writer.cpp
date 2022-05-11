@@ -2,6 +2,7 @@
 #include <unnecessary/serializer/writers/complex_writer.h>
 #include <unnecessary/serializer/writers/default_writer.h>
 #include <unnecessary/serializer/writers/delegate_writer.h>
+#include <unnecessary/serializer/writers/identifiable_writer.h>
 #include <iostream>
 
 namespace un {
@@ -13,29 +14,37 @@ namespace un {
         ss << "throw std::runtime_error(\"Unable to read field " << field.getName() << "\");" << std::endl;
     }
 
-    std::shared_ptr<un::SerializationWriter> WriterRegistry::getWriter(const CXXField& field) {
-        return *std::max_element(
+    std::shared_ptr<un::SerializationWriter> WriterRegistry::getWriter(
+        const un::CXXField& field,
+        const un::CXXTranslationUnit& unit
+    ) const {
+        const auto& bestWriter = std::max_element(
             writers.begin(), writers.end(),
             [&](const std::shared_ptr<un::SerializationWriter>& a,
                 const std::shared_ptr<un::SerializationWriter>& b
             ) {
                 float first;
                 float second;
-                if (!a->accepts(field, first)) {
+                if (!a->accepts(field, unit, first)) {
                     return true;
                 }
-                if (!b->accepts(field, second)) {
+                if (!b->accepts(field, unit, second)) {
                     return false;
                 }
                 return first < second;
             }
         );
+        if (bestWriter == writers.end()){
+            throw std::runtime_error("No suitable writer found");
+        }
+        return *bestWriter;
     }
 
     WriterRegistry::WriterRegistry() : writers() {
         addWriter<un::PrimitiveWriter>();
         addWriter<un::ComplexWriter>();
         addWriter<un::DelegateWriter>();
+        addWriter<un::IdentifiableVectorWriter>();
     }
 
 }

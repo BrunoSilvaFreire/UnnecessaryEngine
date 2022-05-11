@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 namespace un {
     template<typename T>
@@ -15,6 +16,10 @@ namespace un {
     std::string upper(std::string value);
 
     std::string lower(std::string value);
+
+    std::string trim_whitespace_prefix(const std::string& value);
+
+    std::vector<std::string> split_string(const std::string& str, const std::string& delimiter);
 
     template<typename TIterator, typename TTransform>
     std::string join_strings(TIterator begin, TIterator end, const TTransform& transform) {

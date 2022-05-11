@@ -2,9 +2,11 @@
 #include <iostream>
 #include <unnecessary/strings.h>
 #include <unnecessary/rendering/vulkan/vulkan_utils.h>
+#include <unnecessary/rendering/serialization/rendering_serialization.h>
 #include <unnecessary/shaderizer/shader_meta.h>
 #include <unnecessary/shaderizer/shader_parsing.h>
 #include <unnecessary/shaderizer/inputs/glsl_type.h>
+#include <unnecessary/nlohmann/json_archiver.h>
 #include <fstream>
 #include "shader_stage_meta.h"
 
@@ -58,6 +60,9 @@ int main(int argc, char** argv) {
         std::string shaderFile = result[kShaderFileName].as<std::string>();
         std::string outputDirectory = result[kOutput].as<std::string>();
         std::ifstream stream(shaderFile);
+        un::JsonArchiver jsonArchiver;
+        un::Serialized data = jsonArchiver.read_file(shaderFile);
+        auto pipeline = un::serialization::deserialize<un::PipelineDescription>(data);
         nlohmann::json json;
         stream >> json;
         std::string shaderName = json["name"].get<std::string>();
@@ -235,7 +240,7 @@ void generateCPP(
            << std::endl;
     cppSrc << "un::PipelineBuilder builder;" << std::endl;
 //    if (vertexLayout.getLength() > 0) {
-        cppSrc << "builder.setVertexLayout(create" << capitalizedName << "VertexLayout());" << std::endl;
+    cppSrc << "builder.setVertexLayout(create" << capitalizedName << "VertexLayout());" << std::endl;
 //    } else {
 //        cppSrc << "builder.withTriangleListTopology();" << std::endl;
 //    }

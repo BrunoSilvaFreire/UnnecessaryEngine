@@ -78,6 +78,7 @@ namespace un {
             }
             return false;
         }
+
         template<typename T>
         bool try_get(const std::string& key, un::SerializedArray<T>& result) const {
             std::shared_ptr<un::SerializedArray<T>> ptr;
@@ -90,18 +91,27 @@ namespace un {
     };
 
     template<>
-    void Serialized::set<bool>(const std::string& key, const bool& value) {
+    inline void Serialized::set<bool>(const std::string& key, const bool& value) {
         set(key, static_cast<u8>(value));
     }
 
     template<>
-    void Serialized::set<bool>(const uuids::uuid& key, const bool& value) {
+    inline void Serialized::set<bool>(const uuids::uuid& key, const bool& value) {
         set(key, static_cast<u8>(value));
+    }
+    template<>
+    inline void Serialized::set<i32>(const std::string& key, const i32& value) {
+        set(key, *reinterpret_cast<const u32*>(&value));
     }
 
     template<>
-    bool Serialized::try_get<bool>(const std::string& key, bool& result) const {
-        try_get(key, reinterpret_cast<u8&>(result));
+    inline void Serialized::set<i32>(const uuids::uuid& key, const i32& value) {
+        set(key, *reinterpret_cast<const u32*>(&value));
+    }
+
+    template<>
+    inline bool Serialized::try_get<bool>(const std::string& key, bool& result) const {
+        return try_get(key, reinterpret_cast<u8&>(result));
     }
 }
 #endif

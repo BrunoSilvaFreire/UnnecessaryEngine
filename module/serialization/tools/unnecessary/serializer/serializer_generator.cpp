@@ -47,8 +47,10 @@ int main(int argc, char** args) {
         ownInclude = std::filesystem::relative(file, relativeTo).string();
         std::filesystem::path output = result[kOutputDir].as<std::string>();
         std::filesystem::path includesOutput = output / "include";
+        std::filesystem::path filePath = file;
         un::parsing::ParsingOptions parseOptions(file, includes);
         auto translationUnit = un::parsing::parse(parseOptions);
+        std::vector<std::string> allGeneratedFilenames;
         for (const auto& composite : translationUnit.collectSymbols<un::CXXComposite>()) {
             if (!un::isSerializable(composite)) {
                 continue;
@@ -88,8 +90,16 @@ int main(int argc, char** args) {
             info.lower = un::lower(name);
             info.fullName = composite->getFullName();
             info.ownInclude = ownInclude;
-            generateSerializerInclude(includesOutput, composite, info, additionalIncludes);
+            generateSerializerInclude(includesOutput, composite, translationUnit, info, additionalIncludes);
+            allGeneratedFilenames.emplace_back(info.lower + ".serializer.generated.h");
         }
+        std::stringstream ss;
+        ss << "// All generated serializers are included here" << std::endl;
+        ss << "#pragma on" << std::endl;
+        for (const std::string& file : allGeneratedFilenames) {
+            ss << "#include <" << file << ">" << std::endl;
+        }
+        un::files::safe_write_file(includesOutput / (filePath.filename().replace_extension().string() + ".serializers.h"), ss);
     } catch (const cxxopts::OptionParseException& x) {
         std::cerr << "dog: " << x.what() << '\n';
         std::cerr << "usage: dog [options] <input_file> ...\n";

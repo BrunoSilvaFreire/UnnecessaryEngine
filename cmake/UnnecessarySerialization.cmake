@@ -41,14 +41,20 @@ function(
     endforeach ()
 
     foreach (file ${UN_SERIALIZATION_FILES})
-        add_custom_target(
-            _un_generate_${UN_SERIALIZATION_TARGET}_serialization
-            COMMAND
+        set(
+            FILE_SERIALIZER_GENERATION_CMD
             unnecessary_serializer_generator
             ${TGT_SRC}/${file}
             ${COMMAND_INCLUDES}
             --output ${SERIALIZER_OUTPUT}
             --relative_to ${UN_SERIALIZATION_RELATIVE_TO}
+        )
+        list(JOIN FILE_SERIALIZER_GENERATION_CMD " " FILE_SERIALIZER_GENERATION_CMD_STR)
+        message("File ${file} serialization using command '${FILE_SERIALIZER_GENERATION_CMD_STR}'")
+        add_custom_target(
+            _un_generate_${UN_SERIALIZATION_TARGET}_serialization
+            COMMAND
+            ${FILE_SERIALIZER_GENERATION_CMD}
             COMMENT "Generating serialization logic for ${UN_SERIALIZATION_TARGET}"
             SOURCES ${file}
         )

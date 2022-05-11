@@ -33,7 +33,7 @@ namespace un {
         eBool,
         eComplex,
         ePointer,
-        eUnsignedFlag = 1 << (sizeof(CXXTypeKind) - 1), // Last bit indicates if isSigned
+        eUnsignedFlag = 1 << 15, // Last bit indicates if isSigned
         eUnsignedInteger8 = eInteger8 | eUnsignedFlag,
         eUnsignedInteger16 = eInteger16 | eUnsignedFlag,
         eUnsignedInteger32 = eInteger32 | eUnsignedFlag,
@@ -41,10 +41,14 @@ namespace un {
         eUnsignedInteger128 = eInteger128 | eUnsignedFlag,
     };
 
+    template<>
+    std::string to_string(const un::CXXTypeKind& kind);
+
     class CXXType : CXXSymbol, CXXNamed {
     private:
         std::string name;
         un::CXXTypeKind innerType;
+        std::vector<std::string> templateTypes;
     public:
         CXXType(std::string name, CXXTypeKind innerType);
 
@@ -53,6 +57,10 @@ namespace un {
         std::string getName() const override;
 
         CXXTypeKind getKind() const;
+
+        const std::vector<std::string>& getTemplateTypes() const;
+
+        void addTemplate(std::string&& type);
     };
 
     enum CXXAccessModifier {
@@ -97,25 +105,11 @@ namespace un {
 
         const std::vector<un::CXXAttribute>& getAttributes() const;
 
-        const un::CXXAttribute& getAttribute(std::string name) const {
-            for (const auto& att : attributes) {
-                if (att.getName() == name) {
-                    return att;
-                }
-            }
-            std::stringstream ss;
-            ss << "Unable to find attribute " << name;
-            throw std::runtime_error(ss.str());
-        }
+        const un::CXXAttribute& getAttribute(const std::string& name) const;
 
-        const un::CXXAttribute* findAttribute(std::string name) const {
-            for (const auto& att : attributes) {
-                if (att.getName() == name) {
-                    return &att;
-                }
-            }
-            return nullptr;
-        }
+        const un::CXXAttribute* findAttribute(const std::string& name) const;
+
+        bool hasAttribute(const std::string& name) const;
 
         CXXAccessModifier getAccessModifier() const;
 
@@ -131,7 +125,7 @@ namespace un {
         }
 
         template<typename TSymbol>
-        bool findSymbol(std::string type, std::shared_ptr<TSymbol>& out) const {
+        bool findSymbol(std::string fullName, std::shared_ptr<TSymbol>& out) const {
             for (const auto& item : symbols) {
                 std::shared_ptr<TSymbol> ptr = std::dynamic_pointer_cast<TSymbol>(item);
                 if (ptr == nullptr) {
@@ -141,12 +135,18 @@ namespace un {
                 if (named == nullptr) {
                     continue;
                 }
-                if (named->getName() == type) {
+                if (named->getName() == fullName) {
                     out = ptr;
                     return true;
                 }
             }
             return false;
+        }
+
+
+        template<typename TSymbol>
+        inline bool findSymbol(const un::CXXType& type, std::shared_ptr<TSymbol>& out) const {
+            return findSymbol<TSymbol>(type.getName(), out);
         }
 
         template<typename TSymbol>
@@ -179,6 +179,9 @@ namespace un {
 
         std::string getFullName() const;;
     };
+
+    template<>
+    bool CXXScope::findSymbol(std::string fullName, std::shared_ptr<un::CXXComposite>& out) const;
 
     class CXXTranslationUnit : public CXXScope {
     private:

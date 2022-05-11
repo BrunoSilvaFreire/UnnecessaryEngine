@@ -25,12 +25,10 @@ namespace un {
 
     std::string getGeneratedIncludeName(const std::string& typeName);
 
-    void generateSerializerInclude(
-        const std::filesystem::path& includesOutput,
-        const std::shared_ptr<un::CXXComposite>& composite,
-        const GenerationInfo& info,
-        const std::vector<std::string>& additionalIncludes
-    );
+    void generateSerializerInclude(const std::filesystem::path& includesOutput,
+                                   const std::shared_ptr<un::CXXComposite>& composite,
+                                   CXXTranslationUnit& unit,
+                                   const GenerationInfo& info, const std::vector<std::string>& additionalIncludes);
 
     bool isSerializable(const std::shared_ptr<un::CXXComposite>& composite);
 

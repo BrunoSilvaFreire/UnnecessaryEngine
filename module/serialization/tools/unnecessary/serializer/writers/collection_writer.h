@@ -1,14 +1,14 @@
 //
-// Created by bruno on 09/05/2022.
+// Created by bruno on 10/05/2022.
 //
 
-#ifndef UNNECESSARYENGINE_DELEGATE_WRITER_H
-#define UNNECESSARYENGINE_DELEGATE_WRITER_H
+#ifndef UNNECESSARYENGINE_COLLECTION_WRITER_H
+#define UNNECESSARYENGINE_COLLECTION_WRITER_H
 
 #include <unnecessary/serializer/writers/writer.h>
 
 namespace un {
-    class DelegateWriter : public un::SerializationWriter {
+    class CollectionWriter : public un::SerializationWriter{
     public:
         bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
 
@@ -22,4 +22,5 @@ namespace un {
     };
 }
 
-#endif //UNNECESSARYENGINE_DELEGATE_WRITER_H
+
+#endif //UNNECESSARYENGINE_COLLECTION_WRITER_H

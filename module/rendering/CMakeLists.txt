@@ -22,6 +22,7 @@ add_unnecessary_library(
     include/unnecessary/rendering/layout/vertex_layout.h
     include/unnecessary/rendering/layout/descriptor_set_layout.h
     include/unnecessary/rendering/pipelines/inputs.h
+    include/unnecessary/rendering/pipelines/input_scope.h
     include/unnecessary/rendering/pipelines/pipeline_description.h
     include/unnecessary/rendering/pipelines/pipeline.h
     include/unnecessary/rendering/pipelines/pipeline_stage.h
@@ -50,6 +51,7 @@ add_unnecessary_library(
     src/unnecessary/rendering/layout/vertex_layout.cpp
     src/unnecessary/rendering/layout/descriptor_set_layout.cpp
     src/unnecessary/rendering/pipelines/inputs.cpp
+    src/unnecessary/rendering/pipelines/input_scope.cpp
     src/unnecessary/rendering/pipelines/pipeline.cpp
     src/unnecessary/rendering/pipelines/pipeline_stage.cpp
     src/unnecessary/rendering/pipelines/pipeline_description.cpp
@@ -97,6 +99,8 @@ add_unnecessary_tool(
     unnecessary_rendering
     unnecessary_simulation
     unnecessary_application
+    unnecessary_rendering_serialization
+    unnecessary_nlohmann_archiver
     cxxopts::cxxopts
     nlohmann_json::nlohmann_json
 )

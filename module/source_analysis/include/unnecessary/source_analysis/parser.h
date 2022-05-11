@@ -35,8 +35,7 @@ namespace un::parsing {
         un::CXXAccessModifier currentAccess = un::CXXAccessModifier::eNone;
         std::shared_ptr<un::CXXComposite> currentComposite;
         std::vector<un::CXXAttribute> macros;
-
-
+        std::unique_ptr<cppast::cpp_file> result;
 
     public:
 
@@ -51,6 +50,12 @@ namespace un::parsing {
         CXXTypeKind toPrimitiveType(const cppast::cpp_type& type) const;
 
         CXXType toUnType(const cppast::cpp_type& type);
+
+        void parse_template(const cppast::cpp_class_template& clazz);
+
+        std::string getNamespace(const cppast::cpp_entity& entt) const;
+
+        void parse_field(CXXComposite& composite, const CXXAccessModifier& modifier, const cppast::cpp_entity& e);
     };
 }
 #endif

@@ -2,12 +2,14 @@
 #define UNNECESSARYENGINE_WRITER_H
 
 #include <sstream>
-#include <unnecessary/source_analysis/structures.h>
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <unnecessary/source_analysis/structures.h>
 
 namespace un {
+    class WriterRegistry;
+
     class SerializationWriter {
     protected:
         static bool isOptional(const un::CXXField& field);
@@ -15,11 +17,22 @@ namespace un {
         static void addMissingFieldException(std::stringstream& ss, const un::CXXField& field);
 
     public:
-        virtual bool accepts(const CXXField& field, float& outPriority) = 0;
+        virtual bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) = 0;
 
-        virtual void write_serializer(std::stringstream& ss, const CXXField& field) = 0;
+        virtual void write_serializer(
+            std::stringstream& ss,
+            const CXXField& field,
+            const un::CXXTranslationUnit& unit,
+            const un::WriterRegistry& registry
+        ) = 0;
 
-        virtual void write_deserializer(std::stringstream& ss, const CXXField& field) = 0;
+        virtual void write_deserializer(
+            std::stringstream& ss,
+            const CXXField& field,
+            const un::CXXTranslationUnit& unit,
+            const un::WriterRegistry& registry
+        ) = 0;
+
         virtual std::string name() = 0;
     };
 
@@ -29,7 +42,10 @@ namespace un {
     public:
         WriterRegistry();
 
-        std::shared_ptr<un::SerializationWriter> getWriter(const un::CXXField& field);
+        std::shared_ptr<un::SerializationWriter> getWriter(
+            const un::CXXField& field,
+            const un::CXXTranslationUnit& unit
+        ) const;
 
         template<typename TWriter>
         void addWriter() {

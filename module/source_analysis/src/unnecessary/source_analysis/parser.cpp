@@ -6,6 +6,7 @@
 #include <cppast/cpp_namespace.hpp>
 #include <cppast/cpp_member_variable.hpp>
 #include <cppast/cpp_type.hpp>
+#include <cppast/cpp_class_template.hpp>
 #include <cppast/visitor.hpp>
 
 
@@ -35,7 +36,7 @@ namespace un::parsing {
         }
         cppast::cpp_entity_index index;
         un::Chronometer<> chronometer;
-        auto result = parser.parse(index, fileName, config);
+        result = parser.parse(index, fileName, config);
         auto ms = chronometer.stop();
         LOG(INFO) << "Parsing of file " << options.getFile().filename() << " took " << ms;
 
@@ -48,49 +49,38 @@ namespace un::parsing {
         cppast::visit(
             file,
             [](const cppast::cpp_entity& e) {
-                // only visit non-templated class definitions that have the attribute set
-                if (cppast::is_templated(e)) {
-                    return false;
-                }
                 switch (e.kind()) {
                     case cppast::cpp_entity_kind::class_t:
+                        return cppast::is_definition(e);
+                    case cppast::cpp_entity_kind::class_template_t:
                         return cppast::is_definition(e);
                     case cppast::cpp_entity_kind::namespace_t:
                         return true;
                     default:
                         return false;
                 }
-                bool isClass = !cppast::is_templated(e) && e.kind() == cppast::cpp_entity_kind::class_t &&
-                               cppast::is_definition(e);
-                bool isNamespace = e.kind() == cppast::cpp_entity_kind::namespace_t;
-                return isClass || isNamespace;
             },
             [&](const cppast::cpp_entity& e, cppast::visitor_info info) {
-                if (e.kind() == cppast::cpp_entity_kind::class_t) {
-                    if (alreadyParsed.contains(e.name())) {
-                        return;
-                    }
-                    alreadyParsed.emplace(e.name());
-                    parse_class(dynamic_cast<const cppast::cpp_class&>(e));
+                if (alreadyParsed.contains(e.name())) {
+                    return;
+                }
+                alreadyParsed.emplace(e.name());
+                switch (e.kind()) {
+                    case cppast::cpp_entity_kind::class_t:
+                        parse_class(dynamic_cast<const cppast::cpp_class&>(e));
+                        break;
+                    case cppast::cpp_entity_kind::class_template_t:
+                        parse_template(dynamic_cast<const cppast::cpp_class_template&>(e));
+                        break;
+                    default:
+                        break;
                 }
             }
         );
     }
 
     void Parser::parse_class(const cppast::cpp_class& clazz) {
-        std::stack<std::string> segments;
-        auto aNamespace = dynamic_cast<const cppast::cpp_namespace*>(&clazz.parent().value());
-        while (aNamespace != nullptr) {
-            segments.push(aNamespace->name());
-            aNamespace = dynamic_cast<const cppast::cpp_namespace*>(&aNamespace->parent().value());
-        }
-        std::vector<std::string> inOrder;
-        while (!segments.empty()) {
-            inOrder.push_back(segments.top());
-            segments.pop();
-        }
-        std::string ns = un::join_strings("::", inOrder.begin(), inOrder.end());
-        un::CXXComposite composite(clazz.name(), ns);
+        un::CXXComposite composite(clazz.name(), getNamespace(clazz));
         un::CXXAccessModifier modifier = un::CXXAccessModifier::eNone;
         cppast::visit(
             clazz,
@@ -106,31 +96,7 @@ namespace un::parsing {
             [&](const cppast::cpp_entity& e, cppast::visitor_info info) {
                 switch (e.kind()) {
                     case cppast::cpp_entity_kind::member_variable_t : {
-                        const auto& var = dynamic_cast<const cppast::cpp_member_variable&>(e);
-                        std::vector<un::CXXAttribute> attributes;
-                        const cppast::cpp_type& type = var.type();
-                        un::CXXType fieldType = toUnType(type);
-                        for (const auto& att : e.attributes()) {
-                            const auto& args = att.arguments();
-
-                            std::string name;
-                            if (att.scope()) {
-                                name.append(att.scope().value());
-                                name.append("::");
-                            }
-                            name.append(att.name());
-                            if (args) {
-                                std::vector<std::string> a;
-                                for (const auto& item : args.value()) {
-                                    a.emplace_back(item.spelling);
-                                }
-                                attributes.emplace_back(name, a);
-                            } else {
-                                attributes.emplace_back(name);
-                            }
-                        }
-                        un::CXXField field(modifier, var.name(), fieldType, attributes);
-                        composite.addField(std::move(field));
+                        parse_field(composite, modifier, e);
                         break;
                     }
                     case cppast::cpp_entity_kind::access_specifier_t: {
@@ -156,12 +122,56 @@ namespace un::parsing {
         translationUnit.addSymbol(std::make_shared<un::CXXComposite>(composite));
     }
 
+    void Parser::parse_field(CXXComposite& composite, const CXXAccessModifier& modifier, const cppast::cpp_entity& e) {
+        const auto& var = dynamic_cast<const cppast::cpp_member_variable&>(e);
+        std::vector<CXXAttribute> attributes;
+        const cppast::cpp_type& type = var.type();
+        CXXType fieldType = toUnType(type);
+        for (const auto& att : e.attributes()) {
+            const auto& args = att.arguments();
+
+            std::string name;
+            if (att.scope()) {
+                name.append(att.scope().value());
+                name.append("::");
+            }
+            name.append(att.name());
+            if (args) {
+                std::vector<std::string> a;
+                for (const auto& item : args.value()) {
+                    a.emplace_back(item.spelling);
+                }
+                attributes.emplace_back(name, a);
+            } else {
+                attributes.emplace_back(name);
+            }
+        }
+        CXXField field(modifier, var.name(), fieldType, attributes);
+        composite.addField(std::move(field));
+    }
+
+    std::string Parser::getNamespace(const cppast::cpp_entity& entt) const {
+        std::stack<std::string> segments;
+        auto aNamespace = dynamic_cast<const cppast::cpp_namespace*>(&entt.parent().value());
+        while (aNamespace != nullptr) {
+            segments.push(aNamespace->name());
+            aNamespace = dynamic_cast<const cppast::cpp_namespace*>(&aNamespace->parent().value());
+        }
+        std::vector<std::string> inOrder;
+        while (!segments.empty()) {
+            inOrder.push_back(segments.top());
+            segments.pop();
+        }
+        return un::join_strings("::", inOrder.begin(), inOrder.end());
+    }
+
     un::CXXType Parser::toUnType(const cppast::cpp_type& type) {
         std::string typeStr = to_string(type);
         un::CXXType fieldType;
         if (!translationUnit.searchType(typeStr, fieldType)) {
             CXXTypeKind tType;
-            switch (type.kind()) {
+            cppast::cpp_type_kind typeKind = type.kind();
+            switch (typeKind) {
                 case cppast::cpp_type_kind::builtin_t:
                     tType = toPrimitiveType(type);
                     break;
@@ -169,7 +179,37 @@ namespace un::parsing {
                     tType = eComplex;
                     break;
             }
-            fieldType = CXXType(typeStr, tType);
+            if (typeKind == cppast::cpp_type_kind::template_instantiation_t) {
+                const auto& instantiation = dynamic_cast<const cppast::cpp_template_instantiation_type&>(type);
+                fieldType = CXXType(instantiation.primary_template().name(), tType);
+                if (instantiation.arguments_exposed()) {
+                    const auto& optArgs = instantiation.arguments();
+                    if (optArgs) {
+                        for (const auto& item : optArgs.value()) {
+                            const auto& optType = item.type();
+                            if (!optType) {
+                                LOG(WARN) << "Unable to find type of argument in " << typeStr;
+                                continue;
+                            }
+                            const cppast::cpp_type& cppType = optType.value();
+                            CXXType unType = toUnType(cppType);
+                            fieldType.addTemplate(std::move(unType.getName()));
+                        }
+                    } else {
+                        LOG(WARN) << typeStr << " is a template instantiation, but no args were found";
+                    }
+                } else {
+
+                    const std::string& unexposedArguments = instantiation.unexposed_arguments();
+                    std::vector<std::string> splitArgs = un::split_string(unexposedArguments, ",");
+                    for (const auto& arg : splitArgs) {
+                        std::string trimmed = un::trim_whitespace_prefix(arg);
+                        fieldType.addTemplate(std::move(trimmed));
+                    }
+                }
+            } else {
+                fieldType = CXXType(typeStr, tType);
+            }
             translationUnit.addType(fieldType);
         }
         return fieldType;
@@ -222,5 +262,12 @@ namespace un::parsing {
                 break;
         };
         return tType;
+    }
+
+    void Parser::parse_template(const cppast::cpp_class_template& clazz) {
+        for (const auto& item : clazz) {
+
+        }
+
     }
 }

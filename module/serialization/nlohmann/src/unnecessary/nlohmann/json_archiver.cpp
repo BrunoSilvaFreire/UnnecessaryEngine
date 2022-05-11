@@ -15,6 +15,8 @@ namespace un {
     }
 
     void JsonArchiver::read(const Buffer& buffer, Serialized& into) {
-
+        std::string jsonStr(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+        nlohmann::json obj = nlohmann::json::parse(jsonStr);
+        un::serialization::adapt(obj, into);
     }
 }

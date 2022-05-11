@@ -2,12 +2,14 @@
 
 namespace un {
 
-    bool ComplexWriter::accepts(const CXXField& field, float& outPriority) {
+    bool ComplexWriter::accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) {
         outPriority = 1.0F;
         return field.getType().getKind() == un::CXXTypeKind::eComplex;
     }
 
-    void ComplexWriter::write_serializer(std::stringstream& ss, const CXXField& field) {
+    void
+    ComplexWriter::write_serializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
+                                    const un::WriterRegistry& registry) {
         std::string fName = field.getName();
         std::string typeName = field.getType().getName();
         bool optional = isOptional(field);
@@ -17,21 +19,20 @@ namespace un {
            << ");" << std::endl;
 
         ss << "into.set<un::Serialized>(\"" << fName << "\", serialized_" << fName << ");" << std::endl;
-
     }
 
-    void ComplexWriter::write_deserializer(std::stringstream& ss, const CXXField& field) {
+    void
+    ComplexWriter::write_deserializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
+                                      const un::WriterRegistry& registry) {
         std::string fName = field.getName();
         std::string typeName = field.getType().getName();
         bool optional = isOptional(field);
         ss << "un::Serialized serialized_" << fName << ";" << std::endl;
         if (optional) {
-            ss << "if (from.try_get(\"" << fName << "\", serialized_"
-               << fName << ")) {" << std::endl;
-            ss << "value." << fName << " = un::serialization::deserialize<"
-               << typeName << ">(serialized_" << fName << ");" << std::endl;
+            ss << "if (from.try_get(\"" << fName << "\", serialized_" << fName << ")) {" << std::endl;
+            ss << "value." << fName << " = un::serialization::deserialize<" << typeName << ">(serialized_" << fName
+               << ");" << std::endl;
             ss << "}" << std::endl;
-
         } else {
             ss << "if (!from.try_get(\"" << fName << "\", serialized_"
                << fName << ")) {" << std::endl;

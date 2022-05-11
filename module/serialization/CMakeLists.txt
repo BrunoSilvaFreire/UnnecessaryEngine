@@ -35,6 +35,10 @@ add_unnecessary_tool(
     tools/unnecessary/serializer/writers/complex_writer.cpp
     tools/unnecessary/serializer/writers/delegate_writer.h
     tools/unnecessary/serializer/writers/delegate_writer.cpp
+    tools/unnecessary/serializer/writers/identifiable_writer.h
+    tools/unnecessary/serializer/writers/identifiable_writer.cpp
+    tools/unnecessary/serializer/writers/collection_writer.h
+    tools/unnecessary/serializer/writers/collection_writer.cpp
     tools/unnecessary/serializer/generation.h
     tools/unnecessary/serializer/serializer_generator.cpp
     tools/unnecessary/serializer/generation.cpp

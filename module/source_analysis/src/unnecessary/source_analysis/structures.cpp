@@ -108,10 +108,47 @@ namespace un {
         return name;
     }
 
+    bool CXXField::hasAttribute(const std::string& name) const {
+        return findAttribute(name) != nullptr;
+    }
+
+    const un::CXXAttribute* CXXField::findAttribute(const std::string& name) const {
+        for (const auto& att : attributes) {
+            if (att.getName() == name) {
+                return &att;
+            }
+        }
+        return nullptr;
+    }
+
+    const un::CXXAttribute& CXXField::getAttribute(const std::string& name) const {
+        for (const auto& att : attributes) {
+            if (att.getName() == name) {
+                return att;
+            }
+        }
+        std::stringstream ss;
+        ss << "Unable to find attribute " << name;
+        throw std::runtime_error(ss.str());
+    }
+
     CXXSymbol::~CXXSymbol() {
 
     }
-
+    template<>
+    bool CXXScope::findSymbol(std::string fullName, std::shared_ptr<un::CXXComposite>& out) const {
+        for (const auto& item : symbols) {
+            std::shared_ptr<un::CXXComposite> ptr = std::dynamic_pointer_cast<un::CXXComposite>(item);
+            if (ptr == nullptr) {
+                continue;
+            }
+            if (ptr->getFullName() == fullName) {
+                out = ptr;
+                return true;
+            }
+        }
+        return false;
+    }
     CXXType::CXXType(std::string name, CXXTypeKind innerType) : name(std::move(name)), innerType(innerType) { }
 
     std::string CXXType::getName() const {
@@ -121,4 +158,50 @@ namespace un {
     CXXTypeKind CXXType::getKind() const {
         return innerType;
     }
+
+    void CXXType::addTemplate(std::string&& type) {
+        templateTypes.push_back(std::move(type));
+    }
+
+    const std::vector<std::string>& CXXType::getTemplateTypes() const {
+        return templateTypes;
+    }
+
+    template<>
+    std::string un::to_string(const CXXTypeKind& kind) {
+        switch (kind) {
+            case eInteger8:
+                return "i8";
+            case eInteger16:
+                return "i16";
+            case eInteger32:
+                return "i32";
+            case eInteger64:
+                return "i64";
+            case eInteger128:
+                return "i128";
+            case eUnsignedInteger8:
+                return "u8";
+            case eUnsignedInteger16:
+                return "u16";
+            case eUnsignedInteger32:
+                return "u32";
+            case eUnsignedInteger64:
+                return "u64";
+            case eUnsignedInteger128:
+                return "u128";
+            case eFloat:
+                return "f32";
+            case eDouble:
+                return "f64";
+            case eBool:
+                return "bool";
+            case eComplex:
+                return "complex";
+            case ePointer:
+                return "pointer";
+        }
+        return "unknown_kind";
+    }
+
 }
