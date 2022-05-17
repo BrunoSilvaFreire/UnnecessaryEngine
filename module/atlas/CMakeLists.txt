@@ -41,7 +41,21 @@ add_unnecessary_tool(
     tests/packer_tests.cpp
 )
 set(IMG_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/bin/images)
-
+set(NUM_IMAGES 64)
+list(
+    APPEND
+    atlas_generated_images
+    ${IMG_OUT_DIR}/packed/generated
+    ${IMG_OUT_DIR}/random/generated
+)
+foreach (i RANGE 0 64)
+    list(
+        APPEND
+        atlas_generated_images
+        ${IMG_OUT_DIR}/packed/image_${i}.png
+        ${IMG_OUT_DIR}/random/image_${i}.png
+    )
+endforeach ()
 add_custom_command(
     TARGET unnecessary_atlas_packer_tests
     POST_BUILD
@@ -60,5 +74,5 @@ add_custom_command(
     --num_images 64
     --reuse true
     --output ${IMG_OUT_DIR}/random
-    BYPRODUCTS ${IMG_OUT_DIR}/packed ${IMG_OUT_DIR}/random
+    BYPRODUCTS ${atlas_generated_images}
 )

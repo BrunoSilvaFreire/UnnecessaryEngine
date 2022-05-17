@@ -1,5 +1,5 @@
-include(${CMAKE_SOURCE_DIR}/cmake/ClangUtils.cmake)
 setup_libast()
+
 add_unnecessary_library(
     unnecessary_source_analysis
 

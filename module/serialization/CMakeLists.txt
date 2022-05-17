@@ -47,3 +47,4 @@ add_unnecessary_tool(
     unnecessary_source_analysis
 )
 add_subdirectory(nlohmann)
+print_target_properties(unnecessary_serializer_generator)

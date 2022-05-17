@@ -168,7 +168,7 @@ namespace un {
     }
 
     template<>
-    std::string un::to_string(const CXXTypeKind& kind) {
+    std::string to_string(const CXXTypeKind& kind) {
         switch (kind) {
             case eInteger8:
                 return "i8";

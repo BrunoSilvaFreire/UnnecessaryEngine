@@ -24,9 +24,9 @@ namespace un {
         [[un::serialize(identifier)]]
         std::string name;
         [[un::serialize(optional)]]
-        std::vector<un::VertexStreamUsageEntry> vertexStream;
+        std::vector<un::VertexStreamUsageEntry> vertex_stream;
         [[un::serialize(optional)]]
-        std::vector<std::string> inputsUsed;
+        std::vector<std::string> inputs_used;
     };
 
     struct PipelineDepthOptions {
@@ -51,17 +51,13 @@ namespace un {
         [[un::serialize(optional)]]
         PipelineDepthOptions depth;
 
-        [[un::serialize(
-        optional,
-        serializer=un::serialization::pipeline_stages_serializer,
-        deserializer=un::serialization::pipeline_stages_deserializer
-        )]]
+        [[un::serialize]]
         std::vector<un::PipelineStageDescription> stages;
 
-        [[un::serialize(
-        optional
-        )]]
+        [[un::serialize]]
         std::vector<un::PipelineInput> inputs;
+        [[un::serialize]]
+        std::vector<un::PipelineInput> vertex_stream;
     };
 }
 #endif

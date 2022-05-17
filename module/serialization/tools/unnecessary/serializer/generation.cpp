@@ -89,13 +89,18 @@ namespace un {
             const std::string& fName = field.getName();
             const un::CXXType& fieldType = field.getType();
             LOG(INFO) << "Elected " << writer->name() << " for field " << fName << " of " << info.fullName
-                      << " with type " << fieldType.getName() << " (kind: " << un::to_string(fieldType.getKind()) << ")";
+                      << " with type " << fieldType.getName() << " (kind: " << un::to_string(fieldType.getKind())
+                      << ")";
             fieldsSerialization << "// --- BEGIN FIELD SERIALIZATION: " << fName << std::endl;
+            fieldsSerialization << "// Access: " << un::to_string(field.getAccessModifier()) << std::endl;
+            fieldsSerialization << "// Type: " << field.getType().getName() << std::endl;
             fieldsSerialization << "// Writer: " << writer->name() << std::endl;
             writer->write_serializer(fieldsSerialization, field, unit, registry);
             fieldsSerialization << "// --- END FIELD SERIALIZATION: " << fName << std::endl;
             fieldsSerialization << std::endl;
             fieldsDeserialization << "// --- BEGIN FIELD DESERIALIZATION: " << fName << std::endl;
+            fieldsDeserialization << "// Access: " << un::to_string(field.getAccessModifier()) << std::endl;
+            fieldsDeserialization << "// Type: " << field.getType().getName() << std::endl;
             fieldsDeserialization << "// Writer: " << writer->name() << std::endl;
             writer->write_deserializer(fieldsDeserialization, field, unit, registry);
             fieldsDeserialization << "// --- END FIELD DESERIALIZATION: " << fName << std::endl;

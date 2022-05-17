@@ -28,6 +28,7 @@ namespace un::parsing {
         auto work = std::filesystem::current_path();
         cppast::libclang_parser parser;
         cppast::libclang_compile_config config;
+        config.set_flags(cppast::cpp_standard::cpp_20);
         std::string fileName = options.getFile().string();
         LOG(INFO) << "Parsing file: " << fileName;
         for (const std::string& item : options.getIncludes()) {
@@ -38,7 +39,7 @@ namespace un::parsing {
         un::Chronometer<> chronometer;
         result = parser.parse(index, fileName, config);
         auto ms = chronometer.stop();
-        LOG(INFO) << "Parsing of file " << options.getFile().filename() << " took " << ms;
+        LOG(INFO) << "Parsing of file " << options.getFile().filename() << " took " << ms.count() << " ms.";
 
         if (result == nullptr) {
             LOG(FUCK) << "cppast returned null entity.";

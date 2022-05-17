@@ -10,11 +10,9 @@ add_unnecessary_library(
 )
 add_unnecessary_serialization(
     TARGET unnecessary_rendering_serialization
-    GLOBAL_INCLUDES
-    unnecessary/rendering/serialization/pipeline_stage_description_serializer.h
 
     RELATIVE_TO
-    ../include/
+    ${CMAKE_SOURCE_DIR}/module/rendering/include/
 
     FILES
     ../include/unnecessary/rendering/pipelines/pipeline_description.h
