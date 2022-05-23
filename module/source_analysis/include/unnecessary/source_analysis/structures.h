@@ -12,14 +12,24 @@
 
 namespace un {
 
-    class CXXSymbol {
-    public:
-        virtual ~CXXSymbol();
-    };
-
     class CXXNamed {
     public:
         virtual std::string getName() const = 0;
+    };
+
+    class CXXSymbol : public un::CXXNamed {
+    private:
+        std::string name;
+    public:
+        CXXSymbol() = default;
+
+        explicit CXXSymbol(std::string name);
+
+        virtual ~CXXSymbol();
+
+        std::string getName() const override;
+
+        virtual std::string getFullName() const;
     };
 
     enum CXXTypeKind : u16 {
@@ -32,6 +42,7 @@ namespace un {
         eDouble,
         eBool,
         eComplex,
+        eEnum,
         ePointer,
         eUnsignedFlag = 1 << 15, // Last bit indicates if isSigned
         eUnsignedInteger8 = eInteger8 | eUnsignedFlag,
@@ -44,17 +55,14 @@ namespace un {
     template<>
     std::string to_string(const un::CXXTypeKind& kind);
 
-    class CXXType : CXXSymbol, CXXNamed {
+    class CXXType : public un::CXXSymbol {
     private:
-        std::string name;
         un::CXXTypeKind innerType;
         std::vector<std::string> templateTypes;
     public:
-        CXXType(std::string name, CXXTypeKind innerType);
-
         CXXType() = default;
 
-        std::string getName() const override;
+        CXXType(const std::string& name, CXXTypeKind innerType);
 
         CXXTypeKind getKind() const;
 
@@ -75,7 +83,7 @@ namespace un {
         std::string name;
         std::set<std::string> arguments;
     public:
-        CXXAttribute(std::string name, std::vector<std::string> argsSegments);
+        CXXAttribute(std::string name, const std::vector<std::string>& argsSegments);
 
         CXXAttribute(std::string name);
 
@@ -92,7 +100,6 @@ namespace un {
     private:
         std::vector<un::CXXAttribute> attributes;
         CXXAccessModifier accessModifier;
-        std::string name;
         un::CXXType type;
     public:
         CXXField(
@@ -100,8 +107,6 @@ namespace un {
             std::string name, un::CXXType type,
             std::vector<un::CXXAttribute> expansions
         );
-
-        const std::string& getName() const;
 
         const std::vector<un::CXXAttribute>& getAttributes() const;
 
@@ -125,7 +130,7 @@ namespace un {
         }
 
         template<typename TSymbol>
-        bool findSymbol(std::string fullName, std::shared_ptr<TSymbol>& out) const {
+        bool findSymbol(const std::string& fullName, std::shared_ptr<TSymbol>& out) const {
             for (const auto& item : symbols) {
                 std::shared_ptr<TSymbol> ptr = std::dynamic_pointer_cast<TSymbol>(item);
                 if (ptr == nullptr) {
@@ -162,44 +167,62 @@ namespace un {
         }
     };
 
-
-    class CXXComposite : public CXXSymbol, public CXXNamed {
+    class CXXDeclaration : public CXXSymbol {
     private:
-        std::string name;
         std::string ns;
+    public:
+        CXXDeclaration() = default;
+
+        CXXDeclaration(const std::string& name, std::string ns);
+
+        std::string getFullName() const override;
+    };
+
+    class CXXEnumValue : CXXSymbol {
+    private:
+        std::size_t value;
+    public:
+        CXXEnumValue(const std::string& name, size_t value);
+    };
+
+    class CXXEnum : public CXXDeclaration {
+    private:
+        std::vector<CXXEnumValue> values;
+    public:
+        CXXEnum(
+            const std::string& name,
+            const std::string& ns,
+            std::vector<CXXEnumValue> values
+        );
+    };
+
+    class CXXComposite : public CXXDeclaration {
+    private:
         std::vector<CXXField> fields;
     public:
-        explicit CXXComposite(std::string name, std::string ns);
+        explicit CXXComposite(const std::string& name, std::string ns);
 
         void addField(CXXField&& field);
 
-        const std::vector<CXXField>& getFields() const;
+        const std::vector<CXXField>& getFields() const;;
 
-        std::string getName() const override;
-
-        std::string getFullName() const;;
     };
 
     template<>
-    bool CXXScope::findSymbol(std::string fullName, std::shared_ptr<un::CXXComposite>& out) const;
+    bool CXXScope::findSymbol(const std::string& fullName, std::shared_ptr<un::CXXComposite>& out) const;
 
     class CXXTranslationUnit : public CXXScope {
     private:
+        std::vector<std::string> includes;
         std::unordered_map<std::string, un::CXXType> _typeIndex;
     public:
-        bool searchType(std::string type, un::CXXType& out) {
-            return un::maps::search(_typeIndex, type, out);
-        }
+        void addInclude(const std::string& include);
 
+        bool searchType(const std::string& type, un::CXXType& out);
 
-        void addType(std::string key, const un::CXXType& type) {
-            _typeIndex.emplace(key, type);
+        void addType(const std::string& key, const un::CXXType& type);
 
-        }
-
-        void addType(const un::CXXType& out) {
-            addType(out.getName(), out);
-        }
+        void addType(const un::CXXType& out);
     };
 
 }

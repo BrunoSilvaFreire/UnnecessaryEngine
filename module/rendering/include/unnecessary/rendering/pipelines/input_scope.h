@@ -7,10 +7,11 @@
 
 namespace un {
 
-    enum [[un::serialize]] InputScope {
+    enum [[un::generate_strings]] InputScope {
         /**
          * This input is only set once, at the start of the frame
          */
+
         eGlobal,
         /**
          * This input is set everytime the pipeline is bound

@@ -16,6 +16,7 @@ namespace un::parsing {
     class ParsingOptions {
     private:
         std::filesystem::path file;
+        std::filesystem::path debugFile;
         std::vector<std::string> includes;
 
     public:
@@ -24,6 +25,10 @@ namespace un::parsing {
         const std::filesystem::path& getFile() const;
 
         const std::vector<std::string>& getIncludes() const;
+
+        const std::filesystem::path& getDebugFile() const;
+
+        void setDebugFile(const std::filesystem::path& debugFile);
     };
 
     class Parser {
@@ -36,6 +41,8 @@ namespace un::parsing {
         std::shared_ptr<un::CXXComposite> currentComposite;
         std::vector<un::CXXAttribute> macros;
         std::unique_ptr<cppast::cpp_file> result;
+        std::set<std::string> alreadyParsed;
+        cppast::cpp_entity_index index;
 
     public:
 
@@ -56,6 +63,18 @@ namespace un::parsing {
         std::string getNamespace(const cppast::cpp_entity& entt) const;
 
         void parse_field(CXXComposite& composite, const CXXAccessModifier& modifier, const cppast::cpp_entity& e);
+
+        void parse_enum(const cppast::cpp_enum& anEnum);
+
+        void parse_entity(const cppast::cpp_entity& file);
+
+        void visit(const cppast::cpp_entity& e);
+
+        void write_ast(const cppast::cpp_file& file, const std::filesystem::path& path);
+
+        void write_ast_node(std::ofstream& os, const std::string& prefix, const cppast::cpp_entity& e) const;
+
+        CXXTypeKind toUnTypeKind(const cppast::cpp_type& type) const;
     };
 }
 #endif

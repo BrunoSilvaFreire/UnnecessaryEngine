@@ -16,7 +16,26 @@ namespace un {
 
         static void addMissingFieldException(std::stringstream& ss, const un::CXXField& field);
 
+        static void addMissingFieldException(std::stringstream& ss, const std::string& fieldName);
+
+        static bool trySerializePrimitive(
+            std::stringstream& ss,
+            const std::string& name,
+            const un::CXXType& primitiveCandidate
+        );
+
+        bool tryDeserializePrimitive(
+            std::stringstream& ss,
+            const std::string& name,
+            const CXXType& primitiveCandidate
+        );
+
     public:
+        // The following priorities are *hints*, don't feel obliged to follow them
+        static constexpr float kDefaultPriority = 0.0F;
+        static constexpr float kBasicPriority = 1.0F;
+        static constexpr float kSpecializedKindPriority = 1.5F;
+
         virtual bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) = 0;
 
         virtual void write_serializer(

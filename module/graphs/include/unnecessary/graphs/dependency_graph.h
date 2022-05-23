@@ -197,6 +197,29 @@ namespace un {
             }
         }
 
+        UN_AGGRESSIVE_INLINE void each_rlo(
+            const std::function<void(
+                IndexType index
+            )>& perVertex,
+            const std::function<void(
+                IndexType from,
+                IndexType to
+            )>& perEdge
+        ) const {
+            gpp::reverse_level_order_traverse(graph, independent, perVertex, perEdge);
+        }
+
+        std::vector<std::pair<IndexType, const VertexType*>> get_rlo_sequence() const {
+            std::vector<std::pair<IndexType, const VertexType*>> sequence;
+            each_rlo(
+                [&](u32 index) {
+                    sequence.emplace_back(index, graph.vertex(index));
+                },
+                [](u32 from, u32 to) { }
+            );
+            return sequence;
+        }
+
         const InnerGraph& getInnerGraph() const {
             return graph;
         }

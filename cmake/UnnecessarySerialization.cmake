@@ -7,10 +7,10 @@ function(
         TARGET
         RELATIVE_TO
         GLOBAL_INCLUDES
-        FILES
     )
     set(
         MULTI_VALUES
+        FILES
 
     )
     cmake_parse_arguments(
@@ -39,26 +39,24 @@ function(
             list(APPEND COMMAND_INCLUDES --include ${include})
         endif ()
     endforeach ()
-
-    foreach (file ${UN_SERIALIZATION_FILES})
-        set(
-            FILE_SERIALIZER_GENERATION_CMD
-            unnecessary_serializer_generator
-            ${TGT_SRC}/${file}
-            ${COMMAND_INCLUDES}
-            --output ${SERIALIZER_OUTPUT}
-            --relative_to ${UN_SERIALIZATION_RELATIVE_TO}
-        )
-        list(JOIN FILE_SERIALIZER_GENERATION_CMD " " FILE_SERIALIZER_GENERATION_CMD_STR)
-        message("File ${file} serialization using command '${FILE_SERIALIZER_GENERATION_CMD_STR}'")
-        add_custom_target(
-            _un_generate_${UN_SERIALIZATION_TARGET}_serialization
-            COMMAND
-            ${FILE_SERIALIZER_GENERATION_CMD}
-            COMMENT "Generating serialization logic for ${UN_SERIALIZATION_TARGET}"
-            SOURCES ${file}
-        )
-    endforeach ()
+    list(TRANSFORM UN_SERIALIZATION_FILES PREPEND ${TGT_SRC}/)
+    set(
+        FILE_SERIALIZER_GENERATION_CMD
+        unnecessary_serializer_generator
+        ${UN_SERIALIZATION_FILES}
+        ${COMMAND_INCLUDES}
+        --output ${SERIALIZER_OUTPUT}
+        --relative_to ${UN_SERIALIZATION_RELATIVE_TO}
+    )
+    list(JOIN FILE_SERIALIZER_GENERATION_CMD " " FILE_SERIALIZER_GENERATION_CMD_STR)
+    message("Target ${UN_SERIALIZATION_TARGET} serialization using command '${FILE_SERIALIZER_GENERATION_CMD_STR}'")
+    add_custom_target(
+        _un_generate_${UN_SERIALIZATION_TARGET}_serialization
+        COMMAND
+        ${FILE_SERIALIZER_GENERATION_CMD}
+        COMMENT "Generating serialization logic for ${UN_SERIALIZATION_TARGET}"
+        SOURCES ${UN_SERIALIZATION_FILES}
+    )
     add_dependencies(
         ${UN_SERIALIZATION_TARGET}
         _un_generate_${UN_SERIALIZATION_TARGET}_serialization

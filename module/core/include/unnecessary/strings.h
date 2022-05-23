@@ -10,6 +10,8 @@ namespace un {
     std::string to_string(const T& value) {
         return std::to_string(value);
     }
+    template<typename T>
+    T from_string(const std::string& value);
 
     std::string capitalize(std::string value);
 

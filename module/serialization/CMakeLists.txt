@@ -37,14 +37,19 @@ add_unnecessary_tool(
     tools/unnecessary/serializer/writers/delegate_writer.cpp
     tools/unnecessary/serializer/writers/identifiable_writer.h
     tools/unnecessary/serializer/writers/identifiable_writer.cpp
+    tools/unnecessary/serializer/writers/enum_writer.h
+    tools/unnecessary/serializer/writers/enum_writer.cpp
+
     tools/unnecessary/serializer/writers/collection_writer.h
     tools/unnecessary/serializer/writers/collection_writer.cpp
     tools/unnecessary/serializer/generation.h
     tools/unnecessary/serializer/serializer_generator.cpp
     tools/unnecessary/serializer/generation.cpp
+    tools/unnecessary/serializer/generation_plan.h
+    tools/unnecessary/serializer/generation_plan.cpp
 
     DEPENDENCIES
     unnecessary_source_analysis
+    unnecessary_graphs
 )
 add_subdirectory(nlohmann)
-print_target_properties(unnecessary_serializer_generator)

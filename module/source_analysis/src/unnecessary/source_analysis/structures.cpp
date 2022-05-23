@@ -1,6 +1,6 @@
+#include <utility>
 #include <unnecessary/source_analysis/structures.h>
 
-#include <utility>
 
 namespace un {
 
@@ -8,8 +8,11 @@ namespace un {
         return name;
     }
 
-    CXXAttribute::CXXAttribute(std::string macro, std::vector<std::string> argsSegments) : name(std::move(macro)),
-                                                                                           arguments() {
+    CXXAttribute::CXXAttribute(
+        std::string macro,
+        const std::vector<std::string>& argsSegments
+    ) : name(std::move(macro)),
+        arguments() {
         std::string current;
         for (const auto& item : argsSegments) {
             if (item == ",") {
@@ -66,22 +69,25 @@ namespace un {
         return std::string();
     }
 
-    CXXComposite::CXXComposite(std::string name, std::string ns) : fields(), name(std::move(name)), ns(ns) { }
+    std::string un::CXXDeclaration::getFullName() const {
+        if (!ns.empty()) {
+            return ns + "::" + getName();
+        }
+        return CXXSymbol::getFullName();
+    }
+
+    CXXDeclaration::CXXDeclaration(const std::string& name, std::string ns) : CXXSymbol(name), ns(std::move(ns)) { }
+
+
+    CXXComposite::CXXComposite(const std::string& name, std::string ns) : CXXDeclaration(name, std::move(ns)),
+                                                                          fields() { }
 
     void CXXComposite::addField(CXXField&& field) {
         fields.emplace_back(std::move(field));
     }
 
-    std::string CXXComposite::getName() const {
-        return name;
-    }
-
     const std::vector<CXXField>& CXXComposite::getFields() const {
         return fields;
-    }
-
-    std::string CXXComposite::getFullName() const {
-        return ns + "::" + name;
     }
 
     const std::vector<un::CXXAttribute>& CXXField::getAttributes() const {
@@ -101,12 +107,9 @@ namespace un {
         std::string name,
         un::CXXType type,
         std::vector<un::CXXAttribute> expansions
-    ) : accessModifier(accessModifier), name(std::move(name)), type(std::move(type)),
+    ) : un::CXXSymbol(std::move(name)),
+        accessModifier(accessModifier), type(std::move(type)),
         attributes(std::move(expansions)) { }
-
-    const std::string& CXXField::getName() const {
-        return name;
-    }
 
     bool CXXField::hasAttribute(const std::string& name) const {
         return findAttribute(name) != nullptr;
@@ -135,8 +138,19 @@ namespace un {
     CXXSymbol::~CXXSymbol() {
 
     }
+
+    CXXSymbol::CXXSymbol(std::string name) : name(std::move(name)) { }
+
+    std::string un::CXXSymbol::getName() const {
+        return name;
+    }
+
+    std::string un::CXXSymbol::getFullName() const {
+        return name;
+    }
+
     template<>
-    bool CXXScope::findSymbol(std::string fullName, std::shared_ptr<un::CXXComposite>& out) const {
+    bool CXXScope::findSymbol(const std::string& fullName, std::shared_ptr<un::CXXComposite>& out) const {
         for (const auto& item : symbols) {
             std::shared_ptr<un::CXXComposite> ptr = std::dynamic_pointer_cast<un::CXXComposite>(item);
             if (ptr == nullptr) {
@@ -149,11 +163,12 @@ namespace un {
         }
         return false;
     }
-    CXXType::CXXType(std::string name, CXXTypeKind innerType) : name(std::move(name)), innerType(innerType) { }
 
-    std::string CXXType::getName() const {
-        return name;
-    }
+    CXXType::CXXType(
+        const std::string& name,
+        CXXTypeKind innerType
+    ) : CXXSymbol(name), innerType(innerType) { }
+
 
     CXXTypeKind CXXType::getKind() const {
         return innerType;
@@ -204,4 +219,27 @@ namespace un {
         return "unknown_kind";
     }
 
+    CXXEnum::CXXEnum(
+        const std::string& name,
+        const std::string& ns,
+        std::vector<CXXEnumValue> values
+    ) : CXXDeclaration(name, ns), values(values) { }
+
+    CXXEnumValue::CXXEnumValue(const std::string& name, size_t value) : CXXSymbol(name), value(value) { }
+
+    void CXXTranslationUnit::addInclude(const std::string& include) {
+        includes.emplace_back(include);
+    }
+
+    bool CXXTranslationUnit::searchType(const std::string& type, CXXType& out) {
+        return un::maps::search(_typeIndex, type, out);
+    }
+
+    void CXXTranslationUnit::addType(const std::string& key, const CXXType& type) {
+        _typeIndex.emplace(key, type);
+    }
+
+    void CXXTranslationUnit::addType(const CXXType& out) {
+        addType(out.getName(), out);
+    }
 }

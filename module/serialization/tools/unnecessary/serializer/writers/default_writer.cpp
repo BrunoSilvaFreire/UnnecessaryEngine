@@ -12,9 +12,11 @@ namespace un {
         return true;
     }
 
-    void PrimitiveWriter::write_deserializer(std::stringstream& ss, const CXXField& field,
-                                             const un::CXXTranslationUnit& unit,
-                                             const un::WriterRegistry& registry) {
+    void PrimitiveWriter::write_deserializer(
+        std::stringstream& ss, const CXXField& field,
+        const un::CXXTranslationUnit& unit,
+        const un::WriterRegistry& registry
+    ) {
         std::string fName = field.getName();
         std::string typeName = field.getType().getName();
         bool optional = isOptional(field);
@@ -29,12 +31,13 @@ namespace un {
         }
     }
 
-    void
-    PrimitiveWriter::write_serializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-                                      const un::WriterRegistry& registry) {
-        ss << "into.set<" << field.getType().getName() << ">"
-           << "(\"" << field.getName() << "\", value." << field.getName() << ");" << std::endl;
-
+    void PrimitiveWriter::write_serializer(
+        std::stringstream& ss,
+        const CXXField& field,
+        const un::CXXTranslationUnit& unit,
+        const un::WriterRegistry& registry
+    ) {
+        trySerializePrimitive(ss, field.getName(), field.getType());
     }
 
     std::string PrimitiveWriter::name() {

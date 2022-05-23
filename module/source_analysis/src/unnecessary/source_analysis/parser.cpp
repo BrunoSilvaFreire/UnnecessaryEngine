@@ -1,9 +1,13 @@
 #include <utility>
-#include <unnecessary/source_analysis/parser.h>
+#include <fstream>
 #include <unnecessary/misc/benchmark.h>
+#include <unnecessary/source_analysis/parser.h>
+#include <unnecessary/source_analysis/unnecessary_logger.h>
 #include <cppast/cpp_entity_kind.hpp>
 #include <cppast/cpp_class.hpp>
+#include <cppast/cpp_enum.hpp>
 #include <cppast/cpp_namespace.hpp>
+#include <cppast/cpp_preprocessor.hpp>
 #include <cppast/cpp_member_variable.hpp>
 #include <cppast/cpp_type.hpp>
 #include <cppast/cpp_class_template.hpp>
@@ -18,15 +22,26 @@ namespace un::parsing {
     ParsingOptions::ParsingOptions(
         std::filesystem::path file,
         std::vector<std::string> includes
-    ) : file(std::move(file)), includes(std::move(includes)) { }
+    ) : file(std::move(file)),
+        includes(std::move(includes)),
+        debugFile() { }
 
     const std::vector<std::string>& ParsingOptions::getIncludes() const {
         return includes;
     }
 
+    const std::filesystem::path& ParsingOptions::getDebugFile() const {
+        return debugFile;
+    }
+
+    void ParsingOptions::setDebugFile(const std::filesystem::path& debugFile) {
+        ParsingOptions::debugFile = debugFile;
+    }
+
     Parser::Parser(const ParsingOptions& options) {
         auto work = std::filesystem::current_path();
-        cppast::libclang_parser parser;
+        un::UnnecessaryLogger logger;
+        cppast::libclang_parser parser(type_safe::ref(logger));
         cppast::libclang_compile_config config;
         config.set_flags(cppast::cpp_standard::cpp_20);
         std::string fileName = options.getFile().string();
@@ -35,7 +50,6 @@ namespace un::parsing {
             LOG(INFO) << "include: " << item;
             config.add_include_dir(item);
         }
-        cppast::cpp_entity_index index;
         un::Chronometer<> chronometer;
         result = parser.parse(index, fileName, config);
         auto ms = chronometer.stop();
@@ -46,38 +60,68 @@ namespace un::parsing {
             return;
         }
         const cppast::cpp_file& file = *result;
-        std::set<std::string> alreadyParsed;
+        const std::filesystem::path& debugFile = options.getDebugFile();
+        if (!debugFile.empty()) {
+            write_ast(file, debugFile);
+        }
+        parse_entity(file);
+    }
+
+    void Parser::parse_entity(const cppast::cpp_entity& file) {
         cppast::visit(
             file,
             [](const cppast::cpp_entity& e) {
+                LOG(VERBOSE) << "Visiting " << e.name() << " '" << cppast::to_string(e.kind()) << "'";
                 switch (e.kind()) {
                     case cppast::cpp_entity_kind::class_t:
-                        return cppast::is_definition(e);
                     case cppast::cpp_entity_kind::class_template_t:
+                    case cppast::cpp_entity_kind::enum_t:
                         return cppast::is_definition(e);
+                    case cppast::cpp_entity_kind::include_directive_t: {
+                        const auto& directive = dynamic_cast<const cppast::cpp_include_directive&>(e);
+//                        return directive.full_path().ends_with(".h");
+                        return true;
+                    }
+                    case cppast::cpp_entity_kind::file_t:
                     case cppast::cpp_entity_kind::namespace_t:
                         return true;
                     default:
+                        LOG(VERBOSE) << "Ignored  " << e.name() << " with kind '" << cppast::to_string(e.kind()) << "'";
                         return false;
                 }
             },
-            [&](const cppast::cpp_entity& e, cppast::visitor_info info) {
-                if (alreadyParsed.contains(e.name())) {
-                    return;
-                }
-                alreadyParsed.emplace(e.name());
-                switch (e.kind()) {
-                    case cppast::cpp_entity_kind::class_t:
-                        parse_class(dynamic_cast<const cppast::cpp_class&>(e));
-                        break;
-                    case cppast::cpp_entity_kind::class_template_t:
-                        parse_template(dynamic_cast<const cppast::cpp_class_template&>(e));
-                        break;
-                    default:
-                        break;
-                }
+            [this](const cppast::cpp_entity& e, cppast::visitor_info info) {
+                visit(e);
             }
         );
+    }
+
+    void Parser::visit(const cppast::cpp_entity& e) {
+        if (alreadyParsed.contains(e.name())) {
+            return;
+        }
+        alreadyParsed.emplace(e.name());
+        switch (e.kind()) {
+            case cppast::cpp_entity_kind::class_t:
+                parse_class(dynamic_cast<const cppast::cpp_class&>(e));
+                break;
+            case cppast::cpp_entity_kind::class_template_t:
+                parse_template(dynamic_cast<const cppast::cpp_class_template&>(e));
+                break;
+            case cppast::cpp_entity_kind::enum_t:
+                parse_enum(dynamic_cast<const cppast::cpp_enum&>(e));
+                break;
+            case cppast::cpp_entity_kind::include_directive_t: {
+                const auto& directive = dynamic_cast<const cppast::cpp_include_directive&>(e);
+                const auto& vec = directive.target().get(index);
+                for (const auto& item : vec) {
+                    parse_entity(item.get()); // Recurse
+                }
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     void Parser::parse_class(const cppast::cpp_class& clazz) {
@@ -167,19 +211,11 @@ namespace un::parsing {
     }
 
     un::CXXType Parser::toUnType(const cppast::cpp_type& type) {
-        std::string typeStr = to_string(type);
+        std::string typeStr = cppast::to_string(type);
         un::CXXType fieldType;
         if (!translationUnit.searchType(typeStr, fieldType)) {
-            CXXTypeKind tType;
             cppast::cpp_type_kind typeKind = type.kind();
-            switch (typeKind) {
-                case cppast::cpp_type_kind::builtin_t:
-                    tType = toPrimitiveType(type);
-                    break;
-                default:
-                    tType = eComplex;
-                    break;
-            }
+            CXXTypeKind tType = toUnTypeKind(type);
             if (typeKind == cppast::cpp_type_kind::template_instantiation_t) {
                 const auto& instantiation = dynamic_cast<const cppast::cpp_template_instantiation_type&>(type);
                 fieldType = CXXType(instantiation.primary_template().name(), tType);
@@ -214,6 +250,22 @@ namespace un::parsing {
             translationUnit.addType(fieldType);
         }
         return fieldType;
+    }
+
+    CXXTypeKind Parser::toUnTypeKind(const cppast::cpp_type& type) const {
+        switch (type.kind()) {
+            case cppast::cpp_type_kind::builtin_t:
+                return toPrimitiveType(type);
+            default:
+                break;
+        }
+        const auto* asEnum = dynamic_cast<const cppast::cpp_user_defined_type*>(&type);
+        if (cppast::to_string(type) == "un::InputScope") {
+            auto entity = asEnum->entity();
+            auto result = entity.get(index);
+            LOG(INFO) << "Yay";
+        }
+        return un::CXXTypeKind::eComplex;
     }
 
     CXXTypeKind Parser::toPrimitiveType(const cppast::cpp_type& type) const {
@@ -270,5 +322,56 @@ namespace un::parsing {
 
         }
 
+    }
+
+    void Parser::parse_enum(const cppast::cpp_enum& anEnum) {
+        std::vector<un::CXXEnumValue> values;
+        std::size_t i = 0;
+        for (const cppast::cpp_enum_value& item : anEnum) {
+            auto v = item.value();
+            if (v.has_value()) {
+                continue; //TODO: Parse manually specified this
+            }
+            values.emplace_back(item.name(), i);
+            i++;
+        }
+        auto parsed = std::make_shared<un::CXXEnum>(
+            anEnum.name(),
+            getNamespace(anEnum),
+            values
+        );
+        translationUnit.addSymbol(parsed);
+    }
+
+    void Parser::write_ast(const cppast::cpp_file& file, const std::filesystem::path& path) {
+        std::ofstream os(path);
+        std::string prefix;
+        // visit each entity in the file
+        cppast::visit(
+            file, [&](const cppast::cpp_entity& e, cppast::visitor_info info) {
+                if (info.event == cppast::visitor_info::container_entity_exit) {
+                    prefix.pop_back();
+                } else {
+                    write_ast_node(os, prefix, e);
+                    if (info.event == cppast::visitor_info::container_entity_enter) {
+                        prefix += "\t";
+                    }
+                }
+            }
+        );
+        os.close();
+    }
+
+    void Parser::write_ast_node(std::ofstream& os, const std::string& prefix, const cppast::cpp_entity& e) const {
+        os << prefix << "'" << e.name() << "' - " << cppast::to_string(e.kind());
+        switch (e.kind()) {
+            case cppast::cpp_entity_kind::member_variable_t: {
+                const cppast::cpp_type& fieldTYpe = dynamic_cast<const cppast::cpp_member_variable&>(e).type();
+                os << " (" << cppast::to_string(fieldTYpe) << ")";
+            }
+            default:
+                break;
+        }
+        os << std::endl;
     }
 }

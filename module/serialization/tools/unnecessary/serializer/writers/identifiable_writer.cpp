@@ -83,7 +83,7 @@ namespace un {
         ss << "if (from.try_get(\"" << fName << "\", serialized_" << fName << ")) {" << std::endl;
         ss << "for (const auto& [id, element] : serialized_" << fName << ".getNamedProperties()) {" << std::endl;
         ss << "un::Serialized& serialized_element = element->as<un::Serialized>();" << std::endl;
-        ss << typeName << " item = un::serialization::deserialize<" << typeName << ">( serialized_element);"
+        ss << typeName << " item = un::serialization::deserialize<" << typeName << ">(serialized_element);"
            << std::endl;
 
         ss << "item." << idField->getName() << " = id;" << std::endl;

@@ -6,13 +6,17 @@ namespace un {
 
     std::string getGeneratedIncludeName(const GenerationInfo& info);
 
-    void serializeFields(const std::shared_ptr<un::CXXComposite>& composite, const GenerationInfo& info,
-                         WriterRegistry& registry, std::stringstream& ss, un::CXXTranslationUnit& unit);
+    void serializeFields(
+        const std::shared_ptr<un::CXXComposite>& composite, const GenerationInfo& info,
+        WriterRegistry& registry, std::stringstream& ss, un::CXXTranslationUnit& unit
+    );
 
-    void generateSerializerInclude(const std::filesystem::path& includesOutput,
-                                   const std::shared_ptr<un::CXXComposite>& composite,
-                                   CXXTranslationUnit& unit,
-                                   const GenerationInfo& info, const std::vector<std::string>& additionalIncludes) {
+    void generateSerializerInclude(
+        const std::filesystem::path& includesOutput,
+        const std::shared_ptr<un::CXXComposite>& composite,
+        CXXTranslationUnit& unit,
+        const GenerationInfo& info, const std::vector<std::string>& additionalIncludes
+    ) {
         un::WriterRegistry registry;
         std::stringstream ss;
         ss << "#ifndef UN_SERIALIZER_GENERATED_" << info.upper << std::endl;
@@ -76,8 +80,16 @@ namespace un {
         LOG(INFO) << "Written " << info.fullName << " serializer include to " << includeFile;
     }
 
-    void serializeFields(const std::shared_ptr<un::CXXComposite>& composite, const GenerationInfo& info,
-                         WriterRegistry& registry, std::stringstream& ss, un::CXXTranslationUnit& unit) {
+    void writeFieldInfo(
+        std::stringstream& stream,
+        const CXXField& field,
+        const std::shared_ptr<SerializationWriter>& writer
+    );
+
+    void serializeFields(
+        const std::shared_ptr<un::CXXComposite>& composite, const GenerationInfo& info,
+        WriterRegistry& registry, std::stringstream& ss, un::CXXTranslationUnit& unit
+    ) {
         std::stringstream fieldsSerialization;
         std::stringstream fieldsDeserialization;
         for (const auto& field : composite->getFields()) {
@@ -91,17 +103,17 @@ namespace un {
             LOG(INFO) << "Elected " << writer->name() << " for field " << fName << " of " << info.fullName
                       << " with type " << fieldType.getName() << " (kind: " << un::to_string(fieldType.getKind())
                       << ")";
+
+            //Serialization
             fieldsSerialization << "// --- BEGIN FIELD SERIALIZATION: " << fName << std::endl;
-            fieldsSerialization << "// Access: " << un::to_string(field.getAccessModifier()) << std::endl;
-            fieldsSerialization << "// Type: " << field.getType().getName() << std::endl;
-            fieldsSerialization << "// Writer: " << writer->name() << std::endl;
+            writeFieldInfo(fieldsSerialization, field, writer);
             writer->write_serializer(fieldsSerialization, field, unit, registry);
             fieldsSerialization << "// --- END FIELD SERIALIZATION: " << fName << std::endl;
             fieldsSerialization << std::endl;
+
+            // Deserialization
             fieldsDeserialization << "// --- BEGIN FIELD DESERIALIZATION: " << fName << std::endl;
-            fieldsDeserialization << "// Access: " << un::to_string(field.getAccessModifier()) << std::endl;
-            fieldsDeserialization << "// Type: " << field.getType().getName() << std::endl;
-            fieldsDeserialization << "// Writer: " << writer->name() << std::endl;
+            writeFieldInfo(fieldsDeserialization, field, writer);
             writer->write_deserializer(fieldsDeserialization, field, unit, registry);
             fieldsDeserialization << "// --- END FIELD DESERIALIZATION: " << fName << std::endl;
             fieldsDeserialization << std::endl;
@@ -120,19 +132,32 @@ namespace un {
         ss << "}" << std::endl;
     }
 
+    void writeFieldInfo(
+        std::stringstream& stream,
+        const CXXField& field,
+        const std::shared_ptr<SerializationWriter>& writer
+    ) {
+        stream << "// Access: " << to_string(field.getAccessModifier()) << std::endl;
+        stream << "// Type: " << field.getType().getName() << std::endl;
+        stream << "// Writer: " << writer->name() << std::endl;
+    }
+
 
     bool isSerializable(const std::shared_ptr<un::CXXComposite>& composite) {
         const std::vector<CXXField>& field = composite->getFields();
-        return std::any_of(field.begin(), field.end(), [](const un::CXXField& item) {
-            return item.findAttribute("un::serialize") != nullptr;
-        });
+        return std::any_of(
+            field.begin(), field.end(), [](const un::CXXField& item) {
+                return item.findAttribute("un::serialize") != nullptr;
+            }
+        );
 
     }
 
     std::string getGeneratedIncludeName(const GenerationInfo& info) { return info.lower + ".serializer.generated.h"; }
 
-    std::string un::getGeneratedIncludeName(const std::string& typeName) {
-        return un::lower(typeName
+    std::string getGeneratedIncludeName(const std::string& typeName) {
+        return un::lower(
+            typeName
         ) + ".serializer.generated.h";
     }
 

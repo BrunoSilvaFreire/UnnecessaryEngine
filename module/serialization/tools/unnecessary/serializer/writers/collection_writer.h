@@ -8,15 +8,21 @@
 #include <unnecessary/serializer/writers/writer.h>
 
 namespace un {
-    class CollectionWriter : public un::SerializationWriter{
+    class CollectionWriter : public un::SerializationWriter {
     public:
         bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
 
-        void write_serializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-                              const un::WriterRegistry& registry) override;
+        void write_serializer(
+            std::stringstream& ss,
+            const CXXField& field,
+            const un::CXXTranslationUnit& unit,
+            const un::WriterRegistry& registry
+        ) override;
 
-        void write_deserializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-                                const un::WriterRegistry& registry) override;
+        void write_deserializer(
+            std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
+            const un::WriterRegistry& registry
+        ) override;
 
         std::string name() override;
     };

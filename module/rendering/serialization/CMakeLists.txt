@@ -11,9 +11,9 @@ add_unnecessary_library(
 add_unnecessary_serialization(
     TARGET unnecessary_rendering_serialization
 
-    RELATIVE_TO
-    ${CMAKE_SOURCE_DIR}/module/rendering/include/
+    RELATIVE_TO ${CMAKE_SOURCE_DIR}/module/rendering/include/
 
     FILES
     ../include/unnecessary/rendering/pipelines/pipeline_description.h
+    ../include/unnecessary/rendering/pipelines/input_scope.h
 )
