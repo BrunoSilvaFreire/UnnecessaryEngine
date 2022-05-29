@@ -9,7 +9,7 @@
 
 namespace un {
     template<typename TPixel = png::rgba_pixel>
-    class PackTextureJob final : public un::ParallelForJob<un::JobWorker> {
+    class PackTextureJob final : public un::ParallelForJob<JobWorker> {
     private:
         std::shared_ptr<png::image<TPixel>> source;
         std::shared_ptr<png::image<TPixel>> destination;

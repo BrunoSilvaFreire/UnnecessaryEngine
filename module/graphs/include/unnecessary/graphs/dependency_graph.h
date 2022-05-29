@@ -16,6 +16,11 @@ namespace un {
         eUsed
     };
 
+    template<>
+    std::string to_string(const un::DependencyType& type);
+
+    std::ostream& operator<<(std::ostream& stream, const un::DependencyType& dependencyType);
+
 
     template<typename VertexType, typename IndexType = u32>
     class DependencyGraph {

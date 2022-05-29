@@ -8,6 +8,8 @@ add_unnecessary_library(
     include/unnecessary/jobs/job.h
     include/unnecessary/jobs/job_system.h
     include/unnecessary/jobs/job_chain.h
+    include/unnecessary/jobs/job_system_builder.h
+    include/unnecessary/jobs/simple_jobs.h
     include/unnecessary/jobs/thread.h
     include/unnecessary/jobs/parallel_for_job.h
     include/unnecessary/jobs/misc/load_file_job.h
@@ -25,6 +27,7 @@ add_unnecessary_library(
     src/unnecessary/jobs/parallel_for_job.cpp
     src/unnecessary/jobs/worker.cpp
     src/unnecessary/jobs/job_dispatch.cpp
+    src/unnecessary/jobs/simple_jobs.cpp
     src/unnecessary/jobs/thread.cpp
     src/unnecessary/jobs/recorder/data/event_history.cpp
     src/unnecessary/jobs/recorder/job_system_recorder.cpp

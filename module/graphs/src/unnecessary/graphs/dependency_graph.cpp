@@ -1,4 +1,21 @@
-//
-// Created by bruno on 15/12/2021.
-//
+#include <unnecessary/graphs/dependency_graph.h>
 
+namespace un {
+
+    std::ostream& operator<<(std::ostream& stream, const un::DependencyType& dependencyType) {
+        stream << un::to_string(dependencyType);
+        return stream;
+    }
+
+    template<>
+    std::string un::to_string(const DependencyType& type) {
+        switch (type) {
+            case eUses:
+                return "uses";
+                break;
+            case eUsed:
+                return "used";
+                break;
+        }
+    }
+}

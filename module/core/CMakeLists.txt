@@ -28,6 +28,9 @@ add_unnecessary_library(
     src/unnecessary/misc/benchmark.cpp
     src/unnecessary/misc/files.cpp
 
+    SOURCES_WIN
+    src/unnecessary/strings.win.cpp
+
     TESTS
     tests/membuf_tests.cpp
     tests/historic_tests.cpp

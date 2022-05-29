@@ -85,7 +85,7 @@ namespace un {
         typename TGraph,
         typename TJobSystem
     > requires gpp::is_graph<TGraph>
-    class ExploreGraphVertexJob : public un::SimpleJob {
+    class ExploreGraphVertexJob : public SimpleJob {
     public:
         using VertexType = typename TGraph::VertexType;
         using EdgeType = typename TGraph::EdgeType;
@@ -120,7 +120,7 @@ namespace un {
         void operator()(WorkerType* worker) override {
             const VertexType* vertex = graph->vertex(index);
             explorer->vertex(index, *vertex);
-            un::WorkerChain<un::JobWorker> chain;
+            un::WorkerChain<JobWorker> chain;
             for (auto [otherIndex, edge] : graph->edges_from(index)) {
                 if (otherIndex == index) {
                     continue;

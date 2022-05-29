@@ -266,16 +266,5 @@ namespace un {
 
     };
 
-    class JobWorker;
-
-    typedef un::Job<JobWorker> SimpleJob;
-
-    class JobWorker : public un::AbstractJobWorker<un::SimpleJob> {
-    public:
-        JobWorker(
-            size_t index,
-            bool autostart
-        );
-    };
 }
 #endif

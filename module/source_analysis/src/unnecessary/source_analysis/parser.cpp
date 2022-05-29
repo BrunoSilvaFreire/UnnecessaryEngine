@@ -47,7 +47,6 @@ namespace un::parsing {
         std::string fileName = options.getFile().string();
         LOG(INFO) << "Parsing file: " << fileName;
         for (const std::string& item : options.getIncludes()) {
-            LOG(INFO) << "include: " << item;
             config.add_include_dir(item);
         }
         un::Chronometer<> chronometer;
@@ -71,7 +70,6 @@ namespace un::parsing {
         cppast::visit(
             file,
             [](const cppast::cpp_entity& e) {
-                LOG(VERBOSE) << "Visiting " << e.name() << " '" << cppast::to_string(e.kind()) << "'";
                 switch (e.kind()) {
                     case cppast::cpp_entity_kind::class_t:
                     case cppast::cpp_entity_kind::class_template_t:
@@ -86,7 +84,6 @@ namespace un::parsing {
                     case cppast::cpp_entity_kind::namespace_t:
                         return true;
                     default:
-                        LOG(VERBOSE) << "Ignored  " << e.name() << " with kind '" << cppast::to_string(e.kind()) << "'";
                         return false;
                 }
             },
@@ -113,10 +110,7 @@ namespace un::parsing {
                 break;
             case cppast::cpp_entity_kind::include_directive_t: {
                 const auto& directive = dynamic_cast<const cppast::cpp_include_directive&>(e);
-                const auto& vec = directive.target().get(index);
-                for (const auto& item : vec) {
-                    parse_entity(item.get()); // Recurse
-                }
+                translationUnit.addInclude(directive.name());
                 break;
             }
             default:
@@ -263,7 +257,13 @@ namespace un::parsing {
         if (cppast::to_string(type) == "un::InputScope") {
             auto entity = asEnum->entity();
             auto result = entity.get(index);
-            LOG(INFO) << "Yay";
+            LOG(INFO) << "Yay " << result.size() << " " << un::join_strings(
+                result.begin(),
+                result.end(),
+                [](const auto& it) {
+                    return typeid(it).name();
+                }
+            );
         }
         return un::CXXTypeKind::eComplex;
     }

@@ -58,8 +58,8 @@ void un::sdf::process_sdf(
     LOG(INFO) << "Creating image of size " << size << "x" << size << "(" << size * size
               << " pixels)";
     {
-        un::SimpleJobSystem jobSystem(nThreads, false);
-        un::JobSystemRecorder<un::SimpleJobSystem> profiler(&jobSystem);
+        SimpleJobSystem jobSystem(nThreads, false);
+        un::JobSystemRecorder<SimpleJobSystem> profiler(&jobSystem);
         un::ProcessPixelJob job(
             &img,
             &sdf,
@@ -67,7 +67,7 @@ void un::sdf::process_sdf(
             max
         );
         {
-            un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+            un::JobChain<SimpleJobSystem> chain(&jobSystem);
 
             un::ProcessPixelJob::parallelize(
                 &job,

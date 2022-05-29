@@ -255,35 +255,5 @@ namespace un {
         class JobChain;
     };
 
-    class SimpleJobSystem : public un::JobSystem<un::JobWorker> {
-    public:
-        SimpleJobSystem(
-            std::size_t numWorkers,
-            bool autoStart
-        ) : un::JobSystem<un::JobWorker>(
-            un::WorkerPoolConfiguration<un::JobWorker>(
-                numWorkers,
-                [=](
-                    std::size_t index
-                ) {
-                    return new un::JobWorker(index, autoStart);
-                }
-            )
-        ) {
-
-        }
-
-        SimpleJobSystem(
-            bool autoStart
-        ) : SimpleJobSystem(std::thread::hardware_concurrency(), autoStart) {
-
-        }
-
-        void start() {
-            getWorkerPool<un::JobWorker>().start();
-        }
-
-
-    };
 }
 #endif

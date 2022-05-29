@@ -141,7 +141,7 @@ namespace un {
             return system;
         }
 
-        template<typename Worker = un::JobWorker, typename Lambda>
+        template<typename Worker = JobWorker, typename Lambda>
         void finally(Lambda callback) {
             un::JobHandle job;
             immediately<un::LambdaJob<Worker>>(&job, callback);

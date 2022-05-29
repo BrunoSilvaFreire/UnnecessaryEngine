@@ -4,12 +4,17 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <filesystem>
 
 namespace un {
     template<typename T>
     std::string to_string(const T& value) {
         return std::to_string(value);
     }
+
+    template<>
+    std::string to_string(const std::filesystem::path& value);
+
     template<typename T>
     T from_string(const std::string& value);
 

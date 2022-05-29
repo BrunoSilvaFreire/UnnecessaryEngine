@@ -1,3 +1,4 @@
+include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryConan.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryModules.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryShader.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/UnnecessaryDebug.cmake)

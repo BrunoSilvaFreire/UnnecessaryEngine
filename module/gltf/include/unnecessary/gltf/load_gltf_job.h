@@ -13,7 +13,7 @@ namespace un {
         eBinary
     };
 
-    class LoadGLTFJob : public un::SimpleJob {
+    class LoadGLTFJob : public un::Job<JobWorker> {
     private:
         std::filesystem::path _path;
         GLTFType _type;

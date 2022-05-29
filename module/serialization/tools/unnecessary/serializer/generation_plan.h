@@ -8,9 +8,11 @@
 #include <filesystem>
 #include <cppast/libclang_parser.hpp>
 #include <cppast/cpp_file.hpp>
+#include <utility>
 #include <grapphs/algorithms/rlo_traversal.h>
 #include <unnecessary/graphs/dependency_graph.h>
 #include <unnecessary/source_analysis/parser.h>
+#include <ostream>
 
 namespace un {
     class GenerationFile {
@@ -19,11 +21,19 @@ namespace un {
         un::CXXTranslationUnit unit;
     public:
         GenerationFile(
-            const std::filesystem::path& path,
-            const un::parsing::ParsingOptions& options
-        ) {
+            std::filesystem::path path,
+            CXXTranslationUnit&& unit
+        ) : path(std::move(path)), unit(std::move(unit)) { }
 
+        const std::filesystem::path& getPath() const {
+            return path;
         }
+
+        const CXXTranslationUnit& getUnit() const {
+            return unit;
+        }
+
+        friend std::ostream& operator<<(std::ostream& os, const GenerationFile& file);
     };
 
     class GenerationPlan {
@@ -39,14 +49,13 @@ namespace un {
         void addTranslationUnit(
             const std::filesystem::path& file,
             un::CXXTranslationUnit&& unit
-        ) {
+        );
 
-        }
+        void bake();
 
-        std::vector<std::pair<u32, const un::GenerationFile*>> getFilesSequence() const {
-            return includeGraph.get_rlo_sequence();
-        }
+        std::vector<std::pair<u32, const un::GenerationFile*>> getFilesSequence() const;
 
+        const IncludeGraphType& getIncludeGraph() const;
     };
 }
 

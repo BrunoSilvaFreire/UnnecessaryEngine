@@ -155,7 +155,7 @@ namespace un {
         }
 
         template<typename TSymbol>
-        std::vector<std::shared_ptr<TSymbol>> collectSymbols() {
+        std::vector<std::shared_ptr<TSymbol>> collectSymbols() const {
             std::vector<std::shared_ptr<TSymbol>> view;
             for (const auto& item : symbols) {
                 std::shared_ptr<TSymbol> ptr = std::dynamic_pointer_cast<TSymbol>(item);
@@ -217,6 +217,8 @@ namespace un {
         std::unordered_map<std::string, un::CXXType> _typeIndex;
     public:
         void addInclude(const std::string& include);
+
+        const std::vector<std::string>& getIncludes() const;
 
         bool searchType(const std::string& type, un::CXXType& out);
 

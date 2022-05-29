@@ -2,14 +2,6 @@ project(UnnecessaryEngine LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
 
-if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-    message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
-        "${CMAKE_BINARY_DIR}/conan.cmake")
-endif ()
-
-set(CONAN_DISABLE_CHECK_COMPILER On)
-include(${CMAKE_BINARY_DIR}/conan.cmake)
 include(cmake/Unnecessary.cmake)
 find_package(Python REQUIRED)
 option(UN_DISALLOW_AGGRESSIVE_INLINING DEFAULT OFF)
@@ -41,7 +33,7 @@ conan_cmake_configure(
     assimp:with_opengex=False
 )
 
-conan_cmake_autodetect(settings)
+unnecessary_get_conan_settings(settings)
 
 message("Conan cmake settings: ${settings}")
 conan_cmake_install(

@@ -4,8 +4,8 @@ namespace un {
 
     void AtlasSerializer::serialize(const Atlas& value, Serialized& into) {
         un::Serialized index;
-        for (const auto& [key, value] : value.getIndex()) {
-            index.set(key, value);
+        for (const auto& [key, idx] : value.getIndex()) {
+            index.set(key, idx);
         }
         un::SerializedArray<un::Serialized> entries;
         for (const auto& entry : value.getEntries()) {

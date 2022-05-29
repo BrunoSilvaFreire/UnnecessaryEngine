@@ -7,9 +7,9 @@
 #include <unnecessary/jobs/worker_chain.h>
 
 TEST(load_dragon, loading) {
-    un::SimpleJobSystem system(4, true);
+    SimpleJobSystem system(4, true);
     {
-        un::WorkerChain<un::JobWorker> chain;
+        un::WorkerChain<JobWorker> chain;
         auto dragon = std::filesystem::current_path() / "dragon.glb";
         GTEST_LOG_(INFO) << "Expecting dragon @ " << std::filesystem::absolute(dragon);
         chain.immediately<un::LoadGLTFJob>(dragon, un::GLTFType::eBinary);

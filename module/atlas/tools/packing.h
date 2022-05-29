@@ -9,10 +9,10 @@
 
 namespace un {
     void pack(
-        un::SimpleJobSystem& jobSystem,
+        SimpleJobSystem& jobSystem,
         const std::vector<un::packer::PackerEntry>& entries
     ) {
-        un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+        un::JobChain<SimpleJobSystem> chain(&jobSystem);
         un::packer::AlgorithmRegistry registry;
         const auto & algorithms = registry.getAlgorithms();
 //        std::vector<un::packer::PackingStrategy> strategies(algorithms.size());
@@ -27,10 +27,10 @@ namespace un {
     void pack(
         const std::vector<std::filesystem::path>& files
     ) {
-        un::SimpleJobSystem jobSystem(true);
+        SimpleJobSystem jobSystem(true);
         std::vector<un::packer::PackerEntry> entries(files.size());
         {
-            un::JobChain<un::SimpleJobSystem> chain(&jobSystem);
+            un::JobChain<SimpleJobSystem> chain(&jobSystem);
             std::size_t i = 0;
             for (const auto& file : files) {
                 chain.immediately<un::LambdaJob<>>([&, file, i]() {

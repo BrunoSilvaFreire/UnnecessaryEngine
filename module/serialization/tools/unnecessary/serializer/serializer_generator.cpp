@@ -1,5 +1,10 @@
 #include <cxxopts.hpp>
 #include <chrono>
+#include <unnecessary/serializer/generation_plan.h>
+#include <unnecessary/jobs/job_system_builder.h>
+#include <unnecessary/source_analysis/parser.h>
+#include <unnecessary/source_analysis/parsing.h>
+#include <grapphs/dot.h>
 #include "generation.h"
 
 static const char* const kFileArgName = "file";
@@ -54,33 +59,46 @@ int main(int argc, char** args) {
         std::size_t numSpecifiedFiles = result.count(kFileArgName);
 
         std::filesystem::path output = result[kOutputDir].as<std::string>();
-        std::string relativeTo;
+        std::filesystem::path relativeTo;
         if (result.count(kRelativeToName) > 0) {
             relativeTo = result[kRelativeToName].as<std::string>();
         } else {
-            relativeTo = std::filesystem::current_path().string();
+            relativeTo = std::filesystem::current_path();
         }
-        if (numSpecifiedFiles == 1) {
-            const auto& file = result[kFileArgName].as<std::string>();
-            process(includes, globalIncludes, file, output, relativeTo);
-        } else {
-            std::filesystem::path filePath = "temp";
 
-            auto epoch = std::chrono::system_clock::now().time_since_epoch().count();
-            filePath /= (std::string("multiple_files_") + std::to_string(epoch) + ".h");
-            LOG(INFO) << "Generating unity file @ " << std::filesystem::absolute(filePath);
-            {
-                un::files::ensure_directory_exists(filePath.parent_path());
-                std::ofstream tempAllIncludes(filePath);
-                const auto& files = result[kFileArgName].as<std::vector<std::string>>();
-                for (const auto& item : files) {
-                    std::filesystem::path p = item;
-                    std::filesystem::path relative = std::filesystem::relative(item, relativeTo);
-                    tempAllIncludes << "#include <" << relative.string() << ">" << std::endl;
-                }
-            }
-            process(includes, globalIncludes, filePath.string(), output, relativeTo);
+        std::filesystem::path filePath = "temp";
+        un::GenerationPlan plan(relativeTo);
+        const auto& files = result[kFileArgName].as<std::vector<std::string>>();
+        for (const std::string& file : files) {
+            std::filesystem::path path = file;
+            std::filesystem::path relative = std::filesystem::relative(file, relativeTo);
+            un::parsing::ParsingOptions parseOptions(file, includes);
+            std::string debugFileName;
+            debugFileName += path.filename().string();
+            debugFileName += ".info.txt";
+            std::filesystem::path debugFile = output / debugFileName;
+            un::files::ensure_directory_exists(debugFile.parent_path());
+            parseOptions.setDebugFile(debugFile);
+            auto translationUnit = un::parsing::parse(parseOptions);
+            plan.addTranslationUnit(relative, std::move(translationUnit));
         }
+        plan.bake();
+        gpp::save_to_dot(
+            plan.getIncludeGraph().getInnerGraph(),
+            output / "includes.dot"
+        );
+        const auto& sequence = plan.getFilesSequence();
+        LOG(INFO) << "File sequence: " << un::join_strings(
+            sequence.begin(), sequence.end(),
+            [](const std::pair<u32, const un::GenerationFile*>& pair) {
+                return pair.second->getPath().string();
+            }
+        );
+        un::JobSystemBuilder<un::SimpleJobSystem> builder;
+//        builder.withRecorder();
+        un::JobSystemPackage<un::SimpleJobSystem> aPackage = std::move(builder.build());
+        un::SimpleJobSystem& jobSystem = aPackage.getJobSystem();
+        jobSystem.complete();
     } catch (const cxxopts::OptionParseException& x) {
         std::cerr << "dog: " << x.what() << '\n';
         std::cerr << "usage: dog [options] <input_file> ...\n";

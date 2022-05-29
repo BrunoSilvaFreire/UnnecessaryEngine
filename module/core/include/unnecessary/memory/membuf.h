@@ -184,14 +184,19 @@ namespace un {
             return ptr[index];
         }
 
-        void copyFrom(void* data) {
+        void copyFrom(const void* data) {
             std::memcpy(ptr, data, count);
         }
 
-        void copyFrom(void* data, std::size_t offset, std::size_t length) {
+        void copyFrom(const void* data, std::size_t offset, std::size_t length) {
             std::memcpy(ptr + offset, data, length);
         }
 
+        un::Buffer& operator=(const std::string& string) {
+            resize(string.size());
+            copyFrom(reinterpret_cast<const void*>(string.data()), 0, string.size());
+            return *this;
+        }
     };
 
 }

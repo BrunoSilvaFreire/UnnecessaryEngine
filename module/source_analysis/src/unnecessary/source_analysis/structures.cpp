@@ -242,4 +242,8 @@ namespace un {
     void CXXTranslationUnit::addType(const CXXType& out) {
         addType(out.getName(), out);
     }
+
+    const std::vector<std::string>& CXXTranslationUnit::getIncludes() const {
+        return includes;
+    }
 }

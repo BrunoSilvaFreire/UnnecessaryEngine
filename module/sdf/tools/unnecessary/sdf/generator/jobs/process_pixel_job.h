@@ -13,7 +13,7 @@
 
 namespace un {
 
-    class ProcessPixelJob final : public un::ParallelForJob<un::JobWorker> {
+    class ProcessPixelJob final : public un::ParallelForJob<JobWorker> {
     private:
         png::image<png::rgba_pixel>* input;
         png::image<png::gray_pixel>* output;

@@ -3,11 +3,12 @@
 
 #include <filesystem>
 #include <fstream>
-#include "unnecessary/memory/membuf.h"
+#include <unnecessary/memory/membuf.h>
 #include <unnecessary/jobs/workers/worker.h>
+#include <unnecessary/jobs/simple_jobs.h>
 
 namespace un {
-    class LoadFileJob : public un::SimpleJob {
+    class LoadFileJob : public un::Job<JobWorker> {
     private:
         std::filesystem::path path;
         std::ios::openmode openMode;

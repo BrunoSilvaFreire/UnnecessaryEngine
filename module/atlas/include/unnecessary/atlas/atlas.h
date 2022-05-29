@@ -29,10 +29,10 @@ namespace un {
 
     class Atlas {
     private:
-        std::unordered_map<uuids::uuid, std::size_t> index;
+        std::unordered_map<uuids::uuid, u64> index;
         std::vector<AtlasEntry> entries;
     public:
-        const std::unordered_map<uuids::uuid, std::size_t>& getIndex() const {
+        const std::unordered_map<uuids::uuid, u64>& getIndex() const {
             return index;
         }
 

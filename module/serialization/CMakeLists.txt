@@ -47,9 +47,15 @@ add_unnecessary_tool(
     tools/unnecessary/serializer/generation.cpp
     tools/unnecessary/serializer/generation_plan.h
     tools/unnecessary/serializer/generation_plan.cpp
+    tools/unnecessary/serializer/jobs/generate_serializer_job.h
+    tools/unnecessary/serializer/jobs/generate_serializer_job.cpp
+    tools/unnecessary/serializer/jobs/parallel_generation.h
+    tools/unnecessary/serializer/jobs/parallel_generation.cpp
 
     DEPENDENCIES
     unnecessary_source_analysis
     unnecessary_graphs
+    unnecessary_jobs
+    grapphs_visualization
 )
 add_subdirectory(nlohmann)

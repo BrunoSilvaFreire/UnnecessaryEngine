@@ -48,4 +48,11 @@ namespace un {
         }
         return result;
     }
+
+#ifndef UN_PLATFORM_WINDOWS
+    template<>
+    std::string un::to_string(const std::filesystem::path& value) {
+        return value.string();
+    }
+#endif
 }
