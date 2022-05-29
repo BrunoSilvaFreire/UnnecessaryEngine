@@ -52,4 +52,9 @@
       <file path="$PROJECT_DIR$/legacy" />
     </excludeRoots>
   </component>
+  <component name="SwUserDefinedSpecifications">
+    <option name="specTypeByUrl">
+      <map />
+    </option>
+  </component>
 </project>

@@ -30,26 +30,24 @@ namespace un {
     };
 
     template<typename TJobSystem>
-    class JobSystemRecorder {
+    class JobSystemRecorder : public TJobSystem::ExtensionType {
     private:
         typedef typename TJobSystem::ProfilerPoolTuple ProfilerPoolTuple;
         ProfilerPoolTuple tuple;
 
     public:
-        JobSystemRecorder(TJobSystem* jobSystem) : tuple() {
+        JobSystemRecorder() : tuple() { }
+
+        virtual ~JobSystemRecorder() = default;
+
+        void apply(typename TJobSystem::ExtensionType::TargetType& jobSystem) override {
             TJobSystem::for_each_archetype(
                 [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
-                    ProfilerPool<TArchetype>& profilerPool = std::get<TArchetypeIndex>(
-                        tuple
-                    );
-                    un::WorkerPool<TArchetype>& workerPool = jobSystem->template getWorkerPool<TArchetype>();
+                    ProfilerPool<TArchetype>& profilerPool = std::get<TArchetypeIndex>(tuple);
+                    un::WorkerPool<TArchetype>& workerPool = jobSystem.template getWorkerPool<TArchetype>();
                     profilerPool.bootstrap(&workerPool);
                 }
             );
-        }
-
-        virtual ~JobSystemRecorder() {
-
         }
 
         std::string toCSV() const {

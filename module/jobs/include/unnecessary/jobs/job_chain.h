@@ -119,6 +119,14 @@ namespace un {
             return immediately<J>(id, new J(std::forward<Args>(args)...));
         }
 
+        template<typename J, typename... Args>
+        JobChain& after(JobHandle dependencyId, J* job) {
+            un::JobHandle handle;
+            immediately(&handle, job);
+            after<J>(dependencyId, handle);
+            return *this;
+        }
+
 
         template<typename J, typename... Args>
         JobChain& after(JobHandle dependencyId, Args... args) {
@@ -155,6 +163,17 @@ namespace un {
         void setName(JobHandle i, const std::string& name) {
             system->setName(i, name);
         }
+
+        std::size_t getNumJobs() {
+            std::size_t n = 0;
+            JobSystemType::for_each_archetype(
+                [&n, this]<typename TArchetype, size_t Index>() {
+                    n += allJobs.template getBatch<TArchetype>().size();
+                }
+            );
+            return n;
+        }
+
     };
 }
 #endif

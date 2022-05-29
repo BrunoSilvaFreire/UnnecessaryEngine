@@ -10,7 +10,7 @@
 namespace un {
     typedef glm::u16vec2 Size2D;
 
-    class Window : Extension {
+    class Window : AppExtension {
     private:
         GLFWwindow* _window;
         un::Size2D _windowSize;

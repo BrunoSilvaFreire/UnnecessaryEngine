@@ -1,4 +1,5 @@
 #include <unnecessary/misc/files.h>
+#include <fstream>
 
 namespace un::files {
 
@@ -49,5 +50,18 @@ namespace un::files {
         std::ofstream file(path);
         file << stream.str();
         file.close();
+    }
+
+    bool write_buffer_into_file(const std::filesystem::path& path, Buffer& buffer, std::ios::openmode openMode) {
+        std::ofstream stream(path, openMode);
+        if (!stream.is_open()) {
+            return false;
+        }
+        stream.write(
+            reinterpret_cast<const char*>(buffer.data()),
+            static_cast<std::streamsize>(buffer.size())
+        );
+        stream.close();
+        return true;
     }
 }

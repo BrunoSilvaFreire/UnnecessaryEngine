@@ -40,9 +40,12 @@ function(
         endif ()
     endforeach ()
     list(TRANSFORM UN_SERIALIZATION_FILES PREPEND ${TGT_SRC}/)
+    set(UN_SERIALIZATION_FILES_ARG ${UN_SERIALIZATION_FILES})
+    list(TRANSFORM UN_SERIALIZATION_FILES_ARG PREPEND "--file ")
     set(
         FILE_SERIALIZER_GENERATION_CMD
         unnecessary_serializer_generator
+        ${UN_SERIALIZATION_FILES_ARG}
         ${UN_SERIALIZATION_FILES}
         ${COMMAND_INCLUDES}
         --output ${SERIALIZER_OUTPUT}

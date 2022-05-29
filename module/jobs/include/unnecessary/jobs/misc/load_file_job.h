@@ -8,7 +8,7 @@
 #include <unnecessary/jobs/simple_jobs.h>
 
 namespace un {
-    class LoadFileJob : public un::Job<JobWorker> {
+    class LoadFileJob : public un::SimpleJob {
     private:
         std::filesystem::path path;
         std::ios::openmode openMode;
@@ -23,6 +23,17 @@ namespace un {
         );
 
         void operator()(un::JobWorker* worker) override;
+    };
+
+    class WriteFileJob : public un::SimpleJob {
+    private:
+        std::filesystem::path path;
+        std::ios::openmode openMode;
+        un::Buffer* buffer;
+    public:
+        WriteFileJob(std::filesystem::path path, std::ios::openmode openMode, Buffer* buffer);
+
+        void operator()(WorkerType* worker) override;
     };
 }
 #endif

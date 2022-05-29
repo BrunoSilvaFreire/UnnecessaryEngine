@@ -34,6 +34,8 @@ namespace un {
         std::size_t numWorkers;
         WorkerCreator creator;
     public:
+        WorkerPoolConfiguration() = default;
+
         WorkerPoolConfiguration(
             size_t numWorkers,
             const std::function<TWorker*(

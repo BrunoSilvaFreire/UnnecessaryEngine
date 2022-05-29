@@ -1,9 +1,15 @@
 #include <cxxopts.hpp>
 #include <chrono>
+#include <unordered_map>
+#include <unnecessary/serializer/jobs/parse_translation_unit_job.h>
+#include <unnecessary/serializer/jobs/generate_serializer_job.h>
 #include <unnecessary/serializer/generation_plan.h>
 #include <unnecessary/jobs/job_system_builder.h>
 #include <unnecessary/source_analysis/parser.h>
 #include <unnecessary/source_analysis/parsing.h>
+#include <unnecessary/jobs/worker_chain.h>
+#include <unnecessary/jobs/job_chain.h>
+#include <unnecessary/jobs/misc/load_file_job.h>
 #include <grapphs/dot.h>
 #include "generation.h"
 
@@ -48,62 +54,117 @@ int main(int argc, char** args) {
                    kRelativeToName, "Directory where to write the generated files",
                    cxxopts::value<std::string>()
                );
+
+    std::filesystem::path output;
+    std::filesystem::path relativeTo;
+    std::vector<std::string> files;
+    std::vector<std::string> includes;
     try {
         cxxopts::ParseResult result = options.parse(argc, args);
-        auto includes = result[kIncludeArgName].as<std::vector<std::string>>();
+        includes = result[kIncludeArgName].as<std::vector<std::string>>();
         std::vector<std::string> globalIncludes;
         if (result.count(kGlobalIncludeName) > 0) {
             globalIncludes = result[kGlobalIncludeName].as<std::vector<std::string>>();
         }
-
         std::size_t numSpecifiedFiles = result.count(kFileArgName);
-
-        std::filesystem::path output = result[kOutputDir].as<std::string>();
-        std::filesystem::path relativeTo;
+        output = result[kOutputDir].as<std::string>();
         if (result.count(kRelativeToName) > 0) {
             relativeTo = result[kRelativeToName].as<std::string>();
         } else {
             relativeTo = std::filesystem::current_path();
         }
-
         std::filesystem::path filePath = "temp";
-        un::GenerationPlan plan(relativeTo);
-        const auto& files = result[kFileArgName].as<std::vector<std::string>>();
-        for (const std::string& file : files) {
-            std::filesystem::path path = file;
-            std::filesystem::path relative = std::filesystem::relative(file, relativeTo);
-            un::parsing::ParsingOptions parseOptions(file, includes);
-            std::string debugFileName;
-            debugFileName += path.filename().string();
-            debugFileName += ".info.txt";
-            std::filesystem::path debugFile = output / debugFileName;
-            un::files::ensure_directory_exists(debugFile.parent_path());
-            parseOptions.setDebugFile(debugFile);
-            auto translationUnit = un::parsing::parse(parseOptions);
-            plan.addTranslationUnit(relative, std::move(translationUnit));
-        }
-        plan.bake();
-        gpp::save_to_dot(
-            plan.getIncludeGraph().getInnerGraph(),
-            output / "includes.dot"
-        );
-        const auto& sequence = plan.getFilesSequence();
-        LOG(INFO) << "File sequence: " << un::join_strings(
-            sequence.begin(), sequence.end(),
-            [](const std::pair<u32, const un::GenerationFile*>& pair) {
-                return pair.second->getPath().string();
-            }
-        );
-        un::JobSystemBuilder<un::SimpleJobSystem> builder;
-//        builder.withRecorder();
-        un::JobSystemPackage<un::SimpleJobSystem> aPackage = std::move(builder.build());
-        un::SimpleJobSystem& jobSystem = aPackage.getJobSystem();
-        jobSystem.complete();
+        files = result[kFileArgName].as<std::vector<std::string>>();
     } catch (const cxxopts::OptionParseException& x) {
         std::cerr << "dog: " << x.what() << '\n';
         std::cerr << "usage: dog [options] <input_file> ...\n";
         return EXIT_FAILURE;
     }
+
+    un::JobSystemBuilder<un::SimpleJobSystem> builder;
+    builder.withRecorder();
+    auto jobSystem = builder.build();
+
+    un::GenerationPlan plan(relativeTo);
+    {
+        un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
+        for (const std::string& file : files) {
+            std::filesystem::path path = file;
+            std::string debugFileName;
+            debugFileName += path.filename().string();
+            debugFileName += ".info.txt";
+            std::filesystem::path debugFile = output / debugFileName;
+            un::files::ensure_directory_exists(debugFile.parent_path());
+            chain.immediately<un::ParseTranslationUnitJob>(
+                path,
+                relativeTo,
+                debugFileName,
+                includes,
+                &plan
+            );
+        }
+        LOG(INFO) << "Dispatching " << chain.getNumJobs() << " jobs...";
+
+    }
+    jobSystem->join();
+    plan.bake();
+    un::GenerationPlan::IncludeGraphType& includeGraph = plan.getIncludeGraph();
+    gpp::save_to_dot(
+        includeGraph.getInnerGraph(),
+        output / "includes.dot"
+    );
+    {
+        std::vector<std::shared_ptr<un::Buffer>> buffers;
+        {
+            un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
+            std::unordered_map<u32, std::set<un::JobHandle>> include2DeclarationsJobs;
+            includeGraph.each_rlo(
+                [&](u32 index) {
+                    const un::GenerationFile* pGenerationFile = includeGraph[index];
+                    const un::CXXTranslationUnit& translationUnit = pGenerationFile->getUnit();
+                    std::vector<std::shared_ptr<un::CXXDeclaration>> symbols = translationUnit.collectSymbols<un::CXXDeclaration>();
+                    for (const auto& item : symbols) {
+                        const std::shared_ptr<un::Buffer>& buffer = buffers.emplace_back(std::make_shared<un::Buffer>());
+                        un::JobHandle handle;
+                        auto outPath = output / (pGenerationFile->getPath().filename().string() + ".generated.h");
+                        LOG(INFO) << item->getFullName() << " serializer will be written to " << outPath;
+                        chain.immediately<un::GenerateSerializerJob>(
+                            &handle,
+                            buffer,
+                            item,
+                            &translationUnit
+                        ).after<un::WriteFileJob>(
+                            handle,
+                            outPath,
+                            static_cast<std::ios::openmode>(std::ios::out | std::ios::trunc),
+                            buffer.get()
+                        );
+                        include2DeclarationsJobs[index].emplace(handle);
+                    }
+
+                },
+                [&](u32 from, u32 to) {
+                    /*
+                    const auto& fromIt = include2DeclarationsJobs.find(from);
+                    if (fromIt == include2DeclarationsJobs.end()) {
+                        return;
+                    }
+                    const auto& toIt = include2DeclarationsJobs.find(to);
+                    if (toIt == include2DeclarationsJobs.end()) {
+                        return;
+                    }
+                    for (const auto& fromJob : fromIt->second) {
+                        for (const auto& toJob : toIt->second) {
+                            chain.after<un::JobWorker>(fromJob, toJob);
+                        }
+                    }
+                    */
+                }
+            );
+        }
+        jobSystem->join();
+    }
+    jobSystem->complete();
 }
 
 void process(

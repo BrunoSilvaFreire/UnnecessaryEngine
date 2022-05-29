@@ -6,45 +6,38 @@
 
 namespace un {
     template<typename TJobSystem>
-    class JobSystemBuilder;
-
-    template<typename TJobSystem>
-    class JobSystemPackage {
-    private:
-
-        std::unique_ptr<TJobSystem> jobSystem;
-        std::optional<un::JobSystemRecorder<TJobSystem>> recorder;
-    public:
-        TJobSystem& getJobSystem() {
-            return *jobSystem;
-        }
-
-        explicit JobSystemPackage(std::unique_ptr<TJobSystem>&& jobSystem) : jobSystem(std::move(jobSystem)) { }
-
-        JobSystemPackage(JobSystemPackage&& moved) :
-            jobSystem(std::move(moved.jobSystem)),
-            recorder(std::move(moved.recorder)) {
-
-        }
-
-        void addRecorder() {
-            recorder = un::JobSystemRecorder<TJobSystem>(jobSystem.get());
-        }
-
-        friend class JobSystemBuilder<TJobSystem>;
-    };
-
-    template<typename TJobSystem>
     class JobSystemBuilder {
     public:
         using WorkerAllocationConfig = typename TJobSystem::WorkerAllocationConfig;
     private:
         WorkerAllocationConfig allocationConfig;
+        bool addRecorder;
+        bool autoStart;
+
+        std::unique_ptr<TJobSystem> create() const {
+            return TJobSystem(allocationConfig, false);
+        }
+
     public:
+        JobSystemBuilder() : allocationConfig(), addRecorder(false), autoStart(true) { };
+
+        void setAutoStart(bool autoStart) {
+            JobSystemBuilder::autoStart = autoStart;
+        }
+
+        void withRecorder() {
+            addRecorder = true;
+        }
+
         template<typename TWorker>
         void setNumWorkers(std::size_t numWorkers) {
             constexpr auto WorkerIndex = TJobSystem::template index_of_archetype<TWorker>();
             std::get<WorkerIndex>(allocationConfig) = WorkerPoolConfiguration<TWorker>::forwarding(numWorkers);
+        }
+
+        template<typename TWorker>
+        void fillWorkers() {
+            setNumWorkers<TWorker>(std::thread::hardware_concurrency());
         }
 
         template<typename TWorker>
@@ -53,49 +46,30 @@ namespace un {
             return std::get<WorkerIndex>(allocationConfig).getNumWorkers();
         }
 
-        TJobSystem build() const {
-            return TJobSystem(allocationConfig);
+        std::unique_ptr<TJobSystem> build() const {
+            bool start = !addRecorder && autoStart;
+            std::unique_ptr<TJobSystem> system = create();
+            if (addRecorder) {
+                system->extendWith(std::make_shared<un::JobSystemRecorder<TJobSystem>>());
+                if (autoStart) {
+                    system->start();
+                }
+            }
+            return system;
         }
 
     };
 
     template<>
-    class JobSystemBuilder<un::SimpleJobSystem> {
-    private:
-        bool autoStart = true;
-        bool addRecorder = false;
-        std::size_t numWorkers = std::thread::hardware_concurrency();
-    public:
-        void withRecorder() {
-            addRecorder = true;
-        }
+    std::unique_ptr<un::SimpleJobSystem> JobSystemBuilder<un::SimpleJobSystem>::create() const {
+        return std::make_unique<un::SimpleJobSystem>(getNumWorkers<un::JobWorker>(), false);
+    }
 
-        void setAutoStart(bool autoStart) {
-            JobSystemBuilder::autoStart = autoStart;
-        }
-
-        void setNumWorkers(size_t numWorkers) {
-            JobSystemBuilder::numWorkers = numWorkers;
-        }
-
-        JobSystemPackage<un::SimpleJobSystem>&& build() const {
-            bool start = !addRecorder && autoStart;
-            JobSystemPackage<un::SimpleJobSystem> package(
-                std::move(
-                    std::make_unique<un::SimpleJobSystem>(
-                        numWorkers,
-                        start
-                    )));
-            if (addRecorder) {
-                package.addRecorder();
-                if (autoStart) {
-                    package.getJobSystem().start();
-                }
-            }
-            return std::move(package);
-        }
-    };
-
+    template<>
+    JobSystemBuilder<un::SimpleJobSystem>::JobSystemBuilder()
+        : allocationConfig(), addRecorder(false), autoStart(true) {
+        fillWorkers<un::JobWorker>();
+    }
 
 }
 #endif

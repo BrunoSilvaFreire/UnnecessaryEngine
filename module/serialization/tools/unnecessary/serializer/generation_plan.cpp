@@ -14,16 +14,22 @@ namespace un {
     }
 
     void GenerationPlan::addTranslationUnit(const std::filesystem::path& file, CXXTranslationUnit&& unit) {
-        auto i = includeGraph.add(un::GenerationFile(file, std::move(unit)));
-        include2Index[un::to_string(file)] = i;
+        {
+            std::lock_guard<decltype(translationUnitMutexes)> lock(translationUnitMutexes);
+            auto i = includeGraph.add(un::GenerationFile(file, std::move(unit)));
+            include2Index[un::to_string(file)] = i;
+        }
     }
 
     void GenerationPlan::bake() {
-        for (const auto& [gen, i] : includeGraph.getInnerGraph().all_vertices()) {
-            for (const auto& item : gen->getUnit().getIncludes()) {
-                auto it = include2Index.find(item);
-                if (it != include2Index.end()) {
-                    includeGraph.addDependency(i, it->second);
+        {
+            std::lock_guard<decltype(translationUnitMutexes)> lock(translationUnitMutexes);
+            for (const auto& [gen, i] : includeGraph.getInnerGraph().all_vertices()) {
+                for (const auto& item : gen->getUnit().getIncludes()) {
+                    auto it = include2Index.find(item);
+                    if (it != include2Index.end()) {
+                        includeGraph.addDependency(i, it->second);
+                    }
                 }
             }
         }
@@ -31,6 +37,10 @@ namespace un {
 
     std::vector<std::pair<u32, const un::GenerationFile*>> GenerationPlan::getFilesSequence() const {
         return includeGraph.get_rlo_sequence();
+    }
+
+    GenerationPlan::IncludeGraphType& GenerationPlan::getIncludeGraph() {
+        return includeGraph;
     }
 
     std::ostream& operator<<(std::ostream& os, const GenerationFile& file) {

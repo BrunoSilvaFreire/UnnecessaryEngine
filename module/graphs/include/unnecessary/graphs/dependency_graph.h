@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <grapphs/adjacency_list.h>
 #include <grapphs/algorithms/flood.h>
+#include <grapphs/algorithms/rlo_traversal.h>
 #include <iostream>
 #include <fstream>
 #include <string>

@@ -11,9 +11,14 @@ namespace un {
         typedef std::function<void(T...)> Listener;
     private:
         std::vector<Listener> listeners;
+        std::vector<Listener> singleFireListeners;
     public:
         void clear() {
             listeners.clear();
+        }
+
+        void addSingleFireListener(Listener listener) {
+            singleFireListeners.push_back(listener);
         }
 
         void operator+=(Listener listener) {
@@ -28,6 +33,10 @@ namespace un {
             for (Listener& listener : listeners) {
                 listener(args...);
             }
+            for (Listener& listener : singleFireListeners) {
+                listener(args...);
+            }
+            singleFireListeners.clear();
         }
     };
 

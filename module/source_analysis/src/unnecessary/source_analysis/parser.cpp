@@ -253,18 +253,6 @@ namespace un::parsing {
             default:
                 break;
         }
-        const auto* asEnum = dynamic_cast<const cppast::cpp_user_defined_type*>(&type);
-        if (cppast::to_string(type) == "un::InputScope") {
-            auto entity = asEnum->entity();
-            auto result = entity.get(index);
-            LOG(INFO) << "Yay " << result.size() << " " << un::join_strings(
-                result.begin(),
-                result.end(),
-                [](const auto& it) {
-                    return typeid(it).name();
-                }
-            );
-        }
         return un::CXXTypeKind::eComplex;
     }
 

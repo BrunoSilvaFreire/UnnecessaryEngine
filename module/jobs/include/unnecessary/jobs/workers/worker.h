@@ -9,6 +9,7 @@
 #include <queue>
 #include <unnecessary/jobs/job.h>
 #include <unnecessary/jobs/thread.h>
+#include <unnecessary/jobs/misc/fence.h>
 #include <unnecessary/logging.h>
 #include <unnecessary/misc/event.h>
 #include <unnecessary/misc/types.h>
@@ -165,6 +166,21 @@ namespace un {
 
         u32 getCore() const {
             return core;
+        }
+
+        void join(std::size_t handle, un::Fence<>& fence) {
+            {
+                std::lock_guard<std::mutex> lock(sleepingMutex);
+                if (waiting) {
+                    fence.notify(handle);
+                } else {
+                    sleeping.addSingleFireListener(
+                        [&fence, handle]() {
+                            fence.notify(handle);
+                        }
+                    );
+                }
+            }
         }
 
         void setCore(u32 newCore) {

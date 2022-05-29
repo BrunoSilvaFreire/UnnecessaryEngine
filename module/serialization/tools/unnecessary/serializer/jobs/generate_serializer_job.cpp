@@ -22,7 +22,7 @@ namespace un {
                 continue;
             }
             const std::vector<un::CXXAttribute>& attributes = field.getAttributes();
-            ss << "// Field: " << field.getName() << std::endl;
+            ss << "// Field: " << field.getName() << " (" << field.getType().getFullName() << ")" << std::endl;
             if (attributes.empty()) {
                 ss << "// No attributes. " << std::endl;
             } else {
@@ -44,6 +44,29 @@ namespace un {
         const std::shared_ptr<CXXComposite>& comp
     ) {
         generateInfoComments(ss, comp);
+        ss << "namespace un {" << std::endl;
+        // static serialization
+        ss << "namespace serialization {" << std::endl;
+        ss << "}" << std::endl;
+        // static serialization
+
+        ss << "class " << info.name << "Serializer final : public un::Serializer<" << info.fullName
+           << "> {"
+           << std::endl;
+        ss << "inline virtual void serialize(const " << info.fullName
+           << "& value, un::Serialized& into) override {"
+           << std::endl;
+        ss << "un::serialization::serialize(value, into);" << std::endl;
+        ss << "}" << std::endl;
+
+        ss << "inline virtual " << info.fullName << " deserialize(un::Serialized& from) override {"
+           << std::endl;
+        ss << "return un::serialization::deserialize<" << info.fullName << ">(from);" << std::endl;
+        ss << "}" << std::endl;
+
+        ss << "};" << std::endl;
+        ss << "}" << std::endl;
+
     }
 }
 

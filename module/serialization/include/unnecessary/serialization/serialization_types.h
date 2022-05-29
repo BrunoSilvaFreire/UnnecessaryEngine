@@ -1,5 +1,8 @@
 #ifndef UNNECESSARYENGINE_SERIALIZATION_TYPES_H
 #define UNNECESSARYENGINE_SERIALIZATION_TYPES_H
+
+#include <stdexcept>
+
 namespace un {
     enum SerializedType {
         eInteger8,
@@ -21,7 +24,7 @@ namespace un {
         template<typename TNode>
         TNode& as() {
             auto node = dynamic_cast<TNode*>(this);
-            if (node == nullptr){
+            if (node == nullptr) {
                 throw std::runtime_error("Invalid cast.");
             }
             return *node;

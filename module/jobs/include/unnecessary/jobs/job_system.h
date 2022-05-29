@@ -11,6 +11,7 @@
 #include <functional>
 #include <unnecessary/def.h>
 #include <unnecessary/logging.h>
+#include <unnecessary/extension.h>
 #include <unnecessary/graphs/dependency_graph.h>
 #include <unnecessary/misc/types.h>
 #include <unnecessary/misc/templates.h>
@@ -25,7 +26,13 @@ namespace un {
     class ProfilerPool;
 
     template<typename ...Archetypes>
-    class JobSystem : public ArchetypeMixin<Archetypes> ... {
+    class JobSystem;
+
+    template<typename ...Archetypes>
+    using JobSystemExtension = un::Extension<un::JobSystem<Archetypes...>>;
+
+    template<typename ...Archetypes>
+    class JobSystem : public Extensible<JobSystemExtension<Archetypes...>>, public ArchetypeMixin<Archetypes> ... {
     public:
         typedef std::tuple<
             WorkerPoolConfiguration<Archetypes>...
@@ -243,7 +250,27 @@ namespace un {
         }
 
         void join() {
-
+            std::set<std::size_t> workers;
+            std::size_t i = 0;
+            for_types_indexed<Archetypes...>(
+                [&]<typename WorkerType, std::size_t WorkerIndex>() {
+                    auto& pool = getWorkerPool<WorkerType>();
+                    for (WorkerType* worker : pool.getWorkers()) {
+                        workers.emplace(i++);
+                    }
+                }
+            );
+            i = 0;
+            un::Fence<> fence(workers);
+            for_types_indexed<Archetypes...>(
+                [&]<typename WorkerType, std::size_t WorkerIndex>() {
+                    auto& pool = getWorkerPool<WorkerType>();
+                    for (WorkerType* worker : pool.getWorkers()) {
+                        worker->join(i++, fence);
+                    }
+                }
+            );
+            fence.wait();
         }
 
         template<typename TWorker>

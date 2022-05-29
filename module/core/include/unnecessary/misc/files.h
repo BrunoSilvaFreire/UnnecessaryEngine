@@ -4,10 +4,16 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-#include "unnecessary/memory/membuf.h"
+#include <unnecessary/memory/membuf.h>
 
 namespace un::files {
     void read_file_into_buffer(
+        const std::filesystem::path& path,
+        un::Buffer& buffer,
+        std::ios::openmode openMode = std::ios::in
+    );
+
+    bool write_buffer_into_file(
         const std::filesystem::path& path,
         un::Buffer& buffer,
         std::ios::openmode openMode = std::ios::in

@@ -1,6 +1,7 @@
 #ifndef UNNECESSARYENGINE_APPLICATION_H
 #define UNNECESSARYENGINE_APPLICATION_H
 
+#include <unnecessary/extension.h>
 #include <unnecessary/misc/event.h>
 
 namespace un {
@@ -20,17 +21,14 @@ namespace un {
 
     class Application;
 
-    class Extension {
-    public:
-        virtual void apply(un::Application& application) = 0;
-    };
+    using AppExtension = un::Extension<Application>;
 
     class Application {
     private:
         un::AppLoop fixedLoop;
         un::AppLoop variableLoop;
         un::EventVoid onStart, onStop;
-        bool running;
+        bool running = false;
         float fixedFrameRate = 60;
     public:
         float getFixedFrameRate() const;

@@ -11,7 +11,7 @@
 namespace un {
 
     template<typename JobSystemType>
-    class RenderThread : public un::Extension {
+    class RenderThread : public un::AppExtension {
     private:
         bool _rendering = false;
         std::size_t _frame;

@@ -43,6 +43,7 @@ namespace un {
         std::filesystem::path source;
         std::unordered_map<std::string, u32> include2Index;
         IncludeGraphType includeGraph;
+        std::mutex translationUnitMutexes;
     public:
         explicit GenerationPlan(const std::filesystem::path& source);
 
@@ -54,6 +55,8 @@ namespace un {
         void bake();
 
         std::vector<std::pair<u32, const un::GenerationFile*>> getFilesSequence() const;
+
+        IncludeGraphType& getIncludeGraph();;
 
         const IncludeGraphType& getIncludeGraph() const;
     };

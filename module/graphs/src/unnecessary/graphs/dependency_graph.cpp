@@ -8,7 +8,7 @@ namespace un {
     }
 
     template<>
-    std::string un::to_string(const DependencyType& type) {
+    std::string to_string(const DependencyType& type) {
         switch (type) {
             case eUses:
                 return "uses";
@@ -17,5 +17,6 @@ namespace un {
                 return "used";
                 break;
         }
+        return "unknown";
     }
 }
