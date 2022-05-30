@@ -126,13 +126,14 @@ int main(int argc, char** args) {
                     std::vector<std::shared_ptr<un::CXXDeclaration>> symbols = translationUnit.collectSymbols<un::CXXDeclaration>();
                     std::vector<std::shared_ptr<un::Buffer>> toJoin;
                     std::set<un::JobHandle> dependencies;
-                    auto outPath = output / (pGenerationFile->getPath().filename().string() + ".generated.h");
+                    auto outPath =
+                        output / "include" / (pGenerationFile->getPath().filename().string() + ".generated.h");
+                    LOG(INFO) << pGenerationFile->getPath().filename() << "serializer will be written to " << outPath;
                     for (const auto& item : symbols) {
                         std::shared_ptr<un::Buffer> buffer = std::make_shared<un::Buffer>();
                         buffers.emplace_back(buffer);
                         toJoin.emplace_back(buffer);
                         un::JobHandle handle;
-                        LOG(INFO) << item->getFullName() << " serializer will be written to " << outPath;
                         chain.immediately<un::GenerateSerializerJob>(
                             &handle,
                             buffer,
@@ -180,6 +181,8 @@ int main(int argc, char** args) {
         jobSystem->join();
     }
     jobSystem->complete();
+    auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::SimpleJobSystem>>();
+    ptr->saveToFile(output / "recording.csv");
 }
 
 void process(

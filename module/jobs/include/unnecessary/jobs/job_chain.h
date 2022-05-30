@@ -41,10 +41,10 @@ namespace un {
             }
         }
 
-        template<typename TArchetype>
+        template<typename TJob>
         JobChain& after(JobHandle runAfter, JobHandle job) {
             system->addDependency(runAfter, job);
-            toStart.template erase<TArchetype>(job);
+            toStart.template erase<typename TJob::WorkerType>(job);
             return *this;
         }
 

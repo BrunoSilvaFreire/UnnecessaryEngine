@@ -234,14 +234,7 @@ namespace un {
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
                     auto& pool = getWorkerPool<WorkerType>();
                     for (WorkerType* worker : pool.getWorkers()) {
-                        if (worker->isRunning()) {
-                            worker->getOnFinished() += [&, i]() {
-                                completionFence.notify(i);
-                            };
-                        } else {
-                            completionFence.notify(i);
-                        }
-                        i++;
+                        worker->join(i++, completionFence);
                     }
                     pool.complete();
                 }

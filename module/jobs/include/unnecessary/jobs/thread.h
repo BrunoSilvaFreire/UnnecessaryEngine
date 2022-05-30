@@ -17,12 +17,14 @@ namespace un {
         std::thread _inner;
         std::mutex _dataMutex;
         bool _alive;
+        std::string name;
+        u32 core;
 
         void operator()();
 
-        void setAliveThreadName(const std::string& name);
+        void setThreadName(const std::string& name);
 
-        bool setAliveThreadCore(u32 core);
+        bool setThreadCore(u32 core);
 
     public:
         explicit Thread(const std::function<void()>& block);

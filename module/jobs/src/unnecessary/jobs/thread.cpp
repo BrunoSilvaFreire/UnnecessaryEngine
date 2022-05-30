@@ -44,14 +44,23 @@ namespace un {
     }
 
     bool Thread::setCore(u32 core) {
-        return setAliveThreadCore(core);
+        Thread::core = core;
+        if (_alive) {
+            return setThreadCore(core);
+        }
+        return true;
     }
 
     void Thread::setName(const std::string& name) {
-        setAliveThreadName(name);
+        Thread::name = name;
+        if (_alive) {
+            setThreadName(name);
+        }
     }
 
     void Thread::start() {
         _inner = std::thread(&Thread::operator(), this);
+        setThreadCore(core);
+        setThreadName(name);
     }
 }

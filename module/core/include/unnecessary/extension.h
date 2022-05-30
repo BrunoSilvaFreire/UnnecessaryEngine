@@ -31,13 +31,11 @@ namespace un {
 
         template<typename TOfType>
         std::shared_ptr<TOfType> findExtension() {
-            const auto& iterator = std::search(
-                extensions.begin(), extensions.end(), [](const std::shared_ptr<TExtension>& extension) {
-                    return std::dynamic_pointer_cast<TOfType>(extension) != nullptr;
+            for (const auto& extension : extensions) {
+                const auto& casted = std::dynamic_pointer_cast<TOfType>(extension);
+                if (casted != nullptr) {
+                    return casted;
                 }
-            );
-            if (iterator != extensions.end()) {
-                return std::dynamic_pointer_cast<TOfType>(*iterator);
             }
             return nullptr;
         }
