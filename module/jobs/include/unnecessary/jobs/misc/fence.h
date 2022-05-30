@@ -20,7 +20,7 @@ namespace un {
 #if DEBUG
             if (!remaining.contains(id)) {
                 std::stringstream ss;
-                ss << "Id " << id << " has been notified multiple times.";
+                ss << "Id " << id << " either has been notified multiple times or is invalid.";
                 throw std::runtime_error(ss.str());
             }
 #endif

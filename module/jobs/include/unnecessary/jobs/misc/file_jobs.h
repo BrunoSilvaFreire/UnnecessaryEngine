@@ -1,5 +1,5 @@
-#ifndef UNNECESSARYENGINE_LOAD_FILE_JOB_H
-#define UNNECESSARYENGINE_LOAD_FILE_JOB_H
+#ifndef UNNECESSARYENGINE_FILE_JOBS_H
+#define UNNECESSARYENGINE_FILE_JOBS_H
 
 #include <filesystem>
 #include <fstream>
@@ -29,9 +29,9 @@ namespace un {
     private:
         std::filesystem::path path;
         std::ios::openmode openMode;
-        un::Buffer* buffer;
+        std::shared_ptr<un::Buffer> buffer;
     public:
-        WriteFileJob(std::filesystem::path path, std::ios::openmode openMode, Buffer* buffer);
+        WriteFileJob(std::filesystem::path path, std::ios::openmode openMode, std::shared_ptr<Buffer> buffer);
 
         void operator()(WorkerType* worker) override;
     };

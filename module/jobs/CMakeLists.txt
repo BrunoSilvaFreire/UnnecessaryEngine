@@ -12,7 +12,8 @@ add_unnecessary_library(
     include/unnecessary/jobs/simple_jobs.h
     include/unnecessary/jobs/thread.h
     include/unnecessary/jobs/parallel_for_job.h
-    include/unnecessary/jobs/misc/load_file_job.h
+    include/unnecessary/jobs/misc/file_jobs.h
+    include/unnecessary/jobs/misc/join_buffers_job.h
     include/unnecessary/jobs/misc/lambda_job.h
     include/unnecessary/jobs/misc/graph_exploration.h
     include/unnecessary/jobs/misc/fence.h
@@ -23,7 +24,8 @@ add_unnecessary_library(
     include/unnecessary/jobs/recorder/data/event_history.h
     include/unnecessary/jobs/recorder/data/events.h
     src/unnecessary/jobs/jobs.cpp
-    src/unnecessary/jobs/load_file_job.cpp
+    src/unnecessary/jobs/misc/file_jobs.cpp
+    src/unnecessary/jobs/misc/join_buffers_job.cpp
     src/unnecessary/jobs/parallel_for_job.cpp
     src/unnecessary/jobs/worker.cpp
     src/unnecessary/jobs/job_dispatch.cpp

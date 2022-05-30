@@ -9,7 +9,8 @@
 #include <unnecessary/source_analysis/parsing.h>
 #include <unnecessary/jobs/worker_chain.h>
 #include <unnecessary/jobs/job_chain.h>
-#include <unnecessary/jobs/misc/load_file_job.h>
+#include <unnecessary/jobs/misc/file_jobs.h>
+#include <unnecessary/jobs/misc/join_buffers_job.h>
 #include <grapphs/dot.h>
 #include "generation.h"
 
@@ -123,25 +124,39 @@ int main(int argc, char** args) {
                     const un::GenerationFile* pGenerationFile = includeGraph[index];
                     const un::CXXTranslationUnit& translationUnit = pGenerationFile->getUnit();
                     std::vector<std::shared_ptr<un::CXXDeclaration>> symbols = translationUnit.collectSymbols<un::CXXDeclaration>();
+                    std::vector<std::shared_ptr<un::Buffer>> toJoin;
+                    std::set<un::JobHandle> dependencies;
+                    auto outPath = output / (pGenerationFile->getPath().filename().string() + ".generated.h");
                     for (const auto& item : symbols) {
-                        const std::shared_ptr<un::Buffer>& buffer = buffers.emplace_back(std::make_shared<un::Buffer>());
+                        std::shared_ptr<un::Buffer> buffer = std::make_shared<un::Buffer>();
+                        buffers.emplace_back(buffer);
+                        toJoin.emplace_back(buffer);
                         un::JobHandle handle;
-                        auto outPath = output / (pGenerationFile->getPath().filename().string() + ".generated.h");
                         LOG(INFO) << item->getFullName() << " serializer will be written to " << outPath;
                         chain.immediately<un::GenerateSerializerJob>(
                             &handle,
                             buffer,
                             item,
                             &translationUnit
-                        ).after<un::WriteFileJob>(
-                            handle,
-                            outPath,
-                            static_cast<std::ios::openmode>(std::ios::out | std::ios::trunc),
-                            buffer.get()
                         );
+                        dependencies.emplace(handle);
                         include2DeclarationsJobs[index].emplace(handle);
                     }
-
+                    un::JobHandle joinHandle;
+                    auto finalBuffer = std::make_shared<un::Buffer>();
+                    chain.immediately<un::JoinBuffersJob>(
+                        &joinHandle,
+                        toJoin,
+                        finalBuffer
+                    ).after<un::WriteFileJob>(
+                        joinHandle,
+                        outPath,
+                        static_cast<std::ios::openmode>(std::ios::out | std::ios::trunc),
+                        finalBuffer
+                    );
+                    for (const auto& item : dependencies) {
+                        chain.after<un::JoinBuffersJob>(item, joinHandle);
+                    }
                 },
                 [&](u32 from, u32 to) {
                     /*

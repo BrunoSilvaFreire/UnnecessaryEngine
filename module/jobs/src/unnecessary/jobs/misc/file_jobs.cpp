@@ -1,5 +1,5 @@
-#include <unnecessary/jobs/misc/load_file_job.h>
-#include <unnecessary/misc/files.h>
+#include "unnecessary/jobs/misc/file_jobs.h"
+#include "unnecessary/misc/files.h"
 #include <sstream>
 #include <utility>
 
@@ -22,8 +22,13 @@ namespace un {
         un::files::read_file_into_buffer(path, *buffer, openMode);
     }
 
-    WriteFileJob::WriteFileJob(std::filesystem::path path, std::ios::openmode openMode, Buffer* buffer)
-        : path(std::move(path)), openMode(openMode), buffer(buffer) { }
+    WriteFileJob::WriteFileJob(
+        std::filesystem::path path,
+        std::ios::openmode openMode,
+        std::shared_ptr<un::Buffer> buffer
+    ) : path(std::move(path)), openMode(openMode), buffer(std::move(buffer)) {
+        setName(std::string("Write ") + path.string());
+    }
 
     void WriteFileJob::operator()(JobWorker* worker) {
         un::files::ensure_directory_exists(path.parent_path());
