@@ -214,6 +214,10 @@ namespace un {
             return jobs[localHandle].job;
         }
 
+        const JobPointer getJob(un::JobHandle localHandle) const {
+            return jobs[localHandle].job;
+        }
+
         void dispatch(JobHandle jobIndex) {
             {
                 std::lock_guard<std::mutex> lock(queueAccessMutex);

@@ -11,6 +11,7 @@
 #include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/jobs/misc/file_jobs.h>
 #include <unnecessary/jobs/misc/join_buffers_job.h>
+#include <unnecessary/jobs/misc/job_visualization.h>
 #include <grapphs/dot.h>
 #include "generation.h"
 
@@ -30,6 +31,8 @@ void process(
     const std::filesystem::path& output,
     const std::string& relativeTo
 );
+
+void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot);
 
 int main(int argc, char** args) {
     cxxopts::Options options("unnecessary_serialization_generator");
@@ -84,6 +87,7 @@ int main(int argc, char** args) {
 
     un::JobSystemBuilder<un::SimpleJobSystem> builder;
     builder.withRecorder();
+    builder.setNumWorkers<un::JobWorker>(1);
     auto jobSystem = builder.build();
 
     un::GenerationPlan plan(relativeTo);
@@ -96,15 +100,22 @@ int main(int argc, char** args) {
             debugFileName += ".info.txt";
             std::filesystem::path debugFile = output / debugFileName;
             un::files::ensure_directory_exists(debugFile.parent_path());
+            un::JobHandle jobHandle;
             chain.immediately<un::ParseTranslationUnitJob>(
+                &jobHandle,
                 path,
                 relativeTo,
                 debugFileName,
                 includes,
                 &plan
             );
+            chain.setName(
+                jobHandle,
+                std::string("Parse ").append(path.string())
+            );
         }
-        LOG(INFO) << "Dispatching " << chain.getNumJobs() << " jobs...";
+        writeJobToDot(jobSystem, output / "parse_jobs.dot");
+        LOG(INFO) << "Dispatching " << chain.getNumJobs() << " parsing jobs...";
 
     }
     jobSystem->join();
@@ -126,9 +137,10 @@ int main(int argc, char** args) {
                     std::vector<std::shared_ptr<un::CXXDeclaration>> symbols = translationUnit.collectSymbols<un::CXXDeclaration>();
                     std::vector<std::shared_ptr<un::Buffer>> toJoin;
                     std::set<un::JobHandle> dependencies;
+                    std::string fileName = pGenerationFile->getPath().filename().string() + ".generated.h";
                     auto outPath =
-                        output / "include" / (pGenerationFile->getPath().filename().string() + ".generated.h");
-                    LOG(INFO) << pGenerationFile->getPath().filename() << "serializer will be written to " << outPath;
+                        output / "include" / fileName;
+                    LOG(INFO) << pGenerationFile->getPath().filename() << " serializer will be written to " << outPath;
                     for (const auto& item : symbols) {
                         std::shared_ptr<un::Buffer> buffer = std::make_shared<un::Buffer>();
                         buffers.emplace_back(buffer);
@@ -140,10 +152,15 @@ int main(int argc, char** args) {
                             item,
                             &translationUnit
                         );
+                        chain.setName(
+                            handle,
+                            std::string("Generate ").append(item->getFullName()).append(" serializer")
+                        );
                         dependencies.emplace(handle);
                         include2DeclarationsJobs[index].emplace(handle);
                     }
                     un::JobHandle joinHandle;
+                    un::JobHandle writeHandle;
                     auto finalBuffer = std::make_shared<un::Buffer>();
                     chain.immediately<un::JoinBuffersJob>(
                         &joinHandle,
@@ -151,9 +168,18 @@ int main(int argc, char** args) {
                         finalBuffer
                     ).after<un::WriteFileJob>(
                         joinHandle,
+                        &writeHandle,
                         outPath,
                         static_cast<std::ios::openmode>(std::ios::out | std::ios::trunc),
                         finalBuffer
+                    );
+                    chain.setName(
+                        joinHandle,
+                        std::string("Join buffers for ").append(fileName)
+                    );
+                    chain.setName(
+                        writeHandle,
+                        std::string("Write to file ").append(fileName)
                     );
                     for (const auto& item : dependencies) {
                         chain.after<un::JoinBuffersJob>(item, joinHandle);
@@ -177,12 +203,18 @@ int main(int argc, char** args) {
                     */
                 }
             );
+            writeJobToDot(jobSystem, output / "generate_jobs.dot");
+            LOG(INFO) << "Dispatching " << chain.getNumJobs() << " generation jobs...";
         }
         jobSystem->join();
     }
     jobSystem->complete();
     auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::SimpleJobSystem>>();
     ptr->saveToFile(output / "recording.csv");
+}
+
+void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot) {
+    un::create_job_system_graph_writer(*jobSystem).save_to_dot(jobSystem->getJobGraph().getInnerGraph(), jobsDot);
 }
 
 void process(

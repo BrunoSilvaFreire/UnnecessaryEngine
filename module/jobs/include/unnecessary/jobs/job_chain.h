@@ -41,6 +41,10 @@ namespace un {
             }
         }
 
+        void setDispatchOnDestruct(bool dispatchOnDestruct) {
+            JobChain::dispatchOnDestruct = dispatchOnDestruct;
+        }
+
         template<typename TJob>
         JobChain& after(JobHandle runAfter, JobHandle job) {
             system->addDependency(runAfter, job);
@@ -80,11 +84,11 @@ namespace un {
             return *this;
         }
 
-        template<typename T>
-        JobChain& after(un::JobHandle run, un::JobHandle* id, T* job) {
-            immediately<T>(id, job);
+        template<typename TJob>
+        JobChain& after(un::JobHandle run, un::JobHandle* id, TJob* job) {
+            immediately<TJob>(id, job);
             JobHandle handle = *id;
-            after<typename T::WorkerType>(run, handle);
+            after<TJob>(run, handle);
             return *this;
         }
 
@@ -109,21 +113,21 @@ namespace un {
             return *this;
         }
 
-        template<typename J, typename... Args>
+        template<typename TJob, typename... Args>
         JobChain& immediately(Args... args) {
-            return immediately<J>(new J(std::forward<Args>(args)...));
+            return immediately<TJob>(new TJob(std::forward<Args>(args)...));
         }
 
-        template<typename J, typename... Args>
+        template<typename TJob, typename... Args>
         JobChain& immediately(JobHandle* id, Args... args) {
-            return immediately<J>(id, new J(std::forward<Args>(args)...));
+            return immediately<TJob>(id, new TJob(std::forward<Args>(args)...));
         }
 
-        template<typename J, typename... Args>
-        JobChain& after(JobHandle dependencyId, J* job) {
+        template<typename TJob>
+        JobChain& after(JobHandle dependencyId, TJob* job) {
             un::JobHandle handle;
             immediately(&handle, job);
-            after<J>(dependencyId, handle);
+            after<TJob>(dependencyId, handle);
             return *this;
         }
 

@@ -35,7 +35,6 @@
         {% set ns.workerIndex = ns.workerIndex + 1 %}
         {% for job in worker %}
         {
-            id: {{job.handle}},
             group: {{ns.workerIndex}},
             content: "{{job.label}}",
             start: {{job.time_start}} / 1000,

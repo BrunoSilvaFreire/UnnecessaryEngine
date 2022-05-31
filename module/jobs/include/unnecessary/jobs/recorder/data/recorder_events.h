@@ -55,6 +55,20 @@ namespace un {
 
     };
 
+    template<typename TJob>
+    class JobEnqueuedMeta : public JobMeta<TJob> {
+    public:
+        JobEnqueuedMeta(const TJob* const job, JobHandle jobHandle) : JobMeta<TJob>(
+            job,
+            jobHandle
+        ) { }
+
+        ProfilerEventType getEventType() const override {
+            return un::ProfilerEventType::eJobEnqueued;
+        }
+
+    };
+
     class WorkerSleepingMeta : public EventMeta {
     public:
         ProfilerEventType getEventType() const override;

@@ -1,5 +1,7 @@
 #include <unnecessary/serializer/jobs/generate_serializer_job.h>
 
+#include <utility>
+
 namespace un {
     void GenerateSerializerJob::operator()(un::JobWorker* worker) {
         std::stringstream ss;
@@ -71,7 +73,13 @@ namespace un {
 }
 
 un::GenerateSerializerJob::GenerateSerializerJob(
-    const std::shared_ptr<un::Buffer>& buffer,
+    std::shared_ptr<un::Buffer> buffer,
     const std::shared_ptr<un::CXXDeclaration>& toGenerate,
     const un::CXXTranslationUnit* translationUnit
-) : buffer(buffer), toGenerate(toGenerate), translationUnit(translationUnit) { }
+) : buffer(std::move(buffer)), toGenerate(toGenerate), translationUnit(translationUnit) {
+    std::string name = toGenerate->getName();
+    info.name = name;
+    info.upper = un::upper(name);
+    info.lower = un::lower(name);
+    info.fullName = toGenerate->getFullName();
+}

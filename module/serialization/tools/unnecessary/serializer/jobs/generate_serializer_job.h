@@ -30,7 +30,7 @@ namespace un {
     public:
 
         GenerateSerializerJob(
-            const std::shared_ptr<un::Buffer>& buffer,
+            std::shared_ptr<un::Buffer>  buffer,
             const std::shared_ptr<un::CXXDeclaration>& toGenerate,
             const un::CXXTranslationUnit* translationUnit
         );

@@ -203,6 +203,12 @@ namespace un {
             }
         }
 
+        /**
+         * rlo = Reverse Level Order traversal
+         * @see https://www.geeksforgeeks.org/reverse-level-order-traversal
+         * @param perVertex
+         * @param perEdge
+         */
         UN_AGGRESSIVE_INLINE void each_rlo(
             const std::function<void(
                 IndexType index

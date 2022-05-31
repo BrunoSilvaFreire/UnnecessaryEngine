@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Timeline</title>
+    <script
+            type="text/javascript"
+            src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"
+    ></script>
+    <link
+            href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css"
+            rel="stylesheet"
+            type="text/css"
+    />
+    <style type="text/css">
+        #visualization {
+            width: 100%;
+            height: 100%;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+<div id="visualization"></div>
+<script type="text/javascript">
+    // DOM element where the Timeline will be attached
+    const container = document.getElementById('visualization');
+
+    // Create a DataSet (allows two way data-binding)
+    var items = new vis.DataSet([
+        //Archetypes
+        
+        
+        
+        
+        
+        
+        {
+            group: 1,
+            content: "Parse /home/brunorbsf/CLionProjects/UnnecessaryEngine/module/rendering/serialization/../include/unnecessary/rendering/pipelines/pipeline_description.h",
+            start: 1654011724643671775 / 1000,
+            end: 1654011725241392185 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Parse /home/brunorbsf/CLionProjects/UnnecessaryEngine/module/rendering/serialization/../include/unnecessary/rendering/pipelines/pipeline_description.h",
+            start: 1654011724643671775 / 1000,
+            end: 1654011725868691249 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Parse /home/brunorbsf/CLionProjects/UnnecessaryEngine/module/rendering/serialization/../include/unnecessary/rendering/pipelines/pipeline_description.h",
+            start: 1654011725868677029 / 1000,
+            end: 1654011725241392185 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Parse /home/brunorbsf/CLionProjects/UnnecessaryEngine/module/rendering/serialization/../include/unnecessary/rendering/pipelines/pipeline_description.h",
+            start: 1654011725868677029 / 1000,
+            end: 1654011725868691249 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::VertexStreamUsageEntry serializer",
+            start: 1654011724643671775 / 1000,
+            end: 1654011725241392185 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::VertexStreamUsageEntry serializer",
+            start: 1654011724643671775 / 1000,
+            end: 1654011725868691249 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::VertexStreamUsageEntry serializer",
+            start: 1654011725868677029 / 1000,
+            end: 1654011725241392185 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::VertexStreamUsageEntry serializer",
+            start: 1654011725868677029 / 1000,
+            end: 1654011725868691249 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Parse /home/brunorbsf/CLionProjects/UnnecessaryEngine/module/rendering/serialization/../include/unnecessary/rendering/pipelines/input_scope.h",
+            start: 1654011725241397215 / 1000,
+            end: 1654011725868351828 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Parse /home/brunorbsf/CLionProjects/UnnecessaryEngine/module/rendering/serialization/../include/unnecessary/rendering/pipelines/input_scope.h",
+            start: 1654011725241397215 / 1000,
+            end: 1654011725868701839 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Parse /home/brunorbsf/CLionProjects/UnnecessaryEngine/module/rendering/serialization/../include/unnecessary/rendering/pipelines/input_scope.h",
+            start: 1654011725868694509 / 1000,
+            end: 1654011725868351828 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Parse /home/brunorbsf/CLionProjects/UnnecessaryEngine/module/rendering/serialization/../include/unnecessary/rendering/pipelines/input_scope.h",
+            start: 1654011725868694509 / 1000,
+            end: 1654011725868701839 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::VertexStreamEntry serializer",
+            start: 1654011725241397215 / 1000,
+            end: 1654011725868351828 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::VertexStreamEntry serializer",
+            start: 1654011725241397215 / 1000,
+            end: 1654011725868701839 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::VertexStreamEntry serializer",
+            start: 1654011725868694509 / 1000,
+            end: 1654011725868351828 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::VertexStreamEntry serializer",
+            start: 1654011725868694509 / 1000,
+            end: 1654011725868701839 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::PipelineStageDescription serializer",
+            start: 1654011725868703769 / 1000,
+            end: 1654011725868712539 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::PipelineDepthOptions serializer",
+            start: 1654011725868714769 / 1000,
+            end: 1654011725868725399 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::PipelineInput serializer",
+            start: 1654011725868727019 / 1000,
+            end: 1654011725868734860 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::PipelineDescription serializer",
+            start: 1654011725868736410 / 1000,
+            end: 1654011725868744630 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Generate un::InputScope serializer",
+            start: 1654011725868746150 / 1000,
+            end: 1654011725868750730 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Join buffers for input_scope.h.generated.h",
+            start: 1654011725868754410 / 1000,
+            end: 1654011725868757930 / 1000
+        },
+        
+        {
+            group: 1,
+            content: "Write to file input_scope.h.generated.h",
+            start: 1654011725868758850 / 1000,
+            end: 1654011725868805430 / 1000
+        },
+        
+        
+        
+    ]);
+    var groups = [
+        
+        
+        
+            
+            
+                
+                
+            
+            {
+                id: 0,
+                content: "Archetype: 0",
+                nestedGroups: [
+                    [1]
+                ],
+            },
+            
+                
+                {
+                       id: 1,
+                       content: "Worker: 0",
+                },
+            
+            
+        
+    ];
+    // Configuration for the Timeline
+    var options = {
+        stack: false
+    };
+
+    // Create a Timeline
+    var timeline = new vis.Timeline(container, items, groups, options);
+</script>
+</body>
+</html>

@@ -160,6 +160,7 @@ namespace un {
             {
                 std::lock_guard<std::mutex> lock(queueMutex);
                 pending.push(std::make_pair(handle, job));
+                enqueued(job, handle);
                 tryAwake();
             }
         }

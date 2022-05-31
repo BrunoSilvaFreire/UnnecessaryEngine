@@ -59,6 +59,14 @@ namespace un {
                         handle
                     ));
             };
+            type->onEnqueued() += [this](JobType* job, un::JobHandle handle) {
+                _history.record(
+                    std::make_unique<un::JobEnqueuedMeta<JobType>>(
+                        job,
+                        handle
+                    )
+                );
+            };
         }
     };
 }

@@ -146,6 +146,11 @@ namespace un {
             return ArchetypeMixin<TWorker>::_pool;
         }
 
+        template<typename TWorker>
+        const un::WorkerPool<TWorker>& getWorkerPool() const {
+            return ArchetypeMixin<TWorker>::_pool;
+        }
+
         void addDependency(JobHandle to, JobHandle from) {
 #ifdef DEBUG
             if (from == to) {
@@ -264,6 +269,10 @@ namespace un {
                 }
             );
             fence.wait();
+        }
+
+        const JobGraph& getJobGraph() const {
+            return graph;
         }
 
         template<typename TWorker>

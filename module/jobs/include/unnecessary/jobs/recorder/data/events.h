@@ -15,7 +15,9 @@ namespace un {
         eWorkerSleeping,
         eWorkerAwaken,
         eJobStarted,
-        eJobFinished
+        eJobFinished,
+        eJobEnqueued,
+        eJobUnlocked
     };
 
     class EventMeta {

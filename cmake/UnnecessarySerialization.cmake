@@ -54,7 +54,7 @@ function(
     list(JOIN FILE_SERIALIZER_GENERATION_CMD " " FILE_SERIALIZER_GENERATION_CMD_STR)
     message("Target ${UN_SERIALIZATION_TARGET} serialization using command '${FILE_SERIALIZER_GENERATION_CMD_STR}'")
     add_custom_target(
-        _un_generate_${UN_SERIALIZATION_TARGET}_serialization
+        generate_${UN_SERIALIZATION_TARGET}_serialization
         COMMAND
         ${FILE_SERIALIZER_GENERATION_CMD}
         COMMENT "Generating serialization logic for ${UN_SERIALIZATION_TARGET}"
@@ -62,7 +62,7 @@ function(
     )
     add_dependencies(
         ${UN_SERIALIZATION_TARGET}
-        _un_generate_${UN_SERIALIZATION_TARGET}_serialization
+        generate_${UN_SERIALIZATION_TARGET}_serialization
     )
     target_include_directories(
         ${UN_SERIALIZATION_TARGET}
