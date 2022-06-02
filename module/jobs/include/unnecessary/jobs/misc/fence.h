@@ -11,9 +11,10 @@ namespace un {
     private:
         std::mutex mutex, completed;
         std::condition_variable variable;
+        std::set<TValue> allElements;
         std::set<TValue> remaining;
     public:
-        explicit Fence(const std::set<TValue> &remaining) : remaining(remaining) {}
+        explicit Fence(const std::set<TValue> &remaining) : remaining(remaining), allElements(remaining) {}
 
         void notify(TValue id) {
             std::lock_guard<std::mutex> lock(mutex);

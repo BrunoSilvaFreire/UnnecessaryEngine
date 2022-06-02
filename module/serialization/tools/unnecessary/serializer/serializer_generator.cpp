@@ -80,14 +80,15 @@ int main(int argc, char** args) {
         std::filesystem::path filePath = "temp";
         files = result[kFileArgName].as<std::vector<std::string>>();
     } catch (const cxxopts::OptionParseException& x) {
-        std::cerr << "dog: " << x.what() << '\n';
-        std::cerr << "usage: dog [options] <input_file> ...\n";
+        std::cerr << "unnecessary_serializer_generator: " << x.what() << '\n';
+        std::cerr << "usage: unnecessary_serializer_generator [options] <input_file> ...\n";
         return EXIT_FAILURE;
     }
 
     un::JobSystemBuilder<un::SimpleJobSystem> builder;
+    builder.setNumWorkers<un::JobWorker>(2);
     builder.withRecorder();
-    builder.setNumWorkers<un::JobWorker>(1);
+    builder.withLogger();
     auto jobSystem = builder.build();
 
     un::GenerationPlan plan(relativeTo);
@@ -121,10 +122,7 @@ int main(int argc, char** args) {
     jobSystem->join();
     plan.bake();
     un::GenerationPlan::IncludeGraphType& includeGraph = plan.getIncludeGraph();
-    gpp::save_to_dot(
-        includeGraph.getInnerGraph(),
-        output / "includes.dot"
-    );
+    gpp::save_to_dot(includeGraph.getInnerGraph(), output / "includes.dot");
     {
         std::vector<std::shared_ptr<un::Buffer>> buffers;
         {

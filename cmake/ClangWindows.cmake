@@ -71,6 +71,7 @@ macro(build_llvm)
         -DCMAKE_BUILD_TYPE=Release
         -DLLVM_TARGETS_TO_BUILD=X86
         -DLLVM_ENABLE_PROJECTS=clang
+        -DLIBCLANG_BUILD_STATIC=On
         -DCMAKE_INSTALL_PREFIX=${CLANG_INSTALL_DIRECTORY}
         -DCMAKE_C_COMPILER=${LLVM_C_COMPILER}
         -DCMAKE_CXX_COMPILER=${LLVM_CXX_COMPILER}
@@ -100,40 +101,11 @@ macro(setup_llvm)
     if (NOT EXISTS ${CLANG_INSTALL_DIRECTORY})
         build_llvm()
     endif ()
-    add_library(clangAST STATIC IMPORTED)
-    add_library(libclang STATIC IMPORTED)
-    target_include_directories(
-        clangAST
-        INTERFACE
-        ${CLANG_INSTALL_DIRECTORY}/include
-    )
-    target_include_directories(
-        libclang
-        INTERFACE
-        ${CLANG_INSTALL_DIRECTORY}/include
-    )
-
+    add_library(staticclang STATIC IMPORTED)
     set_target_properties(
-        clangAST
-        PROPERTIES
-        IMPORTED_LOCATION ${CLANG_INSTALL_DIRECTORY}/lib/clangAST.lib
-        IMPORTED_CONFIGURATIONS Release
-    )
-    target_link_libraries(
-        clangAST
-        INTERFACE
-        ${LLVM_ALL_LIBRARIES}
-    )
-    set_target_properties(
-        libclang
+        staticclang
         PROPERTIES
         IMPORTED_LOCATION ${CLANG_INSTALL_DIRECTORY}/lib/libclang.lib
         IMPORTED_CONFIGURATIONS Release
-    )
-
-    target_link_libraries(
-        libclang
-        INTERFACE
-        ${LLVM_ALL_LIBRARIES}
     )
 endmacro()

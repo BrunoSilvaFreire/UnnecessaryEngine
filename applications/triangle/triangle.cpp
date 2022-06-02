@@ -14,7 +14,7 @@
 #include <triangle.gen.h>
 #include <pipelinedescription.serializer.generated.h>
 namespace un {
-    typedef un::JobSystem<JobWorker, un::SimulationWorker, un::GraphicsWorker> UnnecessaryJobSystem;
+    typedef un::JobSystem<un::JobWorker, un::SimulationWorker, un::GraphicsWorker> UnnecessaryJobSystem;
 }
 
 int main(int argc, char** argv) {
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         );
         un::UnnecessaryJobSystem jobSystem(
             std::make_tuple(
-                un::WorkerPoolConfiguration<JobWorker>::forwarding(4),
+                un::WorkerPoolConfiguration<un::JobWorker>::forwarding(4),
                 un::WorkerPoolConfiguration<un::SimulationWorker>::forwarding(4),
                 un::WorkerPoolConfiguration<un::GraphicsWorker>(
                     1,

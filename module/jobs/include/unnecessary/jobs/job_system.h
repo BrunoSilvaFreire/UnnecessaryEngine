@@ -37,11 +37,15 @@ namespace un {
         typedef std::tuple<
             WorkerPoolConfiguration<Archetypes>...
         > WorkerAllocationConfig;
-
-        typedef std::tuple<ProfilerPool<Archetypes>...> ProfilerPoolTuple;
-
         template<typename TValue>
         using RepeatedTuple = typename un::repeat_tuple<TValue, sizeof...(Archetypes)>::type;
+
+        template<template<typename> typename TValue>
+        using ArchetypeTuple = std::tuple<TValue<Archetypes>...>;
+
+
+        typedef ArchetypeTuple<ProfilerPool> ProfilerPoolTuple;
+
 
         typedef un::JobDispatchTable<Archetypes...> DispatchTable;
         typedef std::index_sequence_for<Archetypes...> ArchetypesIndices;
@@ -93,8 +97,10 @@ namespace un {
         }
 
         template<typename JobWorkerType>
-        std::pair<un::JobHandle, un::JobNode*>
-        create(typename JobWorkerType::JobType* job, bool dispatch) {
+        std::pair<un::JobHandle, un::JobNode*> create(
+            typename JobWorkerType::JobType* job,
+            bool dispatch
+        ) {
             constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, Archetypes...>();
             un::WorkerPool<JobWorkerType>& pool = getWorkerPool<JobWorkerType>();
             un::JobHandle graphHandle = graph.add(
@@ -269,6 +275,18 @@ namespace un {
                 }
             );
             fence.wait();
+        }
+
+        template<typename TFunc>
+        void for_each_worker(TFunc block) {
+            for_each_archetype(
+                [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
+                    un::WorkerPool<TArchetype>& pool = getWorkerPool<TArchetype>();
+                    for (const auto& worker : pool.getWorkers()) {
+                        block.template operator()<TArchetype, TArchetypeIndex>(worker);
+                    }
+                }
+            );
         }
 
         const JobGraph& getJobGraph() const {

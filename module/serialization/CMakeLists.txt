@@ -60,4 +60,11 @@ add_unnecessary_tool(
     unnecessary_jobs
     grapphs_visualization
 )
+if (WIN32)
+    unnecessary_copy_on_build(
+        unnecessary_serializer_generator
+        ${CLANG_INSTALL_DIRECTORY}/bin/libclang.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/bin/libclang.dll
+    )
+endif ()
 add_subdirectory(nlohmann)

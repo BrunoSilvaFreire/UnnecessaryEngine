@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/menubar/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/menubar/build" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/menubar/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/build" />
+      <excludeFolder url="file://$MODULE_DIR$/unnecessary_interop/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/unnecessary_interop/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/unnecessary_interop/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/build" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/ui/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/ui/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ui/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/menubar/build" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/menubar/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/menubar/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/build" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/linux/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/vision/windows/flutter/ephemeral/.plugin_symlinks/unnecessary_interop/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/unnecessary_interop/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/unnecessary_interop/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/unnecessary_interop/build" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

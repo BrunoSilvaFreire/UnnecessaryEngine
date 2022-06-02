@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Flutter Plugins" type="FlutterPluginsLibraryType">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/unnecessary_interop" />
+      <root url="file://$PROJECT_DIR$/../../../../../Dev/flutter/.pub-cache/hosted/pub.dartlang.org/file_picker-4.6.1" />
+      <root url="file://$PROJECT_DIR$/thirdparty/menubar" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -2,6 +2,7 @@
 #define UNNECESSARYENGINE_JOB_SYSTEM_BUILDER_H
 
 #include <unnecessary/jobs/simple_jobs.h>
+#include <unnecessary/jobs/logger/job_system_logger.h>
 #include <unnecessary/jobs/recorder/job_system_recorder.h>
 
 namespace un {
@@ -11,7 +12,7 @@ namespace un {
         using WorkerAllocationConfig = typename TJobSystem::WorkerAllocationConfig;
     private:
         WorkerAllocationConfig allocationConfig;
-        bool addRecorder;
+        std::vector<std::shared_ptr<typename TJobSystem::ExtensionType>> extensions;
         bool autoStart;
 
         std::unique_ptr<TJobSystem> create() const {
@@ -19,20 +20,36 @@ namespace un {
         }
 
     public:
-        JobSystemBuilder() : allocationConfig(), addRecorder(false), autoStart(true) { };
+        JobSystemBuilder() : allocationConfig(), autoStart(true) { };
 
         void setAutoStart(bool autoStart) {
             JobSystemBuilder::autoStart = autoStart;
         }
 
+        template<typename TExtension, typename... Args>
+        void withExtension(Args... args) {
+            extensions.emplace_back(std::make_shared<TExtension>(args...));
+        }
+
         void withRecorder() {
-            addRecorder = true;
+            withExtension<un::JobSystemRecorder<TJobSystem>>();
+        }
+
+        void withLogger() {
+            withExtension<un::JobSystemLogger<TJobSystem>>();
         }
 
         template<typename TWorker>
         void setNumWorkers(std::size_t numWorkers) {
             constexpr auto WorkerIndex = TJobSystem::template index_of_archetype<TWorker>();
             std::get<WorkerIndex>(allocationConfig) = WorkerPoolConfiguration<TWorker>::forwarding(numWorkers);
+        }
+
+        template<typename TWorker>
+        void setNumWorkers(float percentageOfAvailableThreads, u32 limit) {
+            float percentage = static_cast<f32>(std::thread::hardware_concurrency()) * percentageOfAvailableThreads;
+            u32 candidate = std::min(static_cast<u32>(std::floor(percentage)), limit);
+            setNumWorkers<TWorker>(candidate);
         }
 
         template<typename TWorker>
@@ -47,13 +64,12 @@ namespace un {
         }
 
         std::unique_ptr<TJobSystem> build() const {
-            bool start = !addRecorder && autoStart;
             std::unique_ptr<TJobSystem> system = create();
-            if (addRecorder) {
-                system->extendWith(std::make_shared<un::JobSystemRecorder<TJobSystem>>());
-                if (autoStart) {
-                    system->start();
-                }
+            for (const auto& extension : extensions) {
+                system->extendWith(extension);
+            }
+            if (autoStart) {
+                system->start();
             }
             return system;
         }
@@ -67,7 +83,7 @@ namespace un {
 
     template<>
     JobSystemBuilder<un::SimpleJobSystem>::JobSystemBuilder()
-        : allocationConfig(), addRecorder(false), autoStart(true) {
+        : allocationConfig(), autoStart(true) {
         fillWorkers<un::JobWorker>();
     }
 

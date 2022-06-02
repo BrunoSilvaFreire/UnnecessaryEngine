@@ -23,6 +23,7 @@ add_unnecessary_library(
     include/unnecessary/jobs/recorder/worker_recorder.h
     include/unnecessary/jobs/recorder/data/event_history.h
     include/unnecessary/jobs/recorder/data/events.h
+    include/unnecessary/jobs/logger/job_system_logger.h
     src/unnecessary/jobs/jobs.cpp
     src/unnecessary/jobs/misc/file_jobs.cpp
     src/unnecessary/jobs/misc/join_buffers_job.cpp

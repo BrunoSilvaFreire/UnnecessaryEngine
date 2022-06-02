@@ -8,4 +8,9 @@ endif ()
 function(setup_libast)
     setup_llvm()
     add_unnecessary_thirdparty_library(cppast)
+    target_compile_definitions(
+        cppast
+        PUBLIC
+        CINDEX_NO_EXPORTS
+    )
 endfunction()

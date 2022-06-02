@@ -33,7 +33,11 @@ dependencies:
     path: ../ui
   unnecessary_interop:
     path: ../unnecessary_interop
-
+  csv: ^5.0.1
+  file_picker: ^4.6.1
+  rxdart: any
+  timelines: ^0.1.0
+  dart_numerics: ^0.0.6
 dev_dependencies:
   flutter_test:
     sdk: flutter
