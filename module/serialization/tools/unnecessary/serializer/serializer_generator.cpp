@@ -5,6 +5,7 @@
 #include <unnecessary/source_analysis/parser.h>
 #include <unnecessary/source_analysis/parsing.h>
 #include <unnecessary/serializer/jobs/parse_translation_unit_job.h>
+#include <unnecessary/serializer/jobs/generate_includes_job.h>
 #include <unnecessary/serializer/jobs/generate_serializer_job.h>
 #include <unnecessary/serializer/generation_plan.h>
 #include <unnecessary/jobs/job_system_builder.h>
@@ -94,7 +95,7 @@ int main(int argc, char** args) {
     builder.withLogger();
     auto jobSystem = builder.build();
 
-    un::GenerationPlan plan(relativeTo);
+    un::GenerationPlan plan(relativeTo, output);
     {
         un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
         for (const std::string& file : files) {
@@ -127,7 +128,6 @@ int main(int argc, char** args) {
     un::GenerationPlan::IncludeGraphType& includeGraph = plan.getIncludeGraph();
     gpp::save_to_dot(includeGraph.getInnerGraph(), output / "includes.dot");
     {
-        std::vector<std::shared_ptr<un::Buffer>> buffers;
         {
             un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
             std::unordered_map<u32, std::set<un::JobHandle>> include2DeclarationsJobs;
@@ -139,19 +139,31 @@ int main(int argc, char** args) {
                     std::vector<std::shared_ptr<un::Buffer>> toJoin;
                     std::set<un::JobHandle> dependencies;
                     std::string fileName = pGenerationFile->getPath().filename().string() + ".generated.h";
-                    auto outPath =
-                        output / "include" / fileName;
+                    auto outPath = pGenerationFile->getOutput();
                     LOG(INFO) << pGenerationFile->getPath().filename() << " serializer will be written to " << outPath;
+
+                    std::shared_ptr<un::Buffer> includeBuf = std::make_shared<un::Buffer>();
+                    un::JobHandle includeHandle;
+                    const un::CXXTranslationUnit* pUnit = &translationUnit;
+                    chain.immediately<un::GenerateIncludesJobs>(
+                        &includeHandle,
+                        index,
+                        pUnit,
+                        &plan,
+                        includeBuf
+                    );
+                    toJoin.emplace_back(includeBuf);
+                    dependencies.emplace(includeHandle);
+
                     for (const auto& item : symbols) {
                         std::shared_ptr<un::Buffer> buffer = std::make_shared<un::Buffer>();
-                        buffers.emplace_back(buffer);
                         toJoin.emplace_back(buffer);
                         un::JobHandle handle;
                         chain.immediately<un::GenerateSerializerJob>(
                             &handle,
                             buffer,
                             item,
-                            &translationUnit
+                            pUnit
                         );
                         chain.setName(
                             handle,
@@ -217,75 +229,4 @@ int main(int argc, char** args) {
 
 void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot) {
     un::create_job_system_graph_writer(*jobSystem).save_to_dot(jobSystem->getJobGraph().getInnerGraph(), jobsDot);
-}
-
-void process(
-    const std::vector<std::string>& parsingIncludes,
-    const std::vector<std::string>& globalIncludes,
-    const std::string& file,
-    const std::filesystem::path& output,
-    const std::string& relativeTo
-) {
-    std::string ownInclude = std::filesystem::relative(file, relativeTo).string();
-    std::filesystem::path includesOutput = output / "include";
-    std::filesystem::path filePath = file;
-    un::parsing::ParsingOptions parseOptions(file, parsingIncludes);
-    parseOptions.setDebugFile(output / "cppast.info.txt");
-    auto translationUnit = un::parsing::parse(parseOptions);
-    std::vector<std::string> allGeneratedFilenames;
-    for (const auto& composite : translationUnit.collectSymbols<un::CXXComposite>()) {
-        LOG(INFO) << "Checking " << composite->getFullName();
-        if (!un::isSerializable(composite)) {
-            LOG(INFO) << composite->getFullName() << " is not serializable, skipping.";
-            continue;
-        }
-        un::GenerationInfo info;
-        std::vector<std::string> additionalIncludes;
-        for (const auto& item : composite->getFields()) {
-            const un::CXXType& type = item.getType();
-            if (type.getKind() != un::eComplex) {
-                continue;
-            }
-            std::shared_ptr<un::CXXComposite> other;
-            std::string typeName = type.getName();
-            if (!translationUnit.findSymbol<un::CXXComposite>(typeName, other)) {
-//                    LOG(WARN) << "Unable to find composite type " << typeName << " for field " << item.getName()
-//                              << ". Will not add extra include.";
-                continue;
-            }
-            if (!un::isSerializable(other)) {
-//                    LOG(WARN) << "Type " << typeName << " for field " << item.getName()
-//                              << " isn't serializable. Will not add extra include.";
-                continue;
-            }
-            std::string name = other->getName();
-            auto lastName = name.find_last_of(':');
-            if (lastName > 0) {
-                name = name.substr(lastName + 1);
-            }
-            std::string include = un::getGeneratedIncludeName(name);
-            additionalIncludes.emplace_back(include);
-        }
-        for (const std::string& include : globalIncludes) {
-            additionalIncludes.emplace_back(include);
-        }
-        std::string name = composite->getName();
-        info.name = name;
-        info.upper = un::upper(name);
-        info.lower = un::lower(name);
-        info.fullName = composite->getFullName();
-        info.ownInclude = ownInclude;
-        LOG(INFO) << composite->getFullName() << " is suitable for serialization, proceeding...";
-        generateSerializerInclude(includesOutput, composite, translationUnit, info, additionalIncludes);
-        allGeneratedFilenames.emplace_back(info.lower + ".serializer.generated.h");
-    }
-    std::stringstream ss;
-    ss << "// All generated serializers are included here" << std::endl;
-    ss << "#pragma once" << std::endl;
-    for (const std::string& file : allGeneratedFilenames) {
-        ss << "#include <" << file << ">" << std::endl;
-    }
-    un::files::safe_write_file(
-        includesOutput / (filePath.filename().replace_extension().string() + ".serializers.h"), ss
-    );
 }

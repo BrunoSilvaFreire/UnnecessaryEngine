@@ -32,6 +32,10 @@ typedef double f64;
 #endif
 
 namespace un {
+    template<typename T>
+    using ptr = T*;
+    template<typename T>
+    using const_ptr = const T*;
 #ifdef UN_PLATFORM_WINDOWS
 
     UN_AGGRESSIVE_INLINE void debug_break() {

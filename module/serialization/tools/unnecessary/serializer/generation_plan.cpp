@@ -6,8 +6,11 @@
 
 namespace un {
 
-    GenerationPlan::GenerationPlan(const std::filesystem::path& source)
-        : source(source), include2Index(), includeGraph() { }
+    GenerationPlan::GenerationPlan(
+        const std::filesystem::path& source,
+        std::filesystem::path output
+    )
+        : source(source), include2Index(), includeGraph(), output(output) { }
 
     const GenerationPlan::IncludeGraphType& GenerationPlan::getIncludeGraph() const {
         return includeGraph;
@@ -16,7 +19,16 @@ namespace un {
     void GenerationPlan::addTranslationUnit(const std::filesystem::path& file, CXXTranslationUnit&& unit) {
         {
             std::lock_guard<decltype(translationUnitMutexes)> lock(translationUnitMutexes);
-            auto i = includeGraph.add(un::GenerationFile(file, std::move(unit)));
+            std::filesystem::path fileName = file.filename();;
+            fileName.replace_extension();
+            std::string finalName = fileName.filename().string() + ".serializer.generated.h";
+            auto i = includeGraph.add(
+                un::GenerationFile(
+                    file,
+                    output / "include" / finalName,
+                    std::move(unit)
+                )
+            );
             include2Index[un::to_string(file)] = i;
         }
     }
@@ -46,5 +58,9 @@ namespace un {
     std::ostream& operator<<(std::ostream& os, const GenerationFile& file) {
         os << un::to_string(file.path);
         return os;
+    }
+
+    const std::filesystem::path& GenerationFile::getOutput() const {
+        return output;
     }
 }

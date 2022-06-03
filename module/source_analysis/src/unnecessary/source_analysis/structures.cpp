@@ -246,4 +246,17 @@ namespace un {
     const std::vector<std::string>& CXXTranslationUnit::getIncludes() const {
         return includes;
     }
+
+    CXXTranslationUnit::CXXTranslationUnit(
+        std::filesystem::path location,
+        std::string selfInclude
+    ) : selfInclude(std::move(selfInclude)), location(location) { }
+
+    const std::string& CXXTranslationUnit::getSelfInclude() const {
+        return selfInclude;
+    }
+
+    const std::filesystem::path& CXXTranslationUnit::getLocation() const {
+        return location;
+    }
 }

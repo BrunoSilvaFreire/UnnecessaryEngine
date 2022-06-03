@@ -76,12 +76,11 @@ namespace un {
         std::shared_ptr<un::Buffer> buffer,
         const std::shared_ptr<un::CXXDeclaration>& toGenerate,
         const un::CXXTranslationUnit* translationUnit
-    ) : buffer(std::move(buffer)), toGenerate(toGenerate), translationUnit(translationUnit) {
-        std::string name = toGenerate->getName();
-        info.name = name;
-        info.upper = un::upper(name);
-        info.lower = un::lower(name);
-        info.fullName = toGenerate->getFullName();
+    ) : buffer(std::move(buffer)),
+        toGenerate(toGenerate),
+        translationUnit(translationUnit),
+        info(*toGenerate){
+
     }
 
     void GenerateSerializerJob::writeFieldInfo(

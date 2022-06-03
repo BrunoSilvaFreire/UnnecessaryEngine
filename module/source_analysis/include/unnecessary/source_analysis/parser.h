@@ -16,6 +16,7 @@ namespace un::parsing {
     class ParsingOptions {
     private:
         std::filesystem::path file;
+        std::string selfInclude;
         std::filesystem::path debugFile;
         std::vector<std::string> includes;
 
@@ -29,6 +30,10 @@ namespace un::parsing {
         const std::filesystem::path& getDebugFile() const;
 
         void setDebugFile(const std::filesystem::path& debugFile);
+
+        void setSelfInclude(const std::string& selfInclude);
+
+        std::string getSelfInclude() const;
     };
 
     class Parser {

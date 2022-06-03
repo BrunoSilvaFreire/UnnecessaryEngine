@@ -14,6 +14,7 @@ namespace un {
         std::filesystem::path debugFile = debugOutput / debugFileName;
         un::files::ensure_directory_exists(debugFile.parent_path());
         parseOptions.setDebugFile(debugFile);
+        parseOptions.setSelfInclude(un::to_string(relative));
         auto translationUnit = un::parsing::parse(parseOptions);
         plan->addTranslationUnit(relative, std::move(translationUnit));
     }

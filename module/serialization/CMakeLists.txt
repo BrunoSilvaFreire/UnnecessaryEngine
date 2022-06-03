@@ -54,6 +54,9 @@ add_unnecessary_tool(
     tools/unnecessary/serializer/jobs/parse_translation_unit_job.h
     tools/unnecessary/serializer/jobs/parse_translation_unit_job.cpp
 
+    tools/unnecessary/serializer/jobs/generate_includes_job.h
+    tools/unnecessary/serializer/jobs/generate_includes_job.cpp
+
     DEPENDENCIES
     unnecessary_source_analysis
     unnecessary_graphs

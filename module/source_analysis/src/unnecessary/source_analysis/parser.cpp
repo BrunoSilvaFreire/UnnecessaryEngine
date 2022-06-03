@@ -38,7 +38,18 @@ namespace un::parsing {
         ParsingOptions::debugFile = debugFile;
     }
 
-    Parser::Parser(const ParsingOptions& options) {
+    std::string ParsingOptions::getSelfInclude() const {
+        if (selfInclude.empty()) {
+            return std::filesystem::absolute(file).string();
+        }
+        return selfInclude;
+    }
+
+    void ParsingOptions::setSelfInclude(const std::string& selfInclude) {
+        ParsingOptions::selfInclude = selfInclude;
+    }
+
+    Parser::Parser(const ParsingOptions& options) : translationUnit(options.getFile(), options.getSelfInclude()) {
         auto work = std::filesystem::current_path();
         un::UnnecessaryLogger logger;
         cppast::libclang_parser parser(type_safe::ref(logger));

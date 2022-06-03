@@ -22,7 +22,7 @@ namespace un {
         ss << "#ifndef UN_SERIALIZER_GENERATED_" << info.upper << std::endl;
         ss << "#define UN_SERIALIZER_GENERATED_" << info.upper << std::endl;
         ss << "#include <unnecessary/serialization/serializer.h>" << std::endl;
-        ss << "#include <" << info.ownInclude << ">" << std::endl;
+//        ss << "#include <" << info.ownInclude << ">" << std::endl;
         for (const auto& item : additionalIncludes) {
             ss << "#include <" << item << ">" << std::endl;
         }

@@ -214,8 +214,15 @@ namespace un {
     class CXXTranslationUnit : public CXXScope {
     private:
         std::vector<std::string> includes;
+        std::string selfInclude;
+        std::filesystem::path location;
         std::unordered_map<std::string, un::CXXType> _typeIndex;
     public:
+        explicit CXXTranslationUnit(
+            std::filesystem::path location,
+            std::string selfInclude
+        );
+
         void addInclude(const std::string& include);
 
         const std::vector<std::string>& getIncludes() const;
@@ -225,6 +232,10 @@ namespace un {
         void addType(const std::string& key, const un::CXXType& type);
 
         void addType(const un::CXXType& out);
+
+        const std::string& getSelfInclude() const;
+
+        const std::filesystem::path& getLocation() const;
     };
 
 }
