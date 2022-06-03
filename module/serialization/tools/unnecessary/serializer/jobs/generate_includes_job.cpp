@@ -8,9 +8,11 @@ namespace un {
         std::string macroName = "UN_SERIALIZER_GENERATED_";
         std::filesystem::path loc = translationUnit->getLocation();
         macroName += un::upper(loc.replace_extension().filename().string());
+
         ss << "#ifndef " << macroName << std::endl;
         ss << "#define " << macroName << std::endl;
-
+        ss << "#include <unnecessary/serialization/serializer.h>" << std::endl;
+        ss << "#include <unnecessary/serialization/serialization_utils.h>" << std::endl;
         for (const auto& item : translationUnit->getIncludes()) {
             ss << "#include <" << item << ">" << std::endl;
         }

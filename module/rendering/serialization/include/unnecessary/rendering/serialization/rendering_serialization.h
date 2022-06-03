@@ -4,5 +4,6 @@
 
 #ifndef UNNECESSARYENGINE_RENDERING_SERIALIZATION_H
 #define UNNECESSARYENGINE_RENDERING_SERIALIZATION_H
-#include <pipeline_description.serializers.h>
+#include <pipeline_description.serializer.generated.h>
+#include <input_scope.serializer.generated.h>
 #endif

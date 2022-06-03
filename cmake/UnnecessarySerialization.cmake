@@ -71,7 +71,7 @@ function(add_unnecessary_serialization)
     message("Target ${UN_SERIALIZATION_TARGET} serialization using command '${FILE_SERIALIZER_GENERATION_CMD_STR}'")
     add_custom_target(
         generate_${UN_SERIALIZATION_TARGET}_serialization
-        COMMAND "${FILE_SERIALIZER_GENERATION_CMD}"
+        COMMAND ${FILE_SERIALIZER_GENERATION_CMD}
         COMMENT "Generating serialization logic for ${UN_SERIALIZATION_TARGET}"
         SOURCES ${UN_SERIALIZATION_FILES}
     )

@@ -3,12 +3,7 @@
 namespace un {
 
     bool PrimitiveWriter::accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) {
-        if (field.getType().getName() == "std::string") {
-            outPriority = 1.5F; //Overtake complex writer
-        } else {
-            outPriority = 0;
-
-        }
+        outPriority = 0;
         return true;
     }
 

@@ -31,53 +31,17 @@ namespace un {
         void serializeFields(
             const std::shared_ptr<un::CXXComposite>& composite,
             std::stringstream& ss
-        ) {
-            std::stringstream fieldsSerialization;
-            std::stringstream fieldsDeserialization;
-            for (const auto& field : composite->getFields()) {
-                auto att = field.findAttribute("un::serialize");
-                if (att == nullptr) {
-                    continue;
-                }
-                const std::shared_ptr<SerializationWriter>& writer = writerRegistry.getWriter(field, *translationUnit);
-                const std::string& fName = field.getName();
-                const un::CXXType& fieldType = field.getType();
-                LOG(INFO) << "Elected " << writer->name() << " for field " << fName << " of " << info.fullName
-                          << " with type " << fieldType.getName() << " (kind: " << un::to_string(fieldType.getKind())
-                          << ")";
-
-                //Serialization
-                fieldsSerialization << "// --- BEGIN FIELD SERIALIZATION: " << fName << std::endl;
-                writeFieldInfo(fieldsSerialization, field, writer);
-                writer->write_serializer(fieldsSerialization, field, *translationUnit, writerRegistry);
-                fieldsSerialization << "// --- END FIELD SERIALIZATION: " << fName << std::endl;
-                fieldsSerialization << std::endl;
-
-                // Deserialization
-                fieldsDeserialization << "// --- BEGIN FIELD DESERIALIZATION: " << fName << std::endl;
-                writeFieldInfo(fieldsDeserialization, field, writer);
-                writer->write_deserializer(fieldsDeserialization, field, *translationUnit, writerRegistry);
-                fieldsDeserialization << "// --- END FIELD DESERIALIZATION: " << fName << std::endl;
-                fieldsDeserialization << std::endl;
-            }
-            ss << "template<>" << std::endl;
-            ss << "inline void serialize<" << info.fullName << ">" << "(const " << info.fullName
-               << "& value, un::Serialized& into) {" << std::endl;
-            ss << fieldsSerialization.str() << std::endl;
-            ss << "}" << std::endl;
-
-            ss << "template<>" << std::endl;
-            ss << info.fullName << " deserialize<" << info.fullName << ">(un::Serialized& from) {" << std::endl;
-            ss << info.fullName << " value;" << std::endl;
-            ss << fieldsDeserialization.str() << std::endl;
-            ss << "return value;" << std::endl;
-            ss << "}" << std::endl;
-        }
+        );
 
         void generateCompositeSerializer(
             std::stringstream& ss,
             const std::shared_ptr<CXXComposite>& comp
         );
+        void generateEnumSerializer(
+            std::stringstream& ss,
+            const std::shared_ptr<CXXEnum>& anEnum
+        );
+
 
     public:
 
@@ -88,6 +52,8 @@ namespace un {
         );
 
         void operator()(WorkerType* worker) override;
+
+        void addStaticRediction(std::stringstream& ss) const;
     };
 
 

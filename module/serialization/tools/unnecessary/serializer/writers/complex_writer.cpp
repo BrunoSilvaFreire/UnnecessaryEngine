@@ -3,13 +3,17 @@
 namespace un {
 
     bool ComplexWriter::accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) {
+        if (field.getType().getName() == "std::string") {
+            return false;
+        }
         outPriority = 1.0F;
         return field.getType().getKind() == un::CXXTypeKind::eComplex;
     }
 
-    void
-    ComplexWriter::write_serializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-                                    const un::WriterRegistry& registry) {
+    void ComplexWriter::write_serializer(
+        std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
+        const un::WriterRegistry& registry
+    ) {
         std::string fName = field.getName();
         std::string typeName = field.getType().getName();
         bool optional = isOptional(field);
@@ -22,8 +26,10 @@ namespace un {
     }
 
     void
-    ComplexWriter::write_deserializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-                                      const un::WriterRegistry& registry) {
+    ComplexWriter::write_deserializer(
+        std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
+        const un::WriterRegistry& registry
+    ) {
         std::string fName = field.getName();
         std::string typeName = field.getType().getName();
         bool optional = isOptional(field);
