@@ -36,14 +36,14 @@ namespace un {
         );
         writer.setEdgeWriter(
             [](std::stringstream& ss, u32 from, u32 to, const un::DependencyType& jobNode) {
-                ss << " [label=\"Depends on\"];";
+                ss << " [label=\"" << un::to_string(jobNode) << "\"];";
             }
         );
-        writer.setEdgePredicate(
-            [](u32 from, u32 to, const un::DependencyType& dependencyType) {
-                return dependencyType == un::DependencyType::eUses;
-            }
-        );
+//        writer.setEdgePredicate(
+//            [](u32 from, u32 to, const un::DependencyType& dependencyType) {
+//                return dependencyType == un::DependencyType::eUses;
+//            }
+//        );
         return writer;
     }
 }

@@ -26,11 +26,11 @@ namespace un {
             const std::vector<un::CXXAttribute>& attributes = field.getAttributes();
             ss << "// Field: " << field.getName() << " (" << field.getType().getFullName() << ")" << std::endl;
             if (attributes.empty()) {
-                ss << "// No attributes. " << std::endl;
+                ss << "//     No attributes. " << std::endl;
             } else {
-                ss << "// Attributes (" << attributes.size() << "):" << std::endl;
+                ss << "//     Attributes (" << attributes.size() << "):" << std::endl;
                 for (const un::CXXAttribute& att : attributes) {
-                    ss << "// " << att.getName();
+                    ss << "//         " << att.getName();
                     const std::set<std::string>& args = att.getArguments();
                     if (!args.empty()) {
                         ss << ", args: " << un::join_strings(args.begin(), args.end());
@@ -49,6 +49,7 @@ namespace un {
         ss << "namespace un {" << std::endl;
         // static serialization
         ss << "namespace serialization {" << std::endl;
+        serializeFields(comp, ss);
         ss << "}" << std::endl;
         // static serialization
 
@@ -70,16 +71,27 @@ namespace un {
         ss << "}" << std::endl;
 
     }
-}
 
-un::GenerateSerializerJob::GenerateSerializerJob(
-    std::shared_ptr<un::Buffer> buffer,
-    const std::shared_ptr<un::CXXDeclaration>& toGenerate,
-    const un::CXXTranslationUnit* translationUnit
-) : buffer(std::move(buffer)), toGenerate(toGenerate), translationUnit(translationUnit) {
-    std::string name = toGenerate->getName();
-    info.name = name;
-    info.upper = un::upper(name);
-    info.lower = un::lower(name);
-    info.fullName = toGenerate->getFullName();
+    GenerateSerializerJob::GenerateSerializerJob(
+        std::shared_ptr<un::Buffer> buffer,
+        const std::shared_ptr<un::CXXDeclaration>& toGenerate,
+        const un::CXXTranslationUnit* translationUnit
+    ) : buffer(std::move(buffer)), toGenerate(toGenerate), translationUnit(translationUnit) {
+        std::string name = toGenerate->getName();
+        info.name = name;
+        info.upper = un::upper(name);
+        info.lower = un::lower(name);
+        info.fullName = toGenerate->getFullName();
+    }
+
+    void GenerateSerializerJob::writeFieldInfo(
+        std::stringstream& stream,
+        const un::CXXField& field,
+        const std::shared_ptr<SerializationWriter>& writer
+    ) {
+        stream << "// Access: " << to_string(field.getAccessModifier()) << std::endl;
+        stream << "// Type: " << field.getType().getName() << std::endl;
+        stream << "// Writer: " << writer->name() << std::endl;
+    }
+
 }

@@ -46,17 +46,17 @@ namespace un {
         }
 
         template<typename TJob>
-        JobChain& after(JobHandle runAfter, JobHandle job) {
-            system->addDependency(runAfter, job);
-            toStart.template erase<typename TJob::WorkerType>(job);
+        JobChain& after(JobHandle afterThis, JobHandle runThis) {
+            system->addDependency(afterThis, runThis);
+            toStart.template erase<typename TJob::WorkerType>(runThis);
             return *this;
         }
 
         template<typename TArchetype>
-        JobChain& afterAll(JobHandle job) {
+        JobChain& afterAll(JobHandle runThis) {
             for (un::JobHandle handle : allJobs.template getBatch<TArchetype>()) {
-                if (handle != job) {
-                    after<TArchetype>(handle, job);
+                if (handle != runThis) {
+                    after<TArchetype>(handle, runThis);
                 }
             }
             return *this;
@@ -85,10 +85,10 @@ namespace un {
         }
 
         template<typename TJob>
-        JobChain& after(un::JobHandle run, un::JobHandle* id, TJob* job) {
-            immediately<TJob>(id, job);
-            JobHandle handle = *id;
-            after<TJob>(run, handle);
+        JobChain& after(un::JobHandle afterThis, un::JobHandle* runThis, TJob* job) {
+            immediately<TJob>(runThis, job);
+            JobHandle handle = *runThis;
+            after<TJob>(afterThis, handle);
             return *this;
         }
 
@@ -127,21 +127,21 @@ namespace un {
         JobChain& after(JobHandle dependencyId, TJob* job) {
             un::JobHandle handle;
             immediately(&handle, job);
-            after<TJob>(dependencyId, handle);
+            after<TJob>(handle, dependencyId);
             return *this;
         }
 
 
         template<typename J, typename... Args>
-        JobChain& after(JobHandle dependencyId, Args... args) {
-            after<J>(dependencyId, new J(std::forward<Args>(args)...));
+        JobChain& after(JobHandle afterThis, Args... args) {
+            after<J>(afterThis, new J(std::forward<Args>(args)...));
             return *this;
         }
 
 
         template<typename J, typename... Args>
-        JobChain& after(JobHandle dependencyId, JobHandle* resultId, Args... args) {
-            after<J>(dependencyId, resultId, new J(std::forward<Args>(args)...));
+        JobChain& after(JobHandle afterThis, JobHandle* runThis, Args... args) {
+            after<J>(afterThis, runThis, new J(std::forward<Args>(args)...));
             return *this;
         }
 

@@ -27,7 +27,7 @@ namespace un {
     class DependencyGraph {
     public:
         typedef std::function<void(IndexType index, const VertexType& vertex)> Explorer;
-        typedef gpp::AdjacencyList<VertexType, DependencyType, IndexType> InnerGraph;
+        typedef gpp::AdjacencyList <VertexType, DependencyType, IndexType> InnerGraph;
     protected:
         InnerGraph graph;
         std::set<IndexType> independent;
@@ -124,7 +124,9 @@ namespace un {
             IndexType from,
             IndexType to
         ) {
-            return graph.disconnect(from, to);
+            bool firstSuccess = graph.disconnect(from, to);
+            bool secondSuccess = graph.disconnect(to, from);
+            return firstSuccess && secondSuccess;
         }
 
         template<typename ...Args>

@@ -9,7 +9,9 @@
 namespace un {
     template<typename T>
     std::string to_string(const T& value) {
-        return std::to_string(value);
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
     }
 
     template<>

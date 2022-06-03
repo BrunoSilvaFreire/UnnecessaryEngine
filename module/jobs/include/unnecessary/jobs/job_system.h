@@ -51,12 +51,12 @@ namespace un {
         typedef std::index_sequence_for<Archetypes...> ArchetypesIndices;
 
         template<typename Archetype>
-        constexpr static auto index_of_archetype() {
+        constexpr UN_AGGRESSIVE_INLINE static auto index_of_archetype() {
             return un::index_of_type<Archetype, Archetypes...>();
         }
 
         template<typename Functor>
-        constexpr static void for_each_archetype(Functor&& functor) {
+        constexpr UN_AGGRESSIVE_INLINE static void for_each_archetype(Functor&& functor) {
             un::for_types_indexed<Archetypes...>(functor);
         }
 
@@ -64,16 +64,16 @@ namespace un {
         un::JobGraph graph;
         std::mutex graphAccessMutex;
         size_t totalNumberOfWorkers = 0;
+        un::Event<un::JobHandle, const un::JobNode&> unlockFailed;
 
         template<typename WorkerType, std::size_t WorkerIndex>
         void done(typename WorkerType::JobType* job, JobHandle handle) {
             {
                 std::lock_guard<std::mutex> lock(graphAccessMutex);
-
-                for (auto otherIndex : graph.dependantsOn(handle)) {
+                for (auto subsequent : graph.dependantsOn(handle)) {
                     bool ready = true;
-                    for (auto otherDependency : graph.dependenciesOf(otherIndex)) {
-                        if (otherDependency != handle) {
+                    for (auto subsequentDependency : graph.dependenciesOf(subsequent)) {
+                        if (subsequentDependency != handle) {
                             // There is another dependency we need to wait for
                             ready = false;
                             break;
@@ -82,15 +82,18 @@ namespace un {
                     if (ready) {
                         // TODO: Ewww.
                         for_types_indexed<Archetypes...>(
-                            [&, otherIndex]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
-                                const auto& other = graph[otherIndex];
+                            [&, subsequent]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
+                                const auto& other = graph[subsequent];
                                 if (other->archetypeIndex == OtherWorkerIndex) {
                                     auto& pool = getWorkerPool<OtherWorkerType>();
                                     pool.unsafeDispatch(other->poolLocalIndex);
                                 }
                             }
                         );
+                    } else {
+                        unlockFailed(subsequent, *graph.getInnerGraph().vertex(subsequent));
                     }
+                    graph.disconnect(handle, subsequent);
                 }
                 graph.remove(handle);
             }
@@ -157,15 +160,15 @@ namespace un {
             return ArchetypeMixin<TWorker>::_pool;
         }
 
-        void addDependency(JobHandle to, JobHandle from) {
+        void addDependency(JobHandle afterThis, JobHandle runThis) {
 #ifdef DEBUG
-            if (from == to) {
+            if (afterThis == runThis) {
                 throw std::runtime_error("A job cannot depend on itself!");
             }
 #endif
             {
                 std::lock_guard<std::mutex> guard(graphAccessMutex);
-                graph.addDependency(from, to);
+                graph.addDependency(runThis, afterThis);
             }
         }
 
@@ -291,6 +294,14 @@ namespace un {
 
         const JobGraph& getJobGraph() const {
             return graph;
+        }
+
+        Event<un::JobHandle, const un::JobNode&>& onUnlockFailed() {
+            return unlockFailed;
+        }
+
+        const Event<un::JobHandle, const un::JobNode&>& onUnlockFailed() const {
+            return unlockFailed;
         }
 
         template<typename TWorker>

@@ -67,8 +67,10 @@ namespace un {
 
     template<typename TJobSystem>
     class JobSystemLogger : public TJobSystem::ExtensionType {
+    public:
+        using LoggerPoolTuple = typename TJobSystem::template ArchetypeTuple<LoggerPool>;
     private:
-        typename TJobSystem::template ArchetypeTuple<LoggerPool> loggers;
+        LoggerPoolTuple loggers;
     public:
         void apply(typename TJobSystem::ExtensionType::TargetType& jobSystem) override {
             jobSystem.for_each_worker(
@@ -76,6 +78,53 @@ namespace un {
                     std::get<TArchetypeIndex>(loggers).addLogger(worker);
                 }
             );
+            jobSystem.onUnlockFailed() += [this, &jobSystem](un::JobHandle handle, const un::JobNode& node) {
+                std::vector<std::string> dependenciesMissing;
+                const un::DependencyGraph<un::JobNode>& jobGraph = jobSystem.getJobGraph();
+                for (auto dependantIndex : jobGraph.dependenciesOf(handle)) {
+                    auto dependantNode = jobGraph[dependantIndex];
+                    TJobSystem::for_each_archetype(
+                        [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
+                            if (dependantNode->archetypeIndex != TArchetypeIndex) {
+                                return;
+                            }
+                            auto* job = jobSystem.template getWorkerPool<TArchetype>()
+                                                 .getJob(dependantNode->poolLocalIndex);
+                            std::string jobStr;
+                            if (job == nullptr){
+                                jobStr = std::string("Unknown Job (") + un::to_string(*dependantNode) +
+                                         " of archetype " +
+                                         un::type_name_of<TArchetype>() + ")";
+                            } else {
+                                jobStr = std::string("Job ") + job->getName() + " (" + un::to_string(*dependantNode) +
+                                         " of archetype " +
+                                         un::type_name_of<TArchetype>() + ")";
+                            }
+
+                            dependenciesMissing.push_back(jobStr);
+                        }
+                    );
+                };
+                TJobSystem::for_each_archetype(
+                    [
+                        this,
+                        &node,
+                        &jobSystem,
+                        &dependenciesMissing
+                    ]<typename TArchetype, std::size_t TArchetypeIndex>() {
+                        if (node.archetypeIndex != TArchetypeIndex) {
+                            return;
+                        }
+
+                        auto* job = jobSystem.template getWorkerPool<TArchetype>().getJob(node.poolLocalIndex);
+
+                        LOG(INFO) << "Job \"" << job->getName() << "\" (" << un::type_name_of<TArchetype>()
+                                  << ") failed to be unlocked because of dependencies (" << dependenciesMissing.size()
+                                  << "): "
+                                  << un::join_strings(dependenciesMissing.begin(), dependenciesMissing.end());
+                    }
+                );
+            };
         }
     };
 }

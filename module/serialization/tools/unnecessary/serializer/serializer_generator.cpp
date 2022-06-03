@@ -1,17 +1,19 @@
 #include <cxxopts.hpp>
 #include <chrono>
 #include <unordered_map>
+
+#include <unnecessary/source_analysis/parser.h>
+#include <unnecessary/source_analysis/parsing.h>
 #include <unnecessary/serializer/jobs/parse_translation_unit_job.h>
 #include <unnecessary/serializer/jobs/generate_serializer_job.h>
 #include <unnecessary/serializer/generation_plan.h>
 #include <unnecessary/jobs/job_system_builder.h>
-#include <unnecessary/source_analysis/parser.h>
-#include <unnecessary/source_analysis/parsing.h>
 #include <unnecessary/jobs/worker_chain.h>
 #include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/jobs/misc/file_jobs.h>
 #include <unnecessary/jobs/misc/join_buffers_job.h>
 #include <unnecessary/jobs/misc/job_visualization.h>
+#include <unnecessary/misc/benchmark.h>
 #include <grapphs/dot.h>
 #include "generation.h"
 
@@ -35,6 +37,7 @@ void process(
 void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot);
 
 int main(int argc, char** args) {
+    un::Chronometer<> chronometer;
     cxxopts::Options options("unnecessary_serialization_generator");
     options.add_options("required")
                (
@@ -86,7 +89,7 @@ int main(int argc, char** args) {
     }
 
     un::JobSystemBuilder<un::SimpleJobSystem> builder;
-    builder.setNumWorkers<un::JobWorker>(2);
+    builder.setNumWorkers<un::JobWorker>(1);
     builder.withRecorder();
     builder.withLogger();
     auto jobSystem = builder.build();
@@ -179,8 +182,8 @@ int main(int argc, char** args) {
                         writeHandle,
                         std::string("Write to file ").append(fileName)
                     );
-                    for (const auto& item : dependencies) {
-                        chain.after<un::JoinBuffersJob>(item, joinHandle);
+                    for (const auto& generationHandle : dependencies) {
+                        chain.after<un::JoinBuffersJob>(generationHandle, joinHandle);
                     }
                 },
                 [&](u32 from, u32 to) {
@@ -209,6 +212,7 @@ int main(int argc, char** args) {
     jobSystem->complete();
     auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::SimpleJobSystem>>();
     ptr->saveToFile(output / "recording.csv");
+    LOG(INFO) << "Sources generated in " << chronometer.stop();
 }
 
 void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot) {
