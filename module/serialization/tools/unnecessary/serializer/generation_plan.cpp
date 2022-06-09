@@ -3,14 +3,20 @@
 //
 
 #include <unnecessary/serializer/generation_plan.h>
+#include <utility>
 
 namespace un {
 
     GenerationPlan::GenerationPlan(
-        const std::filesystem::path& source,
+        std::filesystem::path source,
         std::filesystem::path output
-    )
-        : source(source), include2Index(), includeGraph(), output(output) { }
+    ) : include2Index(),
+        includeGraph(),
+        source(std::move(source)),
+        output(std::move(output)),
+        index(std::make_shared<cppast::cpp_entity_index>()) {
+
+    }
 
     const GenerationPlan::IncludeGraphType& GenerationPlan::getIncludeGraph() const {
         return includeGraph;
@@ -35,6 +41,7 @@ namespace un {
 
     void GenerationPlan::bake() {
         {
+
             std::lock_guard<decltype(translationUnitMutexes)> lock(translationUnitMutexes);
             for (const auto& [gen, i] : includeGraph.getInnerGraph().all_vertices()) {
                 for (const auto& item : gen->getUnit().getIncludes()) {
@@ -53,6 +60,10 @@ namespace un {
 
     GenerationPlan::IncludeGraphType& GenerationPlan::getIncludeGraph() {
         return includeGraph;
+    }
+
+    const std::shared_ptr<cppast::cpp_entity_index>& GenerationPlan::getIndex() const {
+        return index;
     }
 
     std::ostream& operator<<(std::ostream& os, const GenerationFile& file) {

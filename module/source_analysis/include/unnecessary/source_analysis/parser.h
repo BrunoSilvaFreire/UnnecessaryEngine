@@ -9,17 +9,18 @@
 #include <functional>
 #include <stack>
 #include <cppast/libclang_parser.hpp>
+#include <utility>
 #include <unnecessary/source_analysis/structures.h>
 #include <unnecessary/logging.h>
 
 namespace un::parsing {
     class ParsingOptions {
     private:
-        std::filesystem::path file;
         std::string selfInclude;
+        std::filesystem::path file;
         std::filesystem::path debugFile;
         std::vector<std::string> includes;
-
+        std::shared_ptr<cppast::cpp_entity_index> indexToUse;
     public:
         ParsingOptions(std::filesystem::path file, std::vector<std::string> includes);
 
@@ -34,6 +35,10 @@ namespace un::parsing {
         void setSelfInclude(const std::string& selfInclude);
 
         std::string getSelfInclude() const;
+
+        const std::shared_ptr<cppast::cpp_entity_index>& getIndexToUse() const;
+
+        void setIndexToUse(const std::shared_ptr<cppast::cpp_entity_index>& indexToUse);
     };
 
     class Parser {
@@ -47,11 +52,19 @@ namespace un::parsing {
         std::vector<un::CXXAttribute> macros;
         std::unique_ptr<cppast::cpp_file> result;
         std::set<std::string> alreadyParsed;
-        cppast::cpp_entity_index index;
+        std::shared_ptr<cppast::cpp_entity_index> index;
 
     public:
 
         Parser(const un::parsing::ParsingOptions& options);
+
+        Parser(
+            cppast::cpp_file&& file,
+            std::shared_ptr<cppast::cpp_entity_index> index
+        ) : result(std::move(std::make_unique<cppast::cpp_file>(std::move(file)))),
+            index(std::move(index)) {
+
+        }
 
         const CXXTranslationUnit& getTranslationUnit() const {
             return translationUnit;
@@ -80,6 +93,8 @@ namespace un::parsing {
         void write_ast_node(std::ofstream& os, const std::string& prefix, const cppast::cpp_entity& e) const;
 
         CXXTypeKind toUnTypeKind(const cppast::cpp_type& type) const;
+
+        std::shared_ptr<cppast::cpp_entity_index> getIndex(const ParsingOptions& options);
     };
 }
 #endif

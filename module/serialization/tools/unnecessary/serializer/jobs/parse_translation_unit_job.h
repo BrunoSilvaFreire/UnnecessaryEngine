@@ -19,12 +19,14 @@ namespace un {
         std::filesystem::path debugOutput;
         std::vector<std::string> includes;
         un::GenerationPlan* plan;
+        std::shared_ptr<cppast::cpp_entity_index> index;
     public:
         ParseTranslationUnitJob(
-            const std::filesystem::path& file,
-            const std::filesystem::path& relativeTo,
-            const std::filesystem::path& debugOutput,
-            const std::vector<std::string>& includes,
+            std::shared_ptr<cppast::cpp_entity_index> index,
+            std::filesystem::path  file,
+            std::filesystem::path  relativeTo,
+            std::filesystem::path  debugOutput,
+            std::vector<std::string>  includes,
             GenerationPlan* plan
         );
 

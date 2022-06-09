@@ -3,6 +3,8 @@
 #include <unnecessary/source_analysis/parsing.h>
 #include <unnecessary/serializer/jobs/parse_translation_unit_job.h>
 
+#include <utility>
+
 namespace un {
     void ParseTranslationUnitJob::operator()(JobWorker* worker) {
         std::filesystem::path path = file;
@@ -15,16 +17,23 @@ namespace un {
         un::files::ensure_directory_exists(debugFile.parent_path());
         parseOptions.setDebugFile(debugFile);
         parseOptions.setSelfInclude(un::to_string(relative));
+        parseOptions.setIndexToUse(index);
         auto translationUnit = un::parsing::parse(parseOptions);
         plan->addTranslationUnit(relative, std::move(translationUnit));
     }
 
     ParseTranslationUnitJob::ParseTranslationUnitJob(
-        const std::filesystem::path& file,
-        const std::filesystem::path& relativeTo,
-        const std::filesystem::path& debugOutput,
-        const std::vector<std::string>& includes,
+        std::shared_ptr<cppast::cpp_entity_index> index,
+        std::filesystem::path file,
+        std::filesystem::path relativeTo,
+        std::filesystem::path debugOutput,
+        std::vector<std::string> includes,
         GenerationPlan* plan
-    ) : file(file), relativeTo(relativeTo), debugOutput(debugOutput), includes(includes), plan(plan) { }
+    ) : file(std::move(file)),
+        relativeTo(std::move(relativeTo)),
+        debugOutput(std::move(debugOutput)),
+        includes(std::move(includes)),
+        plan(plan),
+        index(std::move(index)) { }
 }
 

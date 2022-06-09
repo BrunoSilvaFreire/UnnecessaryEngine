@@ -9,6 +9,7 @@
 #include <cppast/cpp_namespace.hpp>
 #include <cppast/cpp_preprocessor.hpp>
 #include <cppast/cpp_member_variable.hpp>
+#include <cppast/cpp_entity_kind.hpp>
 #include <cppast/cpp_type.hpp>
 #include <cppast/cpp_class_template.hpp>
 #include <cppast/visitor.hpp>
@@ -49,7 +50,19 @@ namespace un::parsing {
         ParsingOptions::selfInclude = selfInclude;
     }
 
-    Parser::Parser(const ParsingOptions& options) : translationUnit(options.getFile(), options.getSelfInclude()) {
+
+    const std::shared_ptr<cppast::cpp_entity_index>& ParsingOptions::getIndexToUse() const {
+        return indexToUse;
+    }
+
+    void ParsingOptions::setIndexToUse(const std::shared_ptr<cppast::cpp_entity_index>& indexToUse) {
+        ParsingOptions::indexToUse = indexToUse;
+    }
+
+    Parser::Parser(
+        const ParsingOptions& options
+    ) : translationUnit(options.getFile(), options.getSelfInclude()),
+        index(getIndex(options)) {
         auto work = std::filesystem::current_path();
         un::UnnecessaryLogger logger;
         cppast::libclang_parser parser(type_safe::ref(logger));
@@ -61,7 +74,7 @@ namespace un::parsing {
             config.add_include_dir(item);
         }
         un::Chronometer<> chronometer;
-        result = parser.parse(index, fileName, config);
+        result = parser.parse(*index, fileName, config);
         auto ms = chronometer.stop();
         LOG(INFO) << "Parsing of file " << options.getFile().filename() << " took " << ms.count() << " ms.";
 
@@ -361,16 +374,71 @@ namespace un::parsing {
         os.close();
     }
 
+    std::string to_string(cppast::cpp_type_kind kind) {
+        switch (kind) {
+            case cppast::cpp_type_kind::builtin_t:
+                return "builtin";
+            case cppast::cpp_type_kind::user_defined_t:
+                return "user_defined";
+            case cppast::cpp_type_kind::auto_t:
+                return "auto";
+            case cppast::cpp_type_kind::decltype_t:
+                return "decltype";
+            case cppast::cpp_type_kind::decltype_auto_t:
+                return "decltype_auto";
+            case cppast::cpp_type_kind::cv_qualified_t:
+                return "cv_qualified";
+            case cppast::cpp_type_kind::pointer_t:
+                return "pointer";
+            case cppast::cpp_type_kind::reference_t:
+                return "reference";
+            case cppast::cpp_type_kind::array_t:
+                return "array";
+            case cppast::cpp_type_kind::function_t:
+                return "function";
+            case cppast::cpp_type_kind::member_function_t:
+                return "member_function";
+            case cppast::cpp_type_kind::member_object_t:
+                return "member_object";
+            case cppast::cpp_type_kind::template_parameter_t:
+                return "template_parameter";
+            case cppast::cpp_type_kind::template_instantiation_t:
+                return "template_instantiation";
+            case cppast::cpp_type_kind::dependent_t:
+                return "dependent";
+            case cppast::cpp_type_kind::unexposed_t:
+                return "unexposed";
+        }
+    }
+
     void Parser::write_ast_node(std::ofstream& os, const std::string& prefix, const cppast::cpp_entity& e) const {
         os << prefix << "'" << e.name() << "' - " << cppast::to_string(e.kind());
         switch (e.kind()) {
             case cppast::cpp_entity_kind::member_variable_t: {
-                const cppast::cpp_type& fieldTYpe = dynamic_cast<const cppast::cpp_member_variable&>(e).type();
-                os << " (" << cppast::to_string(fieldTYpe) << ")";
+                const cppast::cpp_member_variable& variable = dynamic_cast<const cppast::cpp_member_variable&>(e);
+                const cppast::cpp_type& fieldType = variable.type();
+                os << " (" << cppast::to_string(fieldType) << ", " <<
+                   to_string(fieldType.kind());
+                if (fieldType.kind() == cppast::cpp_type_kind::user_defined_t) {
+                    const auto& definedType = dynamic_cast<const cppast::cpp_user_defined_type&>(fieldType);
+                    const cppast::cpp_type_ref& entityRef = definedType.entity();
+                    auto found = entityRef.get(*index);
+
+                    os << ", found: " << found.size();
+                }
+                os << ")";
             }
             default:
                 break;
         }
         os << std::endl;
+    }
+
+    std::shared_ptr<cppast::cpp_entity_index> Parser::getIndex(const ParsingOptions& options) {
+        std::shared_ptr<cppast::cpp_entity_index> toUse = options.getIndexToUse();
+        if (toUse == nullptr) {
+            return std::make_shared<cppast::cpp_entity_index>();
+        }
+        return toUse;
     }
 }

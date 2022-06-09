@@ -90,11 +90,8 @@ int main(int argc, char** args) {
     }
 
     un::JobSystemBuilder<un::SimpleJobSystem> builder;
-    builder.setNumWorkers<un::JobWorker>(1);
     builder.withRecorder();
-    builder.withLogger();
     auto jobSystem = builder.build();
-
     un::GenerationPlan plan(relativeTo, output);
     {
         un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
@@ -108,6 +105,7 @@ int main(int argc, char** args) {
             un::JobHandle jobHandle;
             chain.immediately<un::ParseTranslationUnitJob>(
                 &jobHandle,
+                plan.getIndex(),
                 path,
                 relativeTo,
                 debugFileName,

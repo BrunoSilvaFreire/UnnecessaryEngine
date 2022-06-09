@@ -50,9 +50,11 @@ namespace un {
         std::unordered_map<std::string, u32> include2Index;
         IncludeGraphType includeGraph;
         std::mutex translationUnitMutexes;
+        std::shared_ptr<cppast::cpp_entity_index> index;
+
     public:
         explicit GenerationPlan(
-            const std::filesystem::path& source,
+            std::filesystem::path  source,
             std::filesystem::path output
         );
 
@@ -62,6 +64,8 @@ namespace un {
         );
 
         void bake();
+
+        const std::shared_ptr<cppast::cpp_entity_index>& getIndex() const;
 
         std::vector<std::pair<u32, const un::GenerationFile*>> getFilesSequence() const;
 
