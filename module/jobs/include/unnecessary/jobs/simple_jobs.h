@@ -14,13 +14,7 @@ namespace un {
         JobWorker(std::size_t index, bool autostart);
     };
 
-    class SimpleJobSystem : public un::JobSystem<JobWorker> {
-    public:
-        SimpleJobSystem(size_t numWorkers, bool autoStart);
+    typedef un::JobSystem<un::JobWorker> SimpleJobSystem;
 
-        SimpleJobSystem(bool autoStart);
-
-        void start();
-    };
 }
 #endif

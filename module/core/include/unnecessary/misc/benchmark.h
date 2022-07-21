@@ -20,6 +20,10 @@ namespace un {
     public:
         Chronometer() = default;
 
+        Clock::time_point getStart() const {
+            return start;
+        }
+
         Resolution stop() const {
             const auto end = Clock::now();
             return std::chrono::duration_cast<Resolution>(end - start);

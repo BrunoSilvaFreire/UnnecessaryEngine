@@ -106,7 +106,7 @@ endif ()
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL Clang)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcolor-diagnostics")
     if ("${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHa")
+        set(CMAKE_CXX_FLAGS "/EHa ${CMAKE_CXX_FLAGS}")
         message("Appending /EHa to compile flags because we're using clang-cl (${CMAKE_CXX_FLAGS})")
     endif ()
 

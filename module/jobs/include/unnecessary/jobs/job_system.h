@@ -43,6 +43,11 @@ namespace un {
         template<template<typename> typename TValue>
         using ArchetypeTuple = std::tuple<TValue<Archetypes>...>;
 
+        template<template<typename> typename TValue>
+        constexpr UN_AGGRESSIVE_INLINE static auto make_archetype_tuple() {
+            return std::make_tuple<TValue<Archetypes>...>();
+        }
+
 
         typedef ArchetypeTuple<ProfilerPool> ProfilerPoolTuple;
 
@@ -132,7 +137,6 @@ namespace un {
         explicit JobSystem(
             WorkerAllocationConfig numWorkersPerArchetype
         ) : graph() {
-
             // Instantiate workerPools
             for_types_indexed<Archetypes...>(
                 [this, numWorkersPerArchetype]<typename WorkerType, std::size_t WorkerIndex>() {
@@ -174,15 +178,22 @@ namespace un {
 
 
         void setName(un::JobHandle handle, const std::string& name) {
+            const auto& other = graph[handle];
             for_types_indexed<Archetypes...>(
                 [&]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
-                    const auto& other = graph[handle];
                     if (other->archetypeIndex == OtherWorkerIndex) {
                         auto& pool = getWorkerPool<OtherWorkerType>();
-                        pool.getJob(other->poolLocalIndex)->setName(name);
+                        pool.getJob(other->poolLocalIndex);
                     }
                 }
             );
+        }
+
+        template<typename TArchetype>
+        typename TArchetype::JobType* getJob(un::JobHandle handle) {
+            const auto& other = graph[handle];
+            auto& pool = getWorkerPool<TArchetype>();
+            return pool.getJob(other->poolLocalIndex);
         }
 
 
@@ -288,6 +299,14 @@ namespace un {
                     for (const auto& worker : pool.getWorkers()) {
                         block.template operator()<TArchetype, TArchetypeIndex>(worker);
                     }
+                }
+            );
+        }
+
+        void start() {
+            for_each_archetype(
+                [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
+                    getWorkerPool<TArchetype>().start();
                 }
             );
         }

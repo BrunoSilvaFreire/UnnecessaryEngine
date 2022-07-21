@@ -2,6 +2,61 @@
 <project version="4">
   <component name="CompilerExplorerSettingsProvider">
     <option name="enabled" value="false" />
+    <option name="connected" value="true" />
+    <option name="remoteCompilers">
+      <list>
+        <RemoteCompilerInfo>
+          <option name="id" value="vc2022_64" />
+          <option name="name" value="MSVC 2022 amd64" />
+          <option name="language" value="c++" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="vc2022_32" />
+          <option name="name" value="MSVC 2022 x86" />
+          <option name="language" value="c++" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="python35" />
+          <option name="name" value="Python 3.5" />
+          <option name="language" value="python" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="python36" />
+          <option name="name" value="Python 3.6" />
+          <option name="language" value="python" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="python37" />
+          <option name="name" value="Python 3.7" />
+          <option name="language" value="python" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="python38" />
+          <option name="name" value="Python 3.8" />
+          <option name="language" value="python" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="circledefault" />
+          <option name="name" value="circle default" />
+          <option name="language" value="circle" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="clang_64" />
+          <option name="name" value="clang amd64" />
+          <option name="language" value="c++" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="clang_32" />
+          <option name="name" value="clang x86" />
+          <option name="language" value="c++" />
+        </RemoteCompilerInfo>
+        <RemoteCompilerInfo>
+          <option name="id" value="ocamllocal" />
+          <option name="name" value="ocamllocal" />
+          <option name="language" value="ocaml" />
+        </RemoteCompilerInfo>
+      </list>
+    </option>
     <option name="localCompilerSettings">
       <map>
         <entry>
@@ -18,8 +73,89 @@
             </LocalCompilerSettings>
           </value>
         </entry>
+        <entry>
+          <key>
+            <LocalCompilerPath>
+              <option name="path" value="C:\Program Files\LLVM\bin\clang++.exe" />
+            </LocalCompilerPath>
+          </key>
+          <value>
+            <LocalCompilerSettings>
+              <option name="name" value="Clang" />
+              <option name="version" value="14.0.4" />
+              <option name="target" value="x86_64" />
+            </LocalCompilerSettings>
+          </value>
+        </entry>
       </map>
     </option>
+    <option name="compilerMatches">
+      <map>
+        <entry>
+          <key>
+            <LocalCompilerPath>
+              <option name="path" value="C:\Program Files\LLVM\bin\clang++.exe" />
+            </LocalCompilerPath>
+          </key>
+          <value>
+            <CompilerMatches>
+              <option name="chosenMatch">
+                <CompilerMatch>
+                  <option name="remoteCompilerInfo">
+                    <RemoteCompilerInfo>
+                      <option name="id" value="vc2022_64" />
+                      <option name="name" value="MSVC 2022 amd64" />
+                      <option name="language" value="c++" />
+                    </RemoteCompilerInfo>
+                  </option>
+                </CompilerMatch>
+              </option>
+              <option name="otherMatches">
+                <list>
+                  <CompilerMatch>
+                    <option name="remoteCompilerInfo">
+                      <RemoteCompilerInfo>
+                        <option name="id" value="vc2022_64" />
+                        <option name="name" value="MSVC 2022 amd64" />
+                        <option name="language" value="c++" />
+                      </RemoteCompilerInfo>
+                    </option>
+                  </CompilerMatch>
+                  <CompilerMatch>
+                    <option name="remoteCompilerInfo">
+                      <RemoteCompilerInfo>
+                        <option name="id" value="vc2022_32" />
+                        <option name="name" value="MSVC 2022 x86" />
+                        <option name="language" value="c++" />
+                      </RemoteCompilerInfo>
+                    </option>
+                  </CompilerMatch>
+                  <CompilerMatch>
+                    <option name="remoteCompilerInfo">
+                      <RemoteCompilerInfo>
+                        <option name="id" value="clang_64" />
+                        <option name="name" value="clang amd64" />
+                        <option name="language" value="c++" />
+                      </RemoteCompilerInfo>
+                    </option>
+                  </CompilerMatch>
+                  <CompilerMatch>
+                    <option name="remoteCompilerInfo">
+                      <RemoteCompilerInfo>
+                        <option name="id" value="clang_32" />
+                        <option name="name" value="clang x86" />
+                        <option name="language" value="c++" />
+                      </RemoteCompilerInfo>
+                    </option>
+                  </CompilerMatch>
+                </list>
+              </option>
+            </CompilerMatches>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="additionalSwitches" value="" />
     <option name="initialNoticeShown" value="true" />
   </component>
 </project>

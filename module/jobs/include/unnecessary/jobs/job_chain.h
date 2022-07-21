@@ -56,7 +56,7 @@ namespace un {
         JobChain& afterAll(JobHandle runThis) {
             for (un::JobHandle handle : allJobs.template getBatch<TArchetype>()) {
                 if (handle != runThis) {
-                    after<TArchetype>(handle, runThis);
+                    after<typename TArchetype::JobType>(handle, runThis);
                 }
             }
             return *this;
@@ -153,7 +153,7 @@ namespace un {
             return system;
         }
 
-        template<typename Worker = JobWorker, typename Lambda>
+        template<typename Worker = un::JobWorker, typename Lambda>
         void finally(Lambda callback) {
             un::JobHandle job;
             immediately<un::LambdaJob<Worker>>(&job, callback);
@@ -166,6 +166,10 @@ namespace un {
 
         void setName(JobHandle i, const std::string& name) {
             system->setName(i, name);
+        }
+
+        DispatchTable getAllJobs() const {
+            return allJobs;
         }
 
         std::size_t getNumJobs() {

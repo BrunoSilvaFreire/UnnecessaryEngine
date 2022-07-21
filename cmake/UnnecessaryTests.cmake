@@ -28,9 +28,7 @@ function(
             ${NAME}
         )
     endif ()
-    set(
-        TEST_WORKING_DIR "${CMAKE_CURRENT_BINARY_DIR}"
-        )
+    set(TEST_WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
     set_target_properties(
         ${NAME}_tests
         PROPERTIES

@@ -3,11 +3,13 @@
 #include <grapphs/tests/mazes.h>
 #include <unnecessary/jobs/job_system.h>
 #include <unnecessary/jobs/job_chain.h>
+#include <unnecessary/jobs/simple_jobs.h>
+#include <unnecessary/jobs/job_system_builder.h>
 #include <unnecessary/jobs/misc/file_jobs.h>
 #include <unnecessary/jobs/misc/graph_exploration.h>
 #include <unnecessary/jobs/recorder/job_system_recorder.h>
-#include <unnecessary/misc/benchmark.h>
 #include <unnecessary/jobs/parallel_for_job.h>
+#include <unnecessary/misc/benchmark.h>
 #include <cmath>
 #include <random>
 #include <ostream>
@@ -22,16 +24,17 @@ TEST(jobs, completeness) {
     std::uniform_int_distribution<std::size_t> msRange(minDelay, maxDelay);
     std::default_random_engine engine;
     for (std::size_t i = 0; i < numTries; ++i) {
-
-        SimpleJobSystem jobSystem(numWorkers, false);
-        un::JobSystemRecorder<SimpleJobSystem> recorder(&jobSystem);
+        un::JobSystemBuilder<un::SimpleJobSystem> builder;
+        builder.withLogger();
+        builder.withRecorder();
+        auto jobSystem = builder.build();
         std::atomic<std::size_t> numCompletedJobs = 0;
         {
-            un::JobChain<SimpleJobSystem> chain(&jobSystem);
+            un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
             for (std::size_t j = 0; j < numJobs; ++j) {
                 un::JobHandle handle;
                 std::size_t sleepTime = msRange(engine);
-                chain.immediately<un::LambdaJob<JobWorker>>(
+                chain.immediately<un::LambdaJob<un::JobWorker>>(
                     &handle,
                     [=, &numCompletedJobs]() {
                         std::chrono::milliseconds workTime(sleepTime);
@@ -44,23 +47,21 @@ TEST(jobs, completeness) {
                 chain.setName(handle, name.str());
             }
         }
-        jobSystem.start();
-        jobSystem.complete();
+        jobSystem->start();
+        jobSystem->complete();
         ASSERT_EQ(numJobs, numCompletedJobs);
-        auto outputFile = std::filesystem::current_path() /
-                          (std::string("execution_") + std::to_string(i) + ".csv");
-        std::ofstream stream(outputFile, std::ios::out);
-        stream << recorder.toCSV();
-        stream.close();
     }
 }
 
 
 TEST(jobs, load_file) {
-    SimpleJobSystem jobSystem(4, true);
+    un::JobSystemBuilder<un::SimpleJobSystem> builder;
+    builder.withLogger();
+    builder.withRecorder();
+    auto jobSystem = builder.build();
     un::Buffer buf;
     {
-        un::JobChain<SimpleJobSystem> chain(&jobSystem);
+        un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
         un::JobHandle loadHandle;
         std::filesystem::path filePath = "resources/dummy.txt";
         chain.immediately<un::LoadFileJob>(
@@ -77,7 +78,7 @@ TEST(jobs, load_file) {
             }
         );
     }
-    jobSystem.complete();
+    jobSystem->complete();
 }
 
 struct ExplorationVertex {
@@ -116,8 +117,10 @@ void populate(DummyExplorationGraph &graph) {
 
 TEST(jobs, graph_exploration) {
 
-
-    SimpleJobSystem jobSystem(4, true);
+    un::JobSystemBuilder<un::SimpleJobSystem> builder;
+    builder.withLogger();
+    builder.withRecorder();
+    auto jobSystem = builder.build();
     gpp::test_mazes(
         [&](gpp::Maze &maze) {
             const gpp::AdjacencyList<gpp::Cell, int> &graph = maze.getGraph();
@@ -145,32 +148,35 @@ TEST(jobs, graph_exploration) {
             );
 
             {
-                un::JobChain<SimpleJobSystem> chain(&jobSystem);
-                chain.immediately<un::ExploreGraphVertexJob<gpp::AdjacencyList<gpp::Cell, int>, SimpleJobSystem>>(
+                /*un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
+                chain.immediately<un::ExploreGraphVertexJob<gpp::AdjacencyList<gpp::Cell, int>, un::SimpleJobSystem>>(
                     maze.getStart(),
                     &graph,
                     &explorer,
                     &jobSystem,
                     true
-                );
+                );*/
             }
             explorer.complete();
             LOG(INFO) << "Exploration completed!";
         }
     );
 
-    jobSystem.complete();
+    jobSystem->complete();
 }
 
 TEST(jobs, set_affinity) {
     std::size_t numWorkers = std::thread::hardware_concurrency();
-    SimpleJobSystem jobSystem(numWorkers, true);
-    auto &workers = jobSystem.getWorkerPool<JobWorker>().getWorkers();
+    un::JobSystemBuilder<un::SimpleJobSystem> builder;
+    builder.withLogger();
+    builder.withRecorder();
+    auto jobSystem = builder.build();
+    auto &workers = jobSystem->getWorkerPool<un::JobWorker>().getWorkers();
     for (std::size_t i = 0; i < numWorkers; ++i) {
         un::Thread *thread = workers[i]->getThread();
         EXPECT_TRUE(thread->setCore(i)) << "Unable to set thread " << i << " affinity";
     }
-    jobSystem.complete();
+    jobSystem->complete();
 }
 
 void log_index(size_t index) {
@@ -178,11 +184,14 @@ void log_index(size_t index) {
 }
 
 TEST(jobs, sequence_test) {
-    SimpleJobSystem jobSystem(2, true);
+    un::JobSystemBuilder<un::SimpleJobSystem> builder;
+    builder.withLogger();
+    builder.withRecorder();
+    auto jobSystem = builder.build();
     un::Buffer buf;
 
     {
-        un::JobChain<SimpleJobSystem> chain(&jobSystem);
+        un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
         un::JobHandle first, second;
         chain.immediately<un::LambdaJob<>>(
             &first,
@@ -214,10 +223,10 @@ TEST(jobs, sequence_test) {
         }
 
     }
-    jobSystem.complete();
+    jobSystem->complete();
 }
 
-class PopulateBufferJob final : public un::ParallelForJob<JobWorker> {
+class PopulateBufferJob final : public un::ParallelForJob<un::JobWorker> {
 private:
     std::shared_ptr<un::Buffer> buf;
 public:
@@ -225,7 +234,7 @@ public:
         std::shared_ptr<un::Buffer> buf
     ) : buf(std::move(buf)) {}
 
-    UN_AGGRESSIVE_INLINE void operator()(size_t index, JobWorker *worker) override {
+    UN_AGGRESSIVE_INLINE void operator()(size_t index, un::JobWorker *worker) override {
         int r;
         for (int j = 0; j < 2000; ++j) {
             r = rand();
@@ -239,11 +248,14 @@ TEST(jobs, benchmark) {
     GTEST_LOG_(INFO) << "Generating buffer of length " << bufferSize;
     for (int i = std::thread::hardware_concurrency(); i > 0; --i) {
         un::Chronometer<std::chrono::nanoseconds> chronometer;
-        SimpleJobSystem jobSystem(i, true);
+        un::JobSystemBuilder<un::SimpleJobSystem> builder;
+        builder.withLogger();
+        builder.withRecorder();
+        auto jobSystem = builder.build();
 
         auto buf = std::make_shared<un::Buffer>(bufferSize, false);
         {
-            un::JobChain<SimpleJobSystem> chain(&jobSystem);
+            un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
 
             PopulateBufferJob::parallelize(
                 new PopulateBufferJob(buf),
@@ -252,7 +264,7 @@ TEST(jobs, benchmark) {
                 bufferSize / i
             );
         }
-        jobSystem.complete();
+        jobSystem->complete();
         std::chrono::nanoseconds duration = chronometer.stop();
         GTEST_LOG_(INFO) << "Parallel buffer population took " << duration.count() << "ns ("
                          << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() << "ms) with "

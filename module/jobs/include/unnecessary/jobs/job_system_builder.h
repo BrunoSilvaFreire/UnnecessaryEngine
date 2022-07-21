@@ -16,7 +16,7 @@ namespace un {
         bool autoStart;
 
         std::unique_ptr<TJobSystem> create() const {
-            return TJobSystem(allocationConfig, false);
+            return std::make_unique<TJobSystem>(allocationConfig);
         }
 
     public:
@@ -77,15 +77,7 @@ namespace un {
     };
 
     template<>
-    std::unique_ptr<un::SimpleJobSystem> JobSystemBuilder<un::SimpleJobSystem>::create() const {
-        return std::make_unique<un::SimpleJobSystem>(getNumWorkers<un::JobWorker>(), false);
-    }
-
-    template<>
-    JobSystemBuilder<un::SimpleJobSystem>::JobSystemBuilder()
-        : allocationConfig(), autoStart(true) {
-        fillWorkers<un::JobWorker>();
-    }
+    JobSystemBuilder<un::SimpleJobSystem>::JobSystemBuilder();
 
 }
 #endif

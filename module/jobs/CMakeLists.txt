@@ -25,6 +25,7 @@ add_unnecessary_library(
     include/unnecessary/jobs/recorder/data/events.h
     include/unnecessary/jobs/logger/job_system_logger.h
     src/unnecessary/jobs/jobs.cpp
+    src/unnecessary/jobs/job_system_builder.cpp
     src/unnecessary/jobs/misc/file_jobs.cpp
     src/unnecessary/jobs/misc/join_buffers_job.cpp
     src/unnecessary/jobs/parallel_for_job.cpp
@@ -52,6 +53,7 @@ add_unnecessary_library(
 
     TESTS
     tests/job_dependencies_tests.cpp
+    tests/dynamic_job_tests.cpp
 )
 target_link_libraries(
     unnecessary_jobs_tests

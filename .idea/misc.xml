@@ -47,6 +47,7 @@
       <file path="$PROJECT_DIR$/module/simulation/src" />
       <file path="$PROJECT_DIR$/module/source_analysis/include" />
       <file path="$PROJECT_DIR$/module/source_analysis/src" />
+      <file path="$PROJECT_DIR$/module/source_analysis/tests" />
     </sourceRoots>
     <excludeRoots>
       <file path="$PROJECT_DIR$/legacy" />

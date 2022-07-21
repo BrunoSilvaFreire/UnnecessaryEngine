@@ -58,13 +58,13 @@ namespace un::parsing {
 
         Parser(const un::parsing::ParsingOptions& options);
 
-        Parser(
+/*        Parser(
             cppast::cpp_file&& file,
             std::shared_ptr<cppast::cpp_entity_index> index
         ) : result(std::move(std::make_unique<cppast::cpp_file>(std::move(file)))),
             index(std::move(index)) {
 
-        }
+        }*/
 
         const CXXTranslationUnit& getTranslationUnit() const {
             return translationUnit;

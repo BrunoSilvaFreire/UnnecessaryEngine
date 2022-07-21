@@ -80,11 +80,29 @@ namespace un {
             return children[Index] = std::make_shared<TSelf>(childData);
         };
 
+        template<std::size_t Index>
+        TPointer& setChild(const TPointer& childData) {
+            return children[Index] = childData;
+        };
+
+        template<std::size_t Index>
+        TPointer& setChild(const TSelf& childData) {
+            return children[Index] = std::make_shared<TSelf>(childData);
+        };
+
         TPointer& setChild(std::size_t i, TData&& childData) {
             return children[i] = std::make_shared<TSelf>(std::move(childData));
         };
 
         TPointer& setChild(std::size_t i, const TData& childData) {
+            return children[i] = std::make_shared<TSelf>(childData);
+        };
+
+        TPointer& setChild(std::size_t i, const TPointer& childData) {
+            return children[i] = childData;
+        };
+
+        TPointer& setChild(std::size_t i, const TSelf& childData) {
             return children[i] = std::make_shared<TSelf>(childData);
         };
 
@@ -104,11 +122,27 @@ namespace un {
             return setChild(firstFreeIndex, std::move(child));
         }
 
-        const std::array<TSelf, NChildren>& getChildren() const {
+        TPointer& addChild(const TPointer& child) {
+            std::size_t firstFreeIndex = findFirstFreeIndex();
+            if (firstFreeIndex >= NChildren) {
+                throw std::runtime_error("No free children.");
+            }
+            return setChild(firstFreeIndex, child);
+        }
+
+        TPointer& addChild(const TSelf& child) {
+            std::size_t firstFreeIndex = findFirstFreeIndex();
+            if (firstFreeIndex >= NChildren) {
+                throw std::runtime_error("No free children.");
+            }
+            return setChild(firstFreeIndex, child);
+        }
+
+        const std::array<TPointer, NChildren>& getChildren() const {
             return children;
         }
 
-        std::array<TSelf, NChildren>& getChildren() {
+        std::array<TPointer, NChildren>& getChildren() {
             return children;
         }
     };
