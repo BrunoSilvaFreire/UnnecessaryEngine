@@ -45,7 +45,17 @@ namespace un {
                 un::JobChain<un::SimpleJobSystem>& subChain
             ) {
                 std::unique_ptr<un::ParsedFile>& ptr = _parsed[path];
+                if (ptr == nullptr) {
+                    std::stringstream ss;
+                    ss << "Unable to find parsed file for path \"" << path << "\"";
+                    throw std::runtime_error(ss.str());
+                }
                 const std::unique_ptr<cppast::cpp_file>& uniquePtr = ptr->getFile();
+                if (uniquePtr == nullptr) {
+                    std::stringstream ss;
+                    ss << "Found parsed file for path \"" << path << "\", but it's wrapped value is null.";
+                    throw std::runtime_error(ss.str());
+                }
                 cppast::visit(
                     *uniquePtr,
                     [](const cppast::cpp_entity& e) {

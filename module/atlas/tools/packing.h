@@ -3,6 +3,7 @@
 
 #include <unnecessary/jobs/job_system.h>
 #include <unnecessary/jobs/job_chain.h>
+#include <unnecessary/jobs/job_system_builder.h>
 #include <png++/png.hpp>
 #include <packer_entry.h>
 #include <algorithm_registry.h>
@@ -27,10 +28,11 @@ namespace un {
     void pack(
         const std::vector<std::filesystem::path>& files
     ) {
-        SimpleJobSystem jobSystem(true);
+        un::JobSystemBuilder<un::SimpleJobSystem> builder;
+        auto jobSystem=builder.build();
         std::vector<un::packer::PackerEntry> entries(files.size());
         {
-            un::JobChain<SimpleJobSystem> chain(&jobSystem);
+            un::JobChain<SimpleJobSystem> chain(jobSystem.get());
             std::size_t i = 0;
             for (const auto& file : files) {
                 chain.immediately<un::LambdaJob<>>([&, file, i]() {
@@ -49,10 +51,11 @@ namespace un {
             }
             chain.finally([&]() {
                 LOG(INFO) << "All entries loaded (" << entries.size() << ")";
-                pack(jobSystem, entries);
+
+                pack(*jobSystem, entries);
             });
         }
-        jobSystem.join();
+        jobSystem->join();
     }
 }
 

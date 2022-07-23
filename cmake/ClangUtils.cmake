@@ -13,4 +13,13 @@ function(setup_libast)
         PUBLIC
         CINDEX_NO_EXPORTS
     )
+    # I don't know why tpl adds that macro, but it causes problems, so away it goes
+    get_target_property(DEFS tiny-process-library COMPILE_DEFINITIONS)
+    list(REMOVE_ITEM DEFS /D_CRT_SECURE_NO_WARNINGS)
+    set_target_properties(
+        tiny-process-library
+        PROPERTIES
+        COMPILE_DEFINITIONS "${DEFS}"
+    )
+
 endfunction()

@@ -25,6 +25,8 @@ namespace un {
     void Thread::operator()() {
         {
             std::unique_lock<std::mutex> lock(_dataMutex);
+            setThreadName(name);
+            setThreadCore(core);
             _alive = true;
         }
         _block();

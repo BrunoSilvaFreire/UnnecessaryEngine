@@ -60,24 +60,25 @@ namespace un::packer {
                 strategy.getWidth(),
                 strategy.getHeight()
             );
-            SimpleJobSystem jobSystem(false);
+            un::JobSystemBuilder<un::SimpleJobSystem> builder;
+            auto jobSystem = builder.build();
             {
-                JobChain<SimpleJobSystem> chain(&jobSystem);
+                JobChain<SimpleJobSystem> chain(jobSystem.get());
                 for (const auto& operation : strategy.getOperations()) {
                     JobHandle loadImageJob, parseImageJob;
                     auto buf = std::make_shared<Buffer>();
                     auto src = std::make_shared<png::image<png::rgba_pixel>>();
                     const std::filesystem::path& imgPath = operation.getPath();
                     chain.immediately<LoadFileJob>(&loadImageJob, imgPath, buf.get(), std::ios::binary)
-                        .after<LambdaJob<>>(
-                            loadImageJob, &parseImageJob,
-                            [src, buf]() {
-                                BufferStream<> sbuf(buf);
-                                std::istream stream(&sbuf);
-                                png::image<png::rgba_pixel> img(stream);
-                                *src = img;
-                            }
-                        );
+                         .after<LambdaJob<>>(
+                             loadImageJob, &parseImageJob,
+                             [src, buf]() {
+                                 BufferStream<> sbuf(buf);
+                                 std::istream stream(&sbuf);
+                                 png::image<png::rgba_pixel> img(stream);
+                                 *src = img;
+                             }
+                         );
 
                     chain.setName(parseImageJob, std::string("Parse Image ") + imgPath.string());
                     const Rect<u32>& rect = operation.getDestination();
@@ -97,12 +98,12 @@ namespace un::packer {
                         512
                     );
                     for (JobHandle handle : handles) {
-                        chain.after<JobWorker>(parseImageJob, handle);
+                        chain.after<un::SimpleJob>(parseImageJob, handle);
                     }
                 };
             }
-            jobSystem.start();
-            jobSystem.complete();
+            jobSystem->start();
+            jobSystem->complete();
             LOG(INFO) << "Result written to " << std::filesystem::absolute(output);
             packed->write(output.string());
         }
