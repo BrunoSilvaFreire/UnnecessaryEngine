@@ -15,18 +15,26 @@ namespace un {
             std::chrono::steady_clock>;
 
     private:
-        const Clock::time_point start = Clock::now();
+        Clock::time_point _start;
 
     public:
-        Chronometer() = default;
+        Chronometer(bool autoStart = true) {
+            if (autoStart) {
+                start();
+            }
+        };
+
+        void start() {
+            _start = Clock::now();
+        }
 
         Clock::time_point getStart() const {
-            return start;
+            return _start;
         }
 
         Resolution stop() const {
             const auto end = Clock::now();
-            return std::chrono::duration_cast<Resolution>(end - start);
+            return std::chrono::duration_cast<Resolution>(end - _start);
         }
     };
 }

@@ -2,6 +2,7 @@
 #include <chrono>
 #include <unordered_map>
 
+#include <unnecessary/cli/pretty_print.h>
 #include <unnecessary/source_analysis/parser.h>
 #include <unnecessary/source_analysis/parsing.h>
 #include <unnecessary/serializer/jobs/parse_translation_unit_job.h>
@@ -38,7 +39,8 @@ void process(
 void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot);
 
 int main(int argc, char** args) {
-    un::Chronometer<> chronometer;
+    un::Chronometer<> mainChronometer;
+    LOG(INFO) << "Generating serialization.";
     cxxopts::Options options("unnecessary_serialization_generator");
     options.add_options("required")
                (
@@ -83,16 +85,25 @@ int main(int argc, char** args) {
         }
         std::filesystem::path filePath = "temp";
         files = result[kFileArgName].as<std::vector<std::string>>();
+        std::for_each(
+            files.begin(), files.end(),
+            [](std::string& path) {
+                std::filesystem::path absPath = std::filesystem::absolute(path);
+                path = un::to_string(absPath);
+            }
+        );
     } catch (const cxxopts::OptionParseException& x) {
         std::cerr << "unnecessary_serializer_generator: " << x.what() << '\n';
         std::cerr << "usage: unnecessary_serializer_generator [options] <input_file> ...\n";
         return EXIT_FAILURE;
     }
-
+    LOG(INFO) << un::prettify("files", files);
+    LOG(INFO) << un::prettify("includes", includes);
     un::JobSystemBuilder<un::SimpleJobSystem> builder;
     builder.withRecorder();
     auto jobSystem = builder.build();
     un::GenerationPlan plan(relativeTo, output);
+    un::Chronometer<> chronometer(false);
     {
         un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
         for (const std::string& file : files) {
@@ -119,9 +130,10 @@ int main(int argc, char** args) {
         }
         writeJobToDot(jobSystem, output / "parse_jobs.dot");
         LOG(INFO) << "Dispatching " << chain.getNumJobs() << " parsing jobs...";
-
+        chronometer.start();
     }
     jobSystem->join();
+    LOG(INFO) << "Finished parsing everything, duration: " << chronometer.stop().count() << "ms";
     plan.bake();
     un::GenerationPlan::IncludeGraphType& includeGraph = plan.getIncludeGraph();
     gpp::save_to_dot(includeGraph.getInnerGraph(), output / "includes.dot");
@@ -137,8 +149,8 @@ int main(int argc, char** args) {
                     std::vector<std::shared_ptr<un::Buffer>> toJoin;
                     std::set<un::JobHandle> dependencies;
                     std::string fileName = pGenerationFile->getPath().filename().string() + ".generated.h";
-                    auto outPath = pGenerationFile->getOutput();
-                    LOG(INFO) << pGenerationFile->getPath().filename() << " serializer will be written to " << outPath;
+                    std::filesystem::path outPath = pGenerationFile->getOutput();
+                    LOG(INFO) << pGenerationFile->getPath().filename() << " serializer will be written to " << un::prettify(outPath);
 
                     std::shared_ptr<un::Buffer> includeBuf = std::make_shared<un::Buffer>();
                     un::JobHandle includeHandle;
@@ -150,6 +162,7 @@ int main(int argc, char** args) {
                         &plan,
                         includeBuf
                     );
+                    chain.setName(includeHandle, "Generate includes for translation unit");
                     toJoin.emplace_back(includeBuf);
                     dependencies.emplace(includeHandle);
 
@@ -222,7 +235,7 @@ int main(int argc, char** args) {
     jobSystem->complete();
     auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::SimpleJobSystem>>();
     ptr->saveToFile(output / "recording.csv");
-    LOG(INFO) << "Sources generated in " << chronometer.stop();
+    LOG(INFO) << "Sources generated in " << mainChronometer.stop().count() << " ms";
 }
 
 void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot) {

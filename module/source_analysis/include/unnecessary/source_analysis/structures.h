@@ -178,11 +178,13 @@ namespace un {
         std::string getFullName() const override;
     };
 
-    class CXXEnumValue : CXXSymbol {
+    class CXXEnumValue : public CXXSymbol {
     private:
         std::size_t value;
     public:
         CXXEnumValue(const std::string& name, size_t value);
+
+        size_t getValue() const;
     };
 
     class CXXEnum : public CXXDeclaration {
@@ -194,6 +196,8 @@ namespace un {
             const std::string& ns,
             std::vector<CXXEnumValue> values
         );
+
+        const std::vector<CXXEnumValue>& getValues() const;
     };
 
     class CXXComposite : public CXXDeclaration {

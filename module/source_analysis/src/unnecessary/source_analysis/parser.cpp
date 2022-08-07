@@ -69,7 +69,6 @@ namespace un::parsing {
         cppast::libclang_compile_config config;
         config.set_flags(cppast::cpp_standard::cpp_20);
         std::string fileName = options.getFile().string();
-        LOG(INFO) << "Parsing file: " << fileName;
         for (const std::string& item : options.getIncludes()) {
             config.add_include_dir(item);
         }
@@ -419,13 +418,13 @@ namespace un::parsing {
                 const cppast::cpp_type& fieldType = variable.type();
                 os << " (" << cppast::to_string(fieldType) << ", " <<
                    to_string(fieldType.kind());
-                if (fieldType.kind() == cppast::cpp_type_kind::user_defined_t) {
-                    const auto& definedType = dynamic_cast<const cppast::cpp_user_defined_type&>(fieldType);
-                    const cppast::cpp_type_ref& entityRef = definedType.entity();
-                    auto found = entityRef.get(*index);
-
-                    os << ", found: " << found.size();
-                }
+//                if (fieldType.kind() == cppast::cpp_type_kind::user_defined_t) {
+//                    const auto& definedType = dynamic_cast<const cppast::cpp_user_defined_type&>(fieldType);
+//                    const cppast::cpp_type_ref& entityRef = definedType.entity();
+//                    auto found = entityRef.get(*index);
+//
+//                    os << ", found: " << found.size();
+//                }
                 os << ")";
             }
             default:

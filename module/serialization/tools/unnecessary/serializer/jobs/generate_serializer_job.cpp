@@ -82,14 +82,6 @@ namespace un {
     void GenerateSerializerJob::generateEnumSerializer(std::stringstream& ss, const std::shared_ptr<CXXEnum>& anEnum) {
         std::stringstream enumSerialization;
         std::stringstream enumDeserialization;
-        ss << "namespace un {" << std::endl;
-        // static serialization
-        ss << "namespace serialization {" << std::endl;
-        ss << "template<>" << std::endl;
-        ss << "inline void serialize<" << info.fullName << ">" << "(const " << info.fullName
-           << "& value, un::Serialized& into) {" << std::endl;
-
-        ss << "}" << std::endl;
 
         ss << "template<>" << std::endl;
         ss << info.fullName << " deserialize<" << info.fullName << ">(un::Serialized& from) {" << std::endl;

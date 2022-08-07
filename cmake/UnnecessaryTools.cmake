@@ -40,7 +40,7 @@ function(add_unnecessary_tool NAME)
     target_link_libraries(
         ${NAME}
         PUBLIC
-        cxxopts::cxxopts
+        unnecessary_cli
     )
     LIST(LENGTH UN_MODULE_DEPENDENCIES NUM_DEPENDENCIES)
     LIST(LENGTH UN_MODULE_TESTS NUMTESTS)

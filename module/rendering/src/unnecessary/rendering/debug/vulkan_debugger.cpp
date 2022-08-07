@@ -47,7 +47,7 @@ namespace un {
                 static_cast<vk::DebugUtilsMessengerCreateFlagsEXT>(0),
                 severity,
                 messageType,
-                &VulkanDebugger::messenger_callback,
+                *reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT*>(VulkanDebugger::messenger_callback),
                 this
             );
             vkCall(

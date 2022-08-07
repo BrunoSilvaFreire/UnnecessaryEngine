@@ -183,7 +183,7 @@ namespace un {
                 [&]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
                     if (other->archetypeIndex == OtherWorkerIndex) {
                         auto& pool = getWorkerPool<OtherWorkerType>();
-                        pool.getJob(other->poolLocalIndex);
+                        pool.getJob(other->poolLocalIndex)->setName(name);
                     }
                 }
             );

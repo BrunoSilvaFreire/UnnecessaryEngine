@@ -17,6 +17,24 @@ namespace un {
         const CXXTranslationUnit& unit,
         const WriterRegistry& registry
     ) {
+        std::shared_ptr<un::CXXEnum> anEnum;
+        if (!unit.findSymbol(field.getType(), anEnum)) {
+            return;
+        }
+        ss << "namespace un {" << std::endl;
+        // static serialization
+        ss << "namespace serialization {" << std::endl;
+        ss << "template<>" << std::endl;
+        ss << "inline void serialize<" << anEnum->getFullName() << ">"
+           << "(const " << anEnum->getFullName() << "& value, un::Serialized& into) {" << std::endl;
+        ss << "switch (value) {" << std::endl;
+        for (const auto& item : anEnum->getValues()) {
+            ss << "case " << anEnum->getFullName() << "::" << item.getName() << ":" << std::endl;
+            ss << "into.set<std::string>(" << anEnum->getFullName() << "::" << item.getName() << ":" << std::endl;
+            ss << "return;" << std::endl;
+        }
+        ss << "}" << std::endl;
+        ss << "}" << std::endl;
 
     }
 

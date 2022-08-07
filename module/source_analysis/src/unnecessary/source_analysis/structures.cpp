@@ -225,7 +225,15 @@ namespace un {
         std::vector<CXXEnumValue> values
     ) : CXXDeclaration(name, ns), values(values) { }
 
+    const std::vector<CXXEnumValue>& CXXEnum::getValues() const {
+        return values;
+    }
+
     CXXEnumValue::CXXEnumValue(const std::string& name, size_t value) : CXXSymbol(name), value(value) { }
+
+    size_t CXXEnumValue::getValue() const {
+        return value;
+    }
 
     void CXXTranslationUnit::addInclude(const std::string& include) {
         includes.emplace_back(include);

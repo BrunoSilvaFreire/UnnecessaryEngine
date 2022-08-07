@@ -112,6 +112,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL Clang)
 
 endif ()
 add_subdirectory(module/core)
+add_subdirectory(module/cli)
 add_subdirectory(module/math)
 add_subdirectory(module/graphs)
 add_subdirectory(module/jobs)
