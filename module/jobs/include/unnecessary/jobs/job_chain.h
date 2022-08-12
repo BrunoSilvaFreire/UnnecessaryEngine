@@ -18,7 +18,7 @@ namespace un {
     public:
         typedef TJobSystem JobSystemType;
         typedef typename JobSystemType::DispatchTable DispatchTable;
-    private:
+    protected:
         JobSystemType* system;
         DispatchTable toStart;
         DispatchTable allJobs;
@@ -35,11 +35,22 @@ namespace un {
 
         }
 
-        ~JobChain() {
+        virtual ~JobChain() {
             if (dispatchOnDestruct) {
                 dispatch();
             }
         }
+
+        JobChain(const un::JobChain<TJobSystem>&) = delete;
+
+        JobChain(un::JobChain<TJobSystem>&& other) noexcept
+            : system(std::move(other.system)),
+              allJobs(std::move(other.allJobs)),
+              toStart(std::move(other.toStart)),
+              dispatchOnDestruct(other.dispatchOnDestruct) {
+            other.dispatchOnDestruct = false;
+        };
+
 
         void setDispatchOnDestruct(bool dispatchOnDestruct) {
             JobChain::dispatchOnDestruct = dispatchOnDestruct;
@@ -127,7 +138,7 @@ namespace un {
         JobChain& after(JobHandle dependencyId, TJob* job) {
             un::JobHandle handle;
             immediately(&handle, job);
-            after<TJob>(handle, dependencyId);
+            after<TJob>(dependencyId, handle);
             return *this;
         }
 

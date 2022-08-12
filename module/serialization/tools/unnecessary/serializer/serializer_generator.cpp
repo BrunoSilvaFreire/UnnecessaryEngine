@@ -2,7 +2,7 @@
 #include <chrono>
 #include <unordered_map>
 
-#include <unnecessary/cli/pretty_print.h>
+#include "unnecessary/misc/pretty_print.h"
 #include <unnecessary/source_analysis/parser.h>
 #include <unnecessary/source_analysis/parsing.h>
 #include <unnecessary/serializer/jobs/parse_translation_unit_job.h>
@@ -18,10 +18,12 @@
 #include <unnecessary/misc/benchmark.h>
 #include <grapphs/dot.h>
 #include "generation.h"
+#include "unnecessary/source_analysis/parse_plan.h"
 
 static const char* const kFileArgName = "file";
 static const char* const kRelativeToName = "relative_to";
 static const char* const kGlobalIncludeName = "global_include";
+static const char* const kNumWorkersName = "num_workers";
 
 static const char* const kIncludeArgName = "include";
 static const char* const kOutputDir = "output";
@@ -52,6 +54,10 @@ int main(int argc, char** args) {
                    cxxopts::value<std::vector<std::string>>()
                )
                (
+                   kNumWorkersName, "Number of thread workers to use",
+                   cxxopts::value<std::size_t>()
+               )
+               (
                    kOutputDir, "Directory where to write the generated files",
                    cxxopts::value<std::string>()
                );
@@ -69,6 +75,7 @@ int main(int argc, char** args) {
     std::filesystem::path relativeTo;
     std::vector<std::string> files;
     std::vector<std::string> includes;
+    un::JobSystemBuilder<un::SimpleJobSystem> builder;
     try {
         cxxopts::ParseResult result = options.parse(argc, args);
         includes = result[kIncludeArgName].as<std::vector<std::string>>();
@@ -92,6 +99,11 @@ int main(int argc, char** args) {
                 path = un::to_string(absPath);
             }
         );
+        if (result.count(kNumWorkersName) > 0) {
+            std::size_t numWorkers = result[kNumWorkersName].as<std::size_t>();
+            builder.setNumWorkers<un::JobWorker>(numWorkers);
+        }
+
     } catch (const cxxopts::OptionParseException& x) {
         std::cerr << "unnecessary_serializer_generator: " << x.what() << '\n';
         std::cerr << "usage: unnecessary_serializer_generator [options] <input_file> ...\n";
@@ -99,9 +111,28 @@ int main(int argc, char** args) {
     }
     LOG(INFO) << un::prettify("files", files);
     LOG(INFO) << un::prettify("includes", includes);
-    un::JobSystemBuilder<un::SimpleJobSystem> builder;
     builder.withRecorder();
+    builder.withLogger();
     auto jobSystem = builder.build();
+
+    auto index = std::make_shared<cppast::cpp_entity_index>();
+    {
+        un::ParsePlan parsePlan(index);
+        std::for_each(
+            includes.begin(), includes.end(),
+            [&](const auto& inc) {
+                parsePlan.addInclude(inc);
+            }
+        );
+        std::for_each(
+            files.begin(), files.end(),
+            [&](const auto& item) {
+                parsePlan.addFile(item);
+            }
+        );
+        parsePlan.parse(jobSystem.get());
+    }
+
     un::GenerationPlan plan(relativeTo, output);
     un::Chronometer<> chronometer(false);
     {
@@ -150,7 +181,8 @@ int main(int argc, char** args) {
                     std::set<un::JobHandle> dependencies;
                     std::string fileName = pGenerationFile->getPath().filename().string() + ".generated.h";
                     std::filesystem::path outPath = pGenerationFile->getOutput();
-                    LOG(INFO) << pGenerationFile->getPath().filename() << " serializer will be written to " << un::prettify(outPath);
+                    LOG(INFO) << pGenerationFile->getPath().filename() << " serializer will be written to "
+                              << un::prettify(outPath);
 
                     std::shared_ptr<un::Buffer> includeBuf = std::make_shared<un::Buffer>();
                     un::JobHandle includeHandle;

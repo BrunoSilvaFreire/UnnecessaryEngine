@@ -18,8 +18,10 @@ namespace un {
         parseOptions.setDebugFile(debugFile);
         parseOptions.setSelfInclude(un::to_string(relative));
         parseOptions.setIndexToUse(index);
+        std::unique_ptr<cppast::cpp_file> pFile;
+        parseOptions.setFileDestination(&pFile);
         auto translationUnit = un::parsing::parse(parseOptions);
-        plan->addTranslationUnit(relative, std::move(translationUnit));
+        //plan->addTranslationUnit(relative, std::move(translationUnit), std::move(pFile));
     }
 
     ParseTranslationUnitJob::ParseTranslationUnitJob(

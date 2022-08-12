@@ -1,7 +1,7 @@
 project(UnnecessaryEngine LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
-
+cmake_policy(SET CMP0079 NEW)
 include(cmake/Unnecessary.cmake)
 find_package(Python REQUIRED)
 option(UN_DISALLOW_AGGRESSIVE_INLINING DEFAULT OFF)

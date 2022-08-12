@@ -18,6 +18,9 @@ add_unnecessary_library(
     include/unnecessary/misc/files.h
     include/unnecessary/misc/indexing.h
     include/unnecessary/misc/benchmark.h
+    include/unnecessary/misc/pretty_print.h
+    include/unnecessary/misc/list_printer.h
+    include/unnecessary/misc/path_printer.h
     src/unnecessary/logging.cpp
     src/unnecessary/strings.cpp
     src/unnecessary/version.cpp
@@ -27,6 +30,7 @@ add_unnecessary_library(
     src/unnecessary/misc/historic.cpp
     src/unnecessary/misc/benchmark.cpp
     src/unnecessary/misc/files.cpp
+    src/unnecessary/misc/path_printer.cpp
 
     SOURCES_WIN
     src/unnecessary/strings.win.cpp

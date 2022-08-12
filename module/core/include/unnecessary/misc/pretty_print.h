@@ -3,7 +3,7 @@
 #define UNNECESSARYENGINE_PRETTY_PRINT_H
 
 #include <string>
-#include <unnecessary/cli/path_printer.h>
-#include <unnecessary/cli/list_printer.h>
+#include "path_printer.h"
+#include "list_printer.h"
 
 #endif

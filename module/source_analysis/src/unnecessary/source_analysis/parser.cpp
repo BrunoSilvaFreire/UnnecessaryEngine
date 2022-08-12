@@ -59,6 +59,14 @@ namespace un::parsing {
         ParsingOptions::indexToUse = indexToUse;
     }
 
+    const un::ptr<std::unique_ptr<cppast::cpp_file>> ParsingOptions::getFileDestination() const {
+        return fileDestination;
+    }
+
+    void ParsingOptions::setFileDestination(const un::ptr<std::unique_ptr<cppast::cpp_file>> fileDestination) {
+        ParsingOptions::fileDestination = fileDestination;
+    }
+
     Parser::Parser(
         const ParsingOptions& options
     ) : translationUnit(options.getFile(), options.getSelfInclude()),
@@ -73,7 +81,8 @@ namespace un::parsing {
             config.add_include_dir(item);
         }
         un::Chronometer<> chronometer;
-        result = parser.parse(*index, fileName, config);
+        auto result = options.getFileDestination();
+        *result = parser.parse(*index, fileName, config);
         auto ms = chronometer.stop();
         LOG(INFO) << "Parsing of file " << options.getFile().filename() << " took " << ms.count() << " ms.";
 
@@ -81,7 +90,7 @@ namespace un::parsing {
             LOG(FUCK) << "cppast returned null entity.";
             return;
         }
-        const cppast::cpp_file& file = *result;
+        const cppast::cpp_file& file = result->operator*();
         const std::filesystem::path& debugFile = options.getDebugFile();
         if (!debugFile.empty()) {
             write_ast(file, debugFile);

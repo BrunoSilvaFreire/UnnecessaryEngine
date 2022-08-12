@@ -64,10 +64,11 @@ add_unnecessary_tool(
     grapphs_visualization
 )
 if (WIN32)
-    unnecessary_copy_on_build(
+    message("Adding libclang_s")
+    target_link_libraries(
         unnecessary_serializer_generator
-        ${CLANG_INSTALL_DIRECTORY}/bin/libclang.dll
-        ${CMAKE_CURRENT_BINARY_DIR}/bin/libclang.dll
+        PUBLIC
+        libclang_s
     )
 endif ()
 add_subdirectory(nlohmann)

@@ -1,4 +1,5 @@
 #include <unnecessary/source_analysis/jobs/parse_file_job.h>
+#include <unnecessary/misc/pretty_print.h>
 
 namespace un {
 
@@ -13,8 +14,10 @@ namespace un {
 
         un::Chronometer<> chronometer;
         std::vector<un::ParseDiagnostic> diagnostics;
+        LOG(INFO) << "Parsing @ " << _file;
         std::unique_ptr<cppast::cpp_file> parsed = parser.parse(*_index, _file.string(), config);
         std::chrono::milliseconds duration = chronometer.stop();
+        LOG(INFO) << "Parsed @ " << _file << ", " << duration.count() << " ms";
         auto start = chronometer.getStart();
         auto end = start + duration;
         un::ParseReport report(
@@ -24,7 +27,8 @@ namespace un {
         );
         std::unique_ptr<un::ParsedFile> pFile = std::make_unique<un::ParsedFile>(
             std::move(parsed),
-            report
+            report,
+            _file
         );
         _output->operator=(std::move(pFile));
     }
@@ -37,5 +41,17 @@ namespace un {
     ) : _file(std::move(file)),
         _index(index),
         _output(output),
-        _arguments(std::move(arguments)) { }
+        _arguments(std::move(arguments)) {
+        std::stringstream ss;
+        ss << "Parse '" << un::prettify(_file) << "'";
+        setName(ss.str());
+    }
+
+    const std::filesystem::path& ParseFileJob::getFile() const {
+        return _file;
+    }
+
+    std::unique_ptr<un::ParsedFile>* ParseFileJob::getOutput() {
+        return _output;
+    }
 }

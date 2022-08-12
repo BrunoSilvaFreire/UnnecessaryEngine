@@ -23,6 +23,10 @@ namespace un {
         );
 
         void operator()(WorkerType* worker) override;
+
+        const std::filesystem::path& getFile() const;
+
+        std::unique_ptr<un::ParsedFile>* getOutput();
     };
 }
 #endif

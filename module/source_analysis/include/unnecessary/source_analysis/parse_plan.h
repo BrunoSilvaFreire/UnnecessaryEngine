@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <mutex>
 #include <utility>
+#include <cppast/visitor.hpp>
 #include <cppast/cpp_entity_index.hpp>
 #include <cppast/libclang_parser.hpp>
 #include <unnecessary/misc/benchmark.h>
@@ -22,9 +23,7 @@ namespace un {
     public:
         const std::vector<std::filesystem::path>& getIncludes() const;
 
-        void addInclude(const std::filesystem::path& include) {
-            includes.emplace_back(include);
-        }
+        friend class ParsePlan;
     };
 
     class ParseDiagnostic {
@@ -66,38 +65,46 @@ namespace un {
 
     class ParsedFile {
     private:
+        std::filesystem::path _path;
         std::unique_ptr<cppast::cpp_file> _file;
         un::ParseReport _report;
     public:
         ParsedFile(
             std::unique_ptr<cppast::cpp_file>&& file,
-            const ParseReport& report
+            const ParseReport& report,
+            std::filesystem::path path
         );
 
         const std::unique_ptr<cppast::cpp_file>& getFile() const;
 
+        std::unique_ptr<cppast::cpp_file>& getFile();
+
         const ParseReport& getReport() const;
+
+        const std::filesystem::path& getPath() const;
     };
 
     class ParsePlan {
     private:
         ParseArguments _arguments;
+        std::shared_ptr<cppast::cpp_entity_index> _index;
         std::mutex _mutex;
         std::unordered_set<std::string> _alreadyParsed;
         std::unordered_map<std::string, std::unique_ptr<un::ParsedFile>> _parsed;
-        un::ptr<un::SimpleJobSystem> _jobSystem;
+
+        void onParsed(
+            std::unique_ptr<un::ParsedFile>& ptr,
+            un::DynamicChain<SimpleJobSystem>& builder
+        );
+
     public:
-        ParsePlan(
-            ParseArguments arguments,
-            un::ptr<SimpleJobSystem> jobSystem
-        );
+        explicit ParsePlan(std::shared_ptr<cppast::cpp_entity_index> index);
 
-        bool tryAccess(const std::string& include, un::JobHandle& handle);
+        void addInclude(const std::filesystem::path& include);
 
-        const std::unique_ptr<cppast::cpp_file>& operator()(
-            const std::filesystem::path& file,
-            cppast::cpp_entity_index& index
-        );
+        void addFile(const std::filesystem::path& file);
+
+        void parse(un::ptr<un::SimpleJobSystem> jobSystem);
     };
 }
 #endif

@@ -1,7 +1,3 @@
-//
-// Created by bruno on 22/05/2022.
-//
-
 #ifndef UNNECESSARYENGINE_GENERATION_PLAN_H
 #define UNNECESSARYENGINE_GENERATION_PLAN_H
 
@@ -17,7 +13,6 @@
 namespace un {
     class GenerationFile {
     private:
-
         std::filesystem::path path;
         std::filesystem::path output;
         un::CXXTranslationUnit unit;

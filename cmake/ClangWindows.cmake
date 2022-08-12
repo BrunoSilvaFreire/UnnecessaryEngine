@@ -101,11 +101,14 @@ macro(setup_llvm)
     if (NOT EXISTS ${CLANG_INSTALL_DIRECTORY})
         build_llvm()
     endif ()
-    add_library(staticclang STATIC IMPORTED)
-    set_target_properties(
-        staticclang
-        PROPERTIES
-        IMPORTED_LOCATION ${CLANG_INSTALL_DIRECTORY}/lib/libclang.lib
-        IMPORTED_CONFIGURATIONS Release
-    )
+
+    if (WIN32)
+        add_library(libclang_s STATIC IMPORTED GLOBAL)
+        set_target_properties(
+            libclang_s
+            PROPERTIES
+            IMPORTED_LOCATION ${CLANG_INSTALL_DIRECTORY}/lib/libclang.lib
+            IMPORTED_IMPLIB ${CLANG_INSTALL_DIRECTORY}/lib/libclang.lib
+        )
+    endif ()
 endmacro()

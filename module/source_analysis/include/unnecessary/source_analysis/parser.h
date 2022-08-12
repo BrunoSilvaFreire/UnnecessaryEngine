@@ -21,6 +21,7 @@ namespace un::parsing {
         std::filesystem::path debugFile;
         std::vector<std::string> includes;
         std::shared_ptr<cppast::cpp_entity_index> indexToUse;
+        un::ptr<std::unique_ptr<cppast::cpp_file>> fileDestination;
     public:
         ParsingOptions(std::filesystem::path file, std::vector<std::string> includes);
 
@@ -39,6 +40,10 @@ namespace un::parsing {
         const std::shared_ptr<cppast::cpp_entity_index>& getIndexToUse() const;
 
         void setIndexToUse(const std::shared_ptr<cppast::cpp_entity_index>& indexToUse);
+
+        const un::ptr<std::unique_ptr<cppast::cpp_file>> getFileDestination() const;
+
+        void setFileDestination(const un::ptr<std::unique_ptr<cppast::cpp_file>> fileDestination);
     };
 
     class Parser {
@@ -50,21 +55,12 @@ namespace un::parsing {
         un::CXXAccessModifier currentAccess = un::CXXAccessModifier::eNone;
         std::shared_ptr<un::CXXComposite> currentComposite;
         std::vector<un::CXXAttribute> macros;
-        std::unique_ptr<cppast::cpp_file> result;
         std::set<std::string> alreadyParsed;
         std::shared_ptr<cppast::cpp_entity_index> index;
 
     public:
 
         Parser(const un::parsing::ParsingOptions& options);
-
-/*        Parser(
-            cppast::cpp_file&& file,
-            std::shared_ptr<cppast::cpp_entity_index> index
-        ) : result(std::move(std::make_unique<cppast::cpp_file>(std::move(file)))),
-            index(std::move(index)) {
-
-        }*/
 
         const CXXTranslationUnit& getTranslationUnit() const {
             return translationUnit;
@@ -95,6 +91,8 @@ namespace un::parsing {
         CXXTypeKind toUnTypeKind(const cppast::cpp_type& type) const;
 
         std::shared_ptr<cppast::cpp_entity_index> getIndex(const ParsingOptions& options);
+
+        std::unique_ptr<cppast::cpp_file>&& moveFile();
     };
 }
 #endif

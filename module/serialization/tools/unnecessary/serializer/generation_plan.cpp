@@ -1,7 +1,3 @@
-//
-// Created by bruno on 22/05/2022.
-//
-
 #include <unnecessary/serializer/generation_plan.h>
 #include <utility>
 

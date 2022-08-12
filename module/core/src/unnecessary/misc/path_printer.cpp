@@ -1,5 +1,5 @@
-#include <unnecessary/cli/path_printer.h>
-#include <unnecessary/strings.h>
+#include "unnecessary/misc/path_printer.h"
+#include "unnecessary/strings.h"
 
 namespace un {
     std::string prettify(const std::filesystem::path& path) {
