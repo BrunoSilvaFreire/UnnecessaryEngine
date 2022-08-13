@@ -1,6 +1,7 @@
 #include <unnecessary/source_analysis/parse_plan.h>
 #include <unnecessary/source_analysis/jobs/parse_file_job.h>
 #include <algorithm>
+#include <utility>
 
 namespace un {
 
@@ -37,19 +38,23 @@ namespace un {
 
     ParsedFile::ParsedFile(
         std::unique_ptr<cppast::cpp_file>&& file,
-        const ParseReport& report,
+        ParseReport report,
         std::filesystem::path path
     ) : _file(std::move(file)),
-        _report(report), _path(path) { }
+        _report(std::move(report)), _path(std::move(path)) { }
+
+    ParsePlan::ParsePlan(
+        std::shared_ptr<cppast::cpp_entity_index> index
+    ) : _index(std::move(index)) { }
 
     const std::unique_ptr<cppast::cpp_file>& ParsedFile::getFile() const {
         return _file;
     }
 
+
     std::unique_ptr<cppast::cpp_file>& ParsedFile::getFile() {
         return _file;
     }
-
 
     const ParseReport& ParsedFile::getReport() const {
         return _report;
@@ -60,7 +65,6 @@ namespace un {
     }
 
     void ParsePlan::addFile(const std::filesystem::path& file) {
-
         const std::string& path = file.string();
         std::unique_ptr<un::ParsedFile>& ptr = _parsed[path];
     }
@@ -111,7 +115,8 @@ namespace un {
         );
     }
 
-    void ParsePlan::parse(un::ptr<un::SimpleJobSystem> jobSystem) {
+
+    std::vector<un::CXXTranslationUnit> ParsePlan::parse(un::ptr<un::SimpleJobSystem> jobSystem) {
         un::UnnecessaryLogger logger;
         cppast::libclang_parser parser(type_safe::ref(logger));
         cppast::libclang_compile_config config;
@@ -136,9 +141,19 @@ namespace un {
             );
         }
         flow.wait();
+        std::vector<un::CXXTranslationUnit> translationUnits;
+        for (const auto& item : this->_parsed) {
+            const std::unique_ptr<un::ParsedFile>& parsedFile = item.second;
+            auto unit = &translationUnits.emplace_back(parsedFile->getPath(), item.first);
+            std::unique_ptr<cppast::cpp_file>& pFile = parsedFile->getFile();
+            un::Transpiler transpiler(
+                unit,
+                _index
+            );
+            transpiler.parse(*pFile);
+        }
+        return translationUnits;
     }
-
-    ParsePlan::ParsePlan(std::shared_ptr<cppast::cpp_entity_index> index) : _index(std::move(index)) { }
 
     void ParsePlan::addInclude(const std::filesystem::path& include) {
         _arguments.includes.emplace_back(include);

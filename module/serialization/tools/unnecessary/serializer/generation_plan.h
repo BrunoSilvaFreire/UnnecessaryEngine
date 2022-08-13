@@ -7,13 +7,13 @@
 #include <utility>
 #include <grapphs/algorithms/rlo_traversal.h>
 #include <unnecessary/graphs/dependency_graph.h>
-#include <unnecessary/source_analysis/parser.h>
+#include <unnecessary/source_analysis/structures.h>
 #include <ostream>
 
 namespace un {
     class GenerationFile {
     private:
-        std::filesystem::path path;
+        std::filesystem::path source;
         std::filesystem::path output;
         un::CXXTranslationUnit unit;
     public:
@@ -21,10 +21,12 @@ namespace un {
             std::filesystem::path path,
             std::filesystem::path output,
             CXXTranslationUnit&& unit
-        ) : path(std::move(path)), unit(std::move(unit)), output(output) { }
+        ) : source(std::move(path)),
+            unit(std::move(unit)),
+            output(std::move(output)) { }
 
-        const std::filesystem::path& getPath() const {
-            return path;
+        const std::filesystem::path& getSource() const {
+            return source;
         }
 
         const CXXTranslationUnit& getUnit() const {
@@ -37,36 +39,18 @@ namespace un {
     };
 
     class GenerationPlan {
-    public:
-        using IncludeGraphType = un::DependencyGraph<un::GenerationFile>;
     private:
         std::filesystem::path source;
         std::filesystem::path output;
-        std::unordered_map<std::string, u32> include2Index;
-        IncludeGraphType includeGraph;
-        std::mutex translationUnitMutexes;
         std::shared_ptr<cppast::cpp_entity_index> index;
 
     public:
         explicit GenerationPlan(
-            std::filesystem::path  source,
+            std::shared_ptr<cppast::cpp_entity_index> index,
             std::filesystem::path output
         );
 
-        void addTranslationUnit(
-            const std::filesystem::path& file,
-            un::CXXTranslationUnit&& unit
-        );
-
-        void bake();
-
         const std::shared_ptr<cppast::cpp_entity_index>& getIndex() const;
-
-        std::vector<std::pair<u32, const un::GenerationFile*>> getFilesSequence() const;
-
-        IncludeGraphType& getIncludeGraph();;
-
-        const IncludeGraphType& getIncludeGraph() const;
     };
 }
 

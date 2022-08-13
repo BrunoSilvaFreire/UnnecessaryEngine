@@ -49,11 +49,6 @@ add_unnecessary_tool(
     tools/unnecessary/serializer/generation_plan.cpp
     tools/unnecessary/serializer/jobs/generate_serializer_job.h
     tools/unnecessary/serializer/jobs/generate_serializer_job.cpp
-    tools/unnecessary/serializer/jobs/parallel_generation.h
-    tools/unnecessary/serializer/jobs/parallel_generation.cpp
-    tools/unnecessary/serializer/jobs/parse_translation_unit_job.h
-    tools/unnecessary/serializer/jobs/parse_translation_unit_job.cpp
-
     tools/unnecessary/serializer/jobs/generate_includes_job.h
     tools/unnecessary/serializer/jobs/generate_includes_job.cpp
 

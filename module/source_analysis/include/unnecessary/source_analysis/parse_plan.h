@@ -14,6 +14,7 @@
 #include <unnecessary/misc/benchmark.h>
 #include <unnecessary/jobs/simple_jobs.h>
 #include <unnecessary/jobs/dynamic_chain.h>
+#include <unnecessary/source_analysis/cppast/transpiler.h>
 #include <unnecessary/source_analysis/unnecessary_logger.h>
 
 namespace un {
@@ -71,7 +72,7 @@ namespace un {
     public:
         ParsedFile(
             std::unique_ptr<cppast::cpp_file>&& file,
-            const ParseReport& report,
+            ParseReport  report,
             std::filesystem::path path
         );
 
@@ -104,7 +105,7 @@ namespace un {
 
         void addFile(const std::filesystem::path& file);
 
-        void parse(un::ptr<un::SimpleJobSystem> jobSystem);
+        std::vector<un::CXXTranslationUnit> parse(un::ptr<un::SimpleJobSystem> jobSystem);
     };
 }
 #endif

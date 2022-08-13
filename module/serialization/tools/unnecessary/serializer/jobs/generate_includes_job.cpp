@@ -16,11 +16,11 @@ namespace un {
         for (const auto& item : translationUnit->getIncludes()) {
             ss << "#include <" << item << ">" << std::endl;
         }
-        const auto& includeGraph = plan->getIncludeGraph();
-        for (u32 dependencyIndex : includeGraph.dependenciesOf(unitGraphIndex)) {
-            const un::GenerationFile& file = *includeGraph[dependencyIndex];
-            ss << "#include <" << file.getOutput().filename().string() << ">" << std::endl;
-        }
+//        const auto& includeGraph = plan->getIncludeGraph();
+//        for (u32 dependencyIndex : includeGraph.dependenciesOf(unitGraphIndex)) {
+//            const un::GenerationFile& file = *includeGraph[dependencyIndex];
+//            ss << "#include <" << file.getOutput().filename().string() << ">" << std::endl;
+//        }
         ss << "#include <" << translationUnit->getSelfInclude() << ">" << std::endl;
         ss << "#endif" << std::endl;
         buf->operator=(ss.str());
