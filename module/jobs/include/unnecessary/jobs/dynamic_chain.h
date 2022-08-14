@@ -135,10 +135,6 @@ namespace un {
             _jobSystem(jobSystem) {
         }
 
-        virtual ~DynamicFlow() {
-            LOG(INFO) << "DESTROYED";
-        }
-
         void wait() {
             std::unique_lock<std::mutex> lock(_inFlightMutex);
             _completed.wait(lock);

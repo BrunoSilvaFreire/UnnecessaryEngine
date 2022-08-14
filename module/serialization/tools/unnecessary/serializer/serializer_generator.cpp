@@ -2,19 +2,17 @@
 #include <chrono>
 #include <unordered_map>
 
-#include "unnecessary/misc/pretty_print.h"
 #include <unnecessary/serializer/jobs/generate_includes_job.h>
 #include <unnecessary/serializer/jobs/generate_serializer_job.h>
 #include <unnecessary/serializer/generation_plan.h>
 #include <unnecessary/jobs/job_system_builder.h>
-#include <unnecessary/jobs/worker_chain.h>
 #include <unnecessary/jobs/job_chain.h>
 #include <unnecessary/jobs/misc/file_jobs.h>
 #include <unnecessary/jobs/misc/join_buffers_job.h>
 #include <unnecessary/jobs/misc/job_visualization.h>
 #include <unnecessary/misc/benchmark.h>
+#include <unnecessary/misc/pretty_print.h>
 #include <grapphs/dot.h>
-#include "generation.h"
 #include "unnecessary/source_analysis/parse_plan.h"
 
 static const char* const kFileArgName = "file";
@@ -92,8 +90,7 @@ int main(int argc, char** args) {
         std::for_each(
             files.begin(), files.end(),
             [](std::string& path) {
-                std::filesystem::path absPath = std::filesystem::absolute(path);
-                path = un::to_string(absPath);
+                path = un::to_string(std::filesystem::absolute(path));
             }
         );
         if (result.count(kNumWorkersName) > 0) {
@@ -109,12 +106,11 @@ int main(int argc, char** args) {
     LOG(INFO) << un::prettify("files", files);
     LOG(INFO) << un::prettify("includes", includes);
     builder.withRecorder();
-    builder.withLogger();
     auto jobSystem = builder.build();
 
     auto index = std::make_shared<cppast::cpp_entity_index>();
 
-    std::vector<un::CXXTranslationUnit> units;
+    std::vector<un::GenerationFile> genFiles;
     {
         un::ParsePlan parsePlan(index);
         std::for_each(
@@ -129,35 +125,42 @@ int main(int argc, char** args) {
                 parsePlan.addFile(item);
             }
         );
-        units = parsePlan.parse(jobSystem.get());
+        std::vector<un::CXXTranslationUnit> units = parsePlan.parse(jobSystem.get());
+        for (auto& item : units) {
+            std::filesystem::path location = item.getLocation();
+            std::string fileName = location.filename().replace_extension().string() + ".serializer.generated.h";
+            genFiles.emplace_back(
+                location,
+                output / fileName,
+                std::move(item)
+            );
+        }
     }
 
     un::GenerationPlan plan(index, output);
     un::Chronometer<> chronometer(false);
-    for (const auto& item : units) {
 
-    }
-    /*gpp::save_to_dot(includeGraph.getInnerGraph(), output / "includes.dot");
     {
         un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
         std::unordered_map<u32, std::set<un::JobHandle>> include2DeclarationsJobs;
-        for (const auto& translationUnit : units) {
-            std::vector<std::shared_ptr<un::CXXDeclaration>> symbols = translationUnit.collectSymbols<un::CXXDeclaration>();
+        for (const auto& pGenerationFile : genFiles) {
+            std::filesystem::path filePath = pGenerationFile.getSource();
+            const un::CXXTranslationUnit& pUnit = pGenerationFile.getUnit();
+            std::vector<std::shared_ptr<un::CXXDeclaration>> symbols = pUnit.collectSymbols<un::CXXDeclaration>();
             std::vector<std::shared_ptr<un::Buffer>> toJoin;
             std::set<un::JobHandle> dependencies;
-            std::string fileName = pGenerationFile->getSource().filename().string() + ".generated.h";
-            std::filesystem::path outPath = pGenerationFile->getOutput();
-            LOG(INFO) << pGenerationFile->getSource().filename() << " serializer will be written to "
+            std::filesystem::path outPath = pGenerationFile.getOutput();
+            std::string fileName = outPath.filename();
+            LOG(INFO) << filePath.filename() << " serializer will be written to "
                       << un::prettify(outPath);
 
             std::shared_ptr<un::Buffer> includeBuf = std::make_shared<un::Buffer>();
             un::JobHandle includeHandle;
-            const un::CXXTranslationUnit* pUnit = &translationUnit;
             u32 index = 0;
             chain.immediately<un::GenerateIncludesJobs>(
                 &includeHandle,
                 index,
-                pUnit,
+                &pUnit,
                 &plan,
                 includeBuf
             );
@@ -173,7 +176,7 @@ int main(int argc, char** args) {
                     &handle,
                     buffer,
                     item,
-                    pUnit
+                    &pUnit
                 );
                 chain.setName(
                     handle,
@@ -210,7 +213,7 @@ int main(int argc, char** args) {
         }
         writeJobToDot(jobSystem, output / "generate_jobs.dot");
         LOG(INFO) << "Dispatching " << chain.getNumJobs() << " generation jobs...";
-    }*/
+    }
     jobSystem->complete();
     auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::SimpleJobSystem>>();
     ptr->saveToFile(output / "recording.csv");

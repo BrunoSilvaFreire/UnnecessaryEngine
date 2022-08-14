@@ -126,9 +126,9 @@ namespace un {
             const std::shared_ptr<SerializationWriter>& writer = writerRegistry.getWriter(field, *translationUnit);
             const std::string& fName = field.getName();
             const un::CXXType& fieldType = field.getType();
-            LOG(INFO) << "Elected " << writer->name() << " for field " << fName << " of " << info.fullName
-                      << " with type " << fieldType.getName() << " (kind: " << un::to_string(fieldType.getKind())
-                      << ")";
+//            LOG(INFO) << "Elected " << writer->name() << " for field " << fName << " of " << info.fullName
+//                      << " with type " << fieldType.getName() << " (kind: " << un::to_string(fieldType.getKind())
+//                      << ")";
 
             //Serialization
             fieldsSerialization << "// --- BEGIN FIELD SERIALIZATION: " << fName << std::endl;

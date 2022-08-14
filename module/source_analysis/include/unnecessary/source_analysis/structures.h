@@ -78,6 +78,9 @@ namespace un {
         ePrivate
     };
 
+    template<>
+    std::string to_string(const un::CXXAccessModifier& value);
+
     class CXXAttribute : CXXNamed {
     private:
         std::string name;

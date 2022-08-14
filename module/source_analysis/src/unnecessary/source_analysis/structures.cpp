@@ -219,6 +219,20 @@ namespace un {
         return "unknown_kind";
     }
 
+    template<>
+    std::string to_string(const CXXAccessModifier& value) {
+        switch (value) {
+            case un::CXXAccessModifier::eNone:
+                return "none";
+            case un::CXXAccessModifier::ePublic:
+                return "public";
+            case un::CXXAccessModifier::eProtected:
+                return "protected";
+            case un::CXXAccessModifier::ePrivate:
+                return "private";
+        }
+    }
+
     CXXEnum::CXXEnum(
         const std::string& name,
         const std::string& ns,
@@ -258,7 +272,7 @@ namespace un {
     CXXTranslationUnit::CXXTranslationUnit(
         std::filesystem::path location,
         std::string selfInclude
-    ) : selfInclude(std::move(selfInclude)), location(location) { }
+    ) : selfInclude(std::move(selfInclude)), location(std::move(location)) { }
 
     const std::string& CXXTranslationUnit::getSelfInclude() const {
         return selfInclude;

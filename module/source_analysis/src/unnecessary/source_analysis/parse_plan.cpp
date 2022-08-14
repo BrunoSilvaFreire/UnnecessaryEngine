@@ -64,9 +64,8 @@ namespace un {
         return _path;
     }
 
-    void ParsePlan::addFile(const std::filesystem::path& file) {
-        const std::string& path = file.string();
-        std::unique_ptr<un::ParsedFile>& ptr = _parsed[path];
+    std::unique_ptr<un::ParsedFile>& ParsePlan::addFile(const std::filesystem::path& file) {
+        return addFile(file.string(), file);
     }
 
     void ParsePlan::onParsed(
@@ -144,7 +143,10 @@ namespace un {
         std::vector<un::CXXTranslationUnit> translationUnits;
         for (const auto& item : this->_parsed) {
             const std::unique_ptr<un::ParsedFile>& parsedFile = item.second;
-            auto unit = &translationUnits.emplace_back(parsedFile->getPath(), item.first);
+            auto unit = &translationUnits.emplace_back(
+                parsedFile->getPath(),
+                item.first
+            );
             std::unique_ptr<cppast::cpp_file>& pFile = parsedFile->getFile();
             un::Transpiler transpiler(
                 unit,

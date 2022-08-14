@@ -4,7 +4,6 @@
 #include <unnecessary/serializer/writers/delegate_writer.h>
 #include <unnecessary/serializer/writers/identifiable_writer.h>
 #include <unnecessary/serializer/writers/collection_writer.h>
-#include <unnecessary/serializer/writers/enum_writer.h>
 #include <iostream>
 
 namespace un {
@@ -90,7 +89,6 @@ namespace un {
         addWriter<un::DelegateWriter>();
         addWriter<un::IdentifiableVectorWriter>();
         addWriter<un::CollectionWriter>();
-        addWriter<un::EnumWriter>();
     }
 
 }

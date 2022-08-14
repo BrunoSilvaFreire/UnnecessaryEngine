@@ -25,8 +25,8 @@ namespace un {
     void Thread::operator()() {
         {
             std::unique_lock<std::mutex> lock(_dataMutex);
-            setThreadName(name);
-            setThreadCore(core);
+
+            std::thread::id id = _inner.get_id();
             _alive = true;
         }
         _block();
@@ -62,7 +62,5 @@ namespace un {
 
     void Thread::start() {
         _inner = std::thread(&Thread::operator(), this);
-        setThreadCore(core);
-        setThreadName(name);
     }
 }

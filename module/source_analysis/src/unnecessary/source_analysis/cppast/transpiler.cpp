@@ -114,6 +114,9 @@ namespace un {
     Transpiler::parse_field(CXXComposite& composite, const CXXAccessModifier& modifier, const cppast::cpp_entity& e) {
         const auto& var = dynamic_cast<const cppast::cpp_member_variable&>(e);
         std::vector<CXXAttribute> attributes;
+        if (var.name() == "scope") {
+            LOG(INFO) << "SCOPE";
+        }
         const cppast::cpp_type& type = var.type();
         CXXType fieldType = toUnType(type);
         for (const auto& att : e.attributes()) {
@@ -186,6 +189,17 @@ namespace un {
                     for (const auto& arg : splitArgs) {
                         std::string trimmed = un::trim_whitespace_prefix(arg);
                         fieldType.addTemplate(std::move(trimmed));
+                    }
+                }
+            } else if (typeKind == cppast::cpp_type_kind::user_defined_t) {
+                const auto& userType = dynamic_cast<const cppast::cpp_user_defined_type&>(type);
+                const auto& found = userType.entity().get(*index);
+                if (found.empty()) {
+                    fieldType = CXXType(typeStr, tType);
+                } else {
+                    const auto& entt = found[0];
+                    if (entt->kind() == cppast::cpp_entity_kind::enum_t) {
+                        fieldType = CXXType(typeStr, un::CXXTypeKind::eEnum);
                     }
                 }
             } else {

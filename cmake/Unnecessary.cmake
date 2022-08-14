@@ -10,19 +10,14 @@ include(GNUInstallDirs)
 include(CPack)
 include(CMakePrintHelpers)
 include(CMakeGraphVizOptions)
-find_package(
-    Vulkan
-    REQUIRED
-)
+find_package(Vulkan)
 
 find_program(
     GLSLC_EXEC glslc
-    REQUIRED
     HINTS $ENV{VULKAN_SDK}/bin
 )
 find_program(
     SPIRV_EXEC spirv-cross
-    REQUIRED
     HINTS $ENV{VULKAN_SDK}/bin
 )
 

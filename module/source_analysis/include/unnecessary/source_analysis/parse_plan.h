@@ -72,7 +72,7 @@ namespace un {
     public:
         ParsedFile(
             std::unique_ptr<cppast::cpp_file>&& file,
-            ParseReport  report,
+            ParseReport report,
             std::filesystem::path path
         );
 
@@ -103,7 +103,12 @@ namespace un {
 
         void addInclude(const std::filesystem::path& include);
 
-        void addFile(const std::filesystem::path& file);
+
+        std::unique_ptr<un::ParsedFile>& addFile(const std::filesystem::path& file);
+
+        std::unique_ptr<un::ParsedFile>& addFile(const std::string& selfInclude, const std::filesystem::path& include) {
+            return _parsed[selfInclude];
+        }
 
         std::vector<un::CXXTranslationUnit> parse(un::ptr<un::SimpleJobSystem> jobSystem);
     };

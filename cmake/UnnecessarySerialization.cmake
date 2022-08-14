@@ -51,7 +51,7 @@ function(add_unnecessary_serialization)
         list(
             APPEND
             SERIALIZATION_ARGS
-            --output ${SERIALIZER_OUTPUT}
+            --output ${SERIALIZER_INCLUDE_DIR}
 
         )
     endif ()

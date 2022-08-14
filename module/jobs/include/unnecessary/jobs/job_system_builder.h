@@ -1,10 +1,10 @@
 #ifndef UNNECESSARYENGINE_JOB_SYSTEM_BUILDER_H
 #define UNNECESSARYENGINE_JOB_SYSTEM_BUILDER_H
 
+#include <cmath>
 #include <unnecessary/jobs/simple_jobs.h>
 #include <unnecessary/jobs/logger/job_system_logger.h>
 #include <unnecessary/jobs/recorder/job_system_recorder.h>
-
 namespace un {
     template<typename TJobSystem>
     class JobSystemBuilder {
