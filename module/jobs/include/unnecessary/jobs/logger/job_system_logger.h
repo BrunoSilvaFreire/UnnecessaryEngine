@@ -51,17 +51,18 @@ namespace un {
             _worker->onFetched() += [this](JobType* job, un::JobHandle handle) {
                 auto message = un::message("JobSystem");
                 message.text() << worker_header() << " " << YELLOW("fetched") << "  job " << GREEN(handle) << " ("
-                          << GREEN(job->getName()) << ").";
+                               << GREEN(job->getName()) << ").";
             };
             _worker->onExecuted() += [this](JobType* job, un::JobHandle handle) {
                 auto message = un::message("JobSystem");
                 message.text() << worker_header() << " executed job " << GREEN(handle) << " (" << GREEN(job->getName())
-                          << ").";
+                               << ").";
             };
             _worker->onEnqueued() += [this](JobType* job, un::JobHandle handle) {
                 auto message = un::message("JobSystem");
-                message.text() << worker_header() << " was enqueued job " << GREEN(handle) << " (" << GREEN(job->getName())
-                          << ").";
+                message.text() << worker_header() << " was enqueued job " << GREEN(handle) << " ("
+                               << GREEN(job->getName())
+                               << ").";
             };
         }
     };
@@ -104,17 +105,17 @@ namespace un {
                             }
                             auto* job = jobSystem.template getWorkerPool<TArchetype>()
                                                  .getJob(dependantNode->poolLocalIndex);
-                            auto& tree = missingJobsMsg.tree();
-                            un::TextMessage& entry = tree.text();
+                            auto& tree = missingJobsMsg.map();
+                            un::TextMessage& entry = tree.text("name");
                             if (job == nullptr) {
                                 entry << "Unknown Job";
                             } else {
-                                entry << "Job " << job->getName();
+                                entry << job->getName();
                             }
 
-                            tree.text() << "handle (poolLocalIndex): " << dependantNode->poolLocalIndex;
-                            tree.text() << "archetype: " << un::type_name_of<TArchetype>();
-                            tree.text() << "archetypeIndex: " << dependantNode->archetypeIndex;
+                            tree.text("handle (poolLocalIndex)") << dependantNode->poolLocalIndex;
+                            tree.text("archetype") << un::type_name_of<TArchetype>();
+                            tree.text("archetypeIndex") << dependantNode->archetypeIndex;
                         }
                     );
                 };

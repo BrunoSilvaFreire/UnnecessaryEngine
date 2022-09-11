@@ -1,8 +1,8 @@
-
 #ifndef UNNECESSARYENGINE_PRETTY_PRINT_H
 #define UNNECESSARYENGINE_PRETTY_PRINT_H
 
 #include <string>
+#include <unordered_map>
 #include <unnecessary/logging.h>
 #include <unnecessary/platform.h>
 #include <unnecessary/misc/path_printer.h>
@@ -16,10 +16,16 @@ namespace un {
         IMessage(const IMessage&) = delete;
 
         virtual void write(std::ostream& stream) const = 0;
+        virtual bool supports_children();
     };
 
+    class TreeMessage;
 
-    class TextMessage : public IMessage {
+    class MapMessage;
+
+    class RichMessage;
+
+    class TextMessage final : public IMessage {
     private:
         std::stringstream _text;
     public:
@@ -31,7 +37,6 @@ namespace un {
         }
     };
 
-    class TreeMessage;
 
     class CompositeMessage : public IMessage {
     protected:
@@ -44,6 +49,14 @@ namespace un {
             const std::unique_ptr<IMessage>& msg
         ) const { }
 
+        template<typename TChild>
+        TChild& add_child() {
+            return dynamic_cast<TChild&>(*_children.emplace_back(std::make_unique<TChild>()));
+        }
+
+    public:
+        bool supports_children() override;
+
     public:
         CompositeMessage() = default;
 
@@ -54,9 +67,11 @@ namespace un {
         un::TextMessage& text();
 
         un::TreeMessage& tree();
+
+        un::MapMessage& map();
     };
 
-    class TreeMessage : public CompositeMessage {
+    class TreeMessage final : public CompositeMessage {
     protected:
         void prefix(
             std::ostream& stream,
@@ -66,13 +81,41 @@ namespace un {
         ) const override;
     };
 
+    class MapMessage final : public IMessage {
+    private:
+        std::unordered_map<std::string, std::unique_ptr<un::IMessage>> _named;
+
+        template<typename TChild>
+        TChild& add_child(const std::string& name) {
+            return dynamic_cast<TChild&>(*(_named[name] = std::make_unique<TChild>()));
+        }
+
+        void prefix(
+            std::ostream& stream,
+            const std::string& name,
+            std::size_t i,
+            std::size_t lineNbr,
+            const std::unique_ptr<IMessage>& msg
+        ) const;
+
+    protected:
+        void write(std::ostream& stream) const override;
+
+    public:
+        bool supports_children() override;
+
+        un::TextMessage& text(const std::string& name);
+
+        un::TreeMessage& tree(const std::string& name);
+    };
+
     class RichMessage : public CompositeMessage {
     private:
         std::string _indent;
         std::string _header;
         std::string _level = INFO;
     public:
-        explicit RichMessage(std::string indent , std::string header);
+        explicit RichMessage(std::string indent, std::string header);
 
         ~RichMessage();
 
