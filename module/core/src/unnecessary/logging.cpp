@@ -50,7 +50,7 @@ namespace un {
         u32 line,
         const std::string& file
     ) : flushed(false) {
-        sstream <<
+        sstream << termcolor::colorize <<
                 DEFAULT_COLOR << '[' <<
                 termcolor::green << header <<
                 DEFAULT_COLOR << "] " <<
@@ -60,7 +60,7 @@ namespace un {
     }
 
     Log::Log(const std::string& header, const std::string& label) : flushed(false) {
-        sstream <<
+        sstream << termcolor::colorize <<
                 DEFAULT_COLOR << '[' <<
                 termcolor::green << header <<
                 DEFAULT_COLOR << "] " <<

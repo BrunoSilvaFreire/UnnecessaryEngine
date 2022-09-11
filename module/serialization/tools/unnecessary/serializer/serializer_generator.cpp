@@ -165,7 +165,9 @@ int main(int argc, char** args) {
                 &plan,
                 includeBuf
             );
-            chain.setName(includeHandle, "Generate includes for translation unit");
+            std::stringstream name;
+            name << "Generate includes for translation unit (" << un::prettify(pGenerationFile.getSource()) << ")";
+            chain.setName(includeHandle, name.str());
             toJoin.emplace_back(includeBuf);
             dependencies.emplace(includeHandle);
 

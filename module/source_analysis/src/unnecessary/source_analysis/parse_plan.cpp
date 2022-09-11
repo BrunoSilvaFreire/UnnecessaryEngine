@@ -128,7 +128,6 @@ namespace un {
             // enqueue(chain, key, value);
             auto& key = pair.first;
             auto& value = pair.second;
-            LOG(INFO) << "Enqueueing " << key;
             flow.enqueue<un::ParseFileJob>(
                 [&](un::DynamicChain<un::SimpleJobSystem>& chain) {
                     onParsed(value, chain);

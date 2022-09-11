@@ -2,10 +2,10 @@
 #define UNNECESSARYENGINE_LOGGING_H
 
 #include <iostream>
-#include <termcolor/termcolor.hpp>
 #include <mutex>
 #include <unnecessary/def.h>
 #include <sstream>
+#include <termcolor/termcolor.hpp>
 
 namespace un {
     class Log {
@@ -38,11 +38,7 @@ namespace un {
 #define WARN "WARN"
 #define FUCK "OH SHIT OH FUCK"
 
-#if defined(_WIN32)
-#define DEFAULT_COLOR termcolor::white
-#else
-#define DEFAULT_COLOR termcolor::grey
-#endif
+#define DEFAULT_COLOR termcolor::reset
 #define COLORED(MSG, COLOR) COLOR << MSG << DEFAULT_COLOR
 
 #ifdef __clang__

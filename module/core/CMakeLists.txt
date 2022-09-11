@@ -22,6 +22,12 @@ add_unnecessary_library(
     include/unnecessary/misc/pretty_print.h
     include/unnecessary/misc/list_printer.h
     include/unnecessary/misc/path_printer.h
+    include/unnecessary/misc/rich_messages/message.h
+    include/unnecessary/misc/rich_messages/rich_message.h
+    include/unnecessary/misc/rich_messages/map_message.h
+    include/unnecessary/misc/rich_messages/tree_message.h
+    include/unnecessary/misc/rich_messages/text_message.h
+
     src/unnecessary/logging.cpp
     src/unnecessary/strings.cpp
     src/unnecessary/version.cpp
@@ -33,6 +39,11 @@ add_unnecessary_library(
     src/unnecessary/misc/files.cpp
     src/unnecessary/misc/path_printer.cpp
     src/unnecessary/misc/pretty_print.cpp
+    src/unnecessary/misc/rich_messages/message.cpp
+    src/unnecessary/misc/rich_messages/rich_message.cpp
+    src/unnecessary/misc/rich_messages/map_message.cpp
+    src/unnecessary/misc/rich_messages/tree_message.cpp
+    src/unnecessary/misc/rich_messages/text_message.cpp
 
     SOURCES_WIN
     src/unnecessary/strings.win.cpp
