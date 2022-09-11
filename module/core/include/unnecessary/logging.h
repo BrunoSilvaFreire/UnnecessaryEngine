@@ -16,6 +16,8 @@ namespace un {
     public:
         void flush();
 
+        Log(const std::string& header, const std::string& label);
+
         Log(const std::string& header, u32 line, const std::string& file);
 
         ~Log();

@@ -106,6 +106,7 @@ int main(int argc, char** args) {
     LOG(INFO) << un::prettify("files", files);
     LOG(INFO) << un::prettify("includes", includes);
     builder.withRecorder();
+    builder.withLogger();
     auto jobSystem = builder.build();
 
     auto index = std::make_shared<cppast::cpp_entity_index>();
@@ -150,7 +151,7 @@ int main(int argc, char** args) {
             std::vector<std::shared_ptr<un::Buffer>> toJoin;
             std::set<un::JobHandle> dependencies;
             std::filesystem::path outPath = pGenerationFile.getOutput();
-            std::string fileName = outPath.filename();
+            std::string fileName = outPath.filename().string();
             LOG(INFO) << filePath.filename() << " serializer will be written to "
                       << un::prettify(outPath);
 

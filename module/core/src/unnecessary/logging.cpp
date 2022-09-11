@@ -58,4 +58,14 @@ namespace un {
                 << '>' <<
                 DEFAULT_COLOR << ": ";
     }
+
+    Log::Log(const std::string& header, const std::string& label) : flushed(false) {
+        sstream <<
+                DEFAULT_COLOR << '[' <<
+                termcolor::green << header <<
+                DEFAULT_COLOR << "] " <<
+                termcolor::magenta << '<' << label
+                << '>' <<
+                DEFAULT_COLOR << ": ";
+    }
 }

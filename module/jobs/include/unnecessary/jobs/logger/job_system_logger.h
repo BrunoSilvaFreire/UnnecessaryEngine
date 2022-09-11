@@ -3,6 +3,7 @@
 
 #include <unnecessary/jobs/job_system.h>
 #include <unnecessary/logging.h>
+#include <unnecessary/misc/pretty_print.h>
 
 namespace un {
     template<typename TWorker>
@@ -14,7 +15,7 @@ namespace un {
 
         std::string worker_header() {
             std::stringstream stream;
-            stream << "Worker " << _worker->getIndex() << " (" << _worker->getName() << ")";
+            stream << PURPLE("Worker " << _worker->getIndex()) << " (" << PURPLE(_worker->getName()) << ")";
             return stream.str();
         }
 
@@ -32,25 +33,35 @@ namespace un {
         explicit WorkerLogger(WorkerType* type) : _worker(type) {
             using JobType = typename WorkerType::JobType;
             _worker->onExited() += [this]() {
-                LOG(INFO) << worker_header() << " exited.";
+                auto message = un::message("JobSystem");
+                message.text() << worker_header() << " " << RED("exited") << ".";
             };
             _worker->onSleeping() += [this]() {
-                LOG(INFO) << worker_header() << " is sleeping.";
+                auto message = un::message("JobSystem");
+                message.text() << worker_header() << " is " << YELLOW("sleeping") << ".";
             };
             _worker->onAwaken() += [this]() {
-                LOG(INFO) << worker_header() << " has awaken.";
+                auto message = un::message("JobSystem");
+                message.text() << worker_header() << " has " << GREEN("awaken") << ".";
             };
             _worker->onStarted() += [this]() {
-                LOG(INFO) << worker_header() << " has started.";
+                auto message = un::message("JobSystem");
+                message.text() << worker_header() << " has " << GREEN("started") << " .";
             };
             _worker->onFetched() += [this](JobType* job, un::JobHandle handle) {
-                LOG(INFO) << worker_header() << " fetched job " << handle << " (" << job->getName() << ").";
+                auto message = un::message("JobSystem");
+                message.text() << worker_header() << " " << YELLOW("fetched") << "  job " << GREEN(handle) << " ("
+                          << GREEN(job->getName()) << ").";
             };
             _worker->onExecuted() += [this](JobType* job, un::JobHandle handle) {
-                LOG(INFO) << worker_header() << " executed job " << handle << " (" << job->getName() << ").";
+                auto message = un::message("JobSystem");
+                message.text() << worker_header() << " executed job " << GREEN(handle) << " (" << GREEN(job->getName())
+                          << ").";
             };
             _worker->onEnqueued() += [this](JobType* job, un::JobHandle handle) {
-                LOG(INFO) << worker_header() << " was enqueued job " << handle << " (" << job->getName() << ").";
+                auto message = un::message("JobSystem");
+                message.text() << worker_header() << " was enqueued job " << GREEN(handle) << " (" << GREEN(job->getName())
+                          << ").";
             };
         }
     };
@@ -71,6 +82,7 @@ namespace un {
         using LoggerPoolTuple = typename TJobSystem::template ArchetypeTuple<LoggerPool>;
     private:
         LoggerPoolTuple loggers;
+
     public:
         void apply(typename TJobSystem::ExtensionType::TargetType& jobSystem) override {
             jobSystem.for_each_worker(
@@ -79,10 +91,12 @@ namespace un {
                 }
             );
             jobSystem.onUnlockFailed() += [this, &jobSystem](un::JobHandle handle, const un::JobNode& node) {
-                std::vector<std::string> dependenciesMissing;
                 const un::DependencyGraph<un::JobNode>& jobGraph = jobSystem.getJobGraph();
+                un::RichMessage root = un::message("JobSystem");
+                auto& header = root.text();
+                auto& missingJobsMsg = root.tree();
                 for (auto dependantIndex : jobGraph.dependenciesOf(handle)) {
-                    auto dependantNode = jobGraph[dependantIndex];
+                    const un::JobNode* dependantNode = jobGraph[dependantIndex];
                     TJobSystem::for_each_archetype(
                         [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
                             if (dependantNode->archetypeIndex != TArchetypeIndex) {
@@ -90,38 +104,30 @@ namespace un {
                             }
                             auto* job = jobSystem.template getWorkerPool<TArchetype>()
                                                  .getJob(dependantNode->poolLocalIndex);
-                            std::string jobStr;
-                            if (job == nullptr){
-                                jobStr = std::string("Unknown Job (") + un::to_string(*dependantNode) +
-                                         " of archetype " +
-                                         un::type_name_of<TArchetype>() + ")";
+                            auto& tree = missingJobsMsg.tree();
+                            un::TextMessage& entry = tree.text();
+                            if (job == nullptr) {
+                                entry << "Unknown Job";
                             } else {
-                                jobStr = std::string("Job ") + job->getName() + " (" + un::to_string(*dependantNode) +
-                                         " of archetype " +
-                                         un::type_name_of<TArchetype>() + ")";
+                                entry << "Job " << job->getName();
                             }
 
-                            dependenciesMissing.push_back(jobStr);
+                            tree.text() << "handle (poolLocalIndex): " << dependantNode->poolLocalIndex;
+                            tree.text() << "archetype: " << un::type_name_of<TArchetype>();
+                            tree.text() << "archetypeIndex: " << dependantNode->archetypeIndex;
                         }
                     );
                 };
                 TJobSystem::for_each_archetype(
-                    [
-                        this,
-                        &node,
-                        &jobSystem,
-                        &dependenciesMissing
-                    ]<typename TArchetype, std::size_t TArchetypeIndex>() {
+                    [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
                         if (node.archetypeIndex != TArchetypeIndex) {
                             return;
                         }
 
                         auto* job = jobSystem.template getWorkerPool<TArchetype>().getJob(node.poolLocalIndex);
-
-                        LOG(INFO) << "Job \"" << job->getName() << "\" (" << un::type_name_of<TArchetype>()
-                                  << ") failed to be unlocked because of dependencies (" << dependenciesMissing.size()
-                                  << "): "
-                                  << un::join_strings(dependenciesMissing.begin(), dependenciesMissing.end());
+                        header << "Job \"" << job->getName() << "\" (" << un::type_name_of<TArchetype>()
+                               << ") failed to be unlocked because of dependencies ("
+                               << missingJobsMsg.num_children() << ")";
                     }
                 );
             };

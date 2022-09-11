@@ -6,6 +6,7 @@ add_unnecessary_library(
 
     SOURCES
     include/unnecessary/def.h
+    include/unnecessary/platform.h
     include/unnecessary/logging.h
     include/unnecessary/algorithms/n_tree.h
     include/unnecessary/algorithms/index_recycler.h
@@ -31,6 +32,7 @@ add_unnecessary_library(
     src/unnecessary/misc/benchmark.cpp
     src/unnecessary/misc/files.cpp
     src/unnecessary/misc/path_printer.cpp
+    src/unnecessary/misc/pretty_print.cpp
 
     SOURCES_WIN
     src/unnecessary/strings.win.cpp

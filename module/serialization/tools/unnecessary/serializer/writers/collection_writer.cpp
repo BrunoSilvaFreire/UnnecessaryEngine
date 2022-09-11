@@ -32,7 +32,7 @@ namespace un {
         std::shared_ptr<un::CXXComposite> ptr;
         const std::string& typeName = fieldType.getTemplateTypes()[0];
 
-        if (!unit.findSymbol(typeName, ptr)) {
+        if (typeName != "std::string" && !unit.findSymbol(typeName, ptr)) {
             LOG(INFO) << "Unable to find composite type for vector template " << typeName << " of field type "
                       << fieldType.getName() << ".";
             return;
