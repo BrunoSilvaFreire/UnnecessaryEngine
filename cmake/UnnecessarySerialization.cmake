@@ -64,11 +64,13 @@ function(add_unnecessary_serialization)
     endif ()
     set(
         FILE_SERIALIZER_GENERATION_CMD
-        unnecessary_serializer_generator
         ${SERIALIZATION_ARGS}
     )
-    list(JOIN FILE_SERIALIZER_GENERATION_CMD " " FILE_SERIALIZER_GENERATION_CMD_STR)
-    message("Target ${UN_SERIALIZATION_TARGET} serialization using command '${FILE_SERIALIZER_GENERATION_CMD_STR}'")
+    list(JOIN SERIALIZATION_ARGS " " FILE_SERIALIZER_GENERATION_CMD_STR)
+    message(
+        STATUS
+        "Target ${UN_SERIALIZATION_TARGET} serializing using arguments '${FILE_SERIALIZER_GENERATION_CMD_STR}'"
+    )
     add_custom_target(
         generate_${UN_SERIALIZATION_TARGET}_serialization
         COMMAND ${FILE_SERIALIZER_GENERATION_CMD}
