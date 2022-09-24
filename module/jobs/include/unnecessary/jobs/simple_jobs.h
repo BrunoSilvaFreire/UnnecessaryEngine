@@ -9,7 +9,7 @@ namespace un {
 
     typedef un::Job<JobWorker> SimpleJob;
 
-    class JobWorker : public un::AbstractJobWorker<SimpleJob> {
+    class JobWorker : public un::JobWorkerMixin<SimpleJob> {
     public:
         JobWorker(std::size_t index, bool autostart);
     };

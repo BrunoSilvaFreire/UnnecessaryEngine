@@ -9,7 +9,7 @@
 namespace un {
     template<typename TWorkerType>
     concept IsWorkerType = std::is_base_of_v<
-        un::AbstractJobWorker<typename TWorkerType::JobType>,
+        un::JobWorkerMixin<typename TWorkerType::JobType>,
         TWorkerType
     >;
 

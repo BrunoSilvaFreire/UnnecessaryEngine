@@ -8,7 +8,7 @@ namespace un {
 
     typedef un::Job<un::SimulationWorker> SimulationJob;
 
-    class SimulationWorker : public un::AbstractJobWorker<un::SimulationJob> {
+    class SimulationWorker : public un::JobWorkerMixin<un::SimulationJob> {
     private:
     public:
         SimulationWorker(

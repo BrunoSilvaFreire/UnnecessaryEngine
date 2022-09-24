@@ -5,5 +5,5 @@ namespace un {
     JobWorker::JobWorker(
         std::size_t index,
         bool autostart
-    ) : AbstractJobWorker(index, autostart) { }
+    ) : JobWorkerMixin(index, autostart) { }
 }

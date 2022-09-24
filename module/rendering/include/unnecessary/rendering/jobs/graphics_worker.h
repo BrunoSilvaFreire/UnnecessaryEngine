@@ -11,7 +11,7 @@ namespace un {
 
     typedef un::Job<GraphicsWorker> GraphicsJob;
 
-    class GraphicsWorker : public un::AbstractJobWorker<un::GraphicsJob> {
+    class GraphicsWorker : public un::JobWorkerMixin<un::GraphicsJob> {
     private:
         un::Renderer* _renderer;
         vk::CommandPool _commandPool;

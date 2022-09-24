@@ -14,7 +14,7 @@ namespace un {
         un::Renderer* renderer,
         size_t index,
         bool autostart
-    ) : AbstractJobWorker(index, autostart), _renderer(renderer) {
+    ) : JobWorkerMixin(index, autostart), _renderer(renderer) {
 
         vk::Device device = renderer->getVirtualDevice();
         _commandPool = device.createCommandPool(
