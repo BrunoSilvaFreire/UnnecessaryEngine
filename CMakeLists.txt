@@ -1,9 +1,19 @@
-project(UnnecessaryEngine LANGUAGES CXX)
-cmake_minimum_required(VERSION 3.10)
-set(CMAKE_CXX_STANDARD 20)
 cmake_policy(SET CMP0079 NEW)
+cmake_policy(SET CMP0048 NEW)
+cmake_minimum_required(VERSION 3.10)
+
+set(CMAKE_CXX_STANDARD 20)
+
+project(
+    UnnecessaryEngine
+    LANGUAGES CXX
+    VERSION 0.0.1
+)
+
+
 include(cmake/Unnecessary.cmake)
 find_package(Python REQUIRED)
+
 option(UN_DISALLOW_AGGRESSIVE_INLINING DEFAULT OFF)
 
 conan_cmake_configure(
@@ -22,6 +32,7 @@ conan_cmake_configure(
     stduuid/1.2.2
     zlib/1.2.12
     stb/20200203
+    #    grpc/1.48.0
 
     GENERATORS
     cmake_find_package
@@ -52,11 +63,7 @@ find_package(glm REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(termcolor REQUIRED)
 find_package(glfw3 REQUIRED)
-if (WIN32)
-    find_package(freetype REQUIRED)
-elseif (UNIX)
-    find_package(Freetype REQUIRED)
-endif ()
+find_package(Freetype REQUIRED)
 find_package(tinyobjloader REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(GTest REQUIRED)
