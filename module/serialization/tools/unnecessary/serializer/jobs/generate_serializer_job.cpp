@@ -69,7 +69,7 @@ namespace un {
     void GenerateSerializerJob::writeFieldInfo(
         std::stringstream& stream,
         const un::CXXField& field,
-        const std::shared_ptr<SerializationWriter>& writer
+        const std::shared_ptr<FieldWriter>& writer
     ) {
         stream << "// Access: " << to_string(field.getAccessModifier()) << std::endl;
         stream << "// Type: " << field.getType().getName() << std::endl;
@@ -164,7 +164,7 @@ namespace un {
             if (att == nullptr) {
                 continue;
             }
-            const std::shared_ptr<SerializationWriter>& writer = writerRegistry.getWriter(field, *translationUnit);
+            const std::shared_ptr<FieldWriter>& writer = writerRegistry.getWriter(field, *translationUnit);
             const std::string& fName = field.getName();
             const un::CXXType& fieldType = field.getType();
 //            LOG(INFO) << "Elected " << writer->name() << " for field " << fName << " of " << info.fullName

@@ -1,4 +1,4 @@
-#include <unnecessary/serializer/writers/writer.h>
+#include <unnecessary/serializer/writers/field_writer.h>
 #include <unnecessary/serializer/writers/complex_writer.h>
 #include <unnecessary/serializer/writers/default_writer.h>
 #include <unnecessary/serializer/writers/delegate_writer.h>
@@ -8,20 +8,20 @@
 #include <iostream>
 
 namespace un {
-    bool SerializationWriter::isOptional(const CXXField& field) {
+    bool FieldWriter::isOptional(const CXXField& field) {
         return field.findAttribute("un::serialize")->hasArgument("optional");
     }
 
-    void SerializationWriter::addMissingFieldException(std::stringstream& ss, const CXXField& field) {
+    void FieldWriter::addMissingFieldException(std::stringstream& ss, const CXXField& field) {
         addMissingFieldException(ss, field.getName());
     }
 
-    void SerializationWriter::addMissingFieldException(std::stringstream& ss, const std::string& fieldName) {
+    void FieldWriter::addMissingFieldException(std::stringstream& ss, const std::string& fieldName) {
         ss << "throw std::runtime_error(\"Unable to read field " << fieldName << "\");" << std::endl;
     }
 
 
-    bool SerializationWriter::trySerializePrimitive(
+    bool FieldWriter::trySerializePrimitive(
         std::stringstream& ss,
         const std::string& name,
         const CXXType& primitiveCandidate
@@ -37,7 +37,7 @@ namespace un {
         return true;
     }
 
-    bool SerializationWriter::tryDeserializePrimitive(
+    bool FieldWriter::tryDeserializePrimitive(
         std::stringstream& ss,
         const std::string& name,
         const CXXType& primitiveCandidate
@@ -57,15 +57,15 @@ namespace un {
     }
 
 
-    std::shared_ptr<un::SerializationWriter> WriterRegistry::getWriter(
+    std::shared_ptr<un::FieldWriter> WriterRegistry::getWriter(
         const un::CXXField& field,
         const un::CXXTranslationUnit& unit
     ) const {
         const auto& bestWriter = std::max_element(
             writers.begin(), writers.end(),
             [&](
-                const std::shared_ptr<un::SerializationWriter>& a,
-                const std::shared_ptr<un::SerializationWriter>& b
+                const std::shared_ptr<un::FieldWriter>& a,
+                const std::shared_ptr<un::FieldWriter>& b
             ) {
                 float first;
                 float second;

@@ -5,10 +5,10 @@
 #ifndef UNNECESSARYENGINE_IDENTIFIABLE_WRITER_H
 #define UNNECESSARYENGINE_IDENTIFIABLE_WRITER_H
 
-#include <unnecessary/serializer/writers/writer.h>
+#include <unnecessary/serializer/writers/field_writer.h>
 
 namespace un {
-    class IdentifiableFieldWriter : public un::SerializationWriter {
+    class IdentifiableFieldWriter : public un::FieldWriter {
     public:
         bool accepts(const CXXField& field, const CXXTranslationUnit& unit, float& outPriority) override;
 
@@ -21,7 +21,7 @@ namespace un {
         std::string name() override;
     };
 
-    class IdentifiableVectorWriter : public un::SerializationWriter {
+    class IdentifiableVectorWriter : public un::FieldWriter {
     public:
         bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
 

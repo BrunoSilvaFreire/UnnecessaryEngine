@@ -5,10 +5,10 @@
 #ifndef UNNECESSARYENGINE_COMPLEX_WRITER_H
 #define UNNECESSARYENGINE_COMPLEX_WRITER_H
 
-#include <unnecessary/serializer/writers/writer.h>
+#include <unnecessary/serializer/writers/field_writer.h>
 
 namespace un {
-    class ComplexWriter : public un::SerializationWriter {
+    class ComplexWriter : public un::FieldWriter {
         bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
 
         void write_serializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,

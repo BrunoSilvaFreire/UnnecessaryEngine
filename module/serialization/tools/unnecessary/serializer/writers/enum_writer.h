@@ -6,10 +6,10 @@
 #define UNNECESSARYENGINE_ENUM_WRITER_H
 
 
-#include <unnecessary/serializer/writers/writer.h>
+#include <unnecessary/serializer/writers/field_writer.h>
 
 namespace un {
-    class EnumWriter : public un::SerializationWriter {
+    class EnumWriter : public un::FieldWriter {
     public:
         bool accepts(const CXXField& field, const CXXTranslationUnit& unit, float& outPriority) override;
 

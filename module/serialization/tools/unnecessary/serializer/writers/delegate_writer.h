@@ -5,10 +5,10 @@
 #ifndef UNNECESSARYENGINE_DELEGATE_WRITER_H
 #define UNNECESSARYENGINE_DELEGATE_WRITER_H
 
-#include <unnecessary/serializer/writers/writer.h>
+#include <unnecessary/serializer/writers/field_writer.h>
 
 namespace un {
-    class DelegateWriter : public un::SerializationWriter {
+    class DelegateWriter : public un::FieldWriter {
     public:
         bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
 

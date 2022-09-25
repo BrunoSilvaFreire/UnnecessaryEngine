@@ -1,11 +1,11 @@
 #ifndef UNNECESSARYENGINE_DEFAULT_WRITER_H
 #define UNNECESSARYENGINE_DEFAULT_WRITER_H
 
-#include <unnecessary/serializer/writers/writer.h>
+#include <unnecessary/serializer/writers/field_writer.h>
 
 namespace un {
 
-    class PrimitiveWriter : public un::SerializationWriter {
+    class PrimitiveWriter : public un::FieldWriter {
         bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
 
         void write_serializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,

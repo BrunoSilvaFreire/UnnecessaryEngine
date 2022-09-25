@@ -8,7 +8,7 @@
 #include <unnecessary/memory/membuf.h>
 #include <unnecessary/jobs/simple_jobs.h>
 #include <unnecessary/source_analysis/structures.h>
-#include <unnecessary/serializer/writers/writer.h>
+#include <unnecessary/serializer/writers/field_writer.h>
 #include <unnecessary/serializer/generation.h>
 
 namespace un {
@@ -25,7 +25,7 @@ namespace un {
         void writeFieldInfo(
             std::stringstream& stream,
             const CXXField& field,
-            const std::shared_ptr<SerializationWriter>& writer
+            const std::shared_ptr<FieldWriter>& writer
         );
 
         void serializeFields(

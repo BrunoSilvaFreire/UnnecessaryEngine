@@ -1,5 +1,5 @@
-#ifndef UNNECESSARYENGINE_WRITER_H
-#define UNNECESSARYENGINE_WRITER_H
+#ifndef UNNECESSARYENGINE_FIELD_WRITER_H
+#define UNNECESSARYENGINE_FIELD_WRITER_H
 
 #include <sstream>
 #include <vector>
@@ -10,7 +10,7 @@
 namespace un {
     class WriterRegistry;
 
-    class SerializationWriter {
+    class FieldWriter {
     protected:
         static bool isOptional(const un::CXXField& field);
 
@@ -57,11 +57,11 @@ namespace un {
 
     class WriterRegistry {
     private:
-        std::vector<std::shared_ptr<un::SerializationWriter>> writers;
+        std::vector<std::shared_ptr<un::FieldWriter>> writers;
     public:
         WriterRegistry();
 
-        std::shared_ptr<un::SerializationWriter> getWriter(
+        std::shared_ptr<un::FieldWriter> getWriter(
             const un::CXXField& field,
             const un::CXXTranslationUnit& unit
         ) const;
@@ -69,8 +69,8 @@ namespace un {
         template<typename TWriter>
         void addWriter() {
             std::shared_ptr<TWriter> val = std::make_shared<TWriter>();
-            writers.emplace_back(std::move(std::static_pointer_cast<un::SerializationWriter>(val)));
+            writers.emplace_back(std::move(std::static_pointer_cast<un::FieldWriter>(val)));
         }
     };
 }
-#endif //UNNECESSARYENGINE_WRITER_H
+#endif //UNNECESSARYENGINE_FIELD_WRITER_H
