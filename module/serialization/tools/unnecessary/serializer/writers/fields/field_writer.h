@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
-#include <unnecessary/source_analysis/structures.h>
+#include "unnecessary/source_analysis/structures.h"
 
 namespace un {
     class WriterRegistry;

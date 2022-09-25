@@ -5,7 +5,7 @@
 #ifndef UNNECESSARYENGINE_IDENTIFIABLE_WRITER_H
 #define UNNECESSARYENGINE_IDENTIFIABLE_WRITER_H
 
-#include <unnecessary/serializer/writers/field_writer.h>
+#include "field_writer.h"
 
 namespace un {
     class IdentifiableFieldWriter : public un::FieldWriter {

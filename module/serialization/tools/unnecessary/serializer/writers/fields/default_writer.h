@@ -1,14 +1,11 @@
-//
-// Created by bruno on 09/05/2022.
-//
+#ifndef UNNECESSARYENGINE_DEFAULT_WRITER_H
+#define UNNECESSARYENGINE_DEFAULT_WRITER_H
 
-#ifndef UNNECESSARYENGINE_COMPLEX_WRITER_H
-#define UNNECESSARYENGINE_COMPLEX_WRITER_H
-
-#include <unnecessary/serializer/writers/field_writer.h>
+#include "field_writer.h"
 
 namespace un {
-    class ComplexWriter : public un::FieldWriter {
+
+    class PrimitiveWriter : public un::FieldWriter {
         bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
 
         void write_serializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,

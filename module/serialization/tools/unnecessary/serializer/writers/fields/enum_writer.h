@@ -6,7 +6,7 @@
 #define UNNECESSARYENGINE_ENUM_WRITER_H
 
 
-#include <unnecessary/serializer/writers/field_writer.h>
+#include "field_writer.h"
 
 namespace un {
     class EnumWriter : public un::FieldWriter {

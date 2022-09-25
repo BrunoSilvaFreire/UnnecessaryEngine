@@ -1,10 +1,10 @@
-#include <unnecessary/serializer/writers/field_writer.h>
-#include <unnecessary/serializer/writers/complex_writer.h>
-#include <unnecessary/serializer/writers/default_writer.h>
-#include <unnecessary/serializer/writers/delegate_writer.h>
-#include <unnecessary/serializer/writers/identifiable_writer.h>
-#include <unnecessary/serializer/writers/collection_writer.h>
-#include <unnecessary/serializer/writers/enum_writer.h>
+#include "field_writer.h"
+#include "complex_writer.h"
+#include "default_writer.h"
+#include "delegate_writer.h"
+#include "identifiable_writer.h"
+#include "collection_writer.h"
+#include "enum_writer.h"
 #include <iostream>
 
 namespace un {

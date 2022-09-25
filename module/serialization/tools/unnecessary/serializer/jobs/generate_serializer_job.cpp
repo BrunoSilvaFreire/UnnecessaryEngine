@@ -1,6 +1,6 @@
-#include <unnecessary/serializer/jobs/generate_serializer_job.h>
-
 #include <utility>
+#include <unnecessary/serializer/jobs/generate_serializer_job.h>
+#include <unnecessary/serializer/writers/misc/enum_serialization_logic.h>
 
 namespace un {
     void GenerateSerializerJob::operator()(un::JobWorker* worker) {
@@ -13,7 +13,7 @@ namespace un {
         }
         std::shared_ptr<CXXEnum> asEnum = std::dynamic_pointer_cast<un::CXXEnum>(toGenerate);
         if (asEnum != nullptr) {
-            generateEnumSerializer(ss, asEnum);
+            un::serialization::write_enum_serialization_logic_pair(ss, info, asEnum);
         }
         ss << "#endif" << std::endl;
         buffer->operator=(ss.str());
@@ -76,62 +76,6 @@ namespace un {
         stream << "// Writer: " << writer->name() << std::endl;
     }
 
-    void GenerateSerializerJob::generateEnumSerializer(std::stringstream& ss, const std::shared_ptr<CXXEnum>& anEnum) {
-        std::stringstream enumSerialization;
-        std::stringstream enumDeserialization;
-        ss << "namespace un::serialization {" << std::endl;
-
-        enumSerialization << "// BEGIN ENUM SERIALIZATION " << std::endl;
-        enumSerialization << "template<>" << std::endl;
-        enumSerialization << "void serialize_inline<" << info.fullName << ">(const std::string& key, const "
-                          << info.fullName
-                          << "& value, un::Serialized& into) {"
-                          << std::endl;
-
-        enumSerialization << "switch (value) {" << std::endl;
-        const std::vector<CXXEnumValue>& enumValues = anEnum->getValues();
-        for (const auto& item : enumValues) {
-            enumSerialization << "case " << info.fullName << "::" << item.getFullName() << ":" << std::endl;
-            enumSerialization << "into.set<std::string>(key, \"" << item.getFullName() << "\");" << std::endl;
-            enumSerialization << "break;" << std::endl;
-        }
-        enumSerialization << "}" << std::endl;
-        enumSerialization << "}" << std::endl;
-        enumSerialization << "// END ENUM SERIALIZATION " << std::endl;
-
-
-        enumDeserialization << "// BEGIN ENUM DESERIALIZATION " << std::endl;
-        enumDeserialization << "template<>" << std::endl;
-        enumDeserialization << info.fullName << " deserialize_inline<" << info.fullName
-                            << ">(const std::string& key, un::Serialized& from) {"
-                            << std::endl;
-
-        enumDeserialization << info.fullName << " value;" << std::endl;
-        enumDeserialization << "static std::unordered_map<std::string, " << info.fullName
-                            << "> kSerializationLookUpTable = {" << std::endl;
-        std::size_t last = enumValues.size();
-        for (std::size_t i = 0; i < last; ++i) {
-            const auto& enumValue = enumValues[i];
-            enumDeserialization << "std::make_pair<std::string, " << info.fullName << ">(\"" << enumValue.getFullName()
-                                << "\", " << info.fullName << "::" << enumValue.getFullName() << ")";
-            if (i != last - 1) {
-                enumDeserialization << ",";
-            }
-            enumDeserialization << std::endl;
-
-        }
-        enumDeserialization << "};" << std::endl;
-        enumDeserialization << "return value;" << std::endl;
-        enumDeserialization << "}" << std::endl;
-        enumDeserialization << "// END ENUM DESERIALIZATION " << std::endl;
-
-        ss << enumSerialization.str();
-        ss << std::endl;
-        ss << enumDeserialization.str();
-        ss << std::endl;
-        ss << "} " << std::endl;
-
-    }
 
     void GenerateSerializerJob::addStaticRediction(std::stringstream& ss) const {
         ss << "class " << info.name << "Serializer final : public un::Serializer<" << info.fullName

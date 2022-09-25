@@ -27,21 +27,26 @@ add_unnecessary_tool(
     unnecessary_serializer_generator
 
     SOURCES
-    tools/unnecessary/serializer/writers/field_writer.h
-    tools/unnecessary/serializer/writers/field_writer.cpp
-    tools/unnecessary/serializer/writers/default_writer.h
-    tools/unnecessary/serializer/writers/default_writer.cpp
-    tools/unnecessary/serializer/writers/complex_writer.h
-    tools/unnecessary/serializer/writers/complex_writer.cpp
-    tools/unnecessary/serializer/writers/delegate_writer.h
-    tools/unnecessary/serializer/writers/delegate_writer.cpp
-    tools/unnecessary/serializer/writers/identifiable_writer.h
-    tools/unnecessary/serializer/writers/identifiable_writer.cpp
-    tools/unnecessary/serializer/writers/enum_writer.h
-    tools/unnecessary/serializer/writers/enum_writer.cpp
+    tools/unnecessary/serializer/writers/fields/field_writer.h
+    tools/unnecessary/serializer/writers/fields/field_writer.cpp
+    tools/unnecessary/serializer/writers/fields/default_writer.h
+    tools/unnecessary/serializer/writers/fields/default_writer.cpp
+    tools/unnecessary/serializer/writers/fields/complex_writer.h
+    tools/unnecessary/serializer/writers/fields/complex_writer.cpp
+    tools/unnecessary/serializer/writers/fields/delegate_writer.h
+    tools/unnecessary/serializer/writers/fields/delegate_writer.cpp
+    tools/unnecessary/serializer/writers/fields/identifiable_writer.h
+    tools/unnecessary/serializer/writers/fields/identifiable_writer.cpp
+    tools/unnecessary/serializer/writers/fields/enum_writer.h
+    tools/unnecessary/serializer/writers/fields/enum_writer.cpp
+    tools/unnecessary/serializer/writers/fields/collection_writer.h
+    tools/unnecessary/serializer/writers/fields/collection_writer.cpp
+    tools/unnecessary/serializer/writers/misc/enum_serialization_logic.h
+    tools/unnecessary/serializer/writers/misc/enum_serialization_logic.cpp
+    tools/unnecessary/serializer/writers/misc/structure_serialization_logic.h
+    tools/unnecessary/serializer/writers/misc/structure_serialization_logic.cpp
 
-    tools/unnecessary/serializer/writers/collection_writer.h
-    tools/unnecessary/serializer/writers/collection_writer.cpp
+
     tools/unnecessary/serializer/generation.h
     tools/unnecessary/serializer/serializer_generator.cpp
     tools/unnecessary/serializer/generation.cpp
