@@ -136,9 +136,6 @@ namespace un {
                         jobHandle << node.poolLocalIndex;
                         header << "A job failed to be unlocked because of unsatisfied dependencies ("
                                << RED(missingJobsMsg.num_children() << " total") << ")";
-                        if (node.poolLocalIndex == 11) {
-                            un::debug_break();
-                        }
                     }
                 );
             };

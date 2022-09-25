@@ -11,7 +11,7 @@ namespace un {
 
     class JobWorker : public un::JobWorkerMixin<SimpleJob> {
     public:
-        JobWorker(std::size_t index, bool autostart);
+        JobWorker(std::size_t index, std::size_t core, bool autostart);
     };
 
     typedef un::JobSystem<un::JobWorker> SimpleJobSystem;

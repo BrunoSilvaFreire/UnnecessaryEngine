@@ -23,9 +23,10 @@ namespace un {
         std::size_t _core;
         std::size_t _stackSize;
     public:
+        static const std::size_t kAnyCore = std::numeric_limits<std::size_t>::max();
         static const std::size_t kDefaultStackSize = 4096;
 
-        ThreadParams(std::string  name, std::size_t core = -1);
+        ThreadParams(std::string name, std::size_t core = kAnyCore);
 
         const std::string& getName() const;
 
@@ -68,6 +69,9 @@ namespace un {
 #if UN_PLATFORM_WINDOWS
 
         friend DWORD WINAPI UnnecessaryThreadProc(_In_ LPVOID lpParameter);
+#elif UN_PLATFORM_UNIX
+
+        friend un::void_ptr unnecessary_unix_proc(un::void_ptr ptr);
 
 #endif
     };

@@ -7,6 +7,10 @@ namespace un {
         return 0;
     }
 
+    void Thread::join() {
+        WaitForSingleObject(_nativeHandle, INFINITE);
+    }
+
     void Thread::start() {
         size_t stackSize = 4096;
         auto hThread = _nativeHandle = CreateThread(

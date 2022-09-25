@@ -25,7 +25,7 @@ namespace un {
         std::size_t _index;
         u32 _core;
         std::string _name;
-        un::Thread* _thread;
+        un::Thread _thread;
         /**
          * Is this worker still processing it's tasks or should it exit?
          */
@@ -109,28 +109,26 @@ namespace un {
         static std::string default_name(size_t index) {
             return type_name_of<typename TJob::WorkerType>() + " #" + to_string(index);
         }
+
     public:
         JobWorkerMixin(
-            size_t index,
-            bool autostart
+            std::size_t index,
+            std::size_t core
         ) : _index(index),
-            _thread(nullptr),
             _jobAvailable(),
             _running(false),
             _waiting(false),
-            _core(-1),
+            _core(core),
             _exited(),
-            _name(default_name(index)) {
-            if (autostart) {
-                start();
-            }
+            _name(default_name(index)),
+            _thread(
+                un::ThreadParams(_name, _core),
+                std::bind(&JobWorkerMixin::workerThread, this)
+            ) {
         }
 
         virtual ~JobWorkerMixin() {
-            if (_thread != nullptr) {
-                _thread->join();
-                delete _thread;
-            }
+            _thread.join();
         }
 
         bool hasPending() const {
@@ -213,14 +211,7 @@ namespace un {
                 }
 
                 _running = true;
-                _thread = new un::Thread(
-                    un::ThreadParams(_name, _core),
-                    std::bind(
-                        &JobWorkerMixin::workerThread,
-                        this
-                    )
-                );
-                _thread->start();
+                _thread.start();
             }
         }
 
@@ -247,7 +238,7 @@ namespace un {
             return _evacuating;
         }
 
-        un::Thread* getThread() const {
+        const un::Thread& getThread() const {
             return _thread;
         }
 

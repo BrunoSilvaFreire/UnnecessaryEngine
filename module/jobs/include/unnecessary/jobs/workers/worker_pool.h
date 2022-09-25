@@ -49,7 +49,7 @@ namespace un {
                 [](
                     std::size_t index
                 ) {
-                    return new WorkerType(index, true);
+                    return new WorkerType(index, index, true);
                 }
             );
         }

@@ -29,10 +29,6 @@ namespace un {
         _alive = false;
     }
 
-    void Thread::join() {
-        WaitForSingleObject(_nativeHandle, INFINITE);
-    }
-
     bool Thread::isAlive() {
         std::unique_lock<std::mutex> lock(_dataMutex);
         return _alive;
