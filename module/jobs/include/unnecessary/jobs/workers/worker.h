@@ -171,11 +171,20 @@ namespace un {
                 if (_waiting) {
                     fence.notify(handle);
                 } else {
-                    _sleeping.addSingleFireListener(
-                        [&fence, handle]() {
-                            fence.notify(handle);
-                        }
-                    );
+                    if (_evacuating) {
+                        fence.notify(handle);
+                    } else {
+                        _sleeping.addSingleFireListener(
+                            [&fence, handle]() {
+                                fence.notify(handle);
+                            }
+                        );
+                        _exited.addSingleFireListener(
+                            [&fence, handle]() {
+                                fence.notify(handle);
+                            }
+                        );
+                    }
                 }
             }
         }
