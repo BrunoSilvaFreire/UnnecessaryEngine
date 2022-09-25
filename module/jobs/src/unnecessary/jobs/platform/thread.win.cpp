@@ -2,18 +2,24 @@
 #include <windows.h>
 
 namespace un {
+    struct ThreadPlatformBridge {
+    public:
+        HANDLE threadHandle;
+    };
+
     DWORD WINAPI UnnecessaryThreadProc(LPVOID lpParameter) {
         reinterpret_cast<un::Thread*>(lpParameter)->operator()();
         return 0;
     }
 
     void Thread::join() {
-        WaitForSingleObject(_nativeHandle, INFINITE);
+        WaitForSingleObject(_bridge->threadHandle, INFINITE);
     }
 
     void Thread::start() {
         size_t stackSize = 4096;
-        auto hThread = _nativeHandle = CreateThread(
+        _bridge = new ThreadPlatformBridge();
+        auto hThread = _bridge->threadHandle = CreateThread(
             nullptr,
             _params.getStackSize(),
             reinterpret_cast<LPTHREAD_START_ROUTINE>(&UnnecessaryThreadProc),

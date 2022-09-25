@@ -258,10 +258,10 @@ namespace un {
             std::size_t j = 0;
             un::Fence<> fence(workers);
             for_types_indexed<Archetypes...>(
-                [&]<typename WorkerType, std::size_t WorkerIndex>() {
+                [&]<typename WorkerType, std::size_t WorkerIndex>() mutable {
                     auto& pool = getWorkerPool<WorkerType>();
                     for (WorkerType* worker : pool.getWorkers()) {
-                        worker->join(un::FenceNotifier<>(&fence, j++));
+                        worker->join(un::FenceNotifier<std::size_t>(&fence, j++));
                     }
                 }
             );

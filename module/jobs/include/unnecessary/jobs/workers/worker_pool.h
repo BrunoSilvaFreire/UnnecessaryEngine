@@ -307,7 +307,7 @@ namespace un {
             );
         }
 
-        void stopAllWorkers(un::FenceNotifier<> poolNotifier) {
+        void stopAllWorkers() {
             un::fences::waitFor(
                 workers.begin(),
                 workers.end(),
@@ -315,7 +315,6 @@ namespace un {
                     worker->stop(notifier);
                 }
             );
-            poolNotifier.notify();
         }
 
         void start() {

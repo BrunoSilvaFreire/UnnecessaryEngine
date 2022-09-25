@@ -55,8 +55,11 @@ namespace un {
 #define UN_CURRENT_FILE __FILE__
 #endif
 #else
+#ifdef __clang__
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wstring-plus-int"
+#endif
 
 #ifdef UN_CMAKE_FILE_NAME
 #define UN_CURRENT_FILE UN_CMAKE_FILE_NAME

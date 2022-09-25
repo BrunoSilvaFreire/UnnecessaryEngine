@@ -97,10 +97,10 @@ namespace un {
             return next_job(jobPtr, id);
         }
 
-        void execute(JobType* jobPtr, JobHandle id) {
-            jobPtr->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
-            _onExecuted(jobPtr, id);
-            delete jobPtr;
+        void execute(JobType* job, JobHandle id) {
+            job->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
+            _onExecuted(job, id);
+            delete job;
         }
 
         static std::string default_name(size_t index) {
@@ -129,7 +129,7 @@ namespace un {
             _jobAvailable(),
             _running(false),
             _sleeping(false),
-            _core(core),
+            _core(static_cast<u32>(core)),
             _onExited(),
             _name(default_name(index)),
             _thread(
@@ -151,7 +151,7 @@ namespace un {
             }
         }
 
-        void join(un::FenceNotifier<>& notifier) {
+        void join(un::FenceNotifier<> notifier) {
             {
                 std::lock_guard<std::mutex> lock(_runningMutex);
                 if (_evacuating || !_running) {
