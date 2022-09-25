@@ -66,8 +66,6 @@ namespace un {
 
         void join();
 
-        bool isAlive();
-
 #if UN_PLATFORM_WINDOWS
 
         friend DWORD WINAPI UnnecessaryThreadProc(_In_ LPVOID lpParameter);

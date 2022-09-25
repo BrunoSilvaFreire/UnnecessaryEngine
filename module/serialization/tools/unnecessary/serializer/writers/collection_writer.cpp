@@ -23,7 +23,6 @@ namespace un {
         const un::CXXTranslationUnit& unit,
         const un::WriterRegistry& registry
     ) {
-        LOG(INFO) << "Found " << field.getName() << ".";
         const un::CXXType& fieldType = field.getType();
         if (fieldType.getName() != "std::vector") {
             LOG(INFO) << "Given field " << fieldType.getName() << " is not std::vector.";
@@ -37,7 +36,6 @@ namespace un {
                       << fieldType.getName() << ".";
             return;
         }
-        LOG(INFO) << "Found " << typeName << ".";
         const std::string& fName = field.getName();
         ss << "un::Serialized serialized_" << fName << ";" << std::endl;
         ss << "std::vector<" << typeName << "> vec_" << fName << ";" << std::endl;

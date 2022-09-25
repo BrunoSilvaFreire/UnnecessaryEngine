@@ -170,8 +170,8 @@ namespace un {
         WorkerPool() = default;
 
         ~WorkerPool() {
+            stopAllWorkers();
             for (WorkerType* worker : workers) {
-                worker->stop();
                 delete worker;
             }
         }
@@ -307,10 +307,15 @@ namespace un {
             );
         }
 
-        void stopAllWorkers() {
-            for (auto worker : workers) {
-                worker->stop();
-            }
+        void stopAllWorkers(un::FenceNotifier<> poolNotifier) {
+            un::fences::waitFor(
+                workers.begin(),
+                workers.end(),
+                [](WorkerType* worker, un::FenceNotifier<> notifier) {
+                    worker->stop(notifier);
+                }
+            );
+            poolNotifier.notify();
         }
 
         void start() {

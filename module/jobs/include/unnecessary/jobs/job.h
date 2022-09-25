@@ -9,14 +9,13 @@ namespace un {
 
     typedef u32 JobHandle;
 
-    template<typename _Worker>
+    template<typename TWorker>
     class Job {
     protected:
         std::string name = "Unnamed Job";
     public:
 
-
-        typedef _Worker WorkerType;
+        typedef TWorker WorkerType;
 
         virtual void operator()(WorkerType* worker) = 0;
 

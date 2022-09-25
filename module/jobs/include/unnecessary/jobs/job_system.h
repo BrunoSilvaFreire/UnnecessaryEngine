@@ -256,18 +256,16 @@ namespace un {
             );
 
             std::size_t j = 0;
-            un::Fence<> completionFence(workers);
+            un::Fence<> fence(workers);
             for_types_indexed<Archetypes...>(
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
                     auto& pool = getWorkerPool<WorkerType>();
                     for (WorkerType* worker : pool.getWorkers()) {
-                        worker->join(j++, completionFence);
+                        worker->join(un::FenceNotifier<>(&fence, j++));
                     }
-                    pool.complete();
                 }
             );
-
-            completionFence.wait();
+            fence.wait();
         }
 
         void join() {

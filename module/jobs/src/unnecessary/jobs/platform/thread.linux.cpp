@@ -56,6 +56,10 @@ namespace un {
     }
 
     void Thread::join() {
-        pthread_join(_bridge->_pthread, nullptr);
+
+        std::unique_lock<std::mutex> lock(_dataMutex);
+        if (_alive) {
+            pthread_join(_bridge->_pthread, nullptr);
+        }
     }
 }

@@ -14,10 +14,8 @@ namespace un {
 
         un::Chronometer<> chronometer;
         std::vector<un::ParseDiagnostic> diagnostics;
-        LOG(INFO) << "Parsing @ " << _file;
         std::unique_ptr<cppast::cpp_file> parsed = parser.parse(*_index, _file.string(), config);
         std::chrono::milliseconds duration = chronometer.stop();
-        LOG(INFO) << "Parsed @ " << _file << ", " << duration.count() << " ms";
         auto start = chronometer.getStart();
         auto end = start + duration;
         un::ParseReport report(

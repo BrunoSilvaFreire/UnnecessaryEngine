@@ -158,7 +158,7 @@ TEST(jobs, graph_exploration) {
                 );*/
             }
             explorer.complete();
-            LOG(INFO) << "Exploration completed!";
+            LOG(INFO) << "Exploration _completed!";
         }
     );
 

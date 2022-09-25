@@ -29,11 +29,6 @@ namespace un {
         _alive = false;
     }
 
-    bool Thread::isAlive() {
-        std::unique_lock<std::mutex> lock(_dataMutex);
-        return _alive;
-    }
-
     ThreadParams::ThreadParams(
         std::string name,
         size_t core
