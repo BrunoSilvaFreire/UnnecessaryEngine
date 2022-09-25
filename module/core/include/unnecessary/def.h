@@ -34,6 +34,9 @@ typedef double f64;
 namespace un {
     template<typename T>
     using ptr = T*;
+
+    using void_ptr = ptr<void>;
+
     template<typename T>
     using const_ptr = const T*;
 #ifdef UN_PLATFORM_WINDOWS

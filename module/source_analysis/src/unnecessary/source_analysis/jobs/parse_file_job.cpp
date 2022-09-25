@@ -54,4 +54,8 @@ namespace un {
     std::unique_ptr<un::ParsedFile>* ParseFileJob::getOutput() {
         return _output;
     }
+
+    ParseFileJob::~ParseFileJob() {
+        LOG(INFO) << "Parse file deleted.";
+    }
 }

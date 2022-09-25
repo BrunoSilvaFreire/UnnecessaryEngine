@@ -1,43 +1,36 @@
 #include <unnecessary/jobs/thread.h>
 #include <unnecessary/logging.h>
 #include <mutex>
+#include <utility>
 
 namespace un {
 
     Thread::Thread(
         const std::function<void()>& block
+    ) : Thread(un::ThreadParams("UnnecessaryThread"), block) {
+    }
+
+    Thread::Thread(
+        un::ThreadParams parameters,
+        const std::function<void()>& block
     ) : _block(block),
         _alive(false),
-        _inner() {
+        _params(std::move(parameters)),
+        _nativeHandle(nullptr) {
         if (block == nullptr) {
             throw std::runtime_error("Thread created with empty block.");
         }
     }
 
-    Thread::Thread(
-        const std::string& name,
-        const std::function<void()>& block
-    ) : Thread(block) {
-
-        setName(name);
-    }
-
     void Thread::operator()() {
-        {
-            std::unique_lock<std::mutex> lock(_dataMutex);
-
-            std::thread::id id = _inner.get_id();
-            _alive = true;
-        }
+        std::unique_lock<std::mutex> lock(_dataMutex);
+        _alive = true;
         _block();
-        {
-            std::unique_lock<std::mutex> lock(_dataMutex);
-            _alive = false;
-        }
+        _alive = false;
     }
 
     void Thread::join() {
-        _inner.join();
+        WaitForSingleObject(_nativeHandle, INFINITE);
     }
 
     bool Thread::isAlive() {
@@ -45,22 +38,28 @@ namespace un {
         return _alive;
     }
 
-    bool Thread::setCore(u32 core) {
-        Thread::core = core;
-        if (_alive) {
-            return setThreadCore(core);
-        }
-        return true;
+    ThreadParams::ThreadParams(
+        std::string name,
+        size_t core
+    ) : _name(std::move(name)),
+        _core(core),
+        _stackSize(kDefaultStackSize) {
+
     }
 
-    void Thread::setName(const std::string& name) {
-        Thread::name = name;
-        if (_alive) {
-            setThreadName(name);
-        }
+    const std::string& ThreadParams::getName() const {
+        return _name;
     }
 
-    void Thread::start() {
-        _inner = std::thread(&Thread::operator(), this);
+    size_t ThreadParams::getCore() const {
+        return _core;
+    }
+
+    size_t ThreadParams::getStackSize() const {
+        return _stackSize;
+    }
+
+    void ThreadParams::setStackSize(size_t stackSize) {
+        _stackSize = stackSize;
     }
 }

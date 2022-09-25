@@ -34,9 +34,9 @@ namespace un {
     template<typename ...Archetypes>
     class JobSystem : public Extensible<JobSystemExtension<Archetypes...>>, public ArchetypeMixin<Archetypes> ... {
     public:
-        typedef std::tuple<
-            WorkerPoolConfiguration<Archetypes>...
-        > WorkerAllocationConfig;
+
+        using WorkerAllocationConfig = std::tuple<WorkerPoolConfiguration<Archetypes>...>;
+
         template<typename TValue>
         using RepeatedTuple = typename un::repeat_tuple<TValue, sizeof...(Archetypes)>::type;
 
@@ -101,6 +101,9 @@ namespace un {
                     graph.disconnect(handle, subsequent);
                 }
                 graph.remove(handle);
+                if (handle == 0) {
+                    LOG(INFO) << "0 @: " << job->getName();
+                }
             }
         }
 

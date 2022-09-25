@@ -10,15 +10,39 @@
 #include <mutex>
 #include <unnecessary/def.h>
 
+#if UN_PLATFORM_WINDOWS
+
+#include <Windows.h>
+
+#endif
+
 namespace un {
+    struct ThreadParams {
+    private:
+        std::string _name;
+        std::size_t _core;
+        std::size_t _stackSize;
+    public:
+        static const std::size_t kDefaultStackSize = 4096;
+
+        ThreadParams(std::string  name, std::size_t core = -1);
+
+        const std::string& getName() const;
+
+        size_t getCore() const;
+
+        void setStackSize(size_t stackSize);
+
+        size_t getStackSize() const;
+    };
+
     class Thread {
     private:
         std::function<void()> _block;
-        std::thread _inner;
         std::mutex _dataMutex;
         bool _alive;
-        std::string name;
-        u32 core;
+        un::ThreadParams _params;
+        un::void_ptr _nativeHandle;
 
         void operator()();
 
@@ -29,21 +53,23 @@ namespace un {
     public:
         explicit Thread(const std::function<void()>& block);
 
-        Thread(const std::string& name, const std::function<void()>& block);
+        explicit Thread(un::ThreadParams name, const std::function<void()>& block);
 
         Thread() = delete;
 
-        Thread(const Thread& cpy) = delete;
-
-        void setName(const std::string& name);
-
-        bool setCore(u32 core);
+        Thread(const Thread&) = delete;
 
         void start();
 
         void join();
 
         bool isAlive();
+
+#if UN_PLATFORM_WINDOWS
+
+        friend DWORD WINAPI UnnecessaryThreadProc(_In_ LPVOID lpParameter);
+
+#endif
     };
 }
 #endif

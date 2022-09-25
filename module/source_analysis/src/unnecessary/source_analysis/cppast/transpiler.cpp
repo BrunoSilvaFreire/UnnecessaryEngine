@@ -114,9 +114,6 @@ namespace un {
     Transpiler::parse_field(CXXComposite& composite, const CXXAccessModifier& modifier, const cppast::cpp_entity& e) {
         const auto& var = dynamic_cast<const cppast::cpp_member_variable&>(e);
         std::vector<CXXAttribute> attributes;
-        if (var.name() == "scope") {
-            LOG(INFO) << "SCOPE";
-        }
         const cppast::cpp_type& type = var.type();
         CXXType fieldType = toUnType(type);
         for (const auto& att : e.attributes()) {

@@ -58,20 +58,20 @@ namespace un {
         }
 
         bool tryDequeue(JobType** jobPtr, JobHandle* id) {
+            {
+                std::lock_guard<std::mutex> runningLock(_runningMutex);
+                if (_evacuating) {
+                    return false;
+                }
+            }
             std::unique_lock<std::mutex> lock(_queueMutex);
             bool hasJobs = !_pending.empty();
             if (hasJobs) {
                 const auto& pair = _pending.front();
                 *id = pair.first;
                 *jobPtr = pair.second;
-//                LOG(INFO) << "Popped " << _index << ", _pending: " << _pending.size();
                 _pending.pop();
                 return true;
-            } else {
-                std::lock_guard<std::mutex> _runningLock(_runningMutex);
-                if (_evacuating) {
-                    return false;
-                }
             }
             return false;
         }
@@ -106,17 +106,21 @@ namespace un {
             delete jobPtr;
         }
 
+        static std::string default_name(size_t index) {
+            return type_name_of<typename TJob::WorkerType>() + " #" + to_string(index);
+        }
     public:
         JobWorkerMixin(
-            size_t _index,
+            size_t index,
             bool autostart
-        ) : _index(_index),
+        ) : _index(index),
             _thread(nullptr),
             _jobAvailable(),
             _running(false),
             _waiting(false),
             _core(-1),
-            _exited() {
+            _exited(),
+            _name(default_name(index)) {
             if (autostart) {
                 start();
             }
@@ -139,7 +143,6 @@ namespace un {
 
         bool tryAwake() {
             if (isSleeping()) {
-//                LOG(INFO) << "Awaking " << _index;
                 _jobAvailable.notify_one();
                 return true;
             }
@@ -164,10 +167,6 @@ namespace un {
             }
         }
 
-        u32 getCore() const {
-            return _core;
-        }
-
         void join(std::size_t handle, un::Fence<>& fence) {
             {
                 std::lock_guard<std::mutex> lock(_sleepingMutex);
@@ -183,11 +182,15 @@ namespace un {
             }
         }
 
+        u32 getCore() const {
+            return _core;
+        }
+
         void setCore(u32 newCore) {
-            JobWorkerMixin::_core = newCore;
             if (_running) {
-                _thread->setCore(newCore);
+                return;
             }
+            JobWorkerMixin::_core = newCore;
         }
 
         const std::string& getName() const {
@@ -195,10 +198,11 @@ namespace un {
         }
 
         void setName(const std::string& name) {
-            JobWorkerMixin::_name = name;
             if (_running) {
-                _thread->setName(name);
+                return;
             }
+            JobWorkerMixin::_name = name;
+
         }
 
         void start() {
@@ -210,13 +214,12 @@ namespace un {
 
                 _running = true;
                 _thread = new un::Thread(
+                    un::ThreadParams(_name, _core),
                     std::bind(
                         &JobWorkerMixin::workerThread,
                         this
                     )
                 );
-                _thread->setCore(_core);
-                _thread->setName(_name);
                 _thread->start();
             }
         }
