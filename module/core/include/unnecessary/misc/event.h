@@ -8,7 +8,7 @@ namespace un {
     template<typename... T>
     class Event {
     public:
-        typedef std::function<void(T...)> Listener;
+        using Listener = std::function<void(T...)>;
     private:
         std::vector<Listener> listeners;
         std::vector<Listener> singleFireListeners;
@@ -41,5 +41,39 @@ namespace un {
     };
 
     typedef un::Event<> EventVoid;
+
+    template<typename... T>
+    class ThreadSafeEvent {
+    public:
+        using Listener = typename Event<T...>::Listener;
+    private:
+        Event<T...> _inner;
+        std::mutex _mutex;
+    public:
+        void clear() {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _inner.clear();
+        }
+
+        void addSingleFireListener(Listener listener) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _inner.addSingleFireListener(listener);
+        }
+
+        void operator+=(Listener listener) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _inner += listener;
+        }
+
+        void operator-=(Listener listener) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _inner -= listener;
+        }
+
+        void operator()(T... args) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _inner(args...);
+        }
+    };
 }
 #endif

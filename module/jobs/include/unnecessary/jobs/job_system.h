@@ -101,9 +101,6 @@ namespace un {
                     graph.disconnect(handle, subsequent);
                 }
                 graph.remove(handle);
-                if (handle == 0) {
-                    LOG(INFO) << "0 @: " << job->getName();
-                }
             }
         }
 
@@ -247,6 +244,7 @@ namespace un {
 
         void complete() {
             std::set<std::size_t> workers;
+
             std::size_t i = 0;
             for_types_indexed<Archetypes...>(
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
@@ -256,17 +254,19 @@ namespace un {
                     }
                 }
             );
-            i = 0;
+
+            std::size_t j = 0;
             un::Fence<> completionFence(workers);
             for_types_indexed<Archetypes...>(
                 [&]<typename WorkerType, std::size_t WorkerIndex>() {
                     auto& pool = getWorkerPool<WorkerType>();
                     for (WorkerType* worker : pool.getWorkers()) {
-                        worker->join(i++, completionFence);
+                        worker->join(j++, completionFence);
                     }
                     pool.complete();
                 }
             );
+
             completionFence.wait();
         }
 

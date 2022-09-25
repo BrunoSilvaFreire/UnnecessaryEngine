@@ -14,7 +14,7 @@ namespace un {
         std::set<TValue> allElements;
         std::set<TValue> remaining;
     public:
-        explicit Fence(const std::set<TValue> &remaining) : remaining(remaining), allElements(remaining) {}
+        explicit Fence(const std::set<TValue>& remaining) : remaining(remaining), allElements(remaining) { }
 
         void notify(TValue id) {
             std::lock_guard<std::mutex> lock(mutex);

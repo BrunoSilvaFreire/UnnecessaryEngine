@@ -1,1 +1,0 @@
-valgrind --tool=memcheck --gen-suppressions=all --leak-check=full --leak-resolution=med --track-origins=yes --vgdb=no --log-file="benchmark.log" /home/brunorbsf/CLionProjects/UnnecessaryEngine/cmake-build-debug/bin/dummy --nThreads 1

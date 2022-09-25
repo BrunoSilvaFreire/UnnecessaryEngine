@@ -14,7 +14,6 @@ namespace un {
     protected:
         std::string name = "Unnamed Job";
     public:
-        virtual ~Job() = default;
 
 
         typedef _Worker WorkerType;

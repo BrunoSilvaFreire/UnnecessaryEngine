@@ -52,6 +52,8 @@ conan_cmake_install(
     BUILD missing
     SETTINGS ${settings}
     ENV
+    CC=${CMAKE_C_COMPILER}
+    CXX=${CMAKE_CXX_COMPILER}
     CONAN_DISABLE_CHECK_COMPILER=On
 )
 list(

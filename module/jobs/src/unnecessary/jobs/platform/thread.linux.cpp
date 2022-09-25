@@ -1,15 +1,45 @@
 #include <unnecessary/jobs/thread.h>
 #include <pthread.h>
+#include <cstring>
 
 namespace un {
+
+    struct ThreadPlatformBridge {
+    public:
+        pthread_t _pthread;
+        char* _nameStorage = nullptr;
+    };
+
     un::void_ptr unnecessary_unix_proc(un::void_ptr ptr) {
-        reinterpret_cast<un::Thread*>(ptr)->operator()();
+        auto* thread = reinterpret_cast<un::Thread*>(ptr);
+
+        const std::string& name = thread->_params.getName();
+        if (!name.empty()) {
+            const std::size_t kMaxLength = 16;
+            ThreadPlatformBridge* pBridge = thread->_bridge;
+            const char* pName;
+            if (name.size() >= kMaxLength) {
+                pBridge->_nameStorage = new char[kMaxLength];
+                std::memcpy(pBridge->_nameStorage, name.data(), kMaxLength - 1);
+                pName = pBridge->_nameStorage;
+            } else {
+                pName = name.c_str();
+            }
+            int statusCode = pthread_setname_np(pBridge->_pthread, pName);
+            if (statusCode != 0) {
+                if (statusCode == ERANGE) {
+                    throw std::runtime_error("Unable to set thread name");
+                }
+            }
+        }
+
+        thread->operator()();
         return nullptr;
     }
 
     void Thread::start() {
-        pthread_t* pThread;
-        _nativeHandle = pThread = new pthread_t();
+        _bridge = new un::ThreadPlatformBridge();
+        pthread_t* pThread = &_bridge->_pthread;
         pthread_attr_t attr{};
         pthread_attr_init(&attr);
         pthread_attr_setstacksize(&attr, _params.getStackSize());
@@ -22,15 +52,10 @@ namespace un {
             pthread_attr_setaffinity_np(&attr, sizeof(cpu_set_t), &set);
         }
 
-        int threadId = pthread_create(pThread, &attr, &unnecessary_unix_proc, this);
-        const std::string& name = _params.getName();
-        if (!name.empty()) {
-            pthread_setname_np(*pThread, name.c_str());
-        }
-
+        pthread_create(pThread, &attr, &unnecessary_unix_proc, this);
     }
 
     void Thread::join() {
-        pthread_join(*reinterpret_cast<pthread_t*>(_nativeHandle), nullptr);
+        pthread_join(_bridge->_pthread, nullptr);
     }
 }

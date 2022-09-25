@@ -16,7 +16,7 @@ namespace un {
     ) : _block(block),
         _alive(false),
         _params(std::move(parameters)),
-        _nativeHandle(nullptr) {
+        _bridge(nullptr) {
         if (block == nullptr) {
             throw std::runtime_error("Thread created with empty block.");
         }

@@ -37,13 +37,15 @@ namespace un {
         size_t getStackSize() const;
     };
 
+    struct ThreadPlatformBridge;
+
     class Thread {
     private:
         std::function<void()> _block;
         std::mutex _dataMutex;
         bool _alive;
         un::ThreadParams _params;
-        un::void_ptr _nativeHandle;
+        un::ptr<ThreadPlatformBridge> _bridge;
 
         void operator()();
 

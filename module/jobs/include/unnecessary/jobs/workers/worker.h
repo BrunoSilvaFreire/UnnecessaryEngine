@@ -43,8 +43,8 @@ namespace un {
         std::mutex _sleepingMutex;
         std::mutex _runningMutex;
         std::condition_variable _jobAvailable;
-        un::EventVoid _started, _exited, _sleeping, _awaken;
-        un::Event<JobType*, JobHandle> _enqueued, _fetched, _executed;
+        un::ThreadSafeEvent<> _started, _exited, _sleeping, _awaken;
+        un::ThreadSafeEvent<JobType*, JobHandle> _enqueued, _fetched, _executed;
 
         void workerThread() {
             _started();
@@ -107,7 +107,7 @@ namespace un {
         }
 
         static std::string default_name(size_t index) {
-            return type_name_of<typename TJob::WorkerType>() + " #" + to_string(index);
+            return type_name_of<typename TJob::WorkerType>() + "#" + to_string(index);
         }
 
     public:
@@ -152,7 +152,7 @@ namespace un {
             return _waiting;
         }
 
-        un::EventVoid& getOnFinished() {
+        un::ThreadSafeEvent<>& getOnFinished() {
             return _exited;
         }
 
@@ -179,11 +179,11 @@ namespace un {
                                 fence.notify(handle);
                             }
                         );
-                        _exited.addSingleFireListener(
-                            [&fence, handle]() {
-                                fence.notify(handle);
-                            }
-                        );
+//                        _exited.addSingleFireListener(
+//                            [&fence, handle]() {
+//                                fence.notify(handle);
+//                            }
+//                        );
                     }
                 }
             }
@@ -255,31 +255,31 @@ namespace un {
             return _index;
         }
 
-        EventVoid& onExited() {
+        un::ThreadSafeEvent<>& onExited() {
             return _exited;
         }
 
-        EventVoid& onSleeping() {
+        un::ThreadSafeEvent<>& onSleeping() {
             return _sleeping;
         }
 
-        EventVoid& onAwaken() {
+        un::ThreadSafeEvent<>& onAwaken() {
             return _awaken;
         }
 
-        EventVoid& onStarted() {
+        un::ThreadSafeEvent<>& onStarted() {
             return _started;
         }
 
-        un::Event<JobType*, JobHandle>& onFetched() {
+        un::ThreadSafeEvent<JobType*, JobHandle>& onFetched() {
             return _fetched;
         }
 
-        un::Event<JobType*, JobHandle>& onExecuted() {
+        un::ThreadSafeEvent<JobType*, JobHandle>& onExecuted() {
             return _executed;
         }
 
-        un::Event<JobType*, JobHandle>& onEnqueued() {
+        un::ThreadSafeEvent<JobType*, JobHandle>& onEnqueued() {
             return _enqueued;
         }
 

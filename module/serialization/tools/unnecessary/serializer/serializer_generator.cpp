@@ -19,6 +19,7 @@ static const char* const kFileArgName = "file";
 static const char* const kRelativeToName = "relative_to";
 static const char* const kGlobalIncludeName = "global_include";
 static const char* const kNumWorkersName = "num_workers";
+static const char* const kJobSystemLogger = "job_system_logger";
 
 static const char* const kIncludeArgName = "include";
 static const char* const kOutputDir = "output";
@@ -64,13 +65,16 @@ int main(int argc, char** args) {
                (
                    kRelativeToName, "Directory where to write the generated files",
                    cxxopts::value<std::string>()
-               );
+               )
+               (kJobSystemLogger, "Whether to log job system status", cxxopts::value<bool>());
+
 
     std::filesystem::path output;
     std::filesystem::path relativeTo;
     std::vector<std::string> files;
     std::vector<std::string> includes;
     un::JobSystemBuilder<un::SimpleJobSystem> builder;
+    bool logJobSystem = false;
     try {
         cxxopts::ParseResult result = options.parse(argc, args);
         includes = result[kIncludeArgName].as<std::vector<std::string>>();
@@ -93,20 +97,38 @@ int main(int argc, char** args) {
                 path = un::to_string(std::filesystem::absolute(path));
             }
         );
+
         if (result.count(kNumWorkersName) > 0) {
             std::size_t numWorkers = result[kNumWorkersName].as<std::size_t>();
             builder.setNumWorkers<un::JobWorker>(numWorkers);
         }
 
+        if (result.count(kJobSystemLogger) > 0) {
+            logJobSystem = true;
+        }
     } catch (const cxxopts::OptionParseException& x) {
         std::cerr << "unnecessary_serializer_generator: " << x.what() << '\n';
         std::cerr << "usage: unnecessary_serializer_generator [options] <input_file> ...\n";
         return EXIT_FAILURE;
     }
-    LOG(INFO) << un::prettify("files", files);
-    LOG(INFO) << un::prettify("includes", includes);
-    builder.withRecorder();
-    builder.withLogger();
+
+    {
+        auto msg = un::message();
+        msg.text() << "Serialization info:";
+        auto& root = msg.map();
+
+        auto& filesMsg = root.tree("files");
+        for (const auto& file : files) {
+            filesMsg.text() << file;
+        }
+        auto& includesMsg = root.tree("includes");
+        for (const auto& file : includes) {
+            includesMsg.text() << file;
+        }
+    }
+    if (logJobSystem) {
+        builder.withLogger();
+    }
     auto jobSystem = builder.build();
 
     auto index = std::make_shared<cppast::cpp_entity_index>();
@@ -218,8 +240,8 @@ int main(int argc, char** args) {
         LOG(INFO) << "Dispatching " << chain.getNumJobs() << " generation jobs...";
     }
     jobSystem->complete();
-    auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::SimpleJobSystem>>();
-    ptr->saveToFile(output / "recording.csv");
+//    auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::SimpleJobSystem>>();
+//    ptr->saveToFile(output / "recording.csv");
     LOG(INFO) << "Sources generated in " << mainChronometer.stop().count() << " ms";
 }
 

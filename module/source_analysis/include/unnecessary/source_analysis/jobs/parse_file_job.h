@@ -22,8 +22,6 @@ namespace un {
             ParseArguments arguments
         );
 
-        ~ParseFileJob() override;
-
         void operator()(WorkerType* worker) override;
 
         const std::filesystem::path& getFile() const;

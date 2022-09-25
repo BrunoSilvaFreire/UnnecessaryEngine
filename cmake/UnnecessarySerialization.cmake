@@ -64,7 +64,7 @@ function(add_unnecessary_serialization)
     endif ()
     set(
         FILE_SERIALIZER_GENERATION_CMD
-        ${SERIALIZATION_ARGS}
+        unnecessary_serializer_generator ${SERIALIZATION_ARGS}
     )
     list(JOIN SERIALIZATION_ARGS " " FILE_SERIALIZER_GENERATION_CMD_STR)
     message(
