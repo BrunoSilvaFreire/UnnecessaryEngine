@@ -6,10 +6,16 @@
 namespace un {
     namespace serialization {
         template<typename TValue>
-        void serialize(const TValue& value, un::Serialized& into);
+        void serialize_structure(const TValue& value, un::Serialized& into);
 
         template<typename TValue>
-        TValue deserialize(un::Serialized& from);
+        TValue deserialize_structure(un::Serialized& from);
+
+        template<typename TValue>
+        void serialize_inline(const std::string& key, const TValue& value, un::Serialized& into);
+
+        template<typename TValue>
+        TValue deserialize_inline(const std::string& key, un::Serialized& from);
     }
 
     template<typename TValue>

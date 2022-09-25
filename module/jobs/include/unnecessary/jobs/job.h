@@ -11,11 +11,18 @@ namespace un {
 
     template<typename TWorker>
     class Job {
+    public:
+        typedef TWorker WorkerType;
     protected:
         std::string name = "Unnamed Job";
     public:
+        Job() = default;
 
-        typedef TWorker WorkerType;
+        Job(const Job<WorkerType>&) = delete;
+
+        Job(Job<WorkerType>&&) = delete;
+
+        virtual ~Job() = default;
 
         virtual void operator()(WorkerType* worker) = 0;
 

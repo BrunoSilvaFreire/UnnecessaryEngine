@@ -18,7 +18,7 @@ namespace un {
         std::string typeName = field.getType().getName();
         bool optional = isOptional(field);
         ss << "un::Serialized serialized_" << fName << ";" << std::endl;
-        ss << "un::serialization::serialize<" << typeName << ">("
+        ss << "un::serialization::serialize_structure<" << typeName << ">("
            << "value." << field.getName() << ", " << "serialized_" << fName
            << ");" << std::endl;
 
@@ -36,7 +36,7 @@ namespace un {
         ss << "un::Serialized serialized_" << fName << ";" << std::endl;
         if (optional) {
             ss << "if (from.try_get(\"" << fName << "\", serialized_" << fName << ")) {" << std::endl;
-            ss << "value." << fName << " = un::serialization::deserialize<" << typeName << ">(serialized_" << fName
+            ss << "value." << fName << " = un::serialization::deserialize_structure<" << typeName << ">(serialized_" << fName
                << ");" << std::endl;
             ss << "}" << std::endl;
         } else {
@@ -45,7 +45,7 @@ namespace un {
             ss << "throw std::runtime_error(\"Unable to read field " << fName << "\");"
                << std::endl;
             ss << "}" << std::endl;
-            ss << "value." << fName << " = un::serialization::deserialize<"
+            ss << "value." << fName << " = un::serialization::deserialize_structure<"
                << typeName << ">(serialized_" << fName << ");" << std::endl;
         }
     }

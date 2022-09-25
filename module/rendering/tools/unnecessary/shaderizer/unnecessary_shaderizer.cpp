@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
         std::ifstream stream(shaderFile);
         un::JsonArchiver jsonArchiver;
         un::Serialized data = jsonArchiver.read_file(shaderFile);
-        auto pipeline = un::serialization::deserialize<un::PipelineDescription>(data);
+        auto pipeline = un::serialization::deserialize_structure<un::PipelineDescription>(data);
         nlohmann::json json;
         stream >> json;
         std::string shaderName = json["name"].get<std::string>();

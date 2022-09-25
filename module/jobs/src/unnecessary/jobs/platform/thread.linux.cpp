@@ -1,6 +1,8 @@
 #include <unnecessary/jobs/thread.h>
 #include <pthread.h>
 #include <cstring>
+#include <iostream>
+#include "unnecessary/logging.h"
 
 namespace un {
 
@@ -42,7 +44,7 @@ namespace un {
         pthread_t* pThread = &_bridge->_pthread;
         pthread_attr_t attr{};
         pthread_attr_init(&attr);
-        pthread_attr_setstacksize(&attr, _params.getStackSize());
+        //pthread_attr_setstacksize(&attr, _params.getStackSize());
 
         size_t core = _params.getCore();
         if (core != un::ThreadParams::kAnyCore) {

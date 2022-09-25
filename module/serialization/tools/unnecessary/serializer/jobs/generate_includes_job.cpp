@@ -8,11 +8,12 @@ namespace un {
         std::string macroName = "UN_SERIALIZER_GENERATED_";
         std::filesystem::path loc = translationUnit->getLocation();
         macroName += un::upper(loc.replace_extension().filename().string());
-
+        ss << " // BEGIN GENERATED INCLUDES" << std::endl;
         ss << "#ifndef " << macroName << std::endl;
         ss << "#define " << macroName << std::endl;
         ss << "#include <unnecessary/serialization/serializer.h>" << std::endl;
         ss << "#include <unnecessary/serialization/serialization_utils.h>" << std::endl;
+        ss << " // BEGIN TRANSLATION UNIT INCLUDES" << std::endl;
         for (const auto& item : translationUnit->getIncludes()) {
             ss << "#include <" << item << ">" << std::endl;
         }
@@ -21,8 +22,11 @@ namespace un {
 //            const un::GenerationFile& file = *includeGraph[dependencyIndex];
 //            ss << "#include <" << file.getOutput().filename().string() << ">" << std::endl;
 //        }
+        ss << " // END TRANSLATION UNIT INCLUDES" << std::endl;
+        ss << "// Self include" << std::endl;
         ss << "#include <" << translationUnit->getSelfInclude() << ">" << std::endl;
         ss << "#endif" << std::endl;
+        ss << " // END GENERATED INCLUDES" << std::endl;
         buf->operator=(ss.str());
     }
 

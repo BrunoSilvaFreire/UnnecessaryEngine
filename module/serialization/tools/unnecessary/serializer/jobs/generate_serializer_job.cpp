@@ -15,7 +15,6 @@ namespace un {
         if (asEnum != nullptr) {
             generateEnumSerializer(ss, asEnum);
         }
-        addStaticRediction(ss);
         ss << "#endif" << std::endl;
         buffer->operator=(ss.str());
     }
@@ -23,8 +22,8 @@ namespace un {
     void GenerateSerializerJob::generateInfoComments(std::stringstream& ss, const std::shared_ptr<CXXComposite>& ptr) {
         ss << "// Serialization info: " << std::endl;
         for (const auto& field : ptr->getFields()) {
-            auto att = field.findAttribute("un::serialize");
-            if (att == nullptr) {
+            auto attribute = field.findAttribute("un::serialize");
+            if (attribute == nullptr) {
                 continue;
             }
             const std::vector<un::CXXAttribute>& attributes = field.getAttributes();
@@ -50,9 +49,7 @@ namespace un {
         const std::shared_ptr<CXXComposite>& comp
     ) {
         generateInfoComments(ss, comp);
-        ss << "namespace un {" << std::endl;
-        // static serialization
-        ss << "namespace serialization {" << std::endl;
+        ss << "namespace un::serialization {" << std::endl;
         serializeFields(comp, ss);
         ss << "}" << std::endl;
         // static serialization
@@ -82,16 +79,57 @@ namespace un {
     void GenerateSerializerJob::generateEnumSerializer(std::stringstream& ss, const std::shared_ptr<CXXEnum>& anEnum) {
         std::stringstream enumSerialization;
         std::stringstream enumDeserialization;
+        ss << "namespace un::serialization {" << std::endl;
 
-        ss << "template<>" << std::endl;
-        ss << info.fullName << " deserialize<" << info.fullName << ">(un::Serialized& from) {" << std::endl;
-        ss << info.fullName << " value;" << std::endl;
-        ss << "return value;" << std::endl;
-        ss << "}" << std::endl;
-        ss << "}" << std::endl;
-        // static serialization
+        enumSerialization << "// BEGIN ENUM SERIALIZATION " << std::endl;
+        enumSerialization << "template<>" << std::endl;
+        enumSerialization << "void serialize_inline<" << info.fullName << ">(const std::string& key, const "
+                          << info.fullName
+                          << "& value, un::Serialized& into) {"
+                          << std::endl;
 
-        addStaticRediction(ss);
+        enumSerialization << "switch (value) {" << std::endl;
+        const std::vector<CXXEnumValue>& enumValues = anEnum->getValues();
+        for (const auto& item : enumValues) {
+            enumSerialization << "case " << info.fullName << "::" << item.getFullName() << ":" << std::endl;
+            enumSerialization << "into.set<std::string>(key, \"" << item.getFullName() << "\");" << std::endl;
+            enumSerialization << "break;" << std::endl;
+        }
+        enumSerialization << "}" << std::endl;
+        enumSerialization << "}" << std::endl;
+        enumSerialization << "// END ENUM SERIALIZATION " << std::endl;
+
+
+        enumDeserialization << "// BEGIN ENUM DESERIALIZATION " << std::endl;
+        enumDeserialization << "template<>" << std::endl;
+        enumDeserialization << info.fullName << " deserialize_inline<" << info.fullName
+                            << ">(const std::string& key, un::Serialized& from) {"
+                            << std::endl;
+
+        enumDeserialization << info.fullName << " value;" << std::endl;
+        enumDeserialization << "static std::unordered_map<std::string, " << info.fullName
+                            << "> kSerializationLookUpTable = {" << std::endl;
+        std::size_t last = enumValues.size();
+        for (std::size_t i = 0; i < last; ++i) {
+            const auto& enumValue = enumValues[i];
+            enumDeserialization << "std::make_pair<std::string, " << info.fullName << ">(\"" << enumValue.getFullName()
+                                << "\", " << info.fullName << "::" << enumValue.getFullName() << ")";
+            if (i != last - 1) {
+                enumDeserialization << ",";
+            }
+            enumDeserialization << std::endl;
+
+        }
+        enumDeserialization << "};" << std::endl;
+        enumDeserialization << "return value;" << std::endl;
+        enumDeserialization << "}" << std::endl;
+        enumDeserialization << "// END ENUM DESERIALIZATION " << std::endl;
+
+        ss << enumSerialization.str();
+        ss << std::endl;
+        ss << enumDeserialization.str();
+        ss << std::endl;
+        ss << "} " << std::endl;
 
     }
 
@@ -99,19 +137,22 @@ namespace un {
         ss << "class " << info.name << "Serializer final : public un::Serializer<" << info.fullName
            << "> {"
            << std::endl;
+
+
+        // Serialize method
         ss << "inline virtual void serialize(const " << info.fullName
            << "& value, un::Serialized& into) override {"
            << std::endl;
         ss << "un::serialization::serialize(value, into);" << std::endl;
         ss << "}" << std::endl;
 
+        // Deserialize method
         ss << "inline virtual " << info.fullName << " deserialize(un::Serialized& from) override {"
            << std::endl;
-        ss << "return un::serialization::deserialize<" << info.fullName << ">(from);" << std::endl;
+        ss << "return un::serialization::deserialize_structure<" << info.fullName << ">(from);" << std::endl;
         ss << "}" << std::endl;
 
         ss << "};" << std::endl;
-        ss << "}" << std::endl;
     }
 
     void
@@ -145,13 +186,13 @@ namespace un {
             fieldsDeserialization << std::endl;
         }
         ss << "template<>" << std::endl;
-        ss << "inline void serialize<" << info.fullName << ">" << "(const " << info.fullName
+        ss << "inline void serialize_structure<" << info.fullName << ">" << "(const " << info.fullName
            << "& value, un::Serialized& into) {" << std::endl;
         ss << fieldsSerialization.str() << std::endl;
         ss << "}" << std::endl;
 
         ss << "template<>" << std::endl;
-        ss << info.fullName << " deserialize<" << info.fullName << ">(un::Serialized& from) {" << std::endl;
+        ss << info.fullName << " deserialize_structure<" << info.fullName << ">(un::Serialized& from) {" << std::endl;
         ss << info.fullName << " value;" << std::endl;
         ss << fieldsDeserialization.str() << std::endl;
         ss << "return value;" << std::endl;
