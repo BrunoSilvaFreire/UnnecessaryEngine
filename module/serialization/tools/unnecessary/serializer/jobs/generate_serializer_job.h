@@ -8,7 +8,7 @@
 #include <unnecessary/memory/membuf.h>
 #include <unnecessary/jobs/simple_jobs.h>
 #include <unnecessary/source_analysis/structures.h>
-#include "unnecessary/serializer/writers/fields/field_writer.h"
+#include <unnecessary/serializer/writers/fields/field_writer.h>
 #include <unnecessary/serializer/generation.h>
 
 namespace un {
@@ -48,7 +48,6 @@ namespace un {
 
         void operator()(WorkerType* worker) override;
 
-        void addStaticRediction(std::stringstream& ss) const;
     };
 
 

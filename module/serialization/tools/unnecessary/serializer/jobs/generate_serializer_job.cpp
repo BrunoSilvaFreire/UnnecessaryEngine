@@ -77,30 +77,10 @@ namespace un {
     }
 
 
-    void GenerateSerializerJob::addStaticRediction(std::stringstream& ss) const {
-        ss << "class " << info.name << "Serializer final : public un::Serializer<" << info.fullName
-           << "> {"
-           << std::endl;
-
-
-        // Serialize method
-        ss << "inline virtual void serialize(const " << info.fullName
-           << "& value, un::Serialized& into) override {"
-           << std::endl;
-        ss << "un::serialization::serialize(value, into);" << std::endl;
-        ss << "}" << std::endl;
-
-        // Deserialize method
-        ss << "inline virtual " << info.fullName << " deserialize(un::Serialized& from) override {"
-           << std::endl;
-        ss << "return un::serialization::deserialize_structure<" << info.fullName << ">(from);" << std::endl;
-        ss << "}" << std::endl;
-
-        ss << "};" << std::endl;
-    }
-
-    void
-    GenerateSerializerJob::serializeFields(const std::shared_ptr<un::CXXComposite>& composite, std::stringstream& ss) {
+    void GenerateSerializerJob::serializeFields(
+        const std::shared_ptr<un::CXXComposite>& composite,
+        std::stringstream& ss
+    ) {
         std::stringstream fieldsSerialization;
         std::stringstream fieldsDeserialization;
         for (const auto& field : composite->getFields()) {
