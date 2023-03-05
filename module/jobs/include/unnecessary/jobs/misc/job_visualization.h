@@ -12,11 +12,11 @@
 namespace un {
 
     template<typename TJobSystem>
-    gpp::GraphWriter<un::JobGraph::InnerGraph>
+    gpp::graph_writer<un::JobGraph::InnerGraph>
     create_job_system_graph_writer(const TJobSystem& jobSystem) {
         auto graph = jobSystem.getJobGraph().getInnerGraph();
-        gpp::GraphWriter<un::JobGraph::InnerGraph> writer;
-        writer.setVertexWriter(
+        gpp::graph_writer<un::JobGraph::InnerGraph> writer;
+        writer.set_vertex_writer(
             [&jobSystem](std::stringstream& ss, u32 index, const un::JobNode& jobNode) {
                 TJobSystem::for_each_archetype(
                     [&]<typename WorkerType, std::size_t WorkerIndex>() {
@@ -34,17 +34,17 @@ namespace un {
 
             }
         );
-        writer.setEdgeWriter(
+        writer.set_edge_writer(
             [](std::stringstream& ss, u32 from, u32 to, const un::DependencyType& dependencyType) {
                 ss << R"([style="bold"];)";
             }
         );
-        writer.setEdgePredicate(
+        writer.set_edge_predicate(
             [](u32 from, u32 to, const un::DependencyType& dependencyType) {
                 return dependencyType == un::DependencyType::eUses;
             }
         );
-        writer.addNote(R"(A -> B [label="A depends on B", style="bold"])");
+        writer.add_note(R"(A -> B [label="A depends on B", style="bold"])");
         return writer;
     }
 }

@@ -47,7 +47,7 @@ namespace un {
             _graph.bake(*this);
             auto vkPass = _graph.getVulkanPass();
             DependencyGraph<std::unique_ptr<un::RenderPass>>::InnerGraph& innerGraph = _graph.getInnerGraph();
-            for (auto [passPtr, index] : innerGraph.all_vertices()) {
+            for (auto [index, passPtr] : innerGraph.all_vertices()) {
                 (*passPtr)->onVulkanPassCreated(vkPass, *this);
             }
 #ifdef DEBUG

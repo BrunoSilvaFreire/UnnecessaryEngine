@@ -9,7 +9,7 @@
 #include "field_writer.h"
 
 namespace un {
-    class EnumWriter : public un::FieldWriter {
+    class EnumByNameWriter : public un::FieldWriter {
     public:
         bool accepts(const CXXField& field, const CXXTranslationUnit& unit, float& outPriority) override;
 

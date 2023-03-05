@@ -90,7 +90,7 @@ namespace un {
         addWriter<un::DelegateWriter>();
         addWriter<un::IdentifiableVectorWriter>();
         addWriter<un::CollectionWriter>();
-        addWriter<un::EnumWriter>();
+        addWriter<un::EnumByNameWriter>();
     }
 
 }

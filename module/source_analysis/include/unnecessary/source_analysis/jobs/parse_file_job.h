@@ -11,14 +11,14 @@ namespace un {
     class ParseFileJob : public un::SimpleJob {
     private:
         std::filesystem::path _file;
-        un::const_ptr<cppast::cpp_entity_index> _index;
-        un::ptr<std::unique_ptr<un::ParsedFile>> _output;
+        un::const_ref<cppast::cpp_entity_index> _index;
+        un::ref<std::unique_ptr<un::ParsedFile>> _output;
         un::ParseArguments _arguments;
     public:
         ParseFileJob(
             std::filesystem::path file,
-            un::const_ptr<cppast::cpp_entity_index> index,
-            un::ptr<std::unique_ptr<un::ParsedFile>> output,
+            un::const_ref<cppast::cpp_entity_index> index,
+            un::ref<std::unique_ptr<un::ParsedFile>> output,
             ParseArguments arguments
         );
 
@@ -26,7 +26,7 @@ namespace un {
 
         const std::filesystem::path& getFile() const;
 
-        std::unique_ptr<un::ParsedFile>* getOutput();
+        std::unique_ptr<un::ParsedFile>& getOutput();
     };
 }
 #endif

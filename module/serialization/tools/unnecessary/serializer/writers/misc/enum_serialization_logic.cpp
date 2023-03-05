@@ -44,27 +44,33 @@ namespace un::serialization {
 
         ss << "template<>" << std::endl;
         ss << info.fullName << " deserialize_inline<" << info.fullName
-                            << ">(const std::string& key, un::Serialized& from) {"
-                            << std::endl;
+           << ">(const std::string& key, un::Serialized& from) {"
+           << std::endl;
 
-        ss << info.fullName << " value;" << std::endl;
-        ss << "static std::unordered_map<std::string, " << info.fullName
-                            << "> kSerializationLookUpTable = {" << std::endl;
+        ss << "static const std::unordered_map<std::string, " << info.fullName
+           << "> kSerializationLookUpTable = {" << std::endl;
 
         const std::vector<CXXEnumValue>& enumValues = anEnum->getValues();
         std::size_t last = enumValues.size();
         for (std::size_t i = 0; i < last; ++i) {
             const auto& enumValue = enumValues[i];
             ss << "std::make_pair<std::string, " << info.fullName << ">(\"" << enumValue.getFullName()
-                                << "\", " << info.fullName << "::" << enumValue.getFullName() << ")";
+               << "\", " << info.fullName << "::" << enumValue.getFullName() << ")";
             if (i != last - 1) {
                 ss << ",";
             }
             ss << std::endl;
         }
         ss << "};" << std::endl;
+        ss << "std::string serializedName;" << std::endl;
+        ss << "if (from.try_get(key, serializedName)) {" << std::endl;
+        ss << "auto found = kSerializationLookUpTable.find(serializedName);" << std::endl;
+        ss << "if (found != kSerializationLookUpTable.end()) {" << std::endl;
+        ss << "return found->second;" << std::endl;
+        ss << "}" << std::endl;
+        ss << "}" << std::endl;
 
-        ss << "return value;" << std::endl;
+        ss << "throw std::exception(\"Invalid enum found\");" << std::endl;
         ss << "}" << std::endl;
 
         ss << "// END ENUM DESERIALIZATION " << std::endl;

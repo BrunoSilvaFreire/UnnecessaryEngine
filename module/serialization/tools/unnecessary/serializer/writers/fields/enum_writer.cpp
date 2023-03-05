@@ -6,22 +6,22 @@
 
 namespace un {
 
-    bool EnumWriter::accepts(const CXXField& field, const CXXTranslationUnit& unit, float& outPriority) {
+    bool EnumByNameWriter::accepts(const CXXField& field, const CXXTranslationUnit& unit, float& outPriority) {
         outPriority = 10;
         return field.getType().getKind() == un::CXXTypeKind::eEnum;
     }
 
-    void EnumWriter::write_serializer(
+    void EnumByNameWriter::write_serializer(
         std::stringstream& ss,
         const CXXField& field,
         const CXXTranslationUnit& unit,
         const WriterRegistry& registry
     ) {
         ss << "un::serialization::serialize_inline<" << field.getType().getFullName() << ">(\"" << field.getName()
-           << "\", value, into);" << std::endl;
+           << "\", value." << field.getName() << ", into);" << std::endl;
     }
 
-    void EnumWriter::write_deserializer(
+    void EnumByNameWriter::write_deserializer(
         std::stringstream& ss,
         const CXXField& field,
         const CXXTranslationUnit& unit,
@@ -32,7 +32,7 @@ namespace un {
            << "\", from);" << std::endl;
     }
 
-    std::string EnumWriter::name() {
-        return "EnumWriter";
+    std::string EnumByNameWriter::name() {
+        return "EnumByNameWriter";
     }
 }

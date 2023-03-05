@@ -33,6 +33,10 @@ typedef double f64;
 
 namespace un {
     template<typename T>
+    using ref = T&;
+    template<typename T>
+    using const_ref = const T&;
+    template<typename T>
     using ptr = T*;
 
     using void_ptr = ptr<void>;

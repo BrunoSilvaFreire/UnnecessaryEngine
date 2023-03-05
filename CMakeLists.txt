@@ -32,7 +32,7 @@ conan_cmake_configure(
     stduuid/1.2.2
     zlib/1.2.12
     stb/20200203
-    #    grpc/1.48.0
+    libpng/1.6.39
 
     GENERATORS
     cmake_find_package

@@ -46,7 +46,15 @@ namespace un {
         template<typename TJob, typename ...TArgs>
         un::DynamicChain<TJobSystem>& enqueue(un::Dynamic<TJobSystem> dyn, TArgs... args) {
             un::JobHandle handle;
-            this->template immediately<TJob>(&handle, args...);
+            this->template immediately<TJob>(&handle, std::forward<TArgs>(args)...);
+            dynamic(handle, dyn);
+            return *this;
+        }
+
+        template<typename TJob>
+        un::DynamicChain<TJobSystem>& enqueue(un::Dynamic<TJobSystem> dyn, un::ptr<TJob> job) {
+            un::JobHandle handle;
+            this->template immediately<TJob>(&handle, job);
             dynamic(handle, dyn);
             return *this;
         }

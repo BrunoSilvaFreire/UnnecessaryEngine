@@ -14,7 +14,7 @@ namespace un {
 
         un::Chronometer<> chronometer;
         std::vector<un::ParseDiagnostic> diagnostics;
-        std::unique_ptr<cppast::cpp_file> parsed = parser.parse(*_index, _file.string(), config);
+        std::unique_ptr<cppast::cpp_file> parsed = parser.parse(_index, _file.string(), config);
         std::chrono::milliseconds duration = chronometer.stop();
         auto start = chronometer.getStart();
         auto end = start + duration;
@@ -28,13 +28,13 @@ namespace un {
             report,
             _file
         );
-        _output->operator=(std::move(pFile));
+        _output = std::move(pFile);
     }
 
     ParseFileJob::ParseFileJob(
         std::filesystem::path file,
-        un::const_ptr<cppast::cpp_entity_index> index,
-        un::ptr<std::unique_ptr<un::ParsedFile>> output,
+        const cppast::cpp_entity_index& index,
+        un::ref<std::unique_ptr<un::ParsedFile>> output,
         ParseArguments arguments
     ) : _file(std::move(file)),
         _index(index),
@@ -49,7 +49,7 @@ namespace un {
         return _file;
     }
 
-    std::unique_ptr<un::ParsedFile>* ParseFileJob::getOutput() {
+    std::unique_ptr<un::ParsedFile>& ParseFileJob::getOutput() {
         return _output;
     }
 

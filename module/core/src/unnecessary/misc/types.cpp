@@ -24,7 +24,7 @@ namespace un {
         return value;
     }
 
-    std::string un::type_name_of(const type_info& info) {
+    std::string type_name_of(const type_info& info) {
         std::string name = info.name();
         return name.substr(6); // Remove class prefix
     }

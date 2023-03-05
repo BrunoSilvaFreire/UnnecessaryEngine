@@ -101,14 +101,16 @@ namespace un {
                 }
                 auto& includePtr = _parsed.operator[](includePath);
                 LOG(INFO) << "Sub @ " << includePath;
-                builder.enqueue<un::ParseFileJob>(
+                builder.enqueue(
                     [&](un::DynamicChain<un::SimpleJobSystem>& chain) {
                         onParsed(includePtr, chain);
                     },
-                    includePath,
-                    _index.get(),
-                    &includePtr,
-                    _arguments
+                    new un::ParseFileJob(
+                        includePath,
+                        *_index,
+                        includePtr,
+                        _arguments
+                    )
                 );
             }
         );
@@ -125,33 +127,31 @@ namespace un {
         }
         un::DynamicFlow<un::SimpleJobSystem> flow(jobSystem);
         for (auto& pair : _parsed) {
-            // enqueue(chain, key, value);
             auto& key = pair.first;
             auto& value = pair.second;
             flow.enqueue<un::ParseFileJob>(
-                [&](un::DynamicChain<un::SimpleJobSystem>& chain) {
+                [&value, this](un::DynamicChain<un::SimpleJobSystem>& chain) {
                     onParsed(value, chain);
                 },
-                key,
-                _index.get(),
-                &value,
-                _arguments
+                new un::ParseFileJob(
+                    key,
+                    *_index,
+                    value,
+                    _arguments
+                )
             );
         }
         flow.wait();
         std::vector<un::CXXTranslationUnit> translationUnits;
         for (const auto& item : this->_parsed) {
             const std::unique_ptr<un::ParsedFile>& parsedFile = item.second;
-            auto unit = &translationUnits.emplace_back(
-                parsedFile->getPath(),
-                item.first
-            );
+
+            auto unit = &translationUnits.emplace_back(parsedFile->getPath(), item.first);
             std::unique_ptr<cppast::cpp_file>& pFile = parsedFile->getFile();
-            un::Transpiler transpiler(
-                unit,
-                _index
-            );
+
+            un::Transpiler transpiler(unit, _index);
             transpiler.parse(*pFile);
+
         }
         return translationUnits;
     }

@@ -34,27 +34,29 @@ namespace un::serialization {
 
             //Serialization
             fieldsSerialization << "// --- BEGIN FIELD SERIALIZATION: " << fName << std::endl;
-            writeFieldInfo(fieldsSerialization, field, writer);
+//            writeFieldInfo(fieldsSerialization, field, writer);
             writer->write_serializer(fieldsSerialization, field, *translationUnit, writerRegistry);
             fieldsSerialization << "// --- END FIELD SERIALIZATION: " << fName << std::endl;
             fieldsSerialization << std::endl;
 
             // Deserialization
             fieldsDeserialization << "// --- BEGIN FIELD DESERIALIZATION: " << fName << std::endl;
-            writeFieldInfo(fieldsDeserialization, field, writer);
+//            writeFieldInfo(fieldsDeserialization, field, writer);
             writer->write_deserializer(fieldsDeserialization, field, *translationUnit, writerRegistry);
             fieldsDeserialization << "// --- END FIELD DESERIALIZATION: " << fName << std::endl;
             fieldsDeserialization << std::endl;
         }
+
+        std::string fullName = composite->getFullName();
         ss << "template<>" << std::endl;
-        ss << "inline void serialize_structure<" << info.fullName << ">" << "(const " << info.fullName
+        ss << "inline void serialize_structure<" << fullName << ">" << "(const " << fullName
            << "& value, un::Serialized& into) {" << std::endl;
         ss << fieldsSerialization.str() << std::endl;
         ss << "}" << std::endl;
 
         ss << "template<>" << std::endl;
-        ss << info.fullName << " deserialize_structure<" << info.fullName << ">(un::Serialized& from) {" << std::endl;
-        ss << info.fullName << " value;" << std::endl;
+        ss << fullName << " deserialize_structure<" << fullName << ">(un::Serialized& from) {" << std::endl;
+        ss << fullName << " value;" << std::endl;
         ss << fieldsDeserialization.str() << std::endl;
         ss << "return value;" << std::endl;
         ss << "}" << std::endl;
@@ -67,7 +69,7 @@ namespace un::serialization {
     ) {
         write_structure_serialization_info(ss, anComposite);
         ss << "namespace un::serialization {" << std::endl;
-        serializeFields(anComposite, ss);
+        //serializeFields(anComposite, ss);
         ss << "}" << std::endl;
     }
 

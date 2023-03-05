@@ -154,6 +154,9 @@ namespace un {
             );
         };
 
+        ~JobSystem(){
+            LOG(INFO) << "Destroying Job System";
+        }
         template<typename TWorker>
         un::WorkerPool<TWorker>& getWorkerPool() {
             return ArchetypeMixin<TWorker>::_pool;
