@@ -61,7 +61,7 @@ add_unnecessary_tool(
     unnecessary_source_analysis
     unnecessary_graphs
     unnecessary_jobs
-    grapphs_visualization
+    grapphs-graphviz
 )
 if (WIN32)
     message("Adding libclang_s")

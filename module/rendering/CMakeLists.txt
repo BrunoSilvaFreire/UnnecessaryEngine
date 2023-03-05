@@ -66,7 +66,7 @@ add_unnecessary_library(
     Vulkan::Vulkan
     glm::glm
     glfw::glfw
-    grapphs_visualization
+    grapphs-graphviz
 )
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)

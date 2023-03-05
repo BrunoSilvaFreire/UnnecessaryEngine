@@ -35,7 +35,7 @@ add_unnecessary_tool(
     unnecessary_atlas
     pngpp::pngpp
     glm::glm
-    grapphs_visualization
+    grapphs-graphviz
 
     TESTS
     tests/packer_tests.cpp

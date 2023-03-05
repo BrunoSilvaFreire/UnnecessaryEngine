@@ -91,7 +91,7 @@ public:
     }
 };
 
-typedef gpp::AdjacencyList<ExplorationVertex, float> DummyExplorationGraph;
+typedef gpp::adjacency_list<ExplorationVertex, float> DummyExplorationGraph;
 
 #define NUM_GRAPH_ENTRIES 2000
 
@@ -123,14 +123,14 @@ TEST(jobs, graph_exploration) {
     auto jobSystem = builder.build();
     gpp::test_mazes(
         [&](gpp::Maze &maze) {
-            const gpp::AdjacencyList<gpp::Cell, int> &graph = maze.getGraph();
+            const gpp::adjacency_list<gpp::Cell, int> &graph = maze.getGraph();
             gpp::save_to_dot(
                 graph,
                 std::filesystem::current_path() / "exploration_graph.dot"
             );
             LOG(INFO) << "Exploring maze " << maze.getSize();
             std::set<std::size_t> alreadyExplored;
-            un::GraphExplorer<gpp::AdjacencyList<gpp::Cell, int>> explorer(
+            un::GraphExplorer<gpp::adjacency_list<gpp::Cell, int>> explorer(
                 graph,
                 [&](u32 index, const gpp::Cell &vertex) {
                     bool isDuplicate = alreadyExplored.contains(index);
@@ -149,7 +149,7 @@ TEST(jobs, graph_exploration) {
 
             {
                 /*un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
-                chain.immediately<un::ExploreGraphVertexJob<gpp::AdjacencyList<gpp::Cell, int>, un::SimpleJobSystem>>(
+                chain.immediately<un::ExploreGraphVertexJob<gpp::adjacency_list<gpp::Cell, int>, un::SimpleJobSystem>>(
                     maze.getStart(),
                     &graph,
                     &explorer,

@@ -58,7 +58,7 @@ add_unnecessary_library(
 target_link_libraries(
     unnecessary_jobs_tests
     PUBLIC
-    grapphs_visualization
+    grapphs-graphviz
     grapphs_testlib
 )
 unnecessary_target_resources(

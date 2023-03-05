@@ -27,7 +27,7 @@ namespace un {
     class DependencyGraph {
     public:
         typedef std::function<void(IndexType index, const VertexType& vertex)> Explorer;
-        typedef gpp::AdjacencyList <VertexType, DependencyType, IndexType> InnerGraph;
+        typedef gpp::adjacency_list<VertexType, DependencyType, IndexType> InnerGraph;
     protected:
         InnerGraph graph;
         std::set<IndexType> independent;
