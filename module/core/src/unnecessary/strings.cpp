@@ -1,7 +1,6 @@
 #include <unnecessary/strings.h>
 
 namespace un {
-
     std::string capitalize(std::string value) {
         value[0] = toupper(value[0]);
         return value;
@@ -35,14 +34,14 @@ namespace un {
             s.erase(0, pos + delimiter.length());
             vec.push_back(token);
         }
-        if (!s.empty()){
+        if (!s.empty()) {
             vec.push_back(s);
         }
         return vec;
     }
 
     std::string trim_whitespace_prefix(const std::string& value) {
-        std::string result = value;;
+        std::string result = value;
         if (auto res = result.find_last_of(' '); res != std::string::npos) {
             result.erase(0, res);
         }

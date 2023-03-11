@@ -8,64 +8,65 @@
 #include <iostream>
 
 namespace un {
-    bool FieldWriter::isOptional(const CXXField& field) {
-        return field.findAttribute("un::serialize")->hasArgument("optional");
+    bool field_writer::is_optional(const cxx_field& field) {
+        return field.find_attribute("un::serialize")->has_argument("optional");
     }
 
-    void FieldWriter::addMissingFieldException(std::stringstream& ss, const CXXField& field) {
-        addMissingFieldException(ss, field.getName());
+    void field_writer::add_missing_field_exception(std::stringstream& ss, const cxx_field& field) {
+        add_missing_field_exception(ss, field.get_name());
     }
 
-    void FieldWriter::addMissingFieldException(std::stringstream& ss, const std::string& fieldName) {
-        ss << "throw std::runtime_error(\"Unable to read field " << fieldName << "\");" << std::endl;
+    void
+    field_writer::add_missing_field_exception(std::stringstream& ss, const std::string& fieldName) {
+        ss << "throw std::runtime_error(\"Unable to read field " << fieldName << "\");"
+           << std::endl;
     }
 
-
-    bool FieldWriter::trySerializePrimitive(
+    bool field_writer::try_serialize_primitive(
         std::stringstream& ss,
         const std::string& name,
-        const CXXType& primitiveCandidate
+        const cxx_type& primitiveCandidate
     ) {
-        if (primitiveCandidate.getName() != "std::string") {
-            if (primitiveCandidate.getKind() == un::CXXTypeKind::eComplex) {
+        if (primitiveCandidate.get_name() != "std::string") {
+            if (primitiveCandidate.get_kind() == complex) {
                 return false;
             }
         }
 
-        ss << "into.set<" << primitiveCandidate.getName() << ">" << "(\"" << name << "\", value." << name << ");"
+        ss << "into.set<" << primitiveCandidate.get_name() << ">" << "(\"" << name << "\", value."
+           << name << ");"
            << std::endl;
         return true;
     }
 
-    bool FieldWriter::tryDeserializePrimitive(
+    bool field_writer::try_deserialize_primitive(
         std::stringstream& ss,
         const std::string& name,
-        const CXXType& primitiveCandidate
+        const cxx_type& primitiveCandidate
     ) {
-        if (primitiveCandidate.getName() != "std::string") {
-            if (primitiveCandidate.getKind() == un::CXXTypeKind::eComplex) {
+        if (primitiveCandidate.get_name() != "std::string") {
+            if (primitiveCandidate.get_kind() == complex) {
                 return false;
             }
         }
-        std::string typeName = primitiveCandidate.getName();
+        std::string typeName = primitiveCandidate.get_name();
 
         ss << "if (!from.try_get<" << typeName << ">"
            << "(\"" << name << "\", value." << name << ")) {" << std::endl;
-        addMissingFieldException(ss, name);
+        add_missing_field_exception(ss, name);
         ss << "}" << std::endl;
         return true;
     }
 
-
-    std::shared_ptr<un::FieldWriter> WriterRegistry::getWriter(
-        const un::CXXField& field,
-        const un::CXXTranslationUnit& unit
+    std::shared_ptr<field_writer> writer_registry::get_writer(
+        const cxx_field& field,
+        const cxx_translation_unit& unit
     ) const {
         const auto& bestWriter = std::max_element(
-            writers.begin(), writers.end(),
+            _writers.begin(), _writers.end(),
             [&](
-                const std::shared_ptr<un::FieldWriter>& a,
-                const std::shared_ptr<un::FieldWriter>& b
+                const std::shared_ptr<field_writer>& a,
+                const std::shared_ptr<field_writer>& b
             ) {
                 float first;
                 float second;
@@ -78,19 +79,18 @@ namespace un {
                 return first < second;
             }
         );
-        if (bestWriter == writers.end()) {
+        if (bestWriter == _writers.end()) {
             throw std::runtime_error("No suitable writer found");
         }
         return *bestWriter;
     }
 
-    WriterRegistry::WriterRegistry() : writers() {
-        addWriter<un::PrimitiveWriter>();
-        addWriter<un::ComplexWriter>();
-        addWriter<un::DelegateWriter>();
-        addWriter<un::IdentifiableVectorWriter>();
-        addWriter<un::CollectionWriter>();
-        addWriter<un::EnumByNameWriter>();
+    writer_registry::writer_registry() : _writers() {
+        add_writer<primitive_writer>();
+        add_writer<complex_writer>();
+        add_writer<delegate_writer>();
+        add_writer<identifiable_vector_writer>();
+        add_writer<collection_writer>();
+        add_writer<enum_by_name_writer>();
     }
-
 }

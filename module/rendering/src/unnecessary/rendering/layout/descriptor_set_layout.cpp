@@ -1,28 +1,28 @@
 #include <unnecessary/rendering/layout/descriptor_set_layout.h>
 
 namespace un {
-    const std::string& un::Descriptor::getName() const {
-        return name;
+    const std::string& descriptor::get_name() const {
+        return _name;
     }
 
-    vk::DescriptorType un::Descriptor::getType() const {
+    vk::DescriptorType descriptor::get_type() const {
         return type;
     }
 
-    Descriptor::Descriptor(
+    descriptor::descriptor(
         const std::string& name,
         vk::DescriptorType type
-    ) : name(name),
-        type(type) { }
+    ) : _name(name),
+        type(type) {
+    }
 
-    vk::DescriptorSetLayout DescriptorSetLayout::build(vk::Device device) {
+    vk::DescriptorSetLayout descriptor_set_layout::build(vk::Device device) {
         std::vector<vk::DescriptorSetLayoutBinding> items;
-        for (std::size_t i = 0; i < elements.size(); ++i) {
-
+        for (std::size_t i = 0; i < _elements.size(); ++i) {
             items.emplace_back(
                 vk::DescriptorSetLayoutBinding(
                     i,
-                    elements[i].getType(),
+                    _elements[i].get_type(),
                     1,
                     stageFlags,
                     nullptr
@@ -37,9 +37,8 @@ namespace un {
         );
     }
 
-    DescriptorSetLayout::DescriptorSetLayout(
+    descriptor_set_layout::descriptor_set_layout(
         const vk::ShaderStageFlags& stageFlags
     ) : stageFlags(stageFlags) {
-
     }
 }

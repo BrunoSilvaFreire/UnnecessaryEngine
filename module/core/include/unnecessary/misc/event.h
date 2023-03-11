@@ -7,66 +7,70 @@
 
 namespace un {
     template<typename... T>
-    class Event {
+    class event {
     public:
-        using Listener = std::function<void(T...)>;
+        using listener = std::function<void(T...)>;
+
     private:
-        std::vector<Listener> listeners;
-        std::vector<Listener> singleFireListeners;
+        std::vector<listener> _listeners;
+        std::vector<listener> _singleFireListeners;
+
     public:
         void clear() {
-            listeners.clear();
+            _listeners.clear();
         }
 
-        void addSingleFireListener(Listener listener) {
-            singleFireListeners.push_back(listener);
+        void add_single_fire_listener(listener listener) {
+            _singleFireListeners.push_back(listener);
         }
 
-        void operator+=(Listener listener) {
-            listeners.push_back(listener);
+        void operator+=(listener listener) {
+            _listeners.push_back(listener);
         }
 
-        void operator-=(Listener listener) {
-            listeners.erase(std::remove(listeners.begin(), listeners.end(), listener));
+        void operator-=(listener listener) {
+            _listeners.erase(std::remove(_listeners.begin(), _listeners.end(), listener));
         }
 
         void operator()(T... args) {
-            for (Listener& listener : listeners) {
+            for (listener& listener : _listeners) {
                 listener(args...);
             }
-            for (Listener& listener : singleFireListeners) {
+            for (listener& listener : _singleFireListeners) {
                 listener(args...);
             }
-            singleFireListeners.clear();
+            _singleFireListeners.clear();
         }
     };
 
-    typedef un::Event<> EventVoid;
+    using event_void = event<>;
 
     template<typename... T>
-    class ThreadSafeEvent {
+    class thread_safe_event {
     public:
-        using Listener = typename Event<T...>::Listener;
+        using listener = typename event<T...>::listener;
+
     private:
-        Event<T...> _inner;
+        event<T...> _inner;
         std::mutex _mutex;
+
     public:
         void clear() {
             std::lock_guard<std::mutex> lock(_mutex);
             _inner.clear();
         }
 
-        void addSingleFireListener(Listener listener) {
+        void add_single_fire_listener(listener listener) {
             std::lock_guard<std::mutex> lock(_mutex);
-            _inner.addSingleFireListener(listener);
+            _inner.add_single_fire_listener(listener);
         }
 
-        void operator+=(Listener listener) {
+        void operator+=(listener listener) {
             std::lock_guard<std::mutex> lock(_mutex);
             _inner += listener;
         }
 
-        void operator-=(Listener listener) {
+        void operator-=(listener listener) {
             std::lock_guard<std::mutex> lock(_mutex);
             _inner -= listener;
         }

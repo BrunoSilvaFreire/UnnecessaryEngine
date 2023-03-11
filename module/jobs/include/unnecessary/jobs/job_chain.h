@@ -13,186 +13,182 @@
 #include <unnecessary/jobs/misc/lambda_job.h>
 
 namespace un {
-    template<typename TJobSystem>
-    class JobChain {
+    template<typename t_job_system>
+    class job_chain {
     public:
-        typedef TJobSystem JobSystemType;
-        typedef typename JobSystemType::DispatchTable DispatchTable;
+        using job_system_type = t_job_system;
+        using dispatch_table = typename job_system_type::dispatch_table;
+
     protected:
-        JobSystemType* system;
-        DispatchTable toStart;
-        DispatchTable allJobs;
-        bool dispatchOnDestruct;
-
+        job_system_type* _system;
+        dispatch_table _toStart;
+        dispatch_table _allJobs;
+        bool _dispatchOnDestruct;
 
     public:
-
-        JobChain(
-            JobSystemType* system,
+        explicit job_chain(
+            job_system_type* system,
             bool dispatchOnDestruct = true
-        ) : system(system),
-            dispatchOnDestruct(dispatchOnDestruct) {
-
+        ) : _system(system),
+            _dispatchOnDestruct(dispatchOnDestruct) {
         }
 
-        virtual ~JobChain() {
-            if (dispatchOnDestruct) {
+        virtual ~job_chain() {
+            if (_dispatchOnDestruct) {
                 dispatch();
             }
         }
 
-        JobChain(const un::JobChain<TJobSystem>&) = delete;
+        job_chain(const job_chain<t_job_system>&) = delete;
 
-        JobChain(un::JobChain<TJobSystem>&& other) noexcept
-            : system(std::move(other.system)),
-              allJobs(std::move(other.allJobs)),
-              toStart(std::move(other.toStart)),
-              dispatchOnDestruct(other.dispatchOnDestruct) {
-            other.dispatchOnDestruct = false;
+        job_chain(job_chain<t_job_system>&& other) noexcept
+            : _system(std::move(other._system)),
+              _toStart(std::move(other._toStart)),
+              _allJobs(std::move(other._allJobs)),
+              _dispatchOnDestruct(other._dispatchOnDestruct) {
+            other._dispatchOnDestruct = false;
         };
 
-
-        void setDispatchOnDestruct(bool dispatchOnDestruct) {
-            JobChain::dispatchOnDestruct = dispatchOnDestruct;
+        void set_dispatch_on_destruct(bool dispatchOnDestruct) {
+            _dispatchOnDestruct = dispatchOnDestruct;
         }
 
         template<typename TJob>
-        JobChain& after(JobHandle afterThis, JobHandle runThis) {
-            system->addDependency(afterThis, runThis);
-            toStart.template erase<typename TJob::WorkerType>(runThis);
+        job_chain& after(job_handle afterThis, job_handle runThis) {
+            _system->add_dependency(afterThis, runThis);
+            _toStart.template erase<typename TJob::worker_type>(runThis);
             return *this;
         }
 
-        template<typename TArchetype>
-        JobChain& afterAll(JobHandle runThis) {
-            for (un::JobHandle handle : allJobs.template getBatch<TArchetype>()) {
+        template<typename t_archetype>
+        job_chain& after_all(job_handle runThis) {
+            for (job_handle handle : _allJobs.template get_batch<t_archetype>()) {
                 if (handle != runThis) {
-                    after<typename TArchetype::JobType>(handle, runThis);
+                    after<typename t_archetype::job_type>(handle, runThis);
                 }
             }
             return *this;
         }
 
-        template<typename TWorker>
-        JobChain& immediately(JobHandle id) {
-            toStart.template dispatch<TWorker>(id);
-            allJobs.template dispatch<TWorker>(id);
+        template<typename worker_type>
+        job_chain& immediately(job_handle id) {
+            _toStart.template dispatch<worker_type>(id);
+            _allJobs.template dispatch<worker_type>(id);
             return *this;
         }
 
-
         template<typename T, typename... Args>
-        JobChain& after(
-            const std::initializer_list<JobHandle>& dependencies,
+        job_chain& after(
+            const std::initializer_list<job_handle>& dependencies,
             Args... args
         ) {
             auto job = new T(std::forward<Args>(args)...);
-            auto id = system->enqueue(job);
-            for (JobHandle dependency : dependencies) {
-                system->addDependency(dependency, id);
+            auto id = _system->enqueue(job);
+            for (job_handle dependency : dependencies) {
+                _system->add_dependency(dependency, id);
             }
-            allJobs.emplace(id);
+            _allJobs.emplace(id);
             return *this;
         }
 
         template<typename TJob>
-        JobChain& after(un::JobHandle afterThis, un::JobHandle* runThis, TJob* job) {
+        job_chain& after(job_handle afterThis, job_handle* runThis, TJob* job) {
             immediately<TJob>(runThis, job);
-            JobHandle handle = *runThis;
+            job_handle handle = *runThis;
             after<TJob>(afterThis, handle);
             return *this;
         }
 
         template<typename J>
-        JobChain& immediately(J* job) {
-            std::pair<un::JobHandle, un::JobNode*> pair = system->template create<typename J::WorkerType>(
+        job_chain& immediately(J* job) {
+            std::pair<
+                job_handle,
+                job_node*
+            > pair = _system->template create<typename J::worker_type>(
                 job,
                 false
             );
-            return immediately<typename J::WorkerType>(pair.second->poolLocalIndex);
+            return immediately<typename J::worker_type>(pair.second->poolLocalIndex);
         }
 
-        template<typename J>
-        JobChain& immediately(JobHandle* id, J* job) {
-            using WorkerType = typename J::WorkerType;
-            std::pair<un::JobHandle, un::JobNode*> pair = system->template create<WorkerType>(
+        template<typename t_job>
+        job_chain& immediately(job_handle* id, t_job* job) {
+            using worker_type = typename t_job::worker_type;
+            std::pair<job_handle, job_node*> pair = _system->template create<worker_type>(
                 job,
                 false
             );
-            JobHandle handle = *id = pair.second->poolLocalIndex;
-            immediately<WorkerType>(handle);
+            job_handle handle = *id = pair.second->poolLocalIndex;
+            immediately<worker_type>(handle);
             return *this;
         }
 
         template<typename TJob, typename... Args>
-        JobChain& immediately(Args... args) {
+        job_chain& immediately(Args... args) {
             return immediately<TJob>(new TJob(std::forward<Args>(args)...));
         }
 
         template<typename TJob, typename... Args>
-        JobChain& immediately(JobHandle* id, Args... args) {
+        job_chain& immediately(job_handle* id, Args... args) {
             return immediately<TJob>(id, new TJob(std::forward<Args>(args)...));
         }
 
         template<typename TJob>
-        JobChain& after(JobHandle dependencyId, TJob* job) {
-            un::JobHandle handle;
+        job_chain& after(job_handle dependencyId, TJob* job) {
+            job_handle handle;
             immediately(&handle, job);
             after<TJob>(dependencyId, handle);
             return *this;
         }
 
-
         template<typename J, typename... Args>
-        JobChain& after(JobHandle afterThis, Args... args) {
+        job_chain& after(job_handle afterThis, Args... args) {
             after<J>(afterThis, new J(std::forward<Args>(args)...));
             return *this;
         }
 
-
         template<typename J, typename... Args>
-        JobChain& after(JobHandle afterThis, JobHandle* runThis, Args... args) {
+        job_chain& after(job_handle afterThis, job_handle* runThis, Args... args) {
             after<J>(afterThis, runThis, new J(std::forward<Args>(args)...));
             return *this;
         }
 
         void dispatch() {
-            system->dispatch(toStart);
+            _system->dispatch(_toStart);
         }
 
-        JobSystemType* getSystem() const {
-            return system;
+        job_system_type* get_system() const {
+            return _system;
         }
 
-        template<typename Worker = un::JobWorker, typename Lambda>
+        template<typename Worker = job_worker, typename Lambda>
         void finally(Lambda callback) {
-            un::JobHandle job;
-            immediately<un::LambdaJob<Worker>>(&job, callback);
-            JobSystemType::for_each_archetype(
-                [this, job]<typename TArchetype, size_t Index>() {
-                    afterAll<TArchetype>(job);
+            job_handle job;
+            immediately<lambda_job<Worker>>(&job, callback);
+            job_system_type::for_each_archetype(
+                [this, job]<typename t_archetype, size_t Index>() {
+                    after_all<t_archetype>(job);
                 }
             );
         }
 
-        void setName(JobHandle i, const std::string& name) {
-            system->setName(i, name);
+        void set_name(job_handle i, const std::string& name) {
+            _system->set_name(i, name);
         }
 
-        DispatchTable getAllJobs() const {
-            return allJobs;
+        dispatch_table get_all_jobs() const {
+            return _allJobs;
         }
 
-        std::size_t getNumJobs() {
+        std::size_t get_num_jobs() {
             std::size_t n = 0;
-            JobSystemType::for_each_archetype(
-                [&n, this]<typename TArchetype, size_t Index>() {
-                    n += allJobs.template getBatch<TArchetype>().size();
+            job_system_type::for_each_archetype(
+                [&n, this]<typename archetype, size_t Index>() {
+                    n += _allJobs.template get_batch<archetype>().size();
                 }
             );
             return n;
         }
-
     };
 }
 #endif

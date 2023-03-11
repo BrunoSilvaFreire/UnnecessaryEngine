@@ -10,28 +10,28 @@ namespace un::packer {
     /**
      * Represent a single image to pack
      */
-    class PackerEntry {
+    class packer_entry {
     private:
-        std::filesystem::path path;
-        glm::uvec2 size;
+        std::filesystem::path _path;
+        glm::uvec2 _size;
+
     public:
-        PackerEntry() = default;
-        PackerEntry(u32 width, u32 height, std::filesystem::path path);
+        packer_entry() = default;
+        packer_entry(u32 width, u32 height, std::filesystem::path path);
 
-        u32 getArea() const;
+        u32 get_area() const;
 
-        const std::filesystem::path &getPath() const;
+        const std::filesystem::path& get_path() const;
 
-        u32 getWidth() const;
+        u32 get_width() const;
 
-        u32 getHeight() const;
+        u32 get_height() const;
 
-        const glm::uvec2 &getSize() const;
+        const glm::uvec2& get_size() const;
 
-        bool fits(const un::Rect<u32> &rect) const {
-            return getWidth() <= rect.getWidth() && getHeight() <= rect.getHeight();
+        bool fits(const rect<u32>& rect) const {
+            return get_width() <= rect.get_width() && get_height() <= rect.get_height();
         }
-
     };
 }
 #endif

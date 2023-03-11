@@ -10,26 +10,28 @@
 #include <unnecessary/rendering/layout/layout.h>
 
 namespace un {
-    class Descriptor {
+    class descriptor {
     private:
-        std::string name;
-        vk::DescriptorType type;
+        std::string _name;
+        vk::DescriptorType _type;
+
     public:
-        Descriptor(
+        descriptor(
             const std::string& name,
             vk::DescriptorType type
         );
 
-        const std::string& getName() const;
+        const std::string& get_name() const;
 
-        vk::DescriptorType getType() const;
+        vk::DescriptorType get_type() const;
     };
 
-    class DescriptorSetLayout : public un::Layout<un::Descriptor> {
+    class descriptor_set_layout : public layout<descriptor> {
     private:
-        vk::ShaderStageFlags stageFlags;
+        vk::ShaderStageFlags _stageFlags;
+
     public:
-        DescriptorSetLayout(
+        descriptor_set_layout(
             const vk::ShaderStageFlags& stageFlags
         );
 

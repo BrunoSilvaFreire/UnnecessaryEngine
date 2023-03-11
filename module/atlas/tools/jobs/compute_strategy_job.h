@@ -9,21 +9,22 @@
 
 namespace un {
 
-    class ComputeStrategyJob : un::Job<un::JobWorker> {
+    class compute_strategy_job : un::job<un::job_worker> {
     private:
-        std::unique_ptr<un::packer::PackingAlgorithm> algorithm;
-        std::vector<un::packer::PackerEntry> entries;
-        un::packer::PackingStrategy* strategy;
+        std::unique_ptr<un::packer::PackingAlgorithm> _algorithm;
+        std::vector<un::packer::PackerEntry> _entries;
+        un::packer::PackingStrategy* _strategy;
     public:
-        ComputeStrategyJob(
+        compute_strategy_job(
             std::unique_ptr<packer::PackingAlgorithm>&& algorithm,
             std::vector<un::packer::PackerEntry> entries,
             un::packer::PackingStrategy* strategy
         ) : algorithm(std::move(algorithm)),
             entries(std::move(entries)),
-            strategy(strategy) { }
+            strategy(strategy) {
+        }
 
-        void operator()(WorkerType* worker) override {
+        void operator()(worker_type* worker) override {
             *strategy = algorithm->operator()(entries);
         }
     };

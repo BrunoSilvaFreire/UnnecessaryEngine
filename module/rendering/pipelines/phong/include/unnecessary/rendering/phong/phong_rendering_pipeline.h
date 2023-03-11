@@ -7,13 +7,13 @@
 #include <phong.gen.h>
 
 namespace un {
-    class PhongRenderingPipeline : public un::RenderingPipeline {
+    class phong_rendering_pipeline : public rendering_pipeline {
     protected:
-        un::RenderGroup opaqueGroup;
-    public:
-        void configure(un::Renderer& renderer, RenderGraph& graph) override {
+        render_group _opaqueGroup;
 
-            size_t color = graph.addBorrowedAttachment(
+    public:
+        void configure(renderer& renderer, render_graph& graph) override {
+            size_t color = graph.add_borrowed_attachment(
                 vk::ClearColorValue(
                     std::array<float, 4>({0, 1, 0, 1})
                 ),
@@ -27,8 +27,8 @@ namespace un {
                 vk::ImageLayout::eUndefined,
                 vk::ImageLayout::ePresentSrcKHR
             );
-            graph.setAttachmentName(color, "Color");
-            size_t depth = graph.addOwnedAttachment(
+            graph.set_attachment_name(color, "Color");
+            size_t depth = graph.add_owned_attachment(
                 vk::ImageUsageFlagBits::eDepthStencilAttachment,
                 vk::ImageAspectFlagBits::eDepth,
                 vk::ClearDepthStencilValue(0, 0),
@@ -42,24 +42,23 @@ namespace un {
                 vk::ImageLayout::eUndefined,
                 vk::ImageLayout::eDepthStencilAttachmentOptimal
             );
-            graph.setAttachmentName(depth, "DepthBuffer");
+            graph.set_attachment_name(depth, "DepthBuffer");
             vk::Rect2D attachmentSize{};
-            const auto& resolution = renderer.getSwapChain().getResolution();
+            const auto& resolution = renderer.get_swap_chain().get_resolution();
             attachmentSize.extent.width = resolution.x;
             attachmentSize.extent.height = resolution.y;
-            graph.enqueuePass<un::DrawObjectsPass>(
-                &opaqueGroup,
+            graph.enqueue_pass<draw_objects_pass>(
+                &_opaqueGroup,
                 attachmentSize,
                 std::vector<vk::ClearValue>(
                     {
-                        graph.getAttachment(color).getClear(),
-                        graph.getAttachment(depth).getClear()
+                        graph.get_attachment(color).get_clear(),
+                        graph.get_attachment(depth).get_clear()
                     }
                 ),
                 color,
                 depth
             );
-
         }
     };
 }

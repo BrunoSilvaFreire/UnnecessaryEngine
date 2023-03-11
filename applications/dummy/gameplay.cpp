@@ -50,7 +50,7 @@ namespace un {
         return clamp<T>(value, 0, 1);
     }
 
-    void PathRunningSystem::step(un::World& world, f32 delta, un::JobWorker* worker) {
+    void PathRunningSystem::step(un::World& world, f32 delta, un::job_worker* worker) {
         for (auto[entity, path, translation, rotation]: world.view<un::Path, un::Translation, un::Rotation>()
                                                              .each()) {
             float newPos = path.position + (delta * path.speed);
@@ -87,7 +87,7 @@ namespace un {
         return (glfwGetKey(window, positive) - glfwGetKey(window, negative));
     }
 
-    void FreeFlightSystem::step(World& world, f32 dt, un::JobWorker* worker) {
+    void FreeFlightSystem::step(World& world, f32 dt, un::job_worker* worker) {
         for (auto[e, translation, rot, nav]: world.view<un::Translation, un::Rotation, un::FreeFlight>()
                                                   .each()) {
             auto speed = nav.speed;
@@ -142,7 +142,7 @@ namespace un {
         descriptor.runsOnStage(un::kEarlyGameplay);
     }
 
-    void OrbitSystem::step(World& world, f32 delta, un::JobWorker* worker) {
+    void OrbitSystem::step(World& world, f32 delta, un::job_worker* worker) {
         for (auto[entity, path, translation, rotation]: world.view<
             un::Orbit,
             un::Translation,

@@ -29,14 +29,15 @@ namespace un {
 #else
 
 
-    std::string type_name_of(const std::type_info& info);
+    std::string type_name_of(const std::type_info& _info);
 
-    template<typename T>
-    std::string type_name_of() {
+    template <typename T>
+    std::string type_name_of()
+    {
         return type_name_of(typeid(T));
     }
 
-    std::string demangle(const char* value);
+    std::string demangle(const char* _value);
 
 #endif
 }

@@ -43,7 +43,6 @@ namespace un {
         return ss.str();
     }
 
-
     template<typename TIterator>
     std::string join_strings(const std::string& separator, TIterator begin, TIterator end) {
         std::stringstream ss;

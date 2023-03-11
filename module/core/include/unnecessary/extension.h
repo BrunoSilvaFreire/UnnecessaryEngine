@@ -9,29 +9,29 @@
 #include <vector>
 
 namespace un {
-    template<typename TTarget>
-    class Extension {
+    template<typename t_target>
+    class extension {
     public:
-        using TargetType = TTarget;
+        using target_type = t_target;
 
-        virtual void apply(TargetType& target) = 0;
+        virtual void apply(target_type& target) = 0;
     };
 
-    template<typename TExtension>
-    class Extensible {
+    template<typename t_extension>
+    class extensible {
     private:
-        std::vector<std::shared_ptr<TExtension>> extensions;
+        std::vector<std::shared_ptr<t_extension>> _extensions;
     public:
-        using ExtensionType = TExtension;
+        using extension_type = t_extension;
 
-        void extendWith(const std::shared_ptr<TExtension>& extension) {
-            extension->apply(*static_cast<typename ExtensionType::TargetType*>(this));
-            extensions.push_back(extension);
+        void extend_with(const std::shared_ptr<t_extension>& extension) {
+            extension->apply(*static_cast<typename extension_type::target_type*>(this));
+            _extensions.push_back(extension);
         }
 
         template<typename TOfType>
-        std::shared_ptr<TOfType> findExtension() {
-            for (const auto& extension : extensions) {
+        std::shared_ptr<TOfType> find_extension() {
+            for (const auto& extension : _extensions) {
                 const auto& casted = std::dynamic_pointer_cast<TOfType>(extension);
                 if (casted != nullptr) {
                     return casted;

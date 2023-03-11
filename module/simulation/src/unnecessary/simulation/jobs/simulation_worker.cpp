@@ -1,9 +1,9 @@
 #include <unnecessary/simulation/jobs/simulation_worker.h>
 
 namespace un {
-
-    SimulationWorker::SimulationWorker(
+    simulation_worker::simulation_worker(
         size_t index,
         bool autostart
-    ) : JobWorkerMixin(index, autostart) { }
+    ) : job_worker_mixin(index, autostart) {
+    }
 }

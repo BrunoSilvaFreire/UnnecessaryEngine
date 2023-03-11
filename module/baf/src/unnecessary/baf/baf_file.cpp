@@ -2,10 +2,10 @@
 #include <unnecessary/baf/file_reader.h>
 
 namespace un {
-    const char* BAFFile::kBafMagic = "LMAO";
+    const char* baf_file::kBafMagic = "LMAO";
 
-    BAFFile::BAFFile(const std::filesystem::path& path) {
-        file = std::fopen(reinterpret_cast<const char*>(path.c_str()), "r");
+    baf_file::baf_file(const std::filesystem::path& path) {
+        _file = std::fopen(reinterpret_cast<const char*>(path.c_str()), "r");
         auto reader = get_reader();
         // Check magic
         char magic[4];
@@ -14,25 +14,26 @@ namespace un {
             throw std::runtime_error("Provided path doesn't seem to be a BAF file");
         }
         // Read version
-        reader.read(version.data(), kNumBytesForVersion);
+        reader.read(_version.data(), kNumBytesForVersion);
         // Read header
         u32 numEntries = reader.read<u32>();
-        std::vector<BAFEntryPair> pairs(numEntries);
+        std::vector<baf_entry_pair> pairs(numEntries);
         reader.read(pairs.data(), numEntries);
-        entries.reserve(numEntries);
+        _entries.reserve(numEntries);
         for (auto pair : pairs) {
-            entries.insert(std::make_pair(pair.uuid, pair.actual));
+            _entries.insert(std::make_pair(pair.uuid, pair.actual));
         }
-        blocksStart = reader.tell();
+        _blocksStart = reader.tell();
     }
 
-    BAFFile::~BAFFile() {
-        std::fclose(file);
+    baf_file::~baf_file() {
+        std::fclose(_file);
     }
 
-    void BAFFile::read_section(const BAFSection& section, Buffer& into, std::size_t intoOffset) {
-        std::size_t start = blocksStart + section.origin;
-        un::FileHelper reader = get_reader();
+    void
+    baf_file::read_section(const baf_section& section, byte_buffer& into, std::size_t intoOffset) {
+        std::size_t start = _blocksStart + section.origin;
+        file_helper reader = get_reader();
         reader.seek(start); // Seek to content start
         auto ptr = into.offset(intoOffset);
         reader.read(
@@ -41,8 +42,7 @@ namespace un {
         ); // Read into buffer
     }
 
-    const std::array<u8, BAFFile::kNumBytesForVersion>& BAFFile::getVersion() const {
-        return version;
+    const std::array<u8, baf_file::kNumBytesForVersion>& baf_file::get_version() const {
+        return _version;
     }
-
 }

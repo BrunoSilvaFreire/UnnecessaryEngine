@@ -5,32 +5,33 @@
 
 namespace un {
     template<typename T>
-    class Layout {
+    class layout {
     protected:
-        std::vector<T> elements;
+        std::vector<T> _elements;
+
     public:
-        std::vector<T>& getElements() {
-            return elements;
+        std::vector<T>& get_elements() {
+            return _elements;
         }
 
-        const std::vector<T>& getElements() const {
-            return elements;
+        const std::vector<T>& get_elements() const {
+            return _elements;
         }
 
-        const std::size_t getLength() const {
-            return elements.size();
+        const std::size_t get_length() const {
+            return _elements.size();
         }
 
         void operator+=(T&& item) {
-            elements.emplace_back(std::move(item));
+            _elements.emplace_back(std::move(item));
         }
 
         T& operator[](std::size_t index) {
-            return elements[index];
+            return _elements[index];
         }
 
         const T& operator[](std::size_t index) const {
-            return elements[index];
+            return _elements[index];
         }
     };
 }

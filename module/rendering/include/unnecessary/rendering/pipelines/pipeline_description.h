@@ -6,30 +6,30 @@
 #include <unnecessary/rendering/pipelines/input_scope.h>
 
 namespace un {
-    struct VertexStreamUsageEntry {
+    struct vertex_stream_usage_entry {
         [[un::serialize(identifier)]]
         std::string attribute;
         [[un::serialize]]
         std::string usage; //Either in or out
     };
 
-    struct VertexStreamEntry {
+    struct vertex_stream_entry {
         [[un::serialize(identifier)]]
         std::string name;
         [[un::serialize]]
         std::string type;
     };
 
-    struct PipelineStageDescription {
+    struct pipeline_stage_description {
         [[un::serialize(identifier)]]
         std::string name;
         [[un::serialize(optional)]]
-        std::vector<un::VertexStreamUsageEntry> vertex_stream;
+        std::vector<vertex_stream_usage_entry> vertex_stream;
         [[un::serialize(optional)]]
         std::vector<std::string> inputs_used;
     };
 
-    struct PipelineDepthOptions {
+    struct pipeline_depth_options {
         [[un::serialize(optional)]]
         bool enabled = true;
 
@@ -38,26 +38,27 @@ namespace un {
         [[un::serialize(optional)]]
         float depthMax = 1;
     };
-    struct PipelineInput {
+
+    struct pipeline_input {
         [[un::serialize(identifier)]]
         std::string name;
         [[un::serialize(optional)]]
-        un::InputScope scope = un::InputScope::eGlobal;
+        input_scope scope = global;
         [[un::serialize]]
         std::string type;
     };
 
-    struct PipelineDescription {
+    struct pipeline_description {
         [[un::serialize(optional)]]
-        PipelineDepthOptions depth;
+        pipeline_depth_options depth;
 
         [[un::serialize]]
-        std::vector<un::PipelineStageDescription> stages;
+        std::vector<pipeline_stage_description> stages;
 
         [[un::serialize]]
-        std::vector<un::PipelineInput> inputs;
+        std::vector<pipeline_input> inputs;
         [[un::serialize]]
-        std::vector<un::PipelineInput> vertex_stream;
+        std::vector<pipeline_input> vertex_stream;
     };
 }
 #endif

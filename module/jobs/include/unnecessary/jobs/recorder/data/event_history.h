@@ -9,47 +9,45 @@
 #include <unnecessary/jobs/recorder/data/events.h>
 
 namespace un {
-
-    class ProfilerEvent {
+    class profiler_event {
     public:
-        ProfilerEvent(
+        profiler_event(
             std::chrono::high_resolution_clock::time_point time,
-            std::unique_ptr<un::EventMeta> meta
+            std::unique_ptr<event_meta> meta
         );
 
-        ProfilerEvent(ProfilerEvent&& moved);
+        profiler_event(profiler_event&& moved);
 
-        ProfilerEvent(const ProfilerEvent& copy) = delete;
+        profiler_event(const profiler_event& copy) = delete;
 
-        std::chrono::high_resolution_clock::time_point getTime() const;
+        std::chrono::high_resolution_clock::time_point get_time() const;
 
-        const std::unique_ptr<un::EventMeta>& getMeta() const;
+        const std::unique_ptr<event_meta>& get_meta() const;
 
-        bool operator<(const ProfilerEvent& rhs) const;
+        bool operator<(const profiler_event& rhs) const;
 
-        bool operator>(const ProfilerEvent& rhs) const;
+        bool operator>(const profiler_event& rhs) const;
 
-        bool operator<=(const ProfilerEvent& rhs) const;
+        bool operator<=(const profiler_event& rhs) const;
 
-        bool operator>=(const ProfilerEvent& rhs) const;
+        bool operator>=(const profiler_event& rhs) const;
 
     protected:
-        std::chrono::high_resolution_clock::time_point time;
-        std::unique_ptr<un::EventMeta> _meta;
-
+        std::chrono::high_resolution_clock::time_point _time;
+        std::unique_ptr<event_meta> _meta;
     };
 
-    class EventHistory {
+    class event_history {
     private:
         std::mutex _queueMutex;
-        std::vector<un::ProfilerEvent> _events;
+        std::vector<profiler_event> _events;
+
     public:
-        EventHistory();
+        event_history();
 
-        const std::vector<un::ProfilerEvent>& getEvents() const;
+        const std::vector<profiler_event>& get_events() const;
 
-        void record(std::unique_ptr<EventMeta>&& meta);
+        void record(std::unique_ptr<event_meta>&& meta);
     };
-
 }
 #endif

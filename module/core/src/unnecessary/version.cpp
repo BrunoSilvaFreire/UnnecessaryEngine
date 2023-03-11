@@ -2,28 +2,27 @@
 #include <sstream>
 
 namespace un {
-
-    Version::Version(u8 major, u8 minor, u8 patch) : major(major),
-                                                     minor(minor),
-                                                     patch(patch) { }
-
-    u8 Version::getMajor() const {
-        return major;
+    version::version(u8 major, u8 minor, u8 patch) : _major(major),
+                                                     _minor(minor),
+                                                     _patch(patch) {
     }
 
-    u8 Version::getMinor() const {
-        return minor;
+    u8 version::get_major() const {
+        return _major;
     }
 
-    u8 Version::getPatch() const {
-        return patch;
+    u8 version::get_minor() const {
+        return _minor;
+    }
+
+    u8 version::get_patch() const {
+        return _patch;
     }
 
     template<>
-    std::string to_string(const Version& ver) {
+    std::string to_string(const version& ver) {
         std::stringstream stream;
-        stream << ver.getMajor() << '.' << ver.getMinor() << '.' << ver.getPatch();
+        stream << ver.get_major() << '.' << ver.get_minor() << '.' << ver.get_patch();
         return stream.str();
     }
-
 }

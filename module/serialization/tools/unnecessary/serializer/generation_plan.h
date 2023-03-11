@@ -11,46 +11,48 @@
 #include <ostream>
 
 namespace un {
-    class GenerationFile {
+    class generation_file {
     private:
-        std::filesystem::path source;
-        std::filesystem::path output;
-        un::CXXTranslationUnit unit;
+        std::filesystem::path _source;
+        std::filesystem::path _output;
+        cxx_translation_unit _unit;
+
     public:
-        GenerationFile(
+        generation_file(
             std::filesystem::path path,
             std::filesystem::path output,
-            CXXTranslationUnit&& unit
-        ) : source(std::move(path)),
-            unit(std::move(unit)),
-            output(std::move(output)) { }
-
-        const std::filesystem::path& getSource() const {
-            return source;
+            cxx_translation_unit&& unit
+        ) : _source(std::move(path)),
+            _output(std::move(output)),
+            _unit(std::move(unit)) {
         }
 
-        const CXXTranslationUnit& getUnit() const {
-            return unit;
+        const std::filesystem::path& get_source() const {
+            return _source;
         }
 
-        const std::filesystem::path& getOutput() const;
+        const cxx_translation_unit& get_unit() const {
+            return _unit;
+        }
 
-        friend std::ostream& operator<<(std::ostream& os, const GenerationFile& file);
+        const std::filesystem::path& get_output() const;
+
+        friend std::ostream& operator<<(std::ostream& os, const generation_file& file);
     };
 
-    class GenerationPlan {
+    class generation_plan {
     private:
-        std::filesystem::path source;
-        std::filesystem::path output;
-        std::shared_ptr<cppast::cpp_entity_index> index;
+        std::filesystem::path _source;
+        std::filesystem::path _output;
+        std::shared_ptr<cppast::cpp_entity_index> _index;
 
     public:
-        explicit GenerationPlan(
+        explicit generation_plan(
             std::shared_ptr<cppast::cpp_entity_index> index,
             std::filesystem::path output
         );
 
-        const std::shared_ptr<cppast::cpp_entity_index>& getIndex() const;
+        const std::shared_ptr<cppast::cpp_entity_index>& get_index() const;
     };
 }
 

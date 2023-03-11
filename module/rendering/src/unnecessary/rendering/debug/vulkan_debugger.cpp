@@ -10,35 +10,32 @@
 #endif
 
 namespace un {
-
-
-
-    VulkanDebugger::VulkanDebugger(
-        un::Renderer& renderer
-    ) : _device(renderer.getVirtualDevice()) {
-        vk::Instance vulkan = renderer.getVulkan();
+    vulkan_debugger::vulkan_debugger(
+        renderer& renderer
+    ) : _device(renderer.get_virtual_device()) {
+        vk::Instance vulkan = renderer.get_vulkan();
         vk::DebugUtilsMessageSeverityFlagsEXT severity;
-        un::Severity maxSeverity = un::Severity::UN_VULKAN_DEBUG_SEVERITY;
-        if (maxSeverity <= un::Severity::eDebug) {
+        auto maxSeverity = un::severity::UN_VULKAN_DEBUG_SEVERITY;
+        if (maxSeverity <= severity::debug) {
             severity |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose;
         }
-        if (maxSeverity <= un::Severity::eInfo) {
+        if (maxSeverity <= severity::info) {
             severity |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
         }
-        if (maxSeverity <= un::Severity::eWarn) {
+        if (maxSeverity <= severity::warn) {
             severity |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning;
         }
-        if (maxSeverity <= un::Severity::eError) {
+        if (maxSeverity <= severity::error) {
             severity |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
         }
         vk::DebugUtilsMessageTypeFlagsEXT messageType;
         messageType |= vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral;
         messageType |= vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation;
-        if (UN_VULKAN_DEBUG_PERFORMANCE) {
+        if constexpr (UN_VULKAN_DEBUG_PERFORMANCE) {
             messageType |= vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
         }
         PFN_vkCreateDebugUtilsMessengerEXT pfnCreateDebugUtilsMessengerEXT;
-        if (un::tryFindFunction(
+        if (try_find_function(
             vulkan,
             "vkCreateDebugUtilsMessengerEXT",
             &pfnCreateDebugUtilsMessengerEXT
@@ -47,10 +44,10 @@ namespace un {
                 static_cast<vk::DebugUtilsMessengerCreateFlagsEXT>(0),
                 severity,
                 messageType,
-                *reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT*>(VulkanDebugger::messenger_callback),
+                *reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT*>(messenger_callback),
                 this
             );
-            vkCall(
+            VK_CALL(
                 static_cast<vk::Result>(pfnCreateDebugUtilsMessengerEXT(
                     vulkan,
                     reinterpret_cast<const VkDebugUtilsMessengerCreateInfoEXT*>(&info),
@@ -58,26 +55,26 @@ namespace un {
                     reinterpret_cast<VkDebugUtilsMessengerEXT*>(&_messenger)
                 ))
             );
-        } else {
-
+        }
+        else {
             throw std::runtime_error(
                 "Unable to find vkCreateDebugUtilsMessengerEXT function."
             );
         }
-        un::loadFunction(
+        load_function(
             vulkan,
             "vkSetDebugUtilsObjectNameEXT",
-            &pSetDebugUtilsObjectName
+            &_pSetDebugUtilsObjectName
         );
     }
 
-    VkBool32 VulkanDebugger::messenger_callback(
+    VkBool32 vulkan_debugger::messenger_callback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageTypes,
         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* pUserData
     ) {
-        auto debugger = static_cast<un::VulkanDebugger*>(pUserData);
+        auto debugger = static_cast<vulkan_debugger*>(pUserData);
         std::stringstream ostream;
         ostream << "Vulkan-"
                 << vk::to_string(static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(messageSeverity))
@@ -97,7 +94,7 @@ namespace un {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
                 LOG(FUCK) << ostream.str();
 #ifdef DEBUG
-                un::debug_break();
+                debug_break();
 #endif
                 break;
         }

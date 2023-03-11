@@ -9,35 +9,38 @@
 #include <uuid.h>
 
 namespace un {
-    union AtlasCoordinates {
+    union atlas_coordinates {
         struct {
             u16 xMin, yMin, xMax, yMax;
         };
+
         struct {
             u32 min, max;
         };
     };
 
-    struct AtlasEntry {
+    struct atlas_entry {
     private:
-        AtlasCoordinates coordinates;
+        atlas_coordinates _coordinates;
+
     public:
-        const AtlasCoordinates& getCoordinates() const {
-            return coordinates;
+        const atlas_coordinates& get_coordinates() const {
+            return _coordinates;
         }
     };
 
-    class Atlas {
+    class atlas {
     private:
-        std::unordered_map<uuids::uuid, u64> index;
-        std::vector<AtlasEntry> entries;
+        std::unordered_map<uuids::uuid, u64> _index;
+        std::vector<atlas_entry> _entries;
+
     public:
-        const std::unordered_map<uuids::uuid, u64>& getIndex() const {
-            return index;
+        const std::unordered_map<uuids::uuid, u64>& get_index() const {
+            return _index;
         }
 
-        const std::vector<AtlasEntry>& getEntries() const {
-            return entries;
+        const std::vector<atlas_entry>& get_entries() const {
+            return _entries;
         }
     };
 }

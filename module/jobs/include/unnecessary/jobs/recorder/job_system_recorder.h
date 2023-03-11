@@ -7,75 +7,79 @@
 #include <ostream>
 
 namespace un {
-    template<typename TWorker>
-    class ProfilerPool {
+    template<typename worker_type>
+    class profiler_pool {
     private:
-        std::vector<un::WorkerRecorder<TWorker>*> profilers;
+        std::vector<worker_recorder<worker_type>*> _profilers;
+
     public:
-        void bootstrap(WorkerPool<TWorker>* fromPool) {
-            for (TWorker* item : fromPool->getWorkers()) {
-                profilers.emplace_back(new un::WorkerRecorder<TWorker>(item));
+        void bootstrap(worker_pool<worker_type>* fromPool) {
+            for (worker_type* item : fromPool->get_workers()) {
+                _profilers.emplace_back(new worker_recorder<worker_type>(item));
             }
         }
 
-        const std::vector<un::WorkerRecorder<TWorker>*>& getProfilers() const {
-            return profilers;
+        const std::vector<worker_recorder<worker_type>*>& get_profilers() const {
+            return _profilers;
         }
 
-        virtual ~ProfilerPool() {
-            for (const auto& item : profilers) {
+        virtual ~profiler_pool() {
+            for (const auto& item : _profilers) {
                 delete item;
             }
         }
     };
 
-    template<typename TJobSystem>
-    class JobSystemRecorder : public TJobSystem::ExtensionType {
+    template<typename t_job_system>
+    class job_system_recorder : public t_job_system::extension_type {
     private:
-        typedef typename TJobSystem::ProfilerPoolTuple ProfilerPoolTuple;
-        ProfilerPoolTuple tuple;
+        using profiler_pool_tuple = typename t_job_system::profiler_pool_tuple;
+        profiler_pool_tuple _tuple;
 
     public:
-        JobSystemRecorder() : tuple() { }
+        job_system_recorder() : _tuple() {
+        }
 
-        virtual ~JobSystemRecorder() = default;
+        virtual ~job_system_recorder() = default;
 
-        void apply(typename TJobSystem::ExtensionType::TargetType& jobSystem) override {
-            TJobSystem::for_each_archetype(
-                [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
-                    ProfilerPool<TArchetype>& profilerPool = std::get<TArchetypeIndex>(tuple);
-                    un::WorkerPool<TArchetype>& workerPool = jobSystem.template getWorkerPool<TArchetype>();
+        void apply(typename t_job_system::extension_type::target_type& jobSystem) override {
+            t_job_system::for_each_archetype(
+                [&]<typename t_archetype, std::size_t TArchetypeIndex>() {
+                    profiler_pool<t_archetype>& profilerPool = std::get<TArchetypeIndex>(_tuple);
+                    worker_pool<t_archetype>& workerPool = jobSystem.template get_worker_pool<
+                        t_archetype
+                    >();
                     profilerPool.bootstrap(&workerPool);
                 }
             );
         }
 
-        std::string toCSV() const {
+        std::string to_csv() const {
             std::stringstream os;
             os << "archetype,worker,handle,label,time,type" << std::endl;
-            TJobSystem::for_each_archetype(
-                [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
-                    const auto& profilerPool = std::get<TArchetypeIndex>(tuple);
-                    for (const auto& item : profilerPool.getProfilers()) {
-                        const un::EventHistory& history = item->getHistory();
+            t_job_system::for_each_archetype(
+                [&]<typename t_archetype, std::size_t TArchetypeIndex>() {
+                    const auto& profilerPool = std::get<TArchetypeIndex>(_tuple);
+                    for (const auto& item : profilerPool.get_profilers()) {
+                        const event_history& history = item->get_history();
                         u32 j = 0;
-                        for (const auto& event : history.getEvents()) {
-
-                            std::chrono::time_point timePoint = event.getTime();
+                        for (const auto& event : history.get_events()) {
+                            std::chrono::time_point timePoint = event.get_time();
                             const auto& count = timePoint.time_since_epoch().count();
                             os << TArchetypeIndex << ","
-                               << item->getWorker()->getIndex() << ",";
-                            un::JobHandle handle;
-                            const std::unique_ptr<un::EventMeta>& meta = event.getMeta();
-                            if (meta->tryGetHandle(handle)) {
+                               << item->get_worker()->get_index() << ",";
+                            job_handle handle;
+                            const std::unique_ptr<event_meta>& meta = event.get_meta();
+                            if (meta->try_get_handle(handle)) {
                                 os << handle << ",";
-                            } else {
+                            }
+                            else {
                                 os << ",";
                             }
                             os
-                                << "\"" << meta->getLabel() << "\","
+                                << "\"" << meta->get_label() << "\","
                                 << count << ","
-                                << meta->getEventType()
+                                << meta->get_event_type()
                                 << std::endl;
                         }
                     }
@@ -84,9 +88,9 @@ namespace un {
             return os.str();
         }
 
-        void saveToFile(std::filesystem::path file) {
+        void save_to_file(std::filesystem::path file) {
             std::ofstream stream(file);
-            stream << toCSV();
+            stream << to_csv();
             stream.close();
         }
     };

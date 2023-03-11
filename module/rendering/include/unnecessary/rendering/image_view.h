@@ -1,4 +1,3 @@
-
 #ifndef UNNECESSARYENGINE_IMAGE_VIEW_H
 #define UNNECESSARYENGINE_IMAGE_VIEW_H
 
@@ -6,11 +5,12 @@
 #include <unnecessary/rendering/rendering_device.h>
 
 namespace un {
-
-    class ImageView : public IDisposable, public un::VulkanWrapper<vk::ImageView> {
+    class image_view
+        : public disposable,
+          public vulkan_wrapper<vk::ImageView> {
     public:
-        ImageView(
-            const un::RenderingDevice& renderer,
+        image_view(
+            const rendering_device& renderer,
             vk::Image image,
             vk::Format format,
             vk::ImageViewType type = vk::ImageViewType::e2D,
@@ -19,6 +19,5 @@ namespace un {
 
         void dispose(const vk::Device& device) override;
     };
-
 }
 #endif //UNNECESSARYENGINE_IMAGE_VIEW_H

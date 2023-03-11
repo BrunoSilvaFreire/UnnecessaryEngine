@@ -4,11 +4,11 @@
 #include <unnecessary/archives/archiver.h>
 
 namespace un {
-    class JsonArchiver final : public Archiver {
+    class json_archiver final : public archiver {
     public:
-        un::Buffer write(const Serialized& serialized) override;
+        byte_buffer write(const serialized& serialized) override;
 
-        void read(const Buffer& buffer, Serialized& into) override;
+        void read(const byte_buffer& buffer, serialized& into) override;
     };
 }
 #endif

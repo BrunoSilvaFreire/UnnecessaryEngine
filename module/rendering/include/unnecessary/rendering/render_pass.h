@@ -11,54 +11,52 @@
 #include <ostream>
 
 namespace un {
-
-    class RenderPass {
+    class render_pass {
     private:
-        std::string name;
-        vk::PipelineStageFlags stageFlags;
-        std::vector<vk::AttachmentReference> colorAttachments;
-        std::vector<vk::AttachmentReference> usedAttachments;
-        std::vector<vk::AttachmentReference> resolveAttachments;
-        std::optional<vk::AttachmentReference> depthAttachment;
-    protected:
+        std::string _name;
+        vk::PipelineStageFlags _stageFlags;
+        std::vector<vk::AttachmentReference> _colorAttachments;
+        std::vector<vk::AttachmentReference> _usedAttachments;
+        std::vector<vk::AttachmentReference> _resolveAttachments;
+        std::optional<vk::AttachmentReference> _depthAttachment;
 
-        void usesColorAttachment(std::size_t attachmentIndex, vk::ImageLayout layout) {
-            colorAttachments.emplace_back(static_cast<u32>(attachmentIndex), layout);
+    protected:
+        void uses_color_attachment(std::size_t attachmentIndex, vk::ImageLayout layout) {
+            _colorAttachments.emplace_back(static_cast<u32>(attachmentIndex), layout);
         }
 
-        void usesDepthAttachment(std::size_t attachmentIndex, vk::ImageLayout layout) {
-            depthAttachment = vk::AttachmentReference(static_cast<u32>(attachmentIndex), layout);
+        void uses_depth_attachment(std::size_t attachmentIndex, vk::ImageLayout layout) {
+            _depthAttachment = vk::AttachmentReference(static_cast<u32>(attachmentIndex), layout);
         }
 
     public:
-        RenderPass(const std::string& name, const vk::PipelineStageFlags& stageFlags);
+        render_pass(const std::string& name, const vk::PipelineStageFlags& stageFlags);
 
-        virtual ~RenderPass() = default;
+        virtual ~render_pass() = default;
 
-        virtual void onVulkanPassCreated(vk::RenderPass renderPass, un::Renderer& renderer) {
-
+        virtual void on_vulkan_pass_created(vk::RenderPass renderPass, renderer& renderer) {
         }
 
         virtual void record(
-            const un::FrameData& data,
-            un::CommandBuffer& cmdBuffer
+            const frame_data& data,
+            command_buffer& cmdBuffer
         ) const = 0;
 
-        const std::string& getName() const;
+        const std::string& get_name() const;
 
-        const vk::PipelineStageFlags& getStageFlags() const;
+        const vk::PipelineStageFlags& get_stage_flags() const;
 
-        const std::vector<vk::AttachmentReference>& getColorAttachments() const;
+        const std::vector<vk::AttachmentReference>& get_color_attachments() const;
 
-        const std::vector<vk::AttachmentReference>& getUsedAttachments() const;
+        const std::vector<vk::AttachmentReference>& get_used_attachments() const;
 
-        const std::vector<vk::AttachmentReference>& getResolveAttachments() const;
+        const std::vector<vk::AttachmentReference>& get_resolve_attachments() const;
 
-        const std::optional<vk::AttachmentReference>& getDepthAttachment() const;
+        const std::optional<vk::AttachmentReference>& get_depth_attachment() const;
 
-        friend std::ostream& operator<<(std::ostream& os, const RenderPass& pass);
+        friend std::ostream& operator<<(std::ostream& os, const render_pass& pass);
 
-        friend std::ostream& operator<<(std::ostream& os, const RenderPass* pass);
+        friend std::ostream& operator<<(std::ostream& os, const render_pass* pass);
     };
 }
 #endif //UNNECESSARYENGINE_RENDER_PASS_H

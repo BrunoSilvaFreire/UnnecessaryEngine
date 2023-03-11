@@ -1,40 +1,45 @@
 #include "unnecessary/serialization/serialized_primitive.h"
 
 namespace un {
-
-    SerializedByte::SerializedByte(u8 value) : SerializedPrimitive(value) { }
-
-    un::SerializedType SerializedByte::getType() {
-        return un::SerializedType::eInteger8;
+    serialized_byte::serialized_byte(u8 value) : serialized_primitive(value) {
     }
 
-    SerializedShort::SerializedShort(u16 value) : SerializedPrimitive(value) { }
-
-    un::SerializedType SerializedShort::getType() {
-        return un::SerializedType::eInteger16;
+    serialized_type serialized_byte::get_type() {
+        return integer8;
     }
 
-    SerializedInteger::SerializedInteger(u32 value) : SerializedPrimitive(value) { }
-
-    un::SerializedType SerializedInteger::getType() {
-        return un::SerializedType::eInteger32;
+    serialized_short::serialized_short(u16 value) : serialized_primitive(value) {
     }
 
-    SerializedLong::SerializedLong(u64 value) : SerializedPrimitive(value) { }
-
-    un::SerializedType SerializedLong::getType() {
-        return un::SerializedType::eInteger64;
+    serialized_type serialized_short::get_type() {
+        return integer16;
     }
 
-    SerializedFloat::SerializedFloat(float value) : SerializedPrimitive(value) { }
-
-    SerializedType SerializedFloat::getType() {
-        return un::SerializedType::eFloat;
+    serialized_integer::serialized_integer(u32 value) : serialized_primitive(value) {
     }
 
-    SerializedDouble::SerializedDouble(double value) : SerializedPrimitive(value) { }
+    serialized_type serialized_integer::get_type() {
+        return integer32;
+    }
 
-    SerializedType SerializedDouble::getType() {
-        return un::SerializedType::eDouble;
+    serialized_long::serialized_long(u64 value) : serialized_primitive(value) {
+    }
+
+    serialized_type serialized_long::get_type() {
+        return integer64;
+    }
+
+    serialized_float::serialized_float(float value) : serialized_primitive(value) {
+    }
+
+    serialized_type serialized_float::get_type() {
+        return float_single;
+    }
+
+    serialized_double::serialized_double(double value) : serialized_primitive(value) {
+    }
+
+    serialized_type serialized_double::get_type() {
+        return float_double;
     }
 }

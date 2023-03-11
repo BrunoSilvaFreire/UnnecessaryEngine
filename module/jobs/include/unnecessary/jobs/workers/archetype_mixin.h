@@ -9,20 +9,20 @@
 
 namespace un {
 
-    template<typename TWorker>
-    class WorkerChain;
+    template<typename worker_type>
+    class worker_chain;
 
-    template<typename TJobSystem>
-    class JobChain;
+    template<typename t_job_system>
+    class job_chain;
 
-    template<typename TWorker>
-    class ArchetypeMixin {
+    template<typename t_worker>
+    class archetype_mixin {
     public:
-        typedef TWorker WorkerType;
+        using worker_type = t_worker;
     protected:
-        un::WorkerPool<WorkerType> _pool;
+        un::worker_pool<worker_type> _pool;
     public:
-        ArchetypeMixin() : _pool() {
+        archetype_mixin() : _pool() {
 
         }
 
@@ -30,23 +30,23 @@ namespace un {
         /**
          * Dispatch a local handle to the worker pool.
          */
-        void dispatchLocal(JobHandle handle) {
+        void dispatch_local(job_handle handle) {
             _pool.dispatch(handle);
         }
 
         /**
          * Dispatch a set of local handles to the worker pool.
          */
-        void dispatchLocal(const std::set<JobHandle>& handles) {
+        void dispatch_local(const std::set<job_handle>& handles) {
             _pool.dispatch(handles);
         }
 
     public:
-        friend class WorkerChain<WorkerType>;
+        friend class worker_chain<worker_type>;
 
         template<typename>
         friend
-        class JobChain;
+        class job_chain;
     };
 }
 #endif

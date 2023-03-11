@@ -4,13 +4,13 @@
 #include <unnecessary/jobs/job_graph.h>
 
 namespace un {
-    template<typename TJobSystem>
-    class JobGraphRecorder {
+    template<typename t_job_system>
+    class job_graph_recorder {
     private:
 
     public:
-        JobGraphRecorder(const TJobSystem& jobSystem) {
-            jobSystem.getJobUnlocked() += [](const un::JobNode& node) {
+        job_graph_recorder(const t_job_system& jobSystem) {
+            jobSystem.getJobUnlocked() += [](const un::job_node& node) {
 
             };
         }

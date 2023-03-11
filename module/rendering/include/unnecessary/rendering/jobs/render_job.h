@@ -6,27 +6,25 @@
 #include <vector>
 
 namespace un {
-
-
-    class RecordPassJob : public un::GraphicsJob {
+    class record_pass_job : public graphics_job {
     private:
-        un::FrameData* _data;
+        frame_data* _data;
         const std::size_t _passIndex;
-        const un::RenderPass* _pass;
+        const render_pass* _pass;
+
     public:
-
-
-        RecordPassJob(
-            un::FrameData* data,
-            const un::RenderPass* pass,
+        record_pass_job(
+            frame_data* data,
+            const render_pass* pass,
             const std::size_t passIndex
         ) : _data(data),
-            _pass(pass),
-            _passIndex(passIndex) { }
+            _passIndex(passIndex),
+            _pass(pass) {
+        }
 
-        void operator()(un::GraphicsWorker* worker) override {
-            un::CommandBuffer buf = _data->requestCommandBuffer(worker, _passIndex);
-            const vk::CommandBufferInheritanceInfo& inheritanceInfo = vk::CommandBufferInheritanceInfo(
+        void operator()(graphics_worker* worker) override {
+            command_buffer buf = _data->request_command_buffer(worker, _passIndex);
+            const auto& inheritanceInfo = vk::CommandBufferInheritanceInfo(
                 _data->renderPass,
                 0,
                 _data->framebuffer,
@@ -48,7 +46,7 @@ namespace un {
          un::FrameData* _data;
          un::Renderer* _renderer;
      public:
-         void operator()(WorkerType* worker) override {
+         void operator()(worker_type* worker) override {
              std::vector<vk::SubmitInfo> submits;
              graph.each(
                  [&](u32 index, const un::RenderPass* const& pass) {
@@ -83,7 +81,7 @@ namespace un {
                  [&](u32 from, u32 to, const un::DependencyType& type) {}
              );
 
-             vk::Queue queue = *_renderer->getDevice().getGraphics();
+             vk::Queue queue = *_renderer->getDevice().get_graphics();
              queue.submit(
                  submits,
                  synchronizer.fence

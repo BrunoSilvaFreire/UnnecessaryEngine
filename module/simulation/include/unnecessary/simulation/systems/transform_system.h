@@ -5,11 +5,11 @@
 #include "unnecessary/simulation/transforms/compute_matrices.h"
 
 namespace un {
-    class TransformSystem : public un::System {
-        void scheduleJobs(
-            un::World& world,
+    class transform_system : public un::system {
+        void schedule_jobs(
+            un::world& world,
             float deltaTime,
-            un::SimulationChain& chain
+            un::simulation_chain& chain
         ) override;
     };
 }

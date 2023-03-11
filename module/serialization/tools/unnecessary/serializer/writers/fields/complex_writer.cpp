@@ -1,45 +1,54 @@
 #include "complex_writer.h"
 
 namespace un {
-
-    bool ComplexWriter::accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) {
-        if (field.getType().getName() == "std::string") {
+    bool
+    complex_writer::accepts(
+        const cxx_field& field,
+        const cxx_translation_unit& unit,
+        float& outPriority
+    ) {
+        if (field.get_type().get_name() == "std::string") {
             return false;
         }
         outPriority = 1.0F;
-        return field.getType().getKind() == un::CXXTypeKind::eComplex;
+        return field.get_type().get_kind() == complex;
     }
 
-    void ComplexWriter::write_serializer(
-        std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-        const un::WriterRegistry& registry
+    void complex_writer::write_serializer(
+        std::stringstream& ss, const cxx_field& field, const cxx_translation_unit& unit,
+        const writer_registry& registry
     ) {
-        std::string fName = field.getName();
-        std::string typeName = field.getType().getName();
-        bool optional = isOptional(field);
+        std::string fName = field.get_name();
+        std::string typeName = field.get_type().get_name();
+        bool optional = is_optional(field);
         ss << "un::Serialized serialized_" << fName << ";" << std::endl;
         ss << "un::serialization::serialize_structure<" << typeName << ">("
-           << "value." << field.getName() << ", " << "serialized_" << fName
+           << "value." << field.get_name() << ", " << "serialized_" << fName
            << ");" << std::endl;
 
-        ss << "into.set<un::Serialized>(\"" << fName << "\", serialized_" << fName << ");" << std::endl;
+        ss << "into.set<un::Serialized>(\"" << fName << "\", serialized_" << fName << ");"
+           << std::endl;
     }
 
     void
-    ComplexWriter::write_deserializer(
-        std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-        const un::WriterRegistry& registry
+    complex_writer::write_deserializer(
+        std::stringstream& ss, const cxx_field& field, const cxx_translation_unit& unit,
+        const writer_registry& registry
     ) {
-        std::string fName = field.getName();
-        std::string typeName = field.getType().getName();
-        bool optional = isOptional(field);
+        std::string fName = field.get_name();
+        std::string typeName = field.get_type().get_name();
+        bool optional = is_optional(field);
         ss << "un::Serialized serialized_" << fName << ";" << std::endl;
         if (optional) {
-            ss << "if (from.try_get(\"" << fName << "\", serialized_" << fName << ")) {" << std::endl;
-            ss << "value." << fName << " = un::serialization::deserialize_structure<" << typeName << ">(serialized_" << fName
+            ss << "if (from.try_get(\"" << fName << "\", serialized_" << fName << ")) {"
+               << std::endl;
+            ss << "value." << fName << " = un::serialization::deserialize_structure<" << typeName
+               << ">(serialized_" <<
+               fName
                << ");" << std::endl;
             ss << "}" << std::endl;
-        } else {
+        }
+        else {
             ss << "if (!from.try_get(\"" << fName << "\", serialized_"
                << fName << ")) {" << std::endl;
             ss << "throw std::runtime_error(\"Unable to read field " << fName << "\");"
@@ -50,7 +59,7 @@ namespace un {
         }
     }
 
-    std::string ComplexWriter::name() {
+    std::string complex_writer::name() {
         return "ComplexWriter";
     }
 }

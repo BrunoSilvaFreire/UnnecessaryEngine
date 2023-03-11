@@ -14,42 +14,46 @@
 #include <unnecessary/rendering/window.h>
 
 namespace un {
-    class Pipeline {
+    class pipeline {
     private:
-        vk::Pipeline pipeline;
-        vk::PipelineCache cache;
-        vk::PipelineLayout layout;
+        vk::Pipeline _pipeline;
+        vk::PipelineCache _cache;
+        vk::PipelineLayout _layout;
+
     public:
-        Pipeline(const vk::Pipeline& pipeline, const vk::PipelineCache& cache, const vk::PipelineLayout& layout);
+        pipeline(
+            const vk::Pipeline& pipeline,
+            const vk::PipelineCache& cache,
+            const vk::PipelineLayout& layout
+        );
 
         vk::Pipeline operator*() const;
 
-        const vk::PipelineCache& getCache() const;
+        const vk::PipelineCache& get_cache() const;
 
-        const vk::PipelineLayout& getLayout() const;
+        const vk::PipelineLayout& get_layout() const;
     };
 
-    class PipelineBuilder {
+    class pipeline_builder {
     private:
-        std::optional<un::VertexLayout> vertexLayout;
-        un::PipelineLayout pipelineLayout;
-        std::vector<un::PipelineStage> stages;
-        std::optional<vk::PipelineInputAssemblyStateCreateInfo> inputAssembly;
+        std::optional<vertex_layout> _vertexLayout;
+        pipeline_layout _pipelineLayout;
+        std::vector<pipeline_stage> _stages;
+        std::optional<vk::PipelineInputAssemblyStateCreateInfo> _inputAssembly;
+
     public:
+        void with_input_assembly(const vk::PipelineInputAssemblyStateCreateInfo& inputAssembly);
 
-        void withInputAssembly(const vk::PipelineInputAssemblyStateCreateInfo& inputAssembly);
+        void with_triangle_list_topology();
 
-        void withTriangleListTopology();
+        void add_stage(pipeline_stage&& stage);
 
-        void addStage(un::PipelineStage&& stage);
+        void set_vertex_layout(const std::optional<vertex_layout>& layout);
 
-        void setVertexLayout(const std::optional<un::VertexLayout>& layout);
+        void set_pipeline_layout(const pipeline_layout& layout);
 
-        void setPipelineLayout(const PipelineLayout& layout);
-
-        un::Pipeline create(vk::Device device, vk::RenderPass renderPass);
+        pipeline create(vk::Device device, vk::RenderPass renderPass);
     };
 }
-
 
 #endif

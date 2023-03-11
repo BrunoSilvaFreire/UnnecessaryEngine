@@ -2,8 +2,8 @@
 
 namespace un {
     template<>
-    JobSystemBuilder<un::SimpleJobSystem>::JobSystemBuilder(
-    ) : allocationConfig(), autoStart(true) {
-        fillWorkers<un::JobWorker>();
+    job_system_builder<simple_job_system>::job_system_builder(
+    ) : _allocationConfig(), _autoStart(true) {
+        fill_workers<job_worker>();
     }
 }

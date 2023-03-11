@@ -2,12 +2,11 @@
 #include "unnecessary/serializer/writers/fields/default_writer.h"
 
 namespace un {
-
-    GenerationInfo::GenerationInfo(
-        const CXXDeclaration& toGenerate
-    ) : name(toGenerate.getName()),
+    generation_info::generation_info(
+        const cxx_declaration& toGenerate
+    ) : name(toGenerate.get_name()),
+        fullName(toGenerate.get_full_name()),
         upper(un::upper(name)),
-        lower(un::lower(name)),
-        fullName(toGenerate.getFullName()) {
+        lower(un::lower(name)) {
     }
 }

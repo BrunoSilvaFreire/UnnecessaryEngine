@@ -12,53 +12,56 @@
 
 namespace un {
 
-    class DrawObjectsPass : public un::RenderPass {
+    class draw_objects_pass : public un::render_pass {
     public:
-        DrawObjectsPass(
-            RenderGroup* objects,
+        draw_objects_pass(
+            render_group* objects,
             const vk::Rect2D& renderArea,
             const std::vector<vk::ClearValue>& clears,
             std::size_t colorAttachmentIndex,
             std::size_t depthAttachmentIndex
-        ) : RenderPass(
+        ) : render_pass(
             "Draw Objects",
             vk::PipelineStageFlagBits::eAllGraphics
         ),
-            objects(objects),
-            renderArea(renderArea),
-            clears(clears) {
-            usesColorAttachment(colorAttachmentIndex, vk::ImageLayout::eColorAttachmentOptimal);
-            usesDepthAttachment(depthAttachmentIndex, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+            _objects(objects),
+            _renderArea(renderArea),
+            _clears(clears) {
+            uses_color_attachment(colorAttachmentIndex, vk::ImageLayout::eColorAttachmentOptimal);
+            uses_depth_attachment(
+                depthAttachmentIndex,
+                vk::ImageLayout::eDepthStencilAttachmentOptimal
+            );
         }
 
     private:
-        un::RenderGroup* objects;
-        vk::Rect2D renderArea;
-        std::vector<vk::ClearValue> clears;
+        un::render_group* _objects;
+        vk::Rect2D _renderArea;
+        std::vector<vk::ClearValue> _clears;
     public:
         void record(
-            const un::FrameData& data,
-            un::CommandBuffer& cmdBuffer
+            const un::frame_data& data,
+            un::command_buffer& cmdBuffer
         ) const override {
             // This is pre-ordered by render group
             cmdBuffer->beginRenderPass(
                 vk::RenderPassBeginInfo(
                     data.renderPass,
                     data.framebuffer,
-                    renderArea,
-                    clears
+                    _renderArea,
+                    _clears
                 ),
                 vk::SubpassContents::eSecondaryCommandBuffers
             );
-            for (const un::MaterialBatch& materialBatch : objects->getMaterialBatches()) {
-                const un::Material* pMaterial = materialBatch.getMaterial();
-                const un::Pipeline* pPipeline = pMaterial->getPipeline();
+            for (const un::material_batch& materialBatch : _objects->get_material_batches()) {
+                const un::material* pMaterial = materialBatch.get_material();
+                const un::pipeline* pPipeline = pMaterial->get_pipeline();
                 std::vector<vk::DescriptorSet> pipelineDescriptorSets;
                 std::array<uint32_t, 0> dynamicOffsets{};
                 if (!pipelineDescriptorSets.empty()) {
                     cmdBuffer->bindDescriptorSets(
                         vk::PipelineBindPoint::eGraphics,
-                        pPipeline->getLayout(),
+                        pPipeline->get_layout(),
                         0,
                         pipelineDescriptorSets,
                         dynamicOffsets
@@ -70,9 +73,9 @@ namespace un {
                     pPipeline->operator*()
                 );
 
-                for (const auto& [geometry, batch] : materialBatch.getGeometryBatches()) {
+                for (const auto& [geometry, batch] : materialBatch.get_geometry_batches()) {
                     std::array<vk::Buffer, 1> vertexBufs = {
-                        *geometry->getVertexBuffer()
+                        *geometry->get_vertex_buffer()
                     };
                     std::array<const vk::DeviceSize, 1> vertexOffset = {
                         0
@@ -84,13 +87,13 @@ namespace un {
                         vertexOffset
                     );
                     cmdBuffer->bindIndexBuffer(
-                        *geometry->getIndexBuffer(),
+                        *geometry->get_index_buffer(),
                         0,
                         vk::IndexType::eUint16
                     );
-                    const auto& drawables = batch.getDrawables();
+                    const auto& drawables = batch.get_drawables();
                     cmdBuffer->drawIndexed(
-                        geometry->getNumVertices(),
+                        geometry->get_num_vertices(),
                         drawables.size(),
                         0,
                         0,

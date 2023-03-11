@@ -7,61 +7,62 @@
 #include "unnecessary/jobs/recorder/data/recorder_events.h"
 
 namespace un {
-    template<typename TWorkerType>
+    template<typename t_worker>
     concept IsWorkerType = std::is_base_of_v<
-        un::JobWorkerMixin<typename TWorkerType::JobType>,
-        TWorkerType
+        job_worker_mixin<typename t_worker::job_type>,
+        t_worker
     >;
 
+    template<typename t_worker>
+    class worker_recorder {
+    public:
+        using worker_type = t_worker;
 
-    template<typename TWorker>
-    class WorkerRecorder {
-    public:
-        typedef TWorker WorkerType;
     private:
-        EventHistory _history;
-        WorkerType* _worker;
+        event_history _history;
+        worker_type* _worker;
+
     public:
-        const EventHistory& getHistory() const {
+        const event_history& get_history() const {
             return _history;
         }
 
-        WorkerType* getWorker() const {
+        worker_type* get_worker() const {
             return _worker;
         }
 
-        WorkerRecorder(WorkerType* type) {
+        worker_recorder(worker_type* type) {
             _worker = type;
-            using JobType = typename WorkerType::JobType;
-            type->onExited() += [this]() {
-                _history.record(std::make_unique<un::WorkerExitedMeta>());
+            using job_type = typename worker_type::job_type;
+            type->on_exited() += [this]() {
+                _history.record(std::make_unique<worker_exited_meta>());
             };
-            type->onSleeping() += [this]() {
-                _history.record(std::make_unique<un::WorkerSleepingMeta>());
+            type->on_sleeping() += [this]() {
+                _history.record(std::make_unique<worker_sleeping_meta>());
             };
-            type->onAwaken() += [this]() {
-                _history.record(std::make_unique<un::WorkerAwakeMeta>());
+            type->on_awaken() += [this]() {
+                _history.record(std::make_unique<worker_awake_meta>());
             };
-            type->onStarted() += [this]() {
-                _history.record(std::make_unique<un::WorkerStartMeta>());
+            type->on_started() += [this]() {
+                _history.record(std::make_unique<worker_start_meta>());
             };
-            type->onFetched() += [this](JobType* job, un::JobHandle handle) {
+            type->on_fetched() += [this](job_type* job, job_handle handle) {
                 _history.record(
-                    std::make_unique<un::JobStartedMeta<JobType>>(
+                    std::make_unique<job_started_meta<job_type>>(
                         job,
                         handle
                     ));
             };
-            type->onExecuted() += [this](JobType* job, un::JobHandle handle) {
+            type->on_executed() += [this](job_type* job, job_handle handle) {
                 _history.record(
-                    std::make_unique<un::JobFinishedMeta<JobType>>(
+                    std::make_unique<job_finished_meta<job_type>>(
                         job,
                         handle
                     ));
             };
-            type->onEnqueued() += [this](JobType* job, un::JobHandle handle) {
+            type->on_enqueued() += [this](job_type* job, job_handle handle) {
                 _history.record(
-                    std::make_unique<un::JobEnqueuedMeta<JobType>>(
+                    std::make_unique<job_enqueued_meta<job_type>>(
                         job,
                         handle
                     )

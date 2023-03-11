@@ -1,12 +1,11 @@
 #include <unnecessary/misc/rich_messages/tree_message.h>
 
 namespace un {
-
-    void TreeMessage::prefix(
+    void tree_message::prefix(
         std::ostream& stream,
         std::size_t i,
         std::size_t lineNbr,
-        const std::unique_ptr<IMessage>& msg
+        const std::unique_ptr<message>& msg
     ) const {
         bool last = i == _children.size() - 1;
         bool isMidsection = lineNbr != 0;
@@ -21,12 +20,15 @@ namespace un {
         if (i == 0) {
             if (last) {
                 stream << "─";
-            } else {
+            }
+            else {
                 stream << "┬";
             }
-        } else if (last) {
+        }
+        else if (last) {
             stream << "└";
-        } else {
+        }
+        else {
             stream << "├";
         }
         stream << '[' << GREEN(i) << ']';

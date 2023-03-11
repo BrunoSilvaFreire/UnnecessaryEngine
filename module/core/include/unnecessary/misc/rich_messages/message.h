@@ -13,36 +13,36 @@
 #include <unnecessary/platform.h>
 
 namespace un {
-    class TreeMessage;
+    class tree_message;
 
-    class TextMessage;
+    class text_message;
 
-    class MapMessage;
+    class map_message;
 
-    class RichMessage;
+    class rich_message;
 
-    class IMessage {
+    class message {
     public:
-        IMessage() = default;
+        message() = default;
 
-        IMessage(const IMessage&) = delete;
+        message(const message&) = delete;
 
         virtual void write(std::ostream& stream) const = 0;
 
         virtual bool is_node();
     };
 
-
-    class CompositeMessage : public IMessage {
+    class composite_message : public message {
     protected:
-        std::vector<std::unique_ptr<IMessage>> _children;
+        std::vector<std::unique_ptr<message>> _children;
 
         virtual void prefix(
             std::ostream& stream,
             std::size_t i,
             std::size_t lineNbr,
-            const std::unique_ptr<IMessage>& msg
-        ) const { }
+            const std::unique_ptr<message>& msg
+        ) const {
+        }
 
         template<typename TChild>
         TChild& add_child() {
@@ -53,18 +53,17 @@ namespace un {
         bool is_node() override;
 
     public:
-        CompositeMessage() = default;
+        composite_message() = default;
 
         void write(std::ostream& stream) const override;
 
         std::size_t num_children() const;
 
-        un::TextMessage& text();
+        text_message& text();
 
-        un::TreeMessage& tree();
+        tree_message& tree();
 
-        un::MapMessage& map();
+        map_message& map();
     };
-
 }
 #endif //UNNECESSARYENGINE_MESSAGE_H

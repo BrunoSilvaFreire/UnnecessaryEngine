@@ -5,43 +5,45 @@
 #include <vector>
 
 namespace un {
-
-    class RichInput {
+    class rich_input {
     private:
-        std::string name;
-        std::string type;
+        std::string _name;
+        std::string _type;
+
     public:
-        RichInput(const std::string& name, const std::string& type);
+        rich_input(const std::string& name, const std::string& type);
 
-        const std::string& getName() const;
+        const std::string& get_name() const;
 
-        const std::string& getType() const;
+        const std::string& get_type() const;
     };
 
-    class InputPack {
+    class input_pack {
     private:
-        std::vector<RichInput> inputs;
+        std::vector<rich_input> _inputs;
+
     public:
-        void operator+=(RichInput&& other);
+        void operator+=(rich_input&& other);
 
-        const std::vector<RichInput>& getInputs() const;
+        const std::vector<rich_input>& get_inputs() const;
 
-        std::vector<RichInput>& getInputs();
+        std::vector<rich_input>& get_inputs();
     };
 
-    class InputUsage {
+    class input_usage {
     private:
-        std::string name;
+        std::string _name;
         /**
          * Either in or out
          */
-        std::string modifier;
+        std::string _modifier;
+
     public:
-        InputUsage(const std::string& name, const std::string& modifier);
+        input_usage(const std::string& name, const std::string& modifier);
 
-        const std::string& getName() const;
+        const std::string& get_name() const;
 
-        const std::string& getModifier() const;
+        const std::string& get_modifier() const;
     };
 }
 #endif

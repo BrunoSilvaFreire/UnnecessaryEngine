@@ -8,172 +8,180 @@
 #include <ostream>
 
 namespace un {
-    template<typename TValue>
-    class Rect {
-    private:
-        glm::vec<2, TValue> origin;
-        glm::vec<2, TValue> size;
+    template<typename t_value>
+    class rect {
     public:
-        Rect(
-            TValue originX, TValue originY,
-            TValue width, TValue height
-        ) : origin(originX, originY), size(width, height) {
+        using value_type = t_value;
 
+    private:
+        glm::vec<2, value_type> _origin;
+        glm::vec<2, value_type> _size;
+
+    public:
+        rect(
+            value_type originX, value_type originY,
+            value_type width, value_type height
+        ) : _origin(originX, originY), _size(width, height) {
         }
 
-        Rect(
-            const glm::vec<2, TValue>& origin,
-            const glm::vec<2, TValue>& size
-        ) : origin(origin), size(size) { }
-
-        const glm::vec<2, TValue>& getOrigin() const {
-            return origin;
+        rect(
+            const glm::vec<2, value_type>& origin,
+            const glm::vec<2, value_type>& size
+        ) : _origin(origin), _size(size) {
         }
 
-        const glm::vec<2, TValue>& getSize() const {
-            return size;
+        const glm::vec<2, value_type>& get_origin() const {
+            return _origin;
         }
 
-        TValue getWidth() const {
-            return size.x;
+        const glm::vec<2, value_type>& get_size() const {
+            return _size;
         }
 
-        TValue getHeight() const {
-            return size.y;
+        value_type get_width() const {
+            return _size.x;
         }
 
-        TValue getMinX() const {
-            return origin.x;
+        value_type get_height() const {
+            return _size.y;
         }
 
-        TValue getMinY() const {
-            return origin.y;
+        value_type get_min_x() const {
+            return _origin.x;
         }
 
-        TValue getMaxX() const {
-            if constexpr(std::is_integral<TValue>()) {
-                return origin.x + size.x - 1;
-            } else {
-                return origin.x + size.x;
+        value_type get_min_y() const {
+            return _origin.y;
+        }
+
+        value_type get_max_x() const {
+            if constexpr (std::is_integral<value_type>()) {
+                return _origin.x + _size.x - 1;
+            }
+            else {
+                return _origin.x + _size.x;
             }
         }
 
-        TValue getMaxY() const {
-            if constexpr(std::is_integral<TValue>()) {
-                return origin.y + size.y - 1;
-            } else {
-                return origin.y + size.y;
+        value_type get_max_y() const {
+            if constexpr (std::is_integral<value_type>()) {
+                return _origin.y + _size.y - 1;
+            }
+            else {
+                return _origin.y + _size.y;
             }
         }
 
-        void setMinX(TValue value) {
-            size.x -= (value - origin.x);
-            origin.x = value;
+        void set_min_x(value_type value) {
+            _size.x -= (value - _origin.x);
+            _origin.x = value;
         }
 
-        void setMinY(TValue value) {
-            size.y -= (value - origin.y);
-            origin.y = value;
+        void set_min_y(value_type value) {
+            _size.y -= (value - _origin.y);
+            _origin.y = value;
         }
 
-        void setMaxX(TValue value) {
-            if constexpr(std::is_integral<TValue>()) {
-                size.x = value - origin.x + 1;
-            } else {
-                size.x = value - origin.x;
+        void set_max_x(value_type value) {
+            if constexpr (std::is_integral<value_type>()) {
+                _size.x = value - _origin.x + 1;
+            }
+            else {
+                _size.x = value - _origin.x;
             }
         }
 
-        void setMaxY(TValue value) {
-            if constexpr(std::is_integral<TValue>()) {
-                size.y = value - origin.y + 1;
-            } else {
-                size.y = value - origin.y;
+        void set_max_y(value_type value) {
+            if constexpr (std::is_integral<value_type>()) {
+                _size.y = value - _origin.y + 1;
+            }
+            else {
+                _size.y = value - _origin.y;
             }
         }
 
-        UN_AGGRESSIVE_INLINE TValue getArea() const {
-            return getWidth() * getHeight();
+        UN_AGGRESSIVE_INLINE value_type get_area() const {
+            return get_width() * get_height();
         }
 
-        void clip(const Rect<TValue>& rect) {
-            TValue newMaxX = std::min(getMaxX(), rect.getMaxX());
-            TValue newMaxY = std::min(getMaxY(), rect.getMaxY());
-            TValue newMinX = std::max(getMinX(), rect.getMinX());
-            TValue newMinY = std::max(getMinY(), rect.getMinY());
-            setMinX(newMinX);
-            setMinY(newMinY);
-            setMaxX(newMaxX);
-            setMaxY(newMaxY);
+        void clip(const rect<value_type>& rect) {
+            value_type newMaxX = std::min(get_max_x(), rect.get_max_x());
+            value_type newMaxY = std::min(get_max_y(), rect.get_max_y());
+            value_type newMinX = std::max(get_min_x(), rect.get_min_x());
+            value_type newMinY = std::max(get_min_y(), rect.get_min_y());
+            set_min_x(newMinX);
+            set_min_y(newMinY);
+            set_max_x(newMaxX);
+            set_max_y(newMaxY);
         }
 
-        bool contains(const un::Rect<TValue>& other) const {
-            TValue minX = getMinX();
-            TValue minY = getMinY();
-            TValue maxX = getMaxX();
-            TValue maxY = getMaxY();
-            TValue rMinX = other.getMinX();
-            TValue rMinY = other.getMinY();
-            TValue rMaxX = other.getMaxX();
-            TValue rMaxY = other.getMaxY();
+        bool contains(const rect<value_type>& other) const {
+            value_type minX = get_min_x();
+            value_type minY = get_min_y();
+            value_type maxX = get_max_x();
+            value_type maxY = get_max_y();
+            value_type rMinX = other.get_min_x();
+            value_type rMinY = other.get_min_y();
+            value_type rMaxX = other.get_max_x();
+            value_type rMaxY = other.get_max_y();
             return minX <= rMinX && maxX >= rMaxX && minY <= rMinY && maxY >= rMaxY;
         }
 
-        bool intersects(const un::Rect<TValue>& other) const {
-            TValue minX = getMinX();
-            TValue minY = getMinY();
-            TValue maxX = getMaxX();
-            TValue maxY = getMaxY();
+        bool intersects(const rect<value_type>& other) const {
+            value_type minX = get_min_x();
+            value_type minY = get_min_y();
+            value_type maxX = get_max_x();
+            value_type maxY = get_max_y();
 
-            TValue rMinX = other.getMinX();
-            TValue rMinY = other.getMinY();
-            TValue rMaxX = other.getMaxX();
-            TValue rMaxY = other.getMaxY();
+            value_type rMinX = other.get_min_x();
+            value_type rMinY = other.get_min_y();
+            value_type rMaxX = other.get_max_x();
+            value_type rMaxY = other.get_max_y();
             return un::within_inclusive(rMinX, rMaxX, minX) ||
                    un::within_inclusive(rMinX, rMaxX, maxX) ||
                    un::within_inclusive(rMinY, rMaxY, minY) ||
                    un::within_inclusive(rMinY, rMaxY, maxY);
         }
 
-        un::Rect<TValue> addMinY(TValue value) const {
-            return un::Rect<TValue>(
-                origin + glm::vec<2, TValue>(0, value),
-                size - glm::vec<2, TValue>(0, value)
+        rect<value_type> add_min_y(value_type value) const {
+            return un::rect<value_type>(
+                _origin + glm::vec<2, value_type>(0, value),
+                _size - glm::vec<2, value_type>(0, value)
             );
         }
 
-        un::Rect<TValue> addMinX(TValue value) const {
-            return un::Rect<TValue>(
-                origin + glm::vec<2, TValue>(value, 0),
-                size - glm::vec<2, TValue>(value, 0)
+        rect<value_type> add_min_x(value_type value) const {
+            return un::rect<value_type>(
+                _origin + glm::vec<2, value_type>(value, 0),
+                _size - glm::vec<2, value_type>(value, 0)
             );
         }
 
-        f32 getAspectRatio() const {
-            return std::max(getWidth(), getHeight()) / std::min(getWidth(), getHeight());
+        f32 get_aspect_ratio() const {
+            return std::max(get_width(), get_height()) / std::min(get_width(), get_height());
         }
 
-        bool operator==(const Rect& rhs) const {
-            return origin == rhs.origin && size == rhs.size;
+        bool operator==(const rect& rhs) const {
+            return _origin == rhs._origin && _size == rhs._size;
         }
 
-        bool operator!=(const Rect& rhs) const {
+        bool operator!=(const rect& rhs) const {
             return !(rhs == *this);
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const Rect& rect) {
+        friend std::ostream& operator<<(std::ostream& os, const rect& rect) {
             os << "un::Rect(origin: ("
-               << rect.origin.x << "," << rect.origin.y
+               << rect._origin.x << "," << rect._origin.y
                << "), size: ("
-               << rect.size.x << "," << rect.size.y
+               << rect._size.x << "," << rect._size.y
 
                << "))";
             return os;
         }
     };
 
-    typedef un::Rect<f32> fRect;
-    typedef un::Rect<i32> iRect;
-    typedef un::Rect<u32> uRect;
+    using rectf = rect<f32>;
+    using recti = rect<i32>;
+    using rectu = rect<u32>;
 }
 #endif

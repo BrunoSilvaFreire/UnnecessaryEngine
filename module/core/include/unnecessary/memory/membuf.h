@@ -10,12 +10,14 @@
 
 namespace un {
     template<typename T>
-    class MemoryBuffer {
+    class buffer {
     public:
-        typedef T ElementType;
+        using element_type = T;
+        using ptr = T*;
+
     private:
-        void assertWithinBounds(size_t index) const {
-            if (index >= count) {
+        void assert_within_bounds(size_t index) const {
+            if (index >= _count) {
                 throw std::runtime_error(
                     "Attempted to read memory outside of buffer range."
                 );
@@ -23,12 +25,12 @@ namespace un {
         }
 
     protected:
-        std::size_t count;
-        T* ptr;
+        std::size_t _count;
+        ptr _ptr;
 
         void allocate(size_t numElements) {
-            ptr = static_cast<T*>(malloc(sizeof(T) * numElements));
-            count = numElements;
+            _ptr = static_cast<ptr>(malloc(sizeof(T) * numElements));
+            _count = numElements;
         }
 
     public:
@@ -36,33 +38,33 @@ namespace un {
          * @return The size of this buffer in bytes
          */
         std::size_t size() const {
-            return count * sizeof(T);
+            return _count * sizeof(T);
         }
 
         /**
          * @return The number of _all in this buffer
          */
-        std::size_t getCount() const {
-            return count;
+        std::size_t get_count() const {
+            return _count;
         }
 
-        const T* offset(std::size_t offsetInBytes) const {
+        const ptr offset(std::size_t offsetInBytes) const {
             return data() + offsetInBytes;
         }
 
-        T* offset(std::size_t offsetInBytes) {
+        ptr offset(std::size_t offsetInBytes) {
             return data() + offsetInBytes;
         }
 
         u8* operator->() {
-            return ptr;
+            return _ptr;
         }
 
-        u8* const operator->() const {
-            return ptr;
+        u8* operator->() const {
+            return _ptr;
         }
 
-        const u8* const data() const {
+        const u8* data() const {
             return operator->();
         }
 
@@ -70,134 +72,133 @@ namespace un {
             return operator->();
         }
 
-        ~MemoryBuffer() {
-            if (isAllocated()) {
-                free(ptr);
-                ptr = nullptr;
+        ~buffer() {
+            if (is_allocated()) {
+                free(_ptr);
+                _ptr = nullptr;
             }
         }
 
-        explicit MemoryBuffer(std::size_t count) : count(count), ptr(nullptr) {
+        explicit buffer(std::size_t count) : _count(count), _ptr(nullptr) {
             allocate(count);
         }
 
-        MemoryBuffer(const un::MemoryBuffer<T>& other) : ptr(nullptr), count(0) {
-            allocate(other.count);
-            std::memcpy(ptr, other.ptr, size());
+        buffer(const buffer<T>& other) : _count(0), _ptr(nullptr) {
+            allocate(other._count);
+            std::memcpy(_ptr, other._ptr, size());
         }
 
-        MemoryBuffer(
-            un::MemoryBuffer<T>&& moved
-        ) noexcept: ptr(std::move(moved.ptr)), count(std::move(moved.count)) { }
+        buffer(buffer<T>&& moved) noexcept:
+            _count(std::move(moved._count)),
+            _ptr(std::move(moved._ptr)) {
+        }
 
-        MemoryBuffer() : ptr(nullptr), count(0) { }
+        buffer() : _count(0), _ptr(nullptr) {
+        }
 
-        bool isAllocated() const {
-            return count > 0;
+        bool is_allocated() const {
+            return _count > 0;
         }
 
         void resize(std::size_t newSize) {
-            if (newSize == 0) {
-                throw std::runtime_error("Cannot resize buffer to length 0.");
-            }
-            if (isAllocated()) {
+            if (is_allocated()) {
                 if (newSize >= 0) {
-                    ptr = static_cast<u8*>(realloc(ptr, newSize));
-                } else {
-                    free(ptr);
-                    ptr = nullptr;
+                    _ptr = static_cast<u8*>(realloc(_ptr, newSize));
                 }
-                count = newSize;
-            } else {
+                else {
+                    free(_ptr);
+                    _ptr = nullptr;
+                }
+                _count = newSize;
+            }
+            else {
                 allocate(newSize);
             }
         }
 
-        void zeroBuffer() const {
-            std::memset(ptr, 0, count * sizeof(T));
+        void zero_buffer() const {
+            std::memset(_ptr, 0, _count * sizeof(T));
         }
 
         T& operator[](std::size_t index) {
 #ifdef DEBUG
-            assertWithinBounds(index);
+            assert_within_bounds(index);
 #endif
-            return ptr[index];
+            return _ptr[index];
         }
-
 
         const T& operator[](std::size_t index) const {
 #ifdef DEBUG
-            assertWithinBounds(index);
+            assert_within_bounds(index);
 #endif
-            return ptr[index];
+            return _ptr[index];
         }
 
-        const T* const begin() const {
-            return ptr;
+        const ptr begin() const {
+            return _ptr;
         }
 
-        const T* const end() const {
-            return ptr + count;
+        const ptr end() const {
+            return _ptr + _count;
         }
 
-        T* const begin() {
-            return ptr;
+        ptr begin() {
+            return _ptr;
         }
 
-        T* const end() {
-            return ptr + count;
+        ptr end() {
+            return _ptr + _count;
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const MemoryBuffer& buffer) {
-            os.write(buffer.ptr, buffer.size());
+        friend std::ostream& operator<<(std::ostream& os, const buffer& buffer) {
+            os.write(buffer._ptr, buffer.size());
             return os;
         }
     };
 
-    class Buffer : public MemoryBuffer<u8> {
+    class byte_buffer : public buffer<u8> {
     public:
-        explicit Buffer(const std::vector<u8>& vector);
+        explicit byte_buffer(const std::vector<u8>& vector);
 
-        explicit Buffer(const MemoryBuffer<u8>& other);
+        explicit byte_buffer(const buffer<u8>& other);
 
-        Buffer();
+        byte_buffer();
 
-        Buffer(un::Buffer&& other) noexcept;
+        byte_buffer(byte_buffer&& other) noexcept;
 
         template<typename TElement>
-        static un::Buffer fromVector(const std::vector<TElement>& vector) {
+        static byte_buffer from_vector(const std::vector<TElement>& vector) {
             std::size_t bufSize = vector.size() * sizeof(TElement);
-            un::Buffer buf(bufSize, false);
-            buf.copyFrom(vector.data());
+            byte_buffer buf(bufSize, false);
+            buf.copy_from(vector.data());
             return buf;
         }
 
-        explicit Buffer(size_t size, bool zero = true);
+        explicit byte_buffer(size_t size, bool zero = true);
 
         template<typename T>
         void write(std::size_t index, const T& value) {
-            ptr[index] = value;
+            _ptr[index] = value;
         }
 
         template<typename T>
         T read(std::size_t index) {
-            return ptr[index];
+            return _ptr[index];
         }
 
-        void copyFrom(const void* data) {
-            std::memcpy(ptr, data, count);
+        void copy_from(const void* data) {
+            std::memcpy(_ptr, data, _count);
         }
 
-        void copyFrom(const void* data, std::size_t offset, std::size_t length) {
-            std::memcpy(ptr + offset, data, length);
+        void copy_from(const void* data, std::size_t offset, std::size_t length) {
+            std::memcpy(_ptr + offset, data, length);
         }
 
-        un::Buffer& operator=(const std::string& string) {
+        byte_buffer& operator=(const std::string& string) {
             resize(string.size());
-            copyFrom(reinterpret_cast<const void*>(string.data()), 0, string.size());
+            copy_from(string.data(), 0, string.size());
             return *this;
         }
     };
-
 }
 #endif

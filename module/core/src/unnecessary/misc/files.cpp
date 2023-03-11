@@ -2,8 +2,12 @@
 #include <fstream>
 
 namespace un::files {
-
-    void read_file_into_buffer(const std::filesystem::path& path, Buffer& buffer, std::ios::openmode openMode) {
+    void
+    read_file_into_buffer(
+        const std::filesystem::path& path,
+        byte_buffer& buffer,
+        std::ios::openmode openMode
+    ) {
         std::ifstream stream(path, openMode);
         if (!stream.is_open()) {
             return;
@@ -15,7 +19,7 @@ namespace un::files {
             fileSize += 1; // Null terminator
         }
         buffer.resize(fileSize);
-        buffer.zeroBuffer();
+        buffer.zero_buffer();
         if (text) {
             buffer.operator[](fileSize - 1) = 0; // Null terminator
         }
@@ -40,19 +44,29 @@ namespace un::files {
     }
 
     void ensure_directory_exists(const std::filesystem::path& path) {
-        if (!std::filesystem::exists(path)) {
-            std::filesystem::create_directories(path);
+        if (!exists(path)) {
+            create_directories(path);
         }
     }
 
-    void safe_write_file(const std::filesystem::path& path, std::stringstream& stream, std::ios::openmode openMode) {
+    void
+    safe_write_file(
+        const std::filesystem::path& path,
+        std::stringstream& stream,
+        std::ios::openmode openMode
+    ) {
         ensure_directory_exists(path.parent_path());
         std::ofstream file(path);
         file << stream.str();
         file.close();
     }
 
-    bool write_buffer_into_file(const std::filesystem::path& path, Buffer& buffer, std::ios::openmode openMode) {
+    bool
+    write_buffer_into_file(
+        const std::filesystem::path& path,
+        byte_buffer& buffer,
+        std::ios::openmode openMode
+    ) {
         std::ofstream stream(path, openMode);
         if (!stream.is_open()) {
             return false;

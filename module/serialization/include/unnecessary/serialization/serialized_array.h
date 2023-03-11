@@ -6,31 +6,31 @@
 
 namespace un {
     template<typename TValue>
-    class SerializedArray : public SerializedNode {
+    class serialized_array : public serialized_node {
     private:
-        un::SerializedType elementsType;
-        std::vector<TValue> elements;
+        serialized_type _elementsType;
+        std::vector<TValue> _elements;
+
     public:
         void add(TValue&& entry) {
-            elements.emplace_back(std::move(entry));
+            _elements.emplace_back(std::move(entry));
         }
 
         operator std::vector<TValue>() {
-            return elements;
+            return _elements;
         };
 
         TValue& add() {
-            return elements.emplace_back();
+            return _elements.emplace_back();
         }
 
-        un::SerializedType getElementsType() const {
-            return elementsType;
+        serialized_type get_elements_type() const {
+            return _elementsType;
         }
 
-        un::SerializedType getType() override {
-            return un::SerializedType::eArray;
+        serialized_type get_type() override {
+            return array;
         }
     };
-
 };
 #endif

@@ -10,20 +10,21 @@
 #include <vulkan/vulkan.hpp>
 
 namespace un {
-    struct VertexAttribute {
+    struct vertex_attribute {
     private:
-        std::string name;
+        std::string _name;
         /**
          * How many _all there are
          */
-        u8 count;
+        u8 _count;
         /**
          * The size in bytes of a single element
          */
-        u8 singleSize;
-        vk::Format format;
+        u8 _singleSize;
+        vk::Format _format;
+
     public:
-        VertexAttribute(
+        vertex_attribute(
             std::string name,
             u8 count,
             u8 singleSize,
@@ -33,23 +34,23 @@ namespace un {
         /**
          * How many items does this input has? (vec2 = 2, mat4 = 16)
          */
-        u8 getCount() const;
+        u8 get_count() const;
 
-        u8 getSingleSize() const;
+        u8 get_single_size() const;
 
         /**
          * @return The total size in bytes this element occupies
          */
-        std::size_t getSize() const;
+        std::size_t get_size() const;
 
-        vk::Format getFormat() const;
+        vk::Format get_format() const;
 
-        const std::string& getName() const;
+        const std::string& get_name() const;
     };
 
-    class VertexLayout : public un::Layout<un::VertexAttribute> {
+    class vertex_layout : public layout<vertex_attribute> {
     public:
-        std::size_t getStride() const;
+        std::size_t get_stride() const;
     };
 }
 #endif

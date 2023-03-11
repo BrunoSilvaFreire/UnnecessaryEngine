@@ -8,42 +8,43 @@
 #include <unnecessary/application/application.h>
 
 namespace un {
-    typedef glm::u16vec2 Size2D;
+    typedef glm::u16vec2 size2d;
 
-    class Window : AppExtension {
+    class window : app_extension {
     private:
         GLFWwindow* _window;
-        un::Size2D _windowSize;
+        un::size2d _windowSize;
 
-        Window(un::Application& application, GLFWwindow* window);
+        window(un::application& application, GLFWwindow* window);
 
-        static void initGLFW();
+        static void init_glfw();
 
     public:
-        void apply(Application& application) override;
+        void apply(application& application) override;
 
-        static Window
-        withSize(std::string title, un::Application& application, un::Size2D size);
+        static window
+        with_size(const std::string& title, application& application, size2d size);
 
-        static Window
-        fullscreen(std::string title, un::Application& application, GLFWmonitor* monitor);
+        static window
+        fullscreen(std::string title, un::application& application, GLFWmonitor* monitor);
 
-        GLFWwindow* getWindow() const;
+        GLFWwindow* get_window() const;
 
-        const Size2D& getWindowSize() const;
+        const size2d& get_window_size() const;
 
-        void poolLoop() {
+        void pool_loop() {
             do {
                 pool();
-            } while (!shouldClose());
+            }
+            while (!should_close());
         }
 
         void pool() {
-//            glfwWaitEvents();
+            //            glfwWaitEvents();
             glfwPollEvents();
         }
 
-        bool shouldClose();
+        bool should_close();
     };
 }
 #endif

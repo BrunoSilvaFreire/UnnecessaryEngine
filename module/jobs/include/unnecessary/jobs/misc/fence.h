@@ -6,28 +6,30 @@
 #include <sstream>
 
 namespace un {
-    template<typename TValue = std::size_t>
-    class Fence {
+    template<typename t_value = std::size_t>
+    class fence {
     public:
-        using ValueType = TValue;
+        using value_type = t_value;
 
     private:
         std::mutex _mutex, _completed;
         std::condition_variable _variable;
-        std::set<TValue> _remaining;
+        std::set<t_value> _remaining;
 #if DEBUG
-        std::set<TValue> _all;
+        std::set<t_value> _all;
 #endif
+
     public:
-        explicit Fence(
-            const std::set<TValue>& remaining
+        explicit fence(
+            const std::set<t_value>& remaining
         ) : _remaining(remaining)
 #if DEBUG
             , _all(remaining)
 #endif
-        { }
+        {
+        }
 
-        void notify(TValue id) {
+        void notify(t_value id) {
             std::lock_guard<std::mutex> lock(_mutex);
 #if DEBUG
             if (!_remaining.contains(id)) {
@@ -48,23 +50,26 @@ namespace un {
                 std::unique_lock<std::mutex> unique(_completed);
                 _mutex.unlock();
                 _variable.wait(unique);
-            } else {
+            }
+            else {
                 _mutex.unlock();
             }
         }
     };
 
-    template<typename TValue = std::size_t>
-    class FenceNotifier {
+    template<typename t_value = std::size_t>
+    class fence_notifier {
     private:
-        un::Fence<TValue>* _fence;
-        TValue _value;
+        fence<t_value>* _fence;
+        t_value _value;
+
     public:
-        FenceNotifier(Fence<TValue>* fence, TValue value) : _fence(fence), _value(value) { }
+        fence_notifier(fence<t_value>* fence, t_value value) : _fence(fence), _value(value) {
+        }
 
-        FenceNotifier(const FenceNotifier<TValue>&) = default;
+        fence_notifier(const fence_notifier<t_value>&) = default;
 
-        FenceNotifier(FenceNotifier<TValue>&&) = delete;
+        fence_notifier(fence_notifier<t_value>&&) = delete;
 
         void notify() {
             _fence->notify(_value);
@@ -72,15 +77,14 @@ namespace un {
     };
 
     namespace fences {
-
-        template<typename TFence, typename TIterator, typename TLambda>
-        static void waitFor(
-            TIterator begin,
-            TIterator end,
-            TLambda dispatcher
+        template<typename t_fence, typename t_iterator, typename t_lambda>
+        static void wait_for(
+            t_iterator begin,
+            t_iterator end,
+            t_lambda dispatcher
         ) {
-            using TValue = typename TFence::ValueType;
-            std::set<TValue> pending;
+            using t_value = typename t_fence::value_type;
+            std::set<t_value> pending;
             std::size_t i = 0;
             std::for_each(
                 begin, end,
@@ -88,24 +92,24 @@ namespace un {
                     pending.emplace(i++);
                 }
             );
-            un::Fence<TValue> fence(pending);
+            fence<t_value> fence(pending);
             std::size_t j = 0;
             std::for_each(
                 begin, end,
                 [&](auto& val) {
-                    dispatcher(val, un::FenceNotifier<TValue>(&fence, j++));
+                    dispatcher(val, un::fence_notifier<t_value>(&fence, j++));
                 }
             );
             fence.wait();
         }
 
-        template<typename TIterator, typename TLambda>
-        static void waitFor(
-            TIterator begin,
-            TIterator end,
-            TLambda dispatcher
+        template<typename t_iterator, typename t_lambda>
+        static void wait_for(
+            t_iterator begin,
+            t_iterator end,
+            t_lambda dispatcher
         ) {
-            waitFor<un::Fence<>>(begin, end, dispatcher);
+            wait_for<fence<>>(begin, end, dispatcher);
         }
     }
 }

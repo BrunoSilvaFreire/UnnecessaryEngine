@@ -5,59 +5,61 @@
 #include "serialization_types.h"
 
 namespace un {
-    template<typename TValue>
-    class SerializedPrimitive : public SerializedNode {
+    template<typename t_value>
+    class serialized_primitive : public serialized_node {
     private:
-        TValue value;
-    public:
-        explicit SerializedPrimitive(TValue value) : value(value) { }
+        t_value _value;
 
-        operator TValue() const {
-            return value;
+    public:
+        explicit serialized_primitive(t_value value) : _value(value) {
+        }
+
+        operator t_value() const {
+            return _value;
         }
     };
 
-    class SerializedByte : public SerializedPrimitive<u8> {
+    class serialized_byte : public serialized_primitive<u8> {
     public:
-        SerializedByte(u8 value);
+        serialized_byte(u8 value);
 
-        un::SerializedType getType() override;
+        serialized_type get_type() override;
     };
 
-    class SerializedShort : public SerializedPrimitive<u16> {
+    class serialized_short : public serialized_primitive<u16> {
     public:
-        SerializedShort(u16 value);
+        serialized_short(u16 value);
 
-        un::SerializedType getType() override;
+        serialized_type get_type() override;
     };
 
-    class SerializedInteger : public SerializedPrimitive<u32> {
+    class serialized_integer : public serialized_primitive<u32> {
     public:
-        SerializedInteger(u32 value);
+        serialized_integer(u32 value);
 
-        un::SerializedType getType() override;
+        serialized_type get_type() override;
     };
 
-    class SerializedLong : public SerializedPrimitive<u64> {
+    class serialized_long : public serialized_primitive<u64> {
     public:
-        SerializedLong(u64 value);
+        serialized_long(u64 value);
 
-        un::SerializedType getType() override;
+        serialized_type get_type() override;
     };
 
-    class SerializedFloat : public SerializedPrimitive<float> {
+    class serialized_float : public serialized_primitive<float> {
     public:
-        SerializedFloat(float value);
+        serialized_float(float value);
 
-        SerializedType getType() override;
+        serialized_type get_type() override;
     };
 
-    class SerializedDouble : public SerializedPrimitive<double> {
+    class serialized_double : public serialized_primitive<double> {
     public:
-        SerializedDouble(double value);
+        serialized_double(double value);
 
     private:
-        SerializedType getType() override;
+        serialized_type get_type() override;
     };
 }
 #endif

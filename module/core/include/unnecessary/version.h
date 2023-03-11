@@ -5,21 +5,21 @@
 #include <unnecessary/def.h>
 
 namespace un {
-    struct Version {
+    struct version {
     private:
-        u8 major, minor, patch;
+        u8 _major, _minor, _patch;
     public:
-        Version(u8 major, u8 minor, u8 patch);
+        version(u8 major, u8 minor, u8 patch);
 
-        u8 getMajor() const;
+        u8 get_major() const;
 
-        u8 getMinor() const;
+        u8 get_minor() const;
 
-        u8 getPatch() const;
+        u8 get_patch() const;
     };
 
     template<>
-    std::string to_string(const Version& ver);
+    std::string to_string(const version& ver);
 
 }
 #endif

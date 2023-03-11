@@ -23,7 +23,7 @@ namespace un::packer {
     void pack(
         const std::filesystem::path& output,
         size_t usedArea,
-        const un::packer::PackingStrategy& strategy
+        const packing_strategy& strategy
     );
 
     template<typename Algorithm>
@@ -32,7 +32,7 @@ namespace un::packer {
         const std::vector<std::string>& files,
         const std::filesystem::path& output
     ) {
-        std::vector<un::packer::PackerEntry> entries;
+        std::vector<packer_entry> entries;
         size_t usedArea = 0;
         for (const auto& path : files) {
             const std::string& filePath = std::filesystem::absolute(path).string();
@@ -49,23 +49,21 @@ namespace un::packer {
                 u32 h = info.get_height();
                 usedArea += w * h;
                 entries.emplace_back(w, h, path);
-            } catch (const std::runtime_error& exception) {
+            }
+            catch (const std::runtime_error& exception) {
                 LOG(INFO) << "Exception " << exception.what() << " while loading file " << path
                           << " (" << filePath << ").";
-                continue;
             }
-
         }
         std::sort(
             entries.begin(),
             entries.end(),
-            [](const un::packer::PackerEntry& a, const un::packer::PackerEntry& b) {
-                return a.getArea() > b.getArea();
+            [](const packer_entry& a, const packer_entry& b) {
+                return a.get_area() > b.get_area();
             }
         );
         auto strategy = algorithm(entries);
         pack(output, usedArea, strategy);
     }
-
 }
 #endif

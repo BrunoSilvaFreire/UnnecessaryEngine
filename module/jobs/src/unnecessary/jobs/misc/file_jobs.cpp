@@ -4,35 +4,34 @@
 #include <utility>
 
 namespace un {
-
-    LoadFileJob::LoadFileJob(
+    load_file_job::load_file_job(
         const std::filesystem::path& path,
-        un::Buffer* buffer,
+        byte_buffer* buffer,
         std::ios::openmode openMode
-    ) : path(path), openMode(openMode), buffer(buffer) {
-        setName(std::string("Load ") + path.string());
+    ) : _path(path), _openMode(openMode), _buffer(buffer) {
+        set_name(std::string("Load ") + path.string());
     }
 
-    void un::LoadFileJob::operator()(un::JobWorker* worker) {
-        if (!exists(path)) {
+    void load_file_job::operator()(job_worker* worker) {
+        if (!exists(_path)) {
             std::stringstream err;
-            err << "File at '" << path << "' doesn't exist";
+            err << "File at '" << _path << "' doesn't exist";
             throw std::runtime_error(err.str());
         }
-        un::files::read_file_into_buffer(path, *buffer, openMode);
+        files::read_file_into_buffer(_path, *_buffer, _openMode);
     }
 
-    WriteFileJob::WriteFileJob(
+    write_file_job::write_file_job(
         std::filesystem::path path,
         std::ios::openmode openMode,
-        std::shared_ptr<un::Buffer> buffer
-    ) : path(std::move(path)), openMode(openMode), buffer(std::move(buffer)) {
-        setName(std::string("Write ") + path.string());
+        std::shared_ptr<byte_buffer> buffer
+    ) : _path(std::move(path)), _openMode(openMode), _buffer(std::move(buffer)) {
+        set_name(std::string("Write ") + path.string());
     }
 
-    void WriteFileJob::operator()(JobWorker* worker) {
-        un::files::ensure_directory_exists(path.parent_path());
-        if (!un::files::write_buffer_into_file(path, *buffer, openMode)) {
+    void write_file_job::operator()(job_worker* worker) {
+        files::ensure_directory_exists(_path.parent_path());
+        if (!files::write_buffer_into_file(_path, *_buffer, _openMode)) {
             throw std::runtime_error("Unable to save");
         }
     }

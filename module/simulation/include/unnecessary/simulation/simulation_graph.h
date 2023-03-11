@@ -2,31 +2,34 @@
 #define UNNECESSARYENGINE_SIMULATION_GRAPH_H
 
 #include <string>
+#include <unnecessary/jobs/worker_chain.h>
 #include <unnecessary/graphs/dependency_graph.h>
 #include <unnecessary/simulation/jobs/simulation_worker.h>
 
 namespace un {
-    class System;
+    class system;
 
-    typedef un::WorkerChain<un::SimulationWorker> SimulationChain;
+    using simulation_chain = worker_chain<simulation_worker>;
 
-    struct SimulationNode {
-        enum Type {
-            eSystem,
-            eStage
+    struct simulation_node {
+        enum class type {
+            system,
+            stage
         };
+
         std::string name;
-        Type type;
+        type type;
+
         union {
-            un::System* asSystem;
+            system* asSystem;
+
             struct {
                 // Reserved for future use
             } asStage;
         };
     };
 
-    class SimulationGraph : public un::DependencyGraph<un::SimulationNode> {
-
+    class simulation_graph : public dependency_graph<simulation_node> {
     };
 }
 #endif

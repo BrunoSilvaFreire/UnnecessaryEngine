@@ -2,11 +2,11 @@
 
 //Unsupported
 namespace un {
-    bool Thread::setThreadCore(u32 core) {
+    bool thread::set_thread_core(u32 core) {
         return false;
     }
 
-    void Thread::setThreadName(const std::string& name) {
+    void thread::set_thread_name(const std::string& name) {
     }
 
 }

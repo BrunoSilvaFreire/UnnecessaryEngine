@@ -69,13 +69,13 @@ add_unnecessary_library(
     grapphs-graphviz
 )
 
-if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
     target_compile_definitions(
         unnecessary_rendering
         PUBLIC
         UN_VULKAN_DEBUG
     )
-endif ()
+endif()
 add_unnecessary_tool(
     unnecessary_shaderizer
 

@@ -1,32 +1,38 @@
 #ifndef UNNECESSARYENGINE_HISTORIC_H
 #define UNNECESSARYENGINE_HISTORIC_H
+
 namespace un {
-    template<class T>
-    class Historic {
-    protected:
-        T current, last;
+    template<class t_value>
+    class historic {
     public:
-        Historic(T current, T last) : current(current), last(last) { }
+        using value_type = t_value;
+    protected:
+        value_type _current, _last;
 
-        Historic() : current(), last() { }
-
-        void set(T value) {
-            last = current;
-            current = value;
+    public:
+        historic(value_type current, value_type last) : _current(current), _last(last) {
         }
 
-        T peek() const {
-            return current;
+        historic() : _current(), _last() {
+        }
+
+        void set(value_type value) {
+            _last = _current;
+            _current = value;
+        }
+
+        value_type peek() const {
+            return _current;
         }
     };
 
-    class BooleanHistoric : public Historic<bool> {
+    class boolean_historic : public historic<bool> {
     public:
-        BooleanHistoric();
+        boolean_historic();
 
-        bool wasJustActivated() const;
+        bool was_just_activated() const;
 
-        bool wasJustDeactivated() const;
+        bool was_just_deactivated() const;
     };
 }
-#endif //UNNECESSARYENGINE_HISTORIC_H
+#endif

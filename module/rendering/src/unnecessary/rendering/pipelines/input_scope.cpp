@@ -1,15 +1,14 @@
 #include <unnecessary/rendering/pipelines/input_scope.h>
 
 namespace un {
-
     template<>
-    std::string to_string(const un::InputScope& scope) {
+    std::string to_string(const input_scope& scope) {
         switch (scope) {
-            case eGlobal:
+            case global:
                 return "global";
-            case ePipeline:
+            case pipeline:
                 return "pipeline";
-            case eInstance:
+            case instance:
                 return "instance";
         }
         return "unknown_scope";

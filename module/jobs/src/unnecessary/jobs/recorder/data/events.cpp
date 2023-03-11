@@ -1,7 +1,6 @@
 #include <unnecessary/jobs/recorder/data/events.h>
 
 namespace un {
-    EventMeta::~EventMeta() {
-
+    event_meta::~event_meta() {
     }
 }

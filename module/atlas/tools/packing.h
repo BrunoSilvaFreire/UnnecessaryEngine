@@ -10,50 +10,55 @@
 
 namespace un {
     void pack(
-        SimpleJobSystem& jobSystem,
-        const std::vector<un::packer::PackerEntry>& entries
+        simple_job_system& jobSystem,
+        const std::vector<packer::packer_entry>& entries
     ) {
-        un::JobChain<SimpleJobSystem> chain(&jobSystem);
-        un::packer::AlgorithmRegistry registry;
-        const auto & algorithms = registry.getAlgorithms();
-//        std::vector<un::packer::PackingStrategy> strategies(algorithms.size());
+        job_chain<simple_job_system> chain(&jobSystem);
+        packer::algorithm_registry registry;
+        const auto& algorithms = registry.get_algorithms();
+        //        std::vector<un::packer::PackingStrategy> strategies(algorithms.size());
         for (const auto& item : algorithms) {
-            chain.immediately<un::LambdaJob<>>([&, item]() {
-                const packer::PackingStrategy& strategy = item->operator()(entries);
-            });
+            chain.immediately<lambda_job<>>(
+                [&, item]() {
+                    const packer::packing_strategy& strategy = item->operator()(entries);
+                }
+            );
         }
-
     }
 
     void pack(
         const std::vector<std::filesystem::path>& files
     ) {
-        un::JobSystemBuilder<un::SimpleJobSystem> builder;
-        auto jobSystem=builder.build();
-        std::vector<un::packer::PackerEntry> entries(files.size());
+        job_system_builder<simple_job_system> builder;
+        auto jobSystem = builder.build();
+        std::vector<packer::packer_entry> entries(files.size());
         {
-            un::JobChain<SimpleJobSystem> chain(jobSystem.get());
+            job_chain<simple_job_system> chain(jobSystem.get());
             std::size_t i = 0;
             for (const auto& file : files) {
-                chain.immediately<un::LambdaJob<>>([&, file, i]() {
-                    std::ifstream fileStream(file, std::ios::binary);
-                    if (!fileStream.is_open() || !fileStream.good()) {
-                        LOG(WARN) << "Unable to read file " << file << ", skipping.";
-                        return;
+                chain.immediately<lambda_job<>>(
+                    [&, file, i]() {
+                        std::ifstream fileStream(file, std::ios::binary);
+                        if (!fileStream.is_open() || !fileStream.good()) {
+                            LOG(WARN) << "Unable to read file " << file << ", skipping.";
+                            return;
+                        }
+                        png::reader<std::ifstream> reader(fileStream);
+                        reader.read_info();
+                        const png::image_info& info = reader.get_image_info();
+                        u32 w = info.get_width();
+                        u32 h = info.get_height();
+                        entries[i] = packer::packer_entry(w, h, file);
                     }
-                    png::reader<std::ifstream> reader(fileStream);
-                    reader.read_info();
-                    const png::image_info& info = reader.get_image_info();
-                    u32 w = info.get_width();
-                    u32 h = info.get_height();
-                    entries[i] = un::packer::PackerEntry(w, h, file);
-                });
+                );
             }
-            chain.finally([&]() {
-                LOG(INFO) << "All entries loaded (" << entries.size() << ")";
+            chain.finally(
+                [&]() {
+                    LOG(INFO) << "All entries loaded (" << entries.size() << ")";
 
-                pack(*jobSystem, entries);
-            });
+                    pack(*jobSystem, entries);
+                }
+            );
         }
         jobSystem->join();
     }

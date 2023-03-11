@@ -8,23 +8,23 @@
 #include <filesystem>
 
 namespace un {
-    enum class GLTFType {
-        eText,
-        eBinary
+    enum class gltf_type {
+        text,
+        binary
     };
 
-    class LoadGLTFJob : public un::Job<JobWorker> {
+    class load_gltf_job : public un::Job<job_worker> {
     private:
         std::filesystem::path _path;
-        GLTFType _type;
-        un::LocalGeometry* _output;
+        gltf_type _type;
+        un::local_geometry* _output;
     public:
-        LoadGLTFJob(
+        load_gltf_job(
             std::filesystem::path path,
-            GLTFType type
+            gltf_type type
         );
 
-        void operator()(WorkerType* worker) override;
+        void operator()(worker_type* worker) override;
     };
 }
 #endif

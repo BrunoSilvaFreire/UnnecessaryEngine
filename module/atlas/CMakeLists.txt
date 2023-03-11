@@ -48,14 +48,14 @@ list(
     ${IMG_OUT_DIR}/packed/generated
     ${IMG_OUT_DIR}/random/generated
 )
-foreach (i RANGE 0 64)
+foreach(i RANGE 0 64)
     list(
         APPEND
         atlas_generated_images
         ${IMG_OUT_DIR}/packed/image_${i}.png
         ${IMG_OUT_DIR}/random/image_${i}.png
     )
-endforeach ()
+endforeach()
 add_custom_command(
     TARGET unnecessary_atlas_packer_tests
     POST_BUILD

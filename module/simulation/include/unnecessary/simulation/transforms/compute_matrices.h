@@ -11,18 +11,18 @@
 #include <unnecessary/simulation/transforms/components.h>
 
 namespace un {
-    class ComputeLocalToWorldJob : public un::ParallelForJob<un::SimulationWorker> {
+    class compute_local_to_world_job : public parallel_for_job<simulation_worker> {
     private:
-        un::World* world;
-        std::vector<entt::entity> entities;
-    public:
+        world* _world;
+        std::vector<entt::entity> _entities;
 
-        ComputeLocalToWorldJob(
-            World* world,
+    public:
+        compute_local_to_world_job(
+            world* world,
             const std::vector<entt::entity>& entities
         );
 
-        void operator()(size_t index, un::SimulationWorker* worker) override;
+        void operator()(size_t index, simulation_worker* worker) override;
     };
 }
 #endif

@@ -9,13 +9,13 @@ namespace un {
         std::make_pair("tesse", vk::ShaderStageFlagBits::eTessellationEvaluation)
     };
 
-    void assertVkCall(vk::Result result, const std::string& method) {
+    void assert_vk_call(vk::Result result, const std::string& method) {
         if (result != vk::Result::eSuccess) {
             std::stringstream str;
             str << "Error while calling ";
             str << method;
             str << " (";
-            str << vk::to_string(result);
+            str << to_string(result);
             str << ")";
             throw std::runtime_error(str.str());
         }

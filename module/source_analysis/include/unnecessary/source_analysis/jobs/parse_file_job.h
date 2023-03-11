@@ -8,25 +8,26 @@
 #include <utility>
 
 namespace un {
-    class ParseFileJob : public un::SimpleJob {
+    class parse_file_job : public simple_job {
     private:
         std::filesystem::path _file;
-        un::const_ref<cppast::cpp_entity_index> _index;
-        un::ref<std::unique_ptr<un::ParsedFile>> _output;
-        un::ParseArguments _arguments;
+        const_ref<cppast::cpp_entity_index> _index;
+        ref<std::unique_ptr<parsed_file>> _output;
+        parse_arguments _arguments;
+
     public:
-        ParseFileJob(
+        parse_file_job(
             std::filesystem::path file,
-            un::const_ref<cppast::cpp_entity_index> index,
-            un::ref<std::unique_ptr<un::ParsedFile>> output,
-            ParseArguments arguments
+            const_ref<cppast::cpp_entity_index> index,
+            ref<std::unique_ptr<parsed_file>> output,
+            parse_arguments arguments
         );
 
-        void operator()(WorkerType* worker) override;
+        void operator()(worker_type* worker) override;
 
-        const std::filesystem::path& getFile() const;
+        const std::filesystem::path& get_file() const;
 
-        std::unique_ptr<un::ParsedFile>& getOutput();
+        std::unique_ptr<parsed_file>& get_output();
     };
 }
 #endif

@@ -14,11 +14,11 @@ namespace un::indexing {
     }
 
     template<typename TInteger = int>
-    UN_AGGRESSIVE_INLINE std::tuple<TInteger, TInteger> position_of(TInteger index, TInteger width) {
+    UN_AGGRESSIVE_INLINE std::tuple<TInteger, TInteger>
+    position_of(TInteger index, TInteger width) {
         TInteger x = index % width;
         TInteger y = index / width;
         return std::make_tuple(x, y);
     }
-
 }
 #endif

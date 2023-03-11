@@ -5,22 +5,22 @@
 
 namespace un {
 
-    class Material {
+    class material {
     private:
-        int renderOrder;
-        un::Pipeline* pipeline;
+        int _renderOrder;
+        un::pipeline* _pipeline;
     public:
-        bool operator<(const Material& rhs) const;
+        bool operator<(const material& rhs) const;
 
-        bool operator>(const Material& rhs) const;
+        bool operator>(const material& rhs) const;
 
-        bool operator<=(const Material& rhs) const;
+        bool operator<=(const material& rhs) const;
 
-        bool operator>=(const Material& rhs) const;
+        bool operator>=(const material& rhs) const;
 
-        int getRenderOrder() const;
+        int get_render_order() const;
 
-        Pipeline* getPipeline() const;
+        pipeline* get_pipeline() const;
     };
 }
 #endif

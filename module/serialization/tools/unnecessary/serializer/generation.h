@@ -13,17 +13,15 @@
 #include <unnecessary/source_analysis/cppast/transpilation.h>
 
 namespace un {
-
-    struct GenerationInfo {
+    struct generation_info {
         std::string name;
         std::string fullName;
         std::string upper;
         std::string lower;
 
-        explicit GenerationInfo(
-            const un::CXXDeclaration& toGenerate
+        explicit generation_info(
+            const cxx_declaration& toGenerate
         );
     };
-
 }
 #endif //UNNECESSARYENGINE_GENERATION_H

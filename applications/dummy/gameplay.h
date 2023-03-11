@@ -16,7 +16,7 @@ namespace un {
 
     class PathRunningSystem : public un::SimpleSystem {
     public:
-        void step(World& world, f32 delta, un::JobWorker* worker) override;
+        void step(World& world, f32 delta, un::job_worker* worker) override;
 
         void describe(SystemDescriptor& descriptor) override;
     };
@@ -25,7 +25,7 @@ namespace un {
     public:
         void describe(SystemDescriptor& descriptor) override;
 
-        void step(World& world, f32 delta, un::JobWorker* worker) override;
+        void step(World& world, f32 delta, un::job_worker* worker) override;
     };
 
     struct FreeFlight {
@@ -40,7 +40,7 @@ namespace un {
     public:
         FreeFlightSystem(GLFWwindow* window);
 
-        void step(World& world, f32 delta, un::JobWorker* worker) override;
+        void step(World& world, f32 delta, un::job_worker* worker) override;
 
         void describe(SystemDescriptor& descriptor) override;
     };

@@ -10,14 +10,12 @@
 #include "unnecessary/logging.h"
 
 namespace un {
-    class UnnecessaryLogger : public cppast::diagnostic_logger {
+    class unnecessary_logger : public cppast::diagnostic_logger {
     private:
         std::string msg(const cppast::diagnostic& d) const;
 
         bool do_log(const char* source, const cppast::diagnostic& d) const override;
     };
-
 }
-
 
 #endif //UNNECESSARYENGINE_UNNECESSARY_LOGGER_H

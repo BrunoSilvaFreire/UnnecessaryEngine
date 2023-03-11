@@ -9,17 +9,16 @@
 #include <unnecessary/logging.h>
 
 namespace un {
-    class Renderer;
+    class renderer;
 
-    class VulkanDebugger {
+    class vulkan_debugger {
     public:
-
-        VulkanDebugger(un::Renderer& renderer);
+        explicit vulkan_debugger(renderer& renderer);
 
     private:
         vk::Device _device;
         vk::DebugUtilsMessengerEXT _messenger;
-        PFN_vkSetDebugUtilsObjectNameEXT pSetDebugUtilsObjectName{};
+        PFN_vkSetDebugUtilsObjectNameEXT _pSetDebugUtilsObjectName{};
 
         static VkBool32 messenger_callback(
             VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -29,17 +28,17 @@ namespace un {
         );
 
     public:
-        template<class T>
+        template<class t_vulkan_cxx_type>
         void tag(
-            T obj,
+            t_vulkan_cxx_type obj,
             const std::string& tag
         ) const {
             vk::DebugUtilsObjectNameInfoEXT nameInfo(
                 obj.objectType,
-                (uint64_t) ((typename T::CType) obj),
+                static_cast<uint64_t>((typename t_vulkan_cxx_type::NativeType) obj),
                 tag.c_str()
             );
-            pSetDebugUtilsObjectName(
+            _pSetDebugUtilsObjectName(
                 _device,
                 &(nameInfo.operator const VkDebugUtilsObjectNameInfoEXT&())
             );

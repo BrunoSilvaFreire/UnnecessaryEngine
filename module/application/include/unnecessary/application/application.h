@@ -5,63 +5,62 @@
 #include <unnecessary/misc/event.h>
 
 namespace un {
-    class AppLoop {
+    class app_loop {
     private:
-        un::EventVoid earlyStep;
-        un::EventVoid lateStep;
+        event_void _earlyStep;
+        event_void _lateStep;
 
     public:
+        void early(event_void::listener listener);
 
-        void early(un::EventVoid::Listener listener);
-
-        void late(un::EventVoid::Listener listener);
+        void late(event_void::listener listener);
 
         void step();
     };
 
-    class Application;
+    class application;
 
-    using AppExtension = un::Extension<Application>;
+    using app_extension = extension<application>;
 
-    class Application {
+    class application {
     private:
-        un::AppLoop fixedLoop;
-        un::AppLoop variableLoop;
-        un::EventVoid onStart, onStop;
-        bool running = false;
-        float fixedFrameRate = 60;
+        app_loop _fixedLoop;
+        app_loop _variableLoop;
+        event_void _onStart, _onStop;
+        bool _running = false;
+        float _fixedFrameRate = 60;
+
     public:
-        float getFixedFrameRate() const;
+        float get_fixed_frame_rate() const;
 
-        void setFixedFrameRate(float fixedFrameRate);
+        void set_fixed_frame_rate(float fixedFrameRate);
 
-        const un::AppLoop& getFixedLoop() const;
+        const app_loop& get_fixed_loop() const;
 
-        const un::AppLoop& getVariableLoop() const;
+        const app_loop& get_variable_loop() const;
 
-        un::AppLoop& getFixedLoop();
+        app_loop& get_fixed_loop();
 
-        un::AppLoop& getVariableLoop();
+        app_loop& get_variable_loop();
 
         void start() {
-            running = true;
-            onStart();
-            while (running) {
-                fixedLoop.step();
-                variableLoop.step();
+            _running = true;
+            _onStart();
+            while (_running) {
+                _fixedLoop.step();
+                _variableLoop.step();
             }
         }
 
-        void waitExit();
+        void wait_exit();
 
-        const EventVoid& getOnStart() const;
+        const event_void& get_on_start() const;
 
-        const EventVoid& getOnStop() const;
+        const event_void& get_on_stop() const;
 
+        event_void& get_on_start();
 
-        un::EventVoid& getOnStart();
-
-        un::EventVoid& getOnStop();
+        event_void& get_on_stop();
 
         template<typename E>
         void extend(E& extension) {

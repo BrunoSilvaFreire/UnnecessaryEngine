@@ -9,31 +9,34 @@
 #include <unnecessary/rendering/jobs/render_graph_system.h>
 #include <unnecessary/rendering/jobs/render_thread.h>
 
-namespace un {
-    typedef un::JobSystem<JobWorker, un::SimulationWorker, un::GraphicsWorker> UnnecessaryJobSystem;
+namespace un
+{
+    using unnecessary_job_system = job_system<job_worker, simulation_worker, graphics_worker>;
 }
 
-int main(int argc, char** argv) {
-    un::World world;
-    un::Application app;
+int main(int argc, char** argv)
+{
+    un::world world;
+    un::application app;
 
     {
-        un::Window window = un::Window::withSize("Orbital", app, un::Size2D(1080, 900));
-        un::Renderer renderer = un::Renderer(
+        un::window window = un::window::with_size("Orbital", app, un::size2d(1080, 900));
+        auto renderer = un::renderer(
             &window,
             "Orbital",
-            un::Version(0, 1, 0)
+            un::version(0, 1, 0)
         );
-        un::UnnecessaryJobSystem jobSystem(
+        un::unnecessary_job_system jobSystem(
             std::make_tuple(
-                un::WorkerPoolConfiguration<JobWorker>::forwarding(4),
-                un::WorkerPoolConfiguration<un::SimulationWorker>::forwarding(4),
-                un::WorkerPoolConfiguration<un::GraphicsWorker>(
+                un::worker_pool_configuration<job_worker>::forwarding(4),
+                un::worker_pool_configuration<un::simulation_worker>::forwarding(4),
+                un::worker_pool_configuration<un::graphics_worker>(
                     1,
                     [&renderer](
-                        std::size_t index
-                    ) {
-                        return new un::GraphicsWorker(
+                    std::size_t index
+                )
+                    {
+                        return new un::graphics_worker(
                             &renderer,
                             index,
                             true
@@ -42,16 +45,16 @@ int main(int argc, char** argv) {
                 )
             )
         );
-        un::PhongRenderingPipeline pipeline;
-        world.addSystem(new un::RenderGraphSystem<un::UnnecessaryJobSystem>());
-        un::RenderThread<un::UnnecessaryJobSystem> renderThread(&jobSystem, &renderer);
-        renderer.usePipeline(&pipeline);
-        un::Simulator<un::UnnecessaryJobSystem> simulator(&jobSystem, &world);
+        un::phong_rendering_pipeline pipeline;
+        world.add_system(new un::render_graph_system<un::unnecessary_job_system>());
+        un::render_thread<un::unnecessary_job_system> renderThread(&jobSystem, &renderer);
+        renderer.use_pipeline(&pipeline);
+        un::simulator<un::unnecessary_job_system> simulator(&jobSystem, &world);
         app.extend(simulator);
         app.extend(renderThread);
         app.extend(window);
         app.start();
-        app.waitExit();
+        app.wait_exit();
         app.stop();
     }
 }

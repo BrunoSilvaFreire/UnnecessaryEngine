@@ -8,21 +8,26 @@
 #include "field_writer.h"
 
 namespace un {
-    class ComplexWriter : public un::FieldWriter {
-        bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
+    class complex_writer : public field_writer {
+        bool
+        accepts(
+            const cxx_field& field,
+            const cxx_translation_unit& unit,
+            float& outPriority
+        ) override;
 
         void write_serializer(
             std::stringstream& ss,
-            const CXXField& field,
-            const un::CXXTranslationUnit& unit,
-            const un::WriterRegistry& registry
+            const cxx_field& field,
+            const cxx_translation_unit& unit,
+            const writer_registry& registry
         ) override;
 
         void write_deserializer(
             std::stringstream& ss,
-            const CXXField& field,
-            const un::CXXTranslationUnit& unit,
-            const un::WriterRegistry& registry
+            const cxx_field& field,
+            const cxx_translation_unit& unit,
+            const writer_registry& registry
         ) override;
 
     public:

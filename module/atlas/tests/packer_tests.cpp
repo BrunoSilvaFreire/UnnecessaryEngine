@@ -5,7 +5,6 @@
 void pack(
     const std::filesystem::path& imagesDir
 ) {
-
     std::vector<std::string> files;
     std::filesystem::directory_iterator iterator(imagesDir);
     for (const auto& entry : iterator) {
@@ -14,24 +13,26 @@ void pack(
         }
         files.emplace_back(entry.path().string());
     }
-    GTEST_LOG_(INFO) << "Found " << files.size() << " images in " << std::filesystem::absolute(imagesDir);
+    GTEST_LOG_(INFO) << "Found " << files.size() << " images in " << absolute(imagesDir);
     std::string prefix = imagesDir.filename().string() + '_';
     un::packer::pack(
-        un::packer::MaxRectanglesAlgorithm<un::bottomLeftHeuristic>(),
+        un::packer::max_rectangles_algorithm<un::bottom_left_heuristic>(),
         files,
         imagesDir.parent_path() / (prefix + "bottom_left.png"));
 
     un::packer::pack(
-        un::packer::MaxRectanglesAlgorithm<un::bestAreaFitHeuristic>(),
+        un::packer::max_rectangles_algorithm<un::best_area_fit_heuristic>(),
         files,
         imagesDir.parent_path() / (prefix + "best_area.png")
     );
     un::packer::pack(
-        un::packer::MaxRectanglesAlgorithm<un::bestShortSideFitHeuristic>(), files,
-        imagesDir.parent_path() / (prefix + "short_side.png"
+        un::packer::max_rectangles_algorithm<un::best_short_side_fit_heuristic>(), files,
+        imagesDir.parent_path() / (
+            prefix + "short_side.png"
         ));
-    un::packer::pack(un::packer::MaxRectanglesAlgorithm<un::bestLongSideFitHeuristic>(), files,
-                     imagesDir.parent_path() / (prefix + "long_side.png"));
+    un::packer::pack(
+        un::packer::max_rectangles_algorithm<un::best_long_side_fit_heuristic>(), files,
+        imagesDir.parent_path() / (prefix + "long_side.png"));
 }
 
 TEST(packer_tool, pack_uniform_images) {

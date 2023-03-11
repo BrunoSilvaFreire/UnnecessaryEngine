@@ -6,29 +6,31 @@
 #include <concepts>
 
 namespace un {
+    template<typename data_type>
+    concept is_tree_data = std::is_default_constructible_v<data_type>();
 
-
-    template<typename TData>
-    concept TreeData = std::is_default_constructible<TData>();
-
-    template<typename TData, std::size_t NChildren>
-    class NTree {
+    template<typename t_data, std::size_t n_children>
+    //#ifdef __cpp_concepts
+    //        requires un::is_tree_data<t_data>
+    //#endif
+    class n_tree {
     public:
-        typedef NTree<TData, NChildren> TSelf;
-        typedef std::shared_ptr<TSelf> TPointer;
-        typedef std::array<TPointer, NChildren> TContainer;
+        using data_type = t_data;
+        using self_type = n_tree<data_type, n_children>;
+        using pointer_type = std::shared_ptr<self_type>;
+        using container_type = std::array<pointer_type, n_children>;
 
         constexpr static std::size_t num_children() {
-            return NChildren;
+            return n_children;
         }
 
     private:
-        TData data;
-        TContainer children;
+        data_type _data;
+        container_type _children;
 
-        std::size_t findFirstFreeIndex() {
-            for (std::size_t i = 0; i < NChildren; ++i) {
-                if (children[i] == nullptr) {
+        std::size_t find_first_free_index() {
+            for (std::size_t i = 0; i < n_children; ++i) {
+                if (_children[i] == nullptr) {
                     return i;
                 }
             }
@@ -36,124 +38,127 @@ namespace un {
         }
 
     public:
-        NTree() : data(), children() { };
+        n_tree() : _data(), _children() {
+        };
 
-        explicit NTree(TData&& data) : data(std::move(data)), children() { }
-
-        explicit NTree(const TData& data) : data(data), children() { }
-
-        TData getData() const {
-            return data;
+        explicit n_tree(data_type&& data) : _data(std::move(data)), _children() {
         }
 
-        void setData(TData data) {
-            NTree::data = data;
+        explicit n_tree(const data_type& data) : _data(data), _children() {
         }
 
-        const TPointer& getChild(std::size_t i) const {
-            return children[i];
+        data_type get_data() const {
+            return _data;
         }
 
-        TPointer& getChild(std::size_t i) {
-            return children[i];
+        void set_data(data_type data) {
+            _data = data;
         }
 
-        template<std::size_t Index>
-        const TPointer& getChild() const {
-            static_assert(Index < NChildren, "Index out of bounds.");
-            return children[Index];
+        const pointer_type& get_child(std::size_t i) const {
+            return _children[i];
+        }
+
+        pointer_type& get_child(std::size_t i) {
+            return _children[i];
         }
 
         template<std::size_t Index>
-        TPointer& getChild() {
-            static_assert(Index < NChildren, "Index out of bounds.");
-            return children[Index];
+        const pointer_type& get_child() const {
+            static_assert(Index < n_children, "Index out of bounds.");
+            return _children[Index];
         }
 
         template<std::size_t Index>
-        TPointer& setChild(TData&& childData) {
-            return children[Index] = std::make_shared<TSelf>(std::move(childData));
+        pointer_type& get_child() {
+            static_assert(Index < n_children, "Index out of bounds.");
+            return _children[Index];
+        }
+
+        template<std::size_t Index>
+        pointer_type& set_child(data_type&& childData) {
+            return _children[Index] = std::make_shared<self_type>(std::move(childData));
         };
 
         template<std::size_t Index>
-        TPointer& setChild(const TData& childData) {
-            return children[Index] = std::make_shared<TSelf>(childData);
+        pointer_type& set_child(const data_type& childData) {
+            return _children[Index] = std::make_shared<self_type>(childData);
         };
 
         template<std::size_t Index>
-        TPointer& setChild(const TPointer& childData) {
-            return children[Index] = childData;
+        pointer_type& set_child(const pointer_type& childData) {
+            return _children[Index] = childData;
         };
 
         template<std::size_t Index>
-        TPointer& setChild(const TSelf& childData) {
-            return children[Index] = std::make_shared<TSelf>(childData);
+        pointer_type& set_child(const self_type& childData) {
+            return _children[Index] = std::make_shared<self_type>(childData);
         };
 
-        TPointer& setChild(std::size_t i, TData&& childData) {
-            return children[i] = std::make_shared<TSelf>(std::move(childData));
+        pointer_type& set_child(std::size_t i, data_type&& childData) {
+            return _children[i] = std::make_shared<self_type>(std::move(childData));
         };
 
-        TPointer& setChild(std::size_t i, const TData& childData) {
-            return children[i] = std::make_shared<TSelf>(childData);
+        pointer_type& set_child(std::size_t i, const data_type& childData) {
+            return _children[i] = std::make_shared<self_type>(childData);
         };
 
-        TPointer& setChild(std::size_t i, const TPointer& childData) {
-            return children[i] = childData;
+        pointer_type& set_child(std::size_t i, const pointer_type& childData) {
+            return _children[i] = childData;
         };
 
-        TPointer& setChild(std::size_t i, const TSelf& childData) {
-            return children[i] = std::make_shared<TSelf>(childData);
+        pointer_type& set_child(std::size_t i, const self_type& childData) {
+            return _children[i] = std::make_shared<self_type>(childData);
         };
 
-        TPointer& addChild(const TData& child) {
-            std::size_t firstFreeIndex = findFirstFreeIndex();
-            if (firstFreeIndex >= NChildren) {
+        pointer_type& add_child(const data_type& child) {
+            std::size_t firstFreeIndex = find_first_free_index();
+            if (firstFreeIndex >= n_children) {
                 throw std::runtime_error("No free children.");
             }
-            return setChild(firstFreeIndex, child);
+            return set_child(firstFreeIndex, child);
         }
 
-        TPointer& addChild(TData&& child) {
-            std::size_t firstFreeIndex = findFirstFreeIndex();
-            if (firstFreeIndex >= NChildren) {
+        pointer_type& add_child(data_type&& child) {
+            std::size_t firstFreeIndex = find_first_free_index();
+            if (firstFreeIndex >= n_children) {
                 throw std::runtime_error("No free children.");
             }
-            return setChild(firstFreeIndex, std::move(child));
+            return set_child(firstFreeIndex, std::move(child));
         }
 
-        TPointer& addChild(const TPointer& child) {
-            std::size_t firstFreeIndex = findFirstFreeIndex();
-            if (firstFreeIndex >= NChildren) {
+        pointer_type& add_child(const pointer_type& child) {
+            std::size_t firstFreeIndex = find_first_free_index();
+            if (firstFreeIndex >= n_children) {
                 throw std::runtime_error("No free children.");
             }
-            return setChild(firstFreeIndex, child);
+            return set_child(firstFreeIndex, child);
         }
 
-        TPointer& addChild(const TSelf& child) {
-            std::size_t firstFreeIndex = findFirstFreeIndex();
-            if (firstFreeIndex >= NChildren) {
+        pointer_type& add_child(const self_type& child) {
+            std::size_t firstFreeIndex = find_first_free_index();
+            if (firstFreeIndex >= n_children) {
                 throw std::runtime_error("No free children.");
             }
-            return setChild(firstFreeIndex, child);
+            return set_child(firstFreeIndex, child);
         }
 
-        const std::array<TPointer, NChildren>& getChildren() const {
-            return children;
+        const std::array<pointer_type, n_children>& get_children() const {
+            return _children;
         }
 
-        std::array<TPointer, NChildren>& getChildren() {
-            return children;
+        std::array<pointer_type, n_children>& get_children() {
+            return _children;
         }
     };
 
     template<typename TData>
-    using BinaryTree = NTree<TData, 2>;
+    using binary_tree = n_tree<TData, 2>;
 
     template<typename TData>
-    using QuadTree = NTree<TData, 4>;
+    using quad_tree = n_tree<TData, 4>;
 
     template<typename TData>
-    using OcTree = NTree<TData, 8>;
+    using oc_tree = n_tree<TData, 8>;
 }
 #endif

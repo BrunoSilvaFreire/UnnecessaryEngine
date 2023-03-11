@@ -18,99 +18,102 @@
 #include <unnecessary/source_analysis/unnecessary_logger.h>
 
 namespace un {
-    class ParseArguments {
+    class parse_arguments {
     private:
-        std::vector<std::filesystem::path> includes;
-    public:
-        const std::vector<std::filesystem::path>& getIncludes() const;
+        std::vector<std::filesystem::path> _includes;
 
-        friend class ParsePlan;
+    public:
+        const std::vector<std::filesystem::path>& get_includes() const;
+
+        friend class parse_plan;
     };
 
-    class ParseDiagnostic {
+    class parse_diagnostic {
     public:
-        enum Type {
-            eInfo,
-            eWarn,
-            eError
+        enum type {
+            info,
+            warn,
+            error
         };
+
     private:
-        Type _type;
+        type _type;
         std::string _message;
+
     public:
-        ParseDiagnostic(Type type, std::string message);
+        parse_diagnostic(type type, std::string message);
 
-        Type getType() const;
+        type get_type() const;
 
-        const std::string& getMessage() const;
+        const std::string& get_message() const;
     };
 
-
-    class ParseReport {
+    class parse_report {
     private:
         std::chrono::milliseconds _parseStart;
         std::chrono::milliseconds _parseEnd;
-        std::vector<un::ParseDiagnostic> _diagnostics;
+        std::vector<parse_diagnostic> _diagnostics;
+
     public:
+        const std::vector<parse_diagnostic>& get_diagnostics() const;
 
-        const std::vector<un::ParseDiagnostic>& getDiagnostics() const;
+        std::chrono::milliseconds get_parse_duration() const;
 
-        std::chrono::milliseconds getParseDuration() const;
-
-        ParseReport(
+        parse_report(
             std::chrono::milliseconds parseStart,
             std::chrono::milliseconds parseEnd,
-            std::vector<un::ParseDiagnostic> diagnostics
+            std::vector<parse_diagnostic> diagnostics
         );
     };
 
-    class ParsedFile {
+    class parsed_file {
     private:
         std::filesystem::path _path;
         std::unique_ptr<cppast::cpp_file> _file;
-        un::ParseReport _report;
+        parse_report _report;
+
     public:
-        ParsedFile(
+        parsed_file(
             std::unique_ptr<cppast::cpp_file>&& file,
-            ParseReport report,
+            parse_report report,
             std::filesystem::path path
         );
 
-        const std::unique_ptr<cppast::cpp_file>& getFile() const;
+        const std::unique_ptr<cppast::cpp_file>& get_file() const;
 
-        std::unique_ptr<cppast::cpp_file>& getFile();
+        std::unique_ptr<cppast::cpp_file>& get_file();
 
-        const ParseReport& getReport() const;
+        const parse_report& get_report() const;
 
-        const std::filesystem::path& getPath() const;
+        const std::filesystem::path& get_path() const;
     };
 
-    class ParsePlan {
+    class parse_plan {
     private:
-        ParseArguments _arguments;
+        parse_arguments _arguments;
         std::shared_ptr<cppast::cpp_entity_index> _index;
         std::mutex _mutex;
         std::unordered_set<std::string> _alreadyParsed;
-        std::unordered_map<std::string, std::unique_ptr<un::ParsedFile>> _parsed;
+        std::unordered_map<std::string, std::unique_ptr<parsed_file>> _parsed;
 
-        void onParsed(
-            std::unique_ptr<un::ParsedFile>& ptr,
-            un::DynamicChain<SimpleJobSystem>& builder
+        void on_parsed(
+            std::unique_ptr<parsed_file>& ptr,
+            dynamic_chain<simple_job_system>& builder
         );
 
     public:
-        explicit ParsePlan(std::shared_ptr<cppast::cpp_entity_index> index);
+        explicit parse_plan(std::shared_ptr<cppast::cpp_entity_index> index);
 
-        void addInclude(const std::filesystem::path& include);
+        void add_include(const std::filesystem::path& include);
 
+        std::unique_ptr<parsed_file>& add_file(const std::filesystem::path& file);
 
-        std::unique_ptr<un::ParsedFile>& addFile(const std::filesystem::path& file);
-
-        std::unique_ptr<un::ParsedFile>& addFile(const std::string& selfInclude, const std::filesystem::path& include) {
+        std::unique_ptr<parsed_file>&
+        add_file(const std::string& selfInclude, const std::filesystem::path& include) {
             return _parsed[selfInclude];
         }
 
-        std::vector<un::CXXTranslationUnit> parse(un::ptr<un::SimpleJobSystem> jobSystem);
+        std::vector<cxx_translation_unit> parse(ptr<simple_job_system> jobSystem);
     };
 }
 #endif

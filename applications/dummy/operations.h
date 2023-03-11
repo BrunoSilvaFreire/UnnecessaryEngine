@@ -45,7 +45,7 @@ namespace un {
             World* world
         );
 
-        inline void operator()(size_t index, un::JobWorker* worker) override;
+        inline void operator()(size_t index, un::job_worker* worker) override;
 
     };
 

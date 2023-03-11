@@ -1,35 +1,36 @@
 #include <unnecessary/shaderizer/shader_meta.h>
 
 namespace un {
-    void ShaderStageMeta::usesInput(const std::string& input) {
-        usedInputs.emplace(input);
+    void shader_stage_meta::uses_input(const std::string& input) {
+        _usedInputs.emplace(input);
     }
 
-    ShaderStageMeta::ShaderStageMeta(const std::string& name) : name(name) { }
-
-    const std::string& ShaderStageMeta::getName() const {
-        return name;
+    shader_stage_meta::shader_stage_meta(const std::string& name) : _name(name) {
     }
 
-    const std::set<std::string>& ShaderStageMeta::getUsedInputs() const {
-        return usedInputs;
+    const std::string& shader_stage_meta::get_name() const {
+        return _name;
     }
 
-    void ShaderStageMeta::usesVertexAttribute(
+    const std::set<std::string>& shader_stage_meta::get_used_inputs() const {
+        return _usedInputs;
+    }
+
+    void shader_stage_meta::uses_vertex_attribute(
         const std::string& vertex,
         const std::string& modifier
     ) {
-        usedVertexAttributes.emplace_back(vertex, modifier);
+        _usedVertexAttributes.emplace_back(vertex, modifier);
     }
 
-    const std::vector<un::InputUsage>& ShaderStageMeta::getUsedVertexAttributes() const {
-        return usedVertexAttributes;
+    const std::vector<input_usage>& shader_stage_meta::get_used_vertex_attributes() const {
+        return _usedVertexAttributes;
     }
 
-    bool ShaderStageMeta::isUsingInputPack(const un::InputPack& scope) const {
-        for (const auto& item : usedInputs) {
-            for (const auto& other : scope.getInputs()) {
-                if (other.getName() == item) {
+    bool shader_stage_meta::is_using_input_pack(const input_pack& scope) const {
+        for (const auto& item : _usedInputs) {
+            for (const auto& other : scope.get_inputs()) {
+                if (other.get_name() == item) {
                     return true;
                 }
             }

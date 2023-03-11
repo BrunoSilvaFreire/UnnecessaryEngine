@@ -9,6 +9,7 @@
 #include <filesystem>
 
 namespace un {
+    std::string uri(const std::filesystem::path& path);
     std::string prettify(const std::filesystem::path& path);
 }
 #endif

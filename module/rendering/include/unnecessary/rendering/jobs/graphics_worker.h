@@ -7,28 +7,27 @@
 #include <unnecessary/jobs/worker_chain.h>
 
 namespace un {
-    class GraphicsWorker;
+    class graphics_worker;
 
-    typedef un::Job<GraphicsWorker> GraphicsJob;
+    using graphics_job = job<graphics_worker>;
 
-    class GraphicsWorker : public un::JobWorkerMixin<un::GraphicsJob> {
+    class graphics_worker : public job_worker_mixin<graphics_job> {
     private:
-        un::Renderer* _renderer;
+        renderer* _renderer;
         vk::CommandPool _commandPool;
+
     public:
-        GraphicsWorker(
-            un::Renderer* renderer,
+        graphics_worker(
+            renderer* renderer,
             size_t index,
             bool autostart
         );
 
-        un::CommandBuffer requestCommandBuffer() const;
+        command_buffer request_command_buffer() const;
 
-        Renderer* getRenderer() const;
+        renderer* get_renderer() const;
     };
 
-    typedef un::WorkerChain<un::GraphicsWorker> GraphicsChain;
-
-
+    using graphics_chain = worker_chain<graphics_worker>;
 }
 #endif

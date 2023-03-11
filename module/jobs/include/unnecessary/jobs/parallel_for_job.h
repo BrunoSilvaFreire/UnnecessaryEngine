@@ -10,50 +10,50 @@
 #include <unnecessary/misc/benchmark.h>
 
 namespace un {
-
-    template<typename J, typename Worker>
-    class ParallelizeJob : public un::Job<Worker> {
+    template<typename t_job, typename t_worker>
+    class parallelize_job : public job<t_worker> {
     private:
-        J* parallelForJob;
-        size_t fromIndex, toIndex;
+        t_job* _parallelForJob;
+        size_t _fromIndex, _toIndex;
+
     public:
-        ParallelizeJob(
-            J* parallelForJob,
+        parallelize_job(
+            t_job* parallelForJob,
             size_t fromIndex,
             size_t toIndex
-        ) : parallelForJob(parallelForJob),
-            fromIndex(fromIndex),
-            toIndex(toIndex) {
-
+        ) : _parallelForJob(parallelForJob),
+            _fromIndex(fromIndex),
+            _toIndex(toIndex) {
             std::stringstream str;
-            str << "Parallelize " << parallelForJob->getName();
+            str << "Parallelize " << parallelForJob->get_name();
             str << "(" << fromIndex << " -> " << toIndex << ")";
-            un::Job<Worker>::name = str.str();
+            job<t_worker>::_name = str.str();
         }
 
-        void operator()(Worker* worker) override {
-            parallelForJob->batchStarted(fromIndex, toIndex);
-            for (size_t i = fromIndex; i < toIndex; ++i) {
-                parallelForJob->operator()(i, worker);
+        void operator()(t_worker* worker) override {
+            _parallelForJob->batch_started(_fromIndex, _toIndex);
+            for (size_t i = _fromIndex; i < _toIndex; ++i) {
+                _parallelForJob->operator()(i, worker);
             }
-            parallelForJob->batchFinished(fromIndex, toIndex);
+            _parallelForJob->batch_finished(_fromIndex, _toIndex);
         }
     };
 
-    template<typename TWorker>
-    class ParallelForJob {
-        std::string name = "Unnamed Job";
+    template<typename worker_type>
+    class parallel_for_job {
+        std::string _name = "Unnamed Job";
+
     public:
-        ParallelForJob() {
-            name = un::type_name_of(typeid(this));
+        parallel_for_job() {
+            _name = type_name_of(typeid(this));
         }
 
-        const std::string& getName() const {
-            return name;
+        const std::string& get_name() const {
+            return _name;
         }
 
-        void setName(const std::string& newName) {
-            name = newName;
+        void set_name(const std::string& newName) {
+            _name = newName;
         }
 
         /**
@@ -61,23 +61,25 @@ namespace un {
          * @param start The batch start
          * @param end The batch end
          */
-        virtual void batchStarted(size_t start, size_t end) { };
+        virtual void batch_started(size_t start, size_t end) {
+        };
 
-        virtual void batchFinished(size_t start, size_t end) { };
+        virtual void batch_finished(size_t start, size_t end) {
+        };
 
-        virtual void operator()(size_t index, TWorker* worker) = 0;
+        virtual void operator()(size_t index, worker_type* worker) = 0;
 
-        template<typename J, typename ChainType>
-        static std::vector<un::JobHandle> parallelize(
-            J* job,
-            ChainType& chain,
+        template<typename t_job, typename t_chain>
+        static std::vector<job_handle> parallelize(
+            t_job* job,
+            t_chain& chain,
             size_t numEntries,
             size_t minNumberLoopsPerThread
         ) {
-            using JobSystemType = typename ChainType::JobSystemType;
-            JobSystemType* system = chain.getSystem();
-            auto& workerPool = system->template getWorkerPool<TWorker>();
-            size_t numWorkers = workerPool.getNumWorkers();
+            using job_system_type = typename t_chain::JobSystemType;
+            job_system_type* system = chain.get_system();
+            auto& workerPool = system->template get_worker_pool<worker_type>();
+            size_t numWorkers = workerPool.get_num_workers();
             size_t numEntriesPerJob = numEntries / numWorkers;
             if (numEntriesPerJob < minNumberLoopsPerThread) {
                 numEntriesPerJob = minNumberLoopsPerThread;
@@ -85,18 +87,18 @@ namespace un {
             size_t numFullJobs = numEntries / numEntriesPerJob;
             size_t totalFullyProcessedLoops = numFullJobs * numEntriesPerJob;
             size_t rest = numEntries - totalFullyProcessedLoops;
-            using Parallelizer = un::ParallelizeJob<J, TWorker>;
-            std::vector<un::JobHandle> handles;
+            using parallelizer = parallelize_job<t_job, worker_type>;
+            std::vector<job_handle> handles;
             for (size_t i = 0; i < numFullJobs; ++i) {
                 size_t from = i * numEntriesPerJob;
                 size_t to = (i + 1) * numEntriesPerJob;
-                un::JobHandle handle;
-                chain.template immediately<Parallelizer>(&handle, job, from, to);
+                job_handle handle;
+                chain.template immediately<parallelizer>(&handle, job, from, to);
                 handles.emplace_back(handle);
             }
             if (rest > 0) {
-                un::JobHandle handle;
-                chain.template immediately<Parallelizer>(
+                job_handle handle;
+                chain.template immediately<parallelizer>(
                     &handle,
                     job,
                     numEntries - rest,

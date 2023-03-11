@@ -6,21 +6,22 @@
 #include <unnecessary/simulation/world.h>
 
 namespace un {
-    class SystemDescriptor {
+    class system_descriptor {
 
     };
 
-    typedef un::WorkerChain<un::SimulationWorker> SimulationChain;
+    typedef un::worker_chain<un::simulation_worker> simulation_chain;
 
-    class System {
+    class system {
     public:
-        virtual void scheduleJobs(
-            un::World& world,
+        virtual void schedule_jobs(
+            un::world& world,
             float deltaTime,
-            un::SimulationChain& chain
+            un::simulation_chain& chain
         ) = 0;
 
-        virtual void describe(un::SystemDescriptor& descriptor) { }
+        virtual void describe(un::system_descriptor& descriptor) {
+        }
     };
 }
 #endif

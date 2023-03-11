@@ -3,7 +3,7 @@
 #include <unnecessary/jobs/workers/worker.h>
 
 namespace un {
-    void LoadGLTFJob::operator()(un::JobWorker* worker) {
+    void LoadGLTFJob::operator()(un::job_worker* worker) {
         tinygltf::TinyGLTF loader;
         tinygltf::Model model;
         std::string err;
@@ -27,7 +27,7 @@ namespace un {
                 break;
         }
         _output = new un::LocalGeometry();
-        for (const auto& buf : model.buffers) {
+        for (const auto& buf : model._buffers) {
 
         }
     }
@@ -35,6 +35,7 @@ namespace un {
     LoadGLTFJob::LoadGLTFJob(
         std::filesystem::path path,
         GLTFType type
-    ) : _path(path), _type(type) { }
+    ) : _path(path), _type(type) {
+    }
 
 }

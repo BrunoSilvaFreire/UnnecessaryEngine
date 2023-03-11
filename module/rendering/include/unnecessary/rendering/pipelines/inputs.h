@@ -13,25 +13,26 @@
 #include <initializer_list>
 
 namespace un {
-
-    class PipelineLayout {
+    class pipeline_layout {
     private:
-        std::unordered_map<un::InputScope, un::DescriptorSetLayout> inputs;
+        std::unordered_map<input_scope, descriptor_set_layout> _inputs;
+
     public:
-        PipelineLayout(
-            const std::initializer_list<decltype(inputs)::value_type>& layouts
-        ) : inputs(layouts) {
-        }
-        PipelineLayout() = default;
-
-        const std::unordered_map<un::InputScope, un::DescriptorSetLayout>& getDescriptorsLayout() const {
-            return inputs;
+        pipeline_layout(
+            const std::initializer_list<decltype(_inputs)::value_type>& layouts
+        ) : _inputs(layouts) {
         }
 
-        std::unordered_map<un::InputScope, un::DescriptorSetLayout>& getDescriptorsLayout() {
-            return inputs;
+        pipeline_layout() = default;
+
+        const std::unordered_map<input_scope, descriptor_set_layout>&
+        get_descriptors_layout() const {
+            return _inputs;
         }
 
+        std::unordered_map<input_scope, descriptor_set_layout>& get_descriptors_layout() {
+            return _inputs;
+        }
     };
 }
 #endif //UNNECESSARYENGINE_INPUTS_H

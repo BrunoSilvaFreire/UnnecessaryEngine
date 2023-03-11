@@ -9,23 +9,18 @@
 #include <unnecessary/simulation/systems/system.h>
 
 namespace un {
-
-
-    template<typename JobSystemType>
-    class RenderGraphSystem : public un::System {
+    template<typename t_job_system>
+    class render_graph_system : public system {
     private:
-        un::RenderGraph* _graph;
-        un::Renderer* _renderer;
-
+        render_graph* _graph;
+        renderer* _renderer;
 
     public:
-
-        void scheduleJobs(
-            World& world,
+        void schedule_jobs(
+            un::world& world,
             float deltaTime,
-            SimulationChain& chain
+            simulation_chain& chain
         ) override {
-
         }
     };
 }

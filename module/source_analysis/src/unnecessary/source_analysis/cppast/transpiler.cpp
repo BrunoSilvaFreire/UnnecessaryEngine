@@ -15,18 +15,15 @@
 #include <cppast/visitor.hpp>
 #include <algorithm>
 
-
 namespace un {
-
-
-    Transpiler::Transpiler(
-        un::ptr<un::CXXTranslationUnit> unit,
+    transpiler::transpiler(
+        un::ptr<cxx_translation_unit> unit,
         std::shared_ptr<cppast::cpp_entity_index> index
-    ) : translationUnit(unit),
-        index(std::move(index)) {
+    ) : _translationUnit(unit),
+        _index(std::move(index)) {
     }
 
-    void Transpiler::parse(const cppast::cpp_file& file) {
+    void transpiler::parse(const cppast::cpp_file& file) {
         cppast::visit(
             file,
             [](const cppast::cpp_entity& e) {
@@ -34,10 +31,10 @@ namespace un {
                     case cppast::cpp_entity_kind::class_t:
                     case cppast::cpp_entity_kind::class_template_t:
                     case cppast::cpp_entity_kind::enum_t:
-                        return cppast::is_definition(e);
+                        return is_definition(e);
                     case cppast::cpp_entity_kind::include_directive_t: {
                         const auto& directive = dynamic_cast<const cppast::cpp_include_directive&>(e);
-//                        return directive.full_path().ends_with(".h");
+                        //                        return directive.full_path().ends_with(".h");
                         return true;
                     }
                     case cppast::cpp_entity_kind::file_t:
@@ -53,11 +50,11 @@ namespace un {
         );
     }
 
-    void Transpiler::visit(const cppast::cpp_entity& e) {
-        if (alreadyParsed.contains(e.name())) {
+    void transpiler::visit(const cppast::cpp_entity& e) {
+        if (_alreadyParsed.contains(e.name())) {
             return;
         }
-        alreadyParsed.emplace(e.name());
+        _alreadyParsed.emplace(e.name());
         switch (e.kind()) {
             case cppast::cpp_entity_kind::class_t:
                 parse_class(dynamic_cast<const cppast::cpp_class&>(e));
@@ -70,7 +67,7 @@ namespace un {
                 break;
             case cppast::cpp_entity_kind::include_directive_t: {
                 const auto& directive = dynamic_cast<const cppast::cpp_include_directive&>(e);
-                translationUnit->addInclude(directive.name());
+                _translationUnit->add_include(directive.name());
                 break;
             }
             default:
@@ -78,14 +75,14 @@ namespace un {
         }
     }
 
-    void Transpiler::parse_class(const cppast::cpp_class& clazz) {
-        un::CXXComposite composite(clazz.name(), getNamespace(clazz));
-        un::CXXAccessModifier modifier = un::CXXAccessModifier::eNone;
+    void transpiler::parse_class(const cppast::cpp_class& clazz) {
+        cxx_composite composite(clazz.name(), get_namespace(clazz));
+        cxx_access_modifier modifier = eNone;
         cppast::visit(
             clazz,
             [](const cppast::cpp_entity& e) {
                 switch (e.kind()) {
-                    case cppast::cpp_entity_kind::member_variable_t :
+                    case cppast::cpp_entity_kind::member_variable_t:
                     case cppast::cpp_entity_kind::access_specifier_t:
                         return true;
                     default:
@@ -94,7 +91,7 @@ namespace un {
             },
             [&](const cppast::cpp_entity& e, cppast::visitor_info info) {
                 switch (e.kind()) {
-                    case cppast::cpp_entity_kind::member_variable_t : {
+                    case cppast::cpp_entity_kind::member_variable_t: {
                         parse_field(composite, modifier, e);
                         break;
                     }
@@ -107,15 +104,19 @@ namespace un {
                 }
             }
         );
-        translationUnit->addSymbol(std::make_shared<un::CXXComposite>(composite));
+        _translationUnit->addSymbol(std::make_shared<cxx_composite>(composite));
     }
 
     void
-    Transpiler::parse_field(CXXComposite& composite, const CXXAccessModifier& modifier, const cppast::cpp_entity& e) {
+    transpiler::parse_field(
+        cxx_composite& composite,
+        const cxx_access_modifier& modifier,
+        const cppast::cpp_entity& e
+    ) {
         const auto& var = dynamic_cast<const cppast::cpp_member_variable&>(e);
-        std::vector<CXXAttribute> attributes;
+        std::vector<cxx_attribute> attributes;
         const cppast::cpp_type& type = var.type();
-        CXXType fieldType = toUnType(type);
+        cxx_type fieldType = to_un_type(type);
         for (const auto& att : e.attributes()) {
             const auto& args = att.arguments();
 
@@ -131,15 +132,16 @@ namespace un {
                     a.emplace_back(item.spelling);
                 }
                 attributes.emplace_back(name, a);
-            } else {
+            }
+            else {
                 attributes.emplace_back(name);
             }
         }
-        CXXField field(modifier, var.name(), fieldType, attributes);
-        composite.addField(std::move(field));
+        cxx_field field(modifier, var.name(), fieldType, attributes);
+        composite.add_field(std::move(field));
     }
 
-    std::string Transpiler::getNamespace(const cppast::cpp_entity& entt) const {
+    std::string transpiler::get_namespace(const cppast::cpp_entity& entt) const {
         std::stack<std::string> segments;
         auto aNamespace = dynamic_cast<const cppast::cpp_namespace*>(&entt.parent().value());
         while (aNamespace != nullptr) {
@@ -151,18 +153,18 @@ namespace un {
             inOrder.push_back(segments.top());
             segments.pop();
         }
-        return un::join_strings("::", inOrder.begin(), inOrder.end());
+        return join_strings("::", inOrder.begin(), inOrder.end());
     }
 
-    un::CXXType Transpiler::toUnType(const cppast::cpp_type& type) {
+    cxx_type transpiler::to_un_type(const cppast::cpp_type& type) {
         std::string typeStr = cppast::to_string(type);
-        un::CXXType fieldType;
-        if (!translationUnit->searchType(typeStr, fieldType)) {
+        cxx_type fieldType;
+        if (!_translationUnit->search_type(typeStr, fieldType)) {
             cppast::cpp_type_kind typeKind = type.kind();
-            CXXTypeKind tType = toUnTypeKind(type);
+            cxx_type_kind tType = to_un_type_kind(type);
             if (typeKind == cppast::cpp_type_kind::template_instantiation_t) {
                 const auto& instantiation = dynamic_cast<const cppast::cpp_template_instantiation_type&>(type);
-                fieldType = CXXType(instantiation.primary_template().name(), tType);
+                fieldType = cxx_type(instantiation.primary_template().name(), tType);
                 if (instantiation.arguments_exposed()) {
                     const auto& optArgs = instantiation.arguments();
                     if (optArgs) {
@@ -173,52 +175,57 @@ namespace un {
                                 continue;
                             }
                             const cppast::cpp_type& cppType = optType.value();
-                            CXXType unType = toUnType(cppType);
-                            fieldType.addTemplate(std::move(unType.getName()));
+                            cxx_type unType = to_un_type(cppType);
+                            fieldType.add_template(std::move(unType.get_name()));
                         }
-                    } else {
-                        LOG(WARN) << typeStr << " is a template instantiation, but no args were found";
                     }
-                } else {
-
-                    const std::string& unexposedArguments = instantiation.unexposed_arguments();
-                    std::vector<std::string> splitArgs = un::split_string(unexposedArguments, ",");
-                    for (const auto& arg : splitArgs) {
-                        std::string trimmed = un::trim_whitespace_prefix(arg);
-                        fieldType.addTemplate(std::move(trimmed));
+                    else {
+                        LOG(WARN) << typeStr
+                                  << " is a template instantiation, but no args were found";
                     }
                 }
-            } else if (typeKind == cppast::cpp_type_kind::user_defined_t) {
+                else {
+                    const std::string& unexposedArguments = instantiation.unexposed_arguments();
+                    std::vector<std::string> splitArgs = split_string(unexposedArguments, ",");
+                    for (const auto& arg : splitArgs) {
+                        std::string trimmed = trim_whitespace_prefix(arg);
+                        fieldType.add_template(std::move(trimmed));
+                    }
+                }
+            }
+            else if (typeKind == cppast::cpp_type_kind::user_defined_t) {
                 const auto& userType = dynamic_cast<const cppast::cpp_user_defined_type&>(type);
-                const auto& found = userType.entity().get(*index);
+                const auto& found = userType.entity().get(*_index);
                 if (found.empty()) {
-                    fieldType = CXXType(typeStr, tType);
-                } else {
+                    fieldType = cxx_type(typeStr, tType);
+                }
+                else {
                     const auto& entt = found[0];
                     if (entt->kind() == cppast::cpp_entity_kind::enum_t) {
-                        fieldType = CXXType(typeStr, un::CXXTypeKind::eEnum);
+                        fieldType = cxx_type(typeStr, eEnum);
                     }
                 }
-            } else {
-                fieldType = CXXType(typeStr, tType);
             }
-            translationUnit->addType(fieldType);
+            else {
+                fieldType = cxx_type(typeStr, tType);
+            }
+            _translationUnit->add_type(fieldType);
         }
         return fieldType;
     }
 
-    CXXTypeKind Transpiler::toUnTypeKind(const cppast::cpp_type& type) const {
+    cxx_type_kind transpiler::to_un_type_kind(const cppast::cpp_type& type) const {
         switch (type.kind()) {
             case cppast::cpp_type_kind::builtin_t:
-                return toPrimitiveType(type);
+                return to_primitive_type(type);
             default:
                 break;
         }
-        return un::CXXTypeKind::eComplex;
+        return complex;
     }
 
-    CXXTypeKind Transpiler::toPrimitiveType(const cppast::cpp_type& type) const {
-        CXXTypeKind tType;
+    cxx_type_kind transpiler::to_primitive_type(const cppast::cpp_type& type) {
+        cxx_type_kind tType;
         const auto& builtIn = dynamic_cast<const cppast::cpp_builtin_type&>(type);
         switch (builtIn.builtin_type_kind()) {
             case cppast::cpp_bool:
@@ -241,39 +248,38 @@ namespace un {
                 tType = eUnsignedInteger128;
                 break;
             case cppast::cpp_schar:
-                tType = eInteger8;
+                tType = integer8;
                 break;
             case cppast::cpp_short:
-                tType = eInteger16;
+                tType = integer16;
                 break;
             case cppast::cpp_int:
-                tType = eInteger32;
+                tType = integer32;
                 break;
             case cppast::cpp_long:
-                tType = eInteger64;
+                tType = integer64;
                 break;
             case cppast::cpp_longlong:
             case cppast::cpp_int128:
-                tType = eInteger128;
+                tType = integer128;
                 break;
             case cppast::cpp_float:
-                tType = eFloat;
+                tType = float_single;
                 break;
             case cppast::cpp_double:
-                tType = eDouble;
+                tType = float_double;
                 break;
-        };
+        }
         return tType;
     }
 
-    void Transpiler::parse_template(const cppast::cpp_class_template& clazz) {
+    void transpiler::parse_template(const cppast::cpp_class_template& clazz) {
         for (const auto& item : clazz) {
-
         }
     }
 
-    void Transpiler::parse_enum(const cppast::cpp_enum& anEnum) {
-        std::vector<un::CXXEnumValue> values;
+    void transpiler::parse_enum(const cppast::cpp_enum& anEnum) {
+        std::vector<cxx_enum_value> values;
         std::size_t i = 0;
         for (const cppast::cpp_enum_value& item : anEnum) {
             auto v = item.value();
@@ -283,15 +289,15 @@ namespace un {
             values.emplace_back(item.name(), i);
             i++;
         }
-        auto parsed = std::make_shared<un::CXXEnum>(
+        auto parsed = std::make_shared<cxx_enum>(
             anEnum.name(),
-            getNamespace(anEnum),
+            get_namespace(anEnum),
             values
         );
-        translationUnit->addSymbol(parsed);
+        _translationUnit->addSymbol(parsed);
     }
 
-    void Transpiler::write_ast(const cppast::cpp_file& file, const std::filesystem::path& path) {
+    void transpiler::write_ast(const cppast::cpp_file& file, const std::filesystem::path& path) {
         std::ofstream os(path);
         std::string prefix;
         // visit each entity in the file
@@ -299,7 +305,8 @@ namespace un {
             file, [&](const cppast::cpp_entity& e, cppast::visitor_info info) {
                 if (info.event == cppast::visitor_info::container_entity_exit) {
                     prefix.pop_back();
-                } else {
+                }
+                else {
                     write_ast_node(os, prefix, e);
                     if (info.event == cppast::visitor_info::container_entity_enter) {
                         prefix += "\t";
@@ -347,7 +354,12 @@ namespace un {
         }
     }
 
-    void Transpiler::write_ast_node(std::ofstream& os, const std::string& prefix, const cppast::cpp_entity& e) const {
+    void
+    transpiler::write_ast_node(
+        std::ofstream& os,
+        const std::string& prefix,
+        const cppast::cpp_entity& e
+    ) const {
         os << prefix << "'" << e.name() << "' - " << cppast::to_string(e.kind());
         switch (e.kind()) {
             case cppast::cpp_entity_kind::member_variable_t: {
@@ -355,13 +367,13 @@ namespace un {
                 const cppast::cpp_type& fieldType = variable.type();
                 os << " (" << cppast::to_string(fieldType) << ", " <<
                    to_string(fieldType.kind());
-//                if (fieldType.kind() == cppast::cpp_type_kind::user_defined_t) {
-//                    const auto& definedType = dynamic_cast<const cppast::cpp_user_defined_type&>(fieldType);
-//                    const cppast::cpp_type_ref& entityRef = definedType.entity();
-//                    auto found = entityRef.get(*index);
-//
-//                    os << ", found: " << found.size();
-//                }
+                //                if (fieldType.kind() == cppast::cpp_type_kind::user_defined_t) {
+                //                    const auto& definedType = dynamic_cast<const cppast::cpp_user_defined_type&>(fieldType);
+                //                    const cppast::cpp_type_ref& entityRef = definedType.entity();
+                //                    auto found = entityRef.get(*index);
+                //
+                //                    os << ", found: " << found.size();
+                //                }
                 os << ")";
             }
             default:

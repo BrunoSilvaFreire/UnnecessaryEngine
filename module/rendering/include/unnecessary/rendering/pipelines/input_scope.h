@@ -6,32 +6,30 @@
 #include <unnecessary/strings.h>
 
 namespace un {
-
-    enum [[un::generate_strings]] InputScope {
+    enum [[un::generate_strings]] input_scope {
         /**
          * This input is only set once, at the start of the frame
          */
 
-        eGlobal,
+        global,
         /**
          * This input is set everytime the pipeline is bound
          */
-        ePipeline,
+        pipeline,
         /**
          * This input is set once per draw instance
          */
-        eInstance
+        instance
     };
 
     template<>
-    std::string to_string(const un::InputScope& scope);
-
+    std::string to_string(const input_scope& scope);
 
     namespace inputs {
-        std::unordered_map<std::string, un::InputScope> const kStringIdsToInputScope = {
-            std::make_pair("global", un::InputScope::eGlobal),
-            std::make_pair("pipeline", un::InputScope::ePipeline),
-            std::make_pair("instance", un::InputScope::eInstance)
+        const std::unordered_map<std::string, input_scope> kStringIdsToInputScope = {
+            std::make_pair("global", global),
+            std::make_pair("pipeline", pipeline),
+            std::make_pair("instance", instance)
         };
     }
 }

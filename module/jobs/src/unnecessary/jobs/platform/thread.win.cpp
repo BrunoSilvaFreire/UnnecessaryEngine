@@ -2,46 +2,49 @@
 #include <windows.h>
 
 namespace un {
-    struct ThreadPlatformBridge {
+    struct thread_platform_bridge {
     public:
         HANDLE threadHandle;
     };
 
-    DWORD WINAPI UnnecessaryThreadProc(LPVOID lpParameter) {
-        reinterpret_cast<un::Thread*>(lpParameter)->operator()();
-        return 0;
-    }
+    DWORD WINAPI
+    unnecessary_thread_proc(LPVOID
+    lpParameter) {
+    reinterpret_cast<thread*>(lpParameter)->
+    operator()();
+    return 0;
+}
 
-    void Thread::join() {
-        WaitForSingleObject(_bridge->threadHandle, INFINITE);
-    }
+void thread::join() {
+    WaitForSingleObject(_bridge->threadHandle, INFINITE);
+}
 
-    void Thread::start() {
-        size_t stackSize = 4096;
-        _bridge = new ThreadPlatformBridge();
-        auto hThread = _bridge->threadHandle = CreateThread(
-            nullptr,
-            _params.getStackSize(),
-            reinterpret_cast<LPTHREAD_START_ROUTINE>(&UnnecessaryThreadProc),
-            this,
-            CREATE_SUSPENDED,
-            nullptr
+void thread::start() {
+    size_t stackSize = 4096;
+    _bridge = new thread_platform_bridge();
+    auto hThread = _bridge->threadHandle = CreateThread(
+        nullptr,
+        _params.get_stack_size(),
+        &unnecessary_thread_proc,
+        this,
+        CREATE_SUSPENDED,
+        nullptr
+    );
+
+    const std::string& name = _params.get_name();
+    if (!name.empty()) {
+        std::wstring wideStr(
+            name.begin(),
+            name.end()
         );
-
-        const std::string& _name = _params.getName();
-        if (!_name.empty()) {
-            std::wstring wideStr(
-                _name.begin(),
-                _name.end()
-            );
-            SetThreadDescription(hThread, wideStr.c_str());
-        }
-
-        size_t core = _params.getCore();
-        if (core != -1) {
-            SetThreadAffinityMask(hThread, 1 << core);
-        }
-
-        ResumeThread(hThread);
+        SetThreadDescription(hThread, wideStr.c_str());
     }
+
+    size_t core = _params.get_core();
+    if (core != -1) {
+        SetThreadAffinityMask(hThread, 1 << core);
+    }
+
+    ResumeThread(hThread);
+}
 }

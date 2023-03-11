@@ -1,94 +1,123 @@
 #include <unnecessary/shaderizer/shader_meta.h>
-#include "shader_parsing.h"
 
 namespace un {
-
-    ShaderMeta::ShaderMeta(const std::string& name) : name(name) { }
-
-    void ShaderMeta::addInput(un::InputScope scope, RichInput&& input) {
-        inputs[scope] += std::move(input);
+    shader_meta::shader_meta(const std::string& name) : _name(name) {
     }
 
-    void ShaderMeta::addStage(const ShaderStageMeta& meta) {
-        stages.push_back(meta);
+    void shader_meta::add_input(input_scope scope, rich_input&& input) {
+        _inputs[scope] += std::move(input);
     }
 
-    const std::string& ShaderMeta::getName() const {
-        return name;
+    void shader_meta::add_stage(const shader_stage_meta& meta) {
+        _stages.push_back(meta);
     }
 
-    const std::unordered_map<un::InputScope, un::InputPack>&
-    ShaderMeta::getInputs() const {
-        return inputs;
+    const std::string& shader_meta::get_name() const {
+        return _name;
     }
 
-    const std::vector<ShaderStageMeta>& ShaderMeta::getStages() const {
-        return stages;
+    const std::unordered_map<input_scope, input_pack>& shader_meta::get_inputs() const {
+        return _inputs;
     }
 
-    const VertexLayout& ShaderMeta::getVertexStreamLayout() const {
-        return vertexStreamLayout;
+    const std::vector<shader_stage_meta>& shader_meta::get_stages() const {
+        return _stages;
     }
 
-    void ShaderMeta::setVertexStreamLayout(
-        const un::VertexLayout& newLayout,
+    const vertex_layout& shader_meta::get_vertex_stream_layout() const {
+        return _vertexStreamLayout;
+    }
+
+    void shader_meta::set_vertex_stream_layout(
+        const vertex_layout& newLayout,
         const std::vector<std::string>& vertexStreamTypes
     ) {
-        ShaderMeta::vertexStreamLayout = newLayout;
-        ShaderMeta::vertexStreamTypes = vertexStreamTypes;
+        _vertexStreamLayout = newLayout;
+        shader_meta::_vertexStreamTypes = vertexStreamTypes;
     }
 
-    un::VertexAttributeMeta ShaderMeta::getVertexAttributeMeta(const std::string& vertexName) const {
+    vertex_attribute_meta
+    shader_meta::get_vertex_attribute_meta(const std::string& vertexName) const {
         std::size_t index = 0;
-        while (index < vertexStreamLayout.getLength()) {
-            if (vertexStreamLayout[index].getName() == vertexName) {
+        while (index < _vertexStreamLayout.get_length()) {
+            if (_vertexStreamLayout[index].get_name() == vertexName) {
                 break;
-            } else {
-                index++;
             }
+            index++;
         }
-        if (index >= vertexStreamLayout.getLength()) {
+        if (index >= _vertexStreamLayout.get_length()) {
             std::string msg = "Unable to find vertex attribute with the specified name (";
             msg += vertexName;
             msg += ").";
             throw std::runtime_error(msg);
         }
-        return un::VertexAttributeMeta(
+        return vertex_attribute_meta(
             index,
-            vertexStreamTypes[index],
-            vertexStreamLayout[index]
+            _vertexStreamTypes[index],
+            _vertexStreamLayout[index]
         );
     }
+    shader_input_meta shader_meta::get_shader_input_meta(std::string inputName) const {
+        constexpr std::array<input_scope, 3> scopes = {
+            global,
+            pipeline,
+            instance
+        };
+        for (input_scope scope : scopes) {
+            auto found = _inputs.find(scope);
+            if (found == _inputs.end()) {
+                continue;
+            }
+            const input_pack& pack = found->second;
+            const std::vector<rich_input>& packInputs = pack.get_inputs();
+            for (std::size_t i = 0; i < packInputs.size(); ++i) {
+                const rich_input& input = packInputs[i];
+                if (input.get_name() != inputName) {
+                    continue;
+                }
+                shader_input_meta meta;
+                meta.index = i;
+                meta.scope = scope;
+                meta.input = &input;
+                return meta;
+            }
+        }
+        std::string msg = "Unable to find input with the given name (";
+        msg += inputName;
+        msg += ").";
+        throw std::runtime_error(msg);
+    }
 
-    VertexAttributeMeta::VertexAttributeMeta(
+    vertex_attribute_meta::vertex_attribute_meta(
         size_t index,
         std::string type,
-        const VertexAttribute& attribute
-    ) : index(index), attribute(attribute), type(type) { }
-
-
-    size_t VertexAttributeMeta::getIndex() const {
-        return index;
+        const vertex_attribute& attribute
+    ) : _index(index), _type(type), _attribute(attribute) {
     }
 
-    const VertexAttribute& VertexAttributeMeta::getAttribute() const {
-        return attribute;
+    size_t vertex_attribute_meta::get_index() const {
+        return _index;
     }
 
-    const std::string& VertexAttributeMeta::getType() const {
-        return type;
+    const vertex_attribute& vertex_attribute_meta::get_attribute() const {
+        return _attribute;
     }
 
-    const std::string& InputUsage::getName() const {
-        return name;
+    const std::string& vertex_attribute_meta::get_type() const {
+        return _type;
     }
 
-    const std::string& InputUsage::getModifier() const {
-        return modifier;
+    const std::string& input_usage::get_name() const {
+        return _name;
     }
 
-    InputUsage::InputUsage(
+    const std::string& input_usage::get_modifier() const {
+        return _modifier;
+    }
+
+    input_usage::input_usage(
         const std::string& name,
         const std::string& modifier
-    ) : name(name), modifier(modifier) { }
+    ) : _name(name), _modifier(modifier) {
+    }
 }

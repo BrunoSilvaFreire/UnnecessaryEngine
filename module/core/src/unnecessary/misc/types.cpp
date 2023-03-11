@@ -20,15 +20,16 @@ namespace un {
 
 #else
 
-    std::string demangle(const char* value) {
-        return value;
+    std::string demangle(const char* _value)
+    {
+        return _value;
     }
 
-    std::string type_name_of(const type_info& info) {
-        std::string name = info.name();
+    std::string type_name_of(const type_info& _info)
+    {
+        std::string name = _info.name();
         return name.substr(6); // Remove class prefix
     }
 
 #endif
-
 }

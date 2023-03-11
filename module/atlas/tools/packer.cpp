@@ -1,4 +1,3 @@
-
 #include <cxxopts.hpp>
 #include <png++/png.hpp>
 #include "packer_entry.h"
@@ -24,21 +23,28 @@
 int main(int argc, char* args[]) {
     cxxopts::Options options("UnnecessaryPacker");
     options.add_options()
-        ("input_files", "RichInput file(s) to concatenate", cxxopts::value<std::vector<std::string>>());
+               (
+                   "input_files",
+                   "RichInput file(s) to concatenate",
+                   cxxopts::value<std::vector<std::string>>());
     options.add_options()
-        ("output", "RichInput file(s) to concatenate", cxxopts::value<std::vector<std::string>>());
+               (
+                   "output",
+                   "RichInput file(s) to concatenate",
+                   cxxopts::value<std::vector<std::string>>());
     options.parse_positional("input_files");
     try {
         cxxopts::ParseResult result = options.parse(argc, args);
         auto files = result["input_files"].as<std::vector<std::string>>();
         auto out = result["output"].as<std::string>();
 
-        un::packer::pack(
-            un::packer::MaxRectanglesAlgorithm<un::bestLongSideFitHeuristic>(),
+        pack(
+            un::packer::max_rectangles_algorithm<un::best_long_side_fit_heuristic>(),
             files,
             out
         );
-    } catch (const cxxopts::OptionParseException& x) {
+    }
+    catch (const cxxopts::OptionParseException& x) {
         std::cerr << "dog: " << x.what() << '\n';
         std::cerr << "usage: dog [options] <input_file> ...\n";
         return EXIT_FAILURE;
@@ -48,63 +54,68 @@ int main(int argc, char* args[]) {
 #endif
 
 namespace un::packer {
-
-    void pack(const std::filesystem::path& output, size_t usedArea, const un::packer::PackingStrategy& strategy) {
-        size_t totalArea = strategy.getWidth() * strategy.getHeight();
+    void
+    pack(const std::filesystem::path& output, size_t usedArea, const packing_strategy& strategy) {
+        size_t totalArea = strategy.get_width() * strategy.get_height();
         size_t unused = totalArea - usedArea;
         f32 efficiency = (static_cast<f32>(usedArea) / static_cast<f32>(totalArea)) * 100;
         LOG(INFO) << "Packed with " << efficiency << "% efficiency. (packedArea: "
                   << usedArea << ", totalArea: " << totalArea << ", unusedArea: " << unused << ").";
         {
             auto packed = std::make_shared<png::image<png::rgba_pixel>>(
-                strategy.getWidth(),
-                strategy.getHeight()
+                strategy.get_width(),
+                strategy.get_height()
             );
-            un::JobSystemBuilder<un::SimpleJobSystem> builder;
+            job_system_builder<simple_job_system> builder;
             auto jobSystem = builder.build();
             {
-                JobChain<SimpleJobSystem> chain(jobSystem.get());
-                for (const auto& operation : strategy.getOperations()) {
-                    JobHandle loadImageJob, parseImageJob;
-                    auto buf = std::make_shared<Buffer>();
+                job_chain<simple_job_system> chain(jobSystem.get());
+                for (const auto& operation : strategy.get_operations()) {
+                    job_handle loadImageJob, parseImageJob;
+                    auto buf = std::make_shared<byte_buffer>();
                     auto src = std::make_shared<png::image<png::rgba_pixel>>();
-                    const std::filesystem::path& imgPath = operation.getPath();
-                    chain.immediately<LoadFileJob>(&loadImageJob, imgPath, buf.get(), std::ios::binary)
-                         .after<LambdaJob<>>(
+                    const std::filesystem::path& imgPath = operation.get_path();
+                    chain.immediately<load_file_job>(
+                             &loadImageJob,
+                             imgPath,
+                             buf.get(),
+                             std::ios::binary
+                         )
+                         .after<lambda_job<>>(
                              loadImageJob, &parseImageJob,
                              [src, buf]() {
-                                 BufferStream<> sbuf(buf);
+                                 buffer_stream<> sbuf(buf);
                                  std::istream stream(&sbuf);
                                  png::image<png::rgba_pixel> img(stream);
                                  *src = img;
                              }
                          );
 
-                    chain.setName(parseImageJob, std::string("Parse Image ") + imgPath.string());
-                    const Rect<u32>& rect = operation.getDestination();
-                    glm::uvec2 origin = rect.getOrigin();
-                    auto* job = new PackTextureJob<png::rgba_pixel>(
+                    chain.set_name(parseImageJob, std::string("Parse Image ") + imgPath.string());
+                    const rect<u32>& rect = operation.get_destination();
+                    glm::uvec2 origin = rect.get_origin();
+                    auto* job = new pack_texture_job<png::rgba_pixel>(
                         src,
                         packed,
                         rect
                     );
                     std::stringstream name;
                     name << "Pack image " << imgPath;
-                    job->setName(name.str());
-                    auto handles = PackTextureJob<png::rgba_pixel>::parallelize(
+                    job->set_name(name.str());
+                    auto handles = pack_texture_job<png::rgba_pixel>::parallelize(
                         job,
                         chain,
-                        rect.getArea(),
+                        rect.get_area(),
                         512
                     );
-                    for (JobHandle handle : handles) {
-                        chain.after<un::SimpleJob>(parseImageJob, handle);
+                    for (job_handle handle : handles) {
+                        chain.after<simple_job>(parseImageJob, handle);
                     }
-                };
+                }
             }
             jobSystem->start();
             jobSystem->complete();
-            LOG(INFO) << "Result written to " << std::filesystem::absolute(output);
+            LOG(INFO) << "Result written to " << absolute(output);
             packed->write(output.string());
         }
     }

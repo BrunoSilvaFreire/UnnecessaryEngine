@@ -41,7 +41,7 @@ void testParallelism(un::JobSystem& jobs) {
             std::vector<IncrementPair>&& pairs
         ) : pairs(std::move(pairs)) {}
 
-        void operator()(size_t index, un::JobWorker* worker) override {
+        void operator()(size_t index, un::job_worker* worker) override {
             IncrementPair& pair = pairs[index];
             pair.position += pair.velocity;
         }
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     un::World world(app);
     un::Renderer& renderer = app.getRenderer();
     entt::registry& registry = world.getRegistry();
-    un::JobSystem& jobs = app.getJobSystem();
+    un::JobSystem& jobs = app.get_job_system();
     un::ObjMeshData data;
     un::MeshInfo info;
     un::VertexLayout vertexLayout;
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
         .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
         .after(
             upload,
-            [&](un::JobWorker* worker) {
+            [&](un::job_worker* worker) {
                 un::BoundVertexLayout boundLayout(vertexLayout);
                 auto* vertex = new un::ShaderStage(
                     "basic.vert",
@@ -238,7 +238,7 @@ int main(int argc, char** argv) {
         .after<un::UploadMeshJob>(load, &upload, vertexLayout, 0, &data, &info, &renderer)
         .after(
             upload,
-            [&](un::JobWorker* worker) {
+            [&](un::job_worker* worker) {
                 const auto& db = app.getDatabase();
                 for (int x = -numSidePots; x <= numSidePots; ++x) {
                     for (int y = -numSidePots; y <= numSidePots; ++y) {

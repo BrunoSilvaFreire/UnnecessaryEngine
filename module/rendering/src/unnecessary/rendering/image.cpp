@@ -2,22 +2,20 @@
 #include <unnecessary/rendering/renderer.h>
 
 namespace un {
-
-
-    Image::Image(
-        const un::RenderingDevice& renderer,
+    image::image(
+        const rendering_device& renderer,
         vk::Format format,
         vk::Extent3D size,
         vk::ImageLayout layout,
         vk::ImageUsageFlags usage,
         vk::ImageType type,
-        un::ImageDetails details,
+        image_details details,
         vk::SharingMode mode,
         vk::ImageCreateFlags flags
     ) {
-        vk::Device device = renderer.getVirtualDevice();
-        u32 index = renderer.getGraphics().getIndex();
-        image = device.createImage(
+        vk::Device device = renderer.get_virtual_device();
+        u32 index = renderer.get_graphics().get_index();
+        _image = device.createImage(
             vk::ImageCreateInfo(
                 flags,
                 type,
@@ -34,39 +32,40 @@ namespace un {
                 layout
             )
         );
-        memoryRequirements = device.getImageMemoryRequirements(image);
-        memory = un::allocateMemoryFor(
+        _memoryRequirements = device.getImageMemoryRequirements(_image);
+        _memory = allocate_memory_for(
             renderer,
             vk::MemoryPropertyFlagBits::eDeviceLocal,
-            memoryRequirements
+            _memoryRequirements
         );
         device.bindImageMemory(
-            image,
-            memory,
+            _image,
+            _memory,
             0
         );
     }
 
-    void Image::dispose(const vk::Device& device) {
-        device.destroy(image);
+    void image::dispose(const vk::Device& device) {
+        device.destroy(_image);
     }
 
-    vk::Image Image::operator*() {
-        return image;
+    vk::Image image::operator*() {
+        return _image;
     }
 
-    Image::operator vk::Image() {
-        return image;
+    image::operator vk::Image() {
+        return _image;
     }
 
-    void Image::tag(Renderer& renderer, const std::string& name) {
-        renderer.tag(image, name);
-        renderer.tag(memory, name + "-Memory");
+    void image::tag(renderer& renderer, const std::string& name) {
+        renderer.tag(_image, name);
+        renderer.tag(_memory, name + "-Memory");
     }
 
-    ImageDetails::ImageDetails(
+    image_details::image_details(
         u8 mipLevels,
         vk::SampleCountFlagBits sampleCountFlag,
         vk::ImageTiling tiling
-    ) : mipLevels(mipLevels), sampleCountFlag(sampleCountFlag), tiling(tiling) { }
+    ) : mipLevels(mipLevels), sampleCountFlag(sampleCountFlag), tiling(tiling) {
+    }
 }

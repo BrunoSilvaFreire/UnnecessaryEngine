@@ -11,48 +11,48 @@
 namespace un {
 
     template<typename JobSystemType>
-    class RenderThread : public un::AppExtension {
+    class render_thread : public un::app_extension {
     private:
         bool _rendering = false;
         std::size_t _frame;
-        un::SteadyLoop _loop;
+        un::steady_loop _loop;
         JobSystemType* _jobSystem;
-        un::Renderer* _renderer;
-        un::Thread* _thread;
-        std::vector<un::FrameData> _inFlightFrames;
+        un::renderer* _renderer;
+        un::thread* _thread;
+        std::vector<un::frame_data> _inFlightFrames;
 
-        void schedulePasses(
+        void schedule_passes(
             u32 framebufferIndex,
-            un::FrameData& frameData,
+            un::frame_data& frameData,
             JobSystemType* jobSystem,
-            un::SwapChain::ChainSynchronizer& synchronizer
+            un::swap_chain::chain_synchronizer& synchronizer
         ) {
-            const un::RenderGraph& graph = _renderer->getRenderGraph();
-            un::GraphicsChain chain;
-            std::unordered_map<u32, un::JobHandle> vertexIndex2JobHandle;
+            const un::render_graph& graph = _renderer->get_render_graph();
+            un::graphics_chain chain;
+            std::unordered_map<u32, un::job_handle> vertexIndex2JobHandle;
             std::unordered_map<u32, std::set<u32>> passesDependencies;
             graph.each(
-                [&](u32 index, const std::unique_ptr<un::RenderPass>& pass) {
-                    un::JobHandle handle = chain.immediately<un::RecordPassJob>(
+                [&](u32 index, const std::unique_ptr<un::render_pass>& pass) {
+                    un::job_handle handle = chain.immediately<un::record_pass_job>(
                         &frameData,
                         pass.get(), //TODO: ONO http://open-std.org/JTC1/sc22/wg21/docs/papers/2014/n4282.pdf
                         index
                     );
                     std::string jobName = "Record Pass: \"";
-                    jobName += pass->getName();
+                    jobName += pass->get_name();
                     jobName += "\" Frame: ";
                     jobName += std::to_string(_frame);
-                    chain.setName(handle, jobName);
+                    chain.set_name(handle, jobName);
                     vertexIndex2JobHandle[index] = handle;
                 },
-                [&](u32 from, u32 to, const un::DependencyType& type) {
+                [&](u32 from, u32 to, const un::dependency_type& type) {
                     passesDependencies[to].emplace(from);
                 }
             );
             for (auto [passIndex, passDependencies] : passesDependencies) {
-                un::JobHandle passHandle = vertexIndex2JobHandle[passIndex];
+                un::job_handle passHandle = vertexIndex2JobHandle[passIndex];
                 for (u32 dependencyIndex : passDependencies) {
-                    un::JobHandle dependencyHandle = vertexIndex2JobHandle[dependencyIndex];
+                    un::job_handle dependencyHandle = vertexIndex2JobHandle[dependencyIndex];
                     chain.after(dependencyHandle, passHandle);
                 }
             }
@@ -62,36 +62,36 @@ namespace un {
             chain.finally(
                 name.str(),
                 [&, framebufferIndex]() {
-                    submitCommands(
+                    submit_commands(
                         framebufferIndex,
                         frameData,
                         synchronizer,
                         graph,
-                        _renderer->getSwapChain().getSwapChain()
+                        _renderer->get_swap_chain().get_swap_chain()
                     );
                 }
             );
             chain.submit(jobSystem);
         }
 
-        void submitCommands(
+        void submit_commands(
             u32 framebufferIndex,
-            const FrameData& frameData,
-            SwapChain::ChainSynchronizer& synchronizer,
-            const RenderGraph& graph,
+            const frame_data& frameData,
+            swap_chain::chain_synchronizer& synchronizer,
+            const render_graph& graph,
             vk::SwapchainKHR swapchain
         ) const {
             std::vector<vk::SubmitInfo> submits;
             graph.each(
-                [&](u32 index, const std::unique_ptr<RenderPass>& pass) {
-                    const PassOutput& passOutput = frameData.passesOutputs[index];
+                [&](u32 index, const std::unique_ptr<render_pass>& pass) {
+                    const pass_output& passOutput = frameData.passesOutputs[index];
 
                     std::vector<u32> dependencies = graph
-                        .dependenciesOf(index)
-                        .getDependencies();
+                        .dependencies_of(index)
+                        .get_dependencies();
                     std::vector<u32> dependants = graph
-                        .dependantsOn(index)
-                        .getDependencies();
+                        .dependants_on(index)
+                        .get_dependencies();
                     std::vector<vk::Semaphore> waitSemaphores;
                     std::vector<vk::PipelineStageFlags> waitStageMask;
                     for (u32 dependency : dependencies) {
@@ -112,17 +112,18 @@ namespace un {
                     }
                     submits.push_back(submit);
                 },
-                [&](u32 from, u32 to, const DependencyType& type) { }
+                [&](u32 from, u32 to, const dependency_type& type) {
+                }
             );
 
-            vk::Queue queue = *_renderer->getDevice().getGraphics();
+            vk::Queue queue = *_renderer->get_device().get_graphics();
             queue.submit(
                 submits,
-                synchronizer.getFence()
+                synchronizer.get_fence()
             );
             std::array<vk::Semaphore, 1> imageReady(
                 {
-                    synchronizer.getImageReady()
+                    synchronizer.get_image_ready()
                 }
             );
             std::array<u32, 1> imageIndices(
@@ -130,8 +131,8 @@ namespace un {
                     framebufferIndex
                 }
             );
-            vkCall(
-                _renderer->getDevice().getPresent()->presentKHR(
+            VK_CALL(
+                _renderer->get_device().get_present()->presentKHR(
                     vk::PresentInfoKHR(
                         imageReady,
                         swapchain,
@@ -142,20 +143,20 @@ namespace un {
             synchronizer.unlock();
         }
 
-        void renderThread() {
-            const vk::Device& device = _renderer->getVirtualDevice();
-            un::SwapChain& swapChain = _renderer->getSwapChain();
-            Window* pWindow = _renderer->getWindow();
+        void render_thread_aaa() {
+            const vk::Device& device = _renderer->get_virtual_device();
+            un::swap_chain& swapChain = _renderer->get_swap_chain();
+            window* pWindow = _renderer->get_window();
             while (_rendering) {
-                un::Chronometer chronometer;
+                un::chronometer chronometer;
                 _loop.enter();
-                un::SwapChain::ChainSynchronizer& synchronizer = swapChain.acquireSynchronizer();
+                un::swap_chain::chain_synchronizer& synchronizer = swapChain.acquire_synchronizer();
                 synchronizer.access();
-                vk::Fence fence = synchronizer.getFence();
+                vk::Fence fence = synchronizer.get_fence();
                 std::array<vk::Fence, 1> fencesToWait(
                     {fence}
                 );
-                std::chrono::nanoseconds timeout = _loop.getLoopTimeFrame();
+                std::chrono::nanoseconds timeout = _loop.get_loop_time_frame();
                 vk::Result waitForFences = device.waitForFences(
                     fencesToWait,
                     true,
@@ -174,9 +175,9 @@ namespace un {
                 );
 
                 auto result = device.acquireNextImageKHR(
-                    swapChain.getSwapChain(),
+                    swapChain.get_swap_chain(),
                     timeout.count(),
-                    synchronizer.getImageReady()
+                    synchronizer.get_image_ready()
                 );
                 if (result.result != vk::Result::eSuccess) {
                     LOG(WARN) << "Unable to acquire image ("
@@ -187,12 +188,12 @@ namespace un {
                 }
                 u32 value = result.value;
                 u32 imageIndex = value;
-                const auto& graph = _renderer->getRenderGraph();
-                un::FrameData& data = _inFlightFrames[imageIndex];
-                data.renderPass = graph.getVulkanPass();
-                data.passesOutputs.resize(graph.getSize());
-                data.framebuffer = graph.getFrameBuffer(imageIndex);
-                schedulePasses(
+                const auto& graph = _renderer->get_render_graph();
+                un::frame_data& data = _inFlightFrames[imageIndex];
+                data.renderPass = graph.get_vulkan_pass();
+                data.passesOutputs.resize(graph.get_size());
+                data.framebuffer = graph.get_frame_buffer(imageIndex);
+                schedule_passes(
                     imageIndex,
                     data,
                     _jobSystem,
@@ -200,7 +201,7 @@ namespace un {
                 );
                 _loop.exit();
                 _frame++;
-                _rendering = !pWindow->shouldClose();
+                _rendering = !pWindow->should_close();
             }
         }
 
@@ -209,11 +210,11 @@ namespace un {
             if (_rendering) {
                 return;
             }
-            _loop.setFrequency(165);
+            _loop.set_frequency(165);
             _rendering = true;
-            _thread = new un::Thread(
+            _thread = new un::thread(
                 "RenderThread",
-                std::bind(&RenderThread::renderThread, this)
+                std::bind(&render_thread::render_thread_aaa, this)
             );
             _thread->start();
         }
@@ -224,21 +225,21 @@ namespace un {
             delete _thread;
         }
 
-        RenderThread(
+        render_thread(
             JobSystemType* jobSystem,
-            Renderer* renderer
+            renderer* renderer
         ) : _jobSystem(jobSystem),
             _renderer(renderer),
             _frame(0),
             _thread(nullptr) {
-            _inFlightFrames.resize(renderer->getSwapChain().getNumLinks());
+            _inFlightFrames.resize(renderer->get_swap_chain().get_num_links());
         }
 
-        void apply(Application& application) override {
-            application.getOnStart() += [this]() {
+        void apply(application& application) override {
+            application.get_on_start() += [this]() {
                 start();
             };
-            application.getOnStop() += [this]() {
+            application.get_on_stop() += [this]() {
                 stop();
             };
         }

@@ -4,29 +4,30 @@
 #include <grapphs/algorithms/rlo_traversal.h>
 
 namespace un {
-    void RenderGraph::bake(Renderer& renderer) {
-        vk::Device device = renderer.getVirtualDevice();
+    void render_graph::bake(renderer& renderer) {
+        vk::Device device = renderer.get_virtual_device();
         std::vector<vk::SubpassDescription> subPasses;
         std::vector<vk::SubpassDependency> subPassesDependencies;
-        subPasses.reserve(getSize());
-        for (size_t i = 0; i < getSize(); ++i) {
+        subPasses.reserve(get_size());
+        for (size_t i = 0; i < get_size(); ++i) {
             const auto& vertex = *(operator[](i));
-            const std::optional<vk::AttachmentReference>& depthAttachment = vertex->getDepthAttachment();
+            const std::optional<vk::AttachmentReference>& depthAttachment = vertex->get_depth_attachment();
             const vk::AttachmentReference* depth;
             if (depthAttachment.has_value()) {
                 depth = depthAttachment.operator->();
-            } else {
+            }
+            else {
                 depth = nullptr;
             }
             subPasses.emplace_back(
-                (vk::SubpassDescriptionFlags) 0,
+                static_cast<vk::SubpassDescriptionFlags>(0),
                 vk::PipelineBindPoint::eGraphics,
-                vertex->getUsedAttachments(),
-                vertex->getColorAttachments(),
-                vertex->getResolveAttachments(),
+                vertex->get_used_attachments(),
+                vertex->get_color_attachments(),
+                vertex->get_resolve_attachments(),
                 depth
             );
-            for (auto neighborIndex : dependenciesOf(i)) {
+            for (auto neighborIndex : dependencies_of(i)) {
                 const auto& neighbor = *operator[](neighborIndex);
                 // TODO: Compute these
                 vk::AccessFlags srcFlags;
@@ -35,8 +36,8 @@ namespace un {
                 subPassesDependencies.emplace_back(
                     i,
                     neighborIndex,
-                    vertex->getStageFlags(),
-                    neighbor->getStageFlags(),
+                    vertex->get_stage_flags(),
+                    neighbor->get_stage_flags(),
                     srcFlags,
                     dstFlags,
                     dependencyFlags
@@ -44,25 +45,25 @@ namespace un {
             }
         }
         std::vector<vk::AttachmentDescription> passAttachments;
-        for (const auto& attachment : attachments) {
-            passAttachments.emplace_back(attachment.getDescription());
+        for (const auto& attachment : _attachments) {
+            passAttachments.emplace_back(attachment.get_description());
         }
 
         vk::RenderPass createdPass = device.createRenderPass(
             vk::RenderPassCreateInfo(
-                (vk::RenderPassCreateFlags) 0,
+                static_cast<vk::RenderPassCreateFlags>(0),
                 passAttachments,
                 subPasses,
                 subPassesDependencies
             )
         );
-        renderPass = createdPass;
+        _renderPass = createdPass;
         renderer.tag(createdPass, "Render Graph Pass");
-        const auto& chain = renderer.getSwapChain();
-        const auto& res = chain.getResolution();
-        const auto& images = chain.getImages();
+        const auto& chain = renderer.get_swap_chain();
+        const auto& res = chain.get_resolution();
+        const auto& images = chain.get_images();
         for (int i = 0; i < images.size(); ++i) {
-            frameBuffers.emplace_back(
+            _frameBuffers.emplace_back(
                 &renderer,
                 *this,
                 createdPass,
@@ -71,19 +72,19 @@ namespace un {
         }
     }
 
-    bool RenderGraph::isAttachmentBorrowed(std::size_t index) const {
-        return borrowedAttachments.contains(static_cast<u32>(index));
+    bool render_graph::is_attachment_borrowed(std::size_t index) const {
+        return _borrowedAttachments.contains(static_cast<u32>(index));
     }
 
-    const std::vector<un::Attachment>& RenderGraph::getAttachments() const {
-        return attachments;
+    const std::vector<attachment>& render_graph::get_attachments() const {
+        return _attachments;
     }
 
-    const std::vector<un::FrameBuffer>& RenderGraph::getFrameBuffers() const {
-        return frameBuffers;
+    const std::vector<frame_buffer>& render_graph::get_frame_buffers() const {
+        return _frameBuffers;
     }
 
-    std::size_t RenderGraph::addBorrowedAttachment(
+    std::size_t render_graph::add_borrowed_attachment(
         const vk::ClearValue& clearValue,
         vk::AttachmentDescriptionFlags flags,
         vk::Format format,
@@ -95,8 +96,8 @@ namespace un {
         vk::ImageLayout initialLayout,
         vk::ImageLayout finalLayout
     ) {
-        std::size_t index = attachments.size();
-        attachments.emplace_back(
+        std::size_t index = _attachments.size();
+        _attachments.emplace_back(
             vk::AttachmentDescription(
                 flags,
                 format,
@@ -110,11 +111,11 @@ namespace un {
             ),
             clearValue
         );
-        borrowedAttachments.emplace(index);
+        _borrowedAttachments.emplace(index);
         return index;
     }
 
-    std::size_t RenderGraph::addOwnedAttachment(
+    std::size_t render_graph::add_owned_attachment(
         vk::ImageUsageFlags usageFlags,
         vk::ImageAspectFlags aspectFlags,
         const vk::ClearValue& clearValue,
@@ -128,8 +129,8 @@ namespace un {
         vk::ImageLayout initialLayout,
         vk::ImageLayout finalLayout
     ) {
-        std::size_t index = attachments.size();
-        attachments.emplace_back(
+        std::size_t index = _attachments.size();
+        _attachments.emplace_back(
             vk::AttachmentDescription(
                 flags,
                 format,
@@ -149,7 +150,7 @@ namespace un {
         return index;
     }
 
-    std::size_t RenderGraph::addColorAttachment(
+    std::size_t render_graph::add_color_attachment(
         vk::ImageUsageFlags usageFlags,
         vk::ImageAspectFlags aspectFlags,
         const vk::ClearColorValue& clearValue,
@@ -161,7 +162,7 @@ namespace un {
         vk::ImageLayout initialLayout,
         vk::ImageLayout finalLayout
     ) {
-        return addOwnedAttachment(
+        return add_owned_attachment(
             usageFlags,
             aspectFlags,
             clearValue,
@@ -176,21 +177,24 @@ namespace un {
         );
     }
 
-    void RenderGraph::setAttachmentName(size_t attachment, std::string name) {
-        attachments[attachment].setName(name);
+    void render_graph::set_attachment_name(size_t attachment, std::string name) {
+        _attachments[attachment].set_name(name);
     }
 
-    const un::Attachment& RenderGraph::getAttachment(std::size_t index) const {
-        return attachments[index];
+    const attachment& render_graph::get_attachment(std::size_t index) const {
+        return _attachments[index];
     }
 
-    un::CommandBuffer
-    FrameData::requestCommandBuffer(un::GraphicsWorker* graphicsWorker, const size_t renderPassIndex) {
-        un::CommandBuffer buffer = graphicsWorker->requestCommandBuffer();
+    command_buffer
+    frame_data::request_command_buffer(
+        graphics_worker* graphicsWorker,
+        const size_t renderPassIndex
+    ) {
+        command_buffer buffer = graphicsWorker->request_command_buffer();
 #if DEBUG
         std::stringstream stream;
         stream << "RenderPass-" << renderPassIndex << "-CommandBuffer";
-        graphicsWorker->getRenderer()->tag(*buffer, stream.str());
+        graphicsWorker->get_renderer()->tag(*buffer, stream.str());
 #endif
         passesOutputs[renderPassIndex].passCommands = *buffer;
         return buffer;

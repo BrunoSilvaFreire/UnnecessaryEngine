@@ -8,31 +8,33 @@
 #include <termcolor/termcolor.hpp>
 
 namespace un {
-    class Log {
+    class log {
     private:
         static std::mutex globalMutex;
-        bool flushed;
-        std::stringstream sstream;
+        bool _flushed;
+        std::stringstream _sstream;
+
     public:
         void flush();
 
-        Log(const std::string& header, const std::string& label);
+        log(const std::string& header, const std::string& label);
 
-        Log(const std::string& header, u32 line, const std::string& file);
+        log(const std::string& header, u32 line, const std::string& file);
 
-        ~Log();
+        ~log();
 
         std::ostream& stream();
     };
 
-    enum class Severity {
-        eDebug,
-        eInfo,
-        eWarn,
-        eError,
-        eFatal
+    enum class severity {
+        debug,
+        info,
+        warn,
+        error,
+        fatal
     };
 }
+
 #define VERBOSE "VERBOSE"
 #define INFO "INFO"
 #define WARN "WARN"
@@ -76,6 +78,6 @@ namespace un {
 #define RED(MSG) COLORED(MSG, termcolor::red)
 #define PURPLE(MSG) COLORED(MSG, termcolor::magenta)
 #define YELLOW(MSG) COLORED(MSG, termcolor::yellow)
-#define LOG(LEVEL) un::Log(LEVEL, __LINE__, UN_CURRENT_FILE).stream()
+#define LOG(LEVEL) un::log(LEVEL, __LINE__, UN_CURRENT_FILE).stream()
 
 #endif

@@ -4,27 +4,26 @@
 #include <unnecessary/simulation/jobs/simulation_worker.h>
 
 namespace un {
-    void World::step(f32 deltaTime, un::SimulationChain& chain) {
-        un::SimulationChain masterChain;
+    void world::step(f32 deltaTime, simulation_chain& chain) {
+        simulation_chain masterChain;
         _simulationGraph.each(
-            [&](u32 index, const un::SimulationNode& node) {
+            [&](u32 index, const simulation_node& node) {
                 switch (node.type) {
-                    case SimulationNode::eSystem:
+                    case simulation_node::type::system:
                         break;
-                    case SimulationNode::eStage:
+                    case simulation_node::type::stage:
                         return;
                 }
-                un::System* pSystem = node.asSystem;
-                un::SimulationChain chain;
-                pSystem->scheduleJobs(
+                system* pSystem = node.asSystem;
+                simulation_chain chain;
+                pSystem->schedule_jobs(
                     *this,
                     deltaTime,
                     chain
                 );
                 masterChain.include(chain);
             },
-            [](u32 from, u32 to, const un::DependencyType& e) {
-
+            [](u32 from, u32 to, const dependency_type& e) {
             }
         );
     }

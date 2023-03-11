@@ -1,14 +1,14 @@
 #include <unnecessary/misc/historic.h>
 
 namespace un {
-
-    bool BooleanHistoric::wasJustDeactivated() const {
-        return last && !current;
+    bool boolean_historic::was_just_deactivated() const {
+        return _last && !_current;
     }
 
-    bool BooleanHistoric::wasJustActivated() const {
-        return !last && current;
+    bool boolean_historic::was_just_activated() const {
+        return !_last && _current;
     }
 
-    BooleanHistoric::BooleanHistoric() : Historic<bool>(false, false) { }
+    boolean_historic::boolean_historic() : historic<bool>(false, false) {
+    }
 }

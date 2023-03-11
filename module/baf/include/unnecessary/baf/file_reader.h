@@ -1,32 +1,32 @@
 #ifndef UNNECESSARYENGINE_FILE_READER_H
 #define UNNECESSARYENGINE_FILE_READER_H
 namespace un {
-    class FileHelper {
+    class file_helper {
     private:
-        std::ifstream stream;
+        std::ifstream _stream;
     public:
-        explicit FileHelper(std::ifstream&& stream) : stream(std::move(stream)) {
+        explicit file_helper(std::ifstream&& stream) : _stream(std::move(stream)) {
 
         }
 
         void seek(std::size_t offset) {
-            stream.seekg(offset, std::ios::beg);
+            _stream.seekg(offset, std::ios::beg);
         }
 
         std::size_t tell() {
-            return stream.tellg();
+            return _stream.tellg();
         }
 
         template<typename T>
         T read() {
             T element;
-            stream.read(reinterpret_cast<char*>(&element), sizeof(T));
+            _stream.read(reinterpret_cast<char*>(&element), sizeof(T));
             return element;
         }
 
         template<typename T>
         void read(T* into, std::size_t count) {
-            stream.read(reinterpret_cast<char*>(&into), sizeof(T) * count);
+            _stream.read(reinterpret_cast<char*>(&into), sizeof(T) * count);
         }
     };
 }

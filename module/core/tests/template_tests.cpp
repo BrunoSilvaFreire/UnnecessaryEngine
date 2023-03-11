@@ -10,9 +10,9 @@
 #include <unnecessary/logging.h>
 
 TEST(templates, for_types_test) {
-    un::for_types<un::Buffer, std::runtime_error, std::string, double, float, int>(
+    un::for_types<un::byte_buffer, std::runtime_error, std::string, double, float, int>(
         []<typename T>() {
-            LOG(INFO) << "Type: " << GREEN(un::type_name_of<T>()) ;
+            LOG(INFO) << "Type: " << GREEN(un::type_name_of<T>());
         }
     );
 }

@@ -4,22 +4,22 @@
 #include <stdexcept>
 
 namespace un {
-    enum SerializedType {
-        eInteger8,
-        eInteger16,
-        eInteger32,
-        eInteger64,
-        eFloat,
-        eDouble,
-        eString,
-        eComplex,
-        eArray,
-        eBinary
+    enum serialized_type {
+        integer8,
+        integer16,
+        integer32,
+        integer64,
+        float_single,
+        float_double,
+        string,
+        complex,
+        array,
+        binary
     };
 
-    class SerializedNode {
+    class serialized_node {
     public:
-        virtual SerializedType getType() = 0;
+        virtual serialized_type get_type() = 0;
 
         template<typename TNode>
         TNode& as() {
@@ -31,6 +31,5 @@ namespace un {
         }
     };
 }
-
 
 #endif

@@ -5,29 +5,30 @@
 #include "membuf.h"
 
 namespace un {
-    class BinaryWriter {
+    class binary_writer {
     private:
-        un::Buffer buf;
-        u64 ptr;
+        byte_buffer _buffer;
+        u64 _ptr;
+
     public:
-        explicit BinaryWriter(u64 bufSize);
+        explicit binary_writer(u64 bufSize);
 
-        u64 getFreeSize() const;
+        u64 get_free_size() const;
 
-        u8* getBuffer() const;
+        u8* get_buffer() const;
 
         template<typename T>
         void write(T* value, u64 count = 1) {
             const size_t elementSize = sizeof(T);
 #if DEBUG
             const size_t requiredSpace = elementSize * count;
-            if (requiredSpace > getFreeSize()) {
+            if (requiredSpace > get_free_size()) {
                 throw std::runtime_error("Binary writer buffer overflow.");
             }
 #endif
             for (u64 j = 0; j < count; ++j) {
-                buf.write<T>(ptr, value[j]);
-                ptr += elementSize;
+                _buffer.write<T>(_ptr, value[j]);
+                _ptr += elementSize;
             }
         }
 

@@ -4,14 +4,13 @@
 #include <utility>
 
 namespace un {
-
-    Thread::Thread(
+    thread::thread(
         const std::function<void()>& block
-    ) : Thread(un::ThreadParams("UnnecessaryThread"), block) {
+    ) : thread(thread_params("UnnecessaryThread"), block) {
     }
 
-    Thread::Thread(
-        un::ThreadParams parameters,
+    thread::thread(
+        thread_params parameters,
         const std::function<void()>& block
     ) : _block(block),
         _alive(false),
@@ -22,35 +21,34 @@ namespace un {
         }
     }
 
-    void Thread::operator()() {
+    void thread::operator()() {
         std::unique_lock<std::mutex> lock(_dataMutex);
         _alive = true;
         _block();
         _alive = false;
     }
 
-    ThreadParams::ThreadParams(
+    thread_params::thread_params(
         std::string name,
         size_t core
     ) : _name(std::move(name)),
         _core(core),
-        _stackSize(kDefaultStackSize) {
-
+        _stackSize(k_default_stack_size) {
     }
 
-    const std::string& ThreadParams::getName() const {
+    const std::string& thread_params::get_name() const {
         return _name;
     }
 
-    size_t ThreadParams::getCore() const {
+    size_t thread_params::get_core() const {
         return _core;
     }
 
-    size_t ThreadParams::getStackSize() const {
+    size_t thread_params::get_stack_size() const {
         return _stackSize;
     }
 
-    void ThreadParams::setStackSize(size_t stackSize) {
+    void thread_params::set_stack_size(size_t stackSize) {
         _stackSize = stackSize;
     }
 }

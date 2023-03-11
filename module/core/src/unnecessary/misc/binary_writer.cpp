@@ -1,21 +1,18 @@
 #include "unnecessary/memory/binary_writer.h"
 
 namespace un {
-
-
-    u64 BinaryWriter::getFreeSize() const {
-        return buf.size() - ptr;
+    u64 binary_writer::get_free_size() const {
+        return _buffer.size() - _ptr;
     }
 
-    BinaryWriter::BinaryWriter(u64 bufSize) : buf(bufSize), ptr(0) {
-
+    binary_writer::binary_writer(u64 bufSize) : _buffer(bufSize), _ptr(0) {
     }
 
-    void BinaryWriter::skip(size_t numBytes) {
-        ptr += numBytes;
+    void binary_writer::skip(size_t numBytes) {
+        _ptr += numBytes;
     }
 
-    u8* BinaryWriter::getBuffer() const {
-        return buf.operator->();
+    u8* binary_writer::get_buffer() const {
+        return _buffer.operator->();
     }
 }

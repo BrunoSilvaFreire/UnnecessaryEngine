@@ -5,51 +5,52 @@
 #include <unnecessary/rendering/vulkan/vulkan_utils.h>
 #include <optional>
 
-
 namespace un {
-    vk::DeviceMemory allocateMemoryFor(
+    vk::DeviceMemory allocate_memory_for(
         const RenderingDevice& device,
         vk::MemoryPropertyFlags flags,
         vk::MemoryRequirements requirements
     ) {
-        return device.getVirtualDevice().allocateMemory(
+        return device.get_virtual_device().allocateMemory(
             vk::MemoryAllocateInfo(
                 requirements.size,
-                device.selectMemoryTypeFor(requirements, flags)
+                device.select_memory_type_for(requirements, flags)
             )
         );
     }
 
-    const vk::Device& RenderingDevice::getVirtualDevice() const {
-        return virtualDevice;
+    const vk::Device& rendering_device::get_virtual_device() const {
+        return _virtualDevice;
     }
 
-    const vk::PhysicalDevice& RenderingDevice::getPhysicalDevice() const {
-        return physicalDevice;
+    const vk::PhysicalDevice& rendering_device::get_physical_device() const {
+        return _physicalDevice;
     }
 
-    const vk::SurfaceKHR& RenderingDevice::getSurface() const {
-        return surface;
+    const vk::SurfaceKHR& rendering_device::get_surface() const {
+        return _surface;
     }
 
-    std::vector<vk::QueueFamilyProperties> selectQueueFamily(
+    std::vector<vk::QueueFamilyProperties> select_queue_family(
         const vk::PhysicalDevice& device
     ) {
         return device.getQueueFamilyProperties();
     }
 
-    vk::PhysicalDeviceProperties selectDeviceProperties(
+    vk::PhysicalDeviceProperties select_device_properties(
         const vk::PhysicalDevice& device
     ) {
         return device.getProperties();
     }
 
-    typedef TransformingRequirement<vk::PhysicalDevice, std::vector<vk::QueueFamilyProperties>, &selectQueueFamily>
-        DeviceQueueRequirements;
-    typedef TransformingRequirement<vk::PhysicalDevice, vk::PhysicalDeviceProperties, &selectDeviceProperties>
-        DevicePropertiesRequirements;
+    using device_queue_requirements = transforming_requirement<
+        vk::PhysicalDevice, std::vector<vk::QueueFamilyProperties>, &select_queue_family
+    >;
+    using device_properties_requirements = transforming_requirement<
+        vk::PhysicalDevice, vk::PhysicalDeviceProperties, &select_device_properties
+    >;
 
-    vk::DeviceQueueCreateInfo makeQueueCreateInfoFor(
+    vk::DeviceQueueCreateInfo make_queue_create_info_for(
         vk::QueueFlags flags,
         std::vector<vk::QueueFamilyProperties>& queueProperties
     ) {
@@ -60,22 +61,22 @@ namespace un {
             if ((property.queueFlags & flags) != flags) {
                 continue;
             }
-            return vk::DeviceQueueCreateInfo((vk::DeviceQueueCreateFlags) 0,
-                                             i,
-                                             1,
-                                             &priority
+            return vk::DeviceQueueCreateInfo(
+                static_cast<vk::DeviceQueueCreateFlags>(0),
+                i,
+                1,
+                &priority
             );
         }
         throw std::runtime_error("Unable to find queue for given flags");
     }
 
-    un::RenderingDevice RenderingDevice::create(
+    RenderingDevice rendering_device::create(
         const vk::Instance& instance,
         GLFWwindow* window
     ) {
-
         vk::SurfaceKHR surface;
-        vkCall(
+        VK_CALL(
             static_cast<vk::Result>(
                 glfwCreateWindowSurface(
                     instance,
@@ -86,15 +87,15 @@ namespace un {
             )
         );
         auto devices = instance.enumeratePhysicalDevices();
-        un::CompositeRequirement<vk::PhysicalDevice> deviceRequirements;
+        composite_requirement<vk::PhysicalDevice> deviceRequirements;
 
-        auto& queueRequirements = deviceRequirements.emplace<un::DeviceQueueRequirements>();
+        auto& queueRequirements = deviceRequirements.emplace<device_queue_requirements>();
 
-        queueRequirements.emplace<un::VulkanQueueAvailableRequirement>(vk::QueueFlagBits::eGraphics);
-        queueRequirements.emplace<un::VulkanQueueAvailableRequirement>(vk::QueueFlagBits::eTransfer);
+        queueRequirements.emplace<vulkan_queue_available_requirement>(vk::QueueFlagBits::eGraphics);
+        queueRequirements.emplace<vulkan_queue_available_requirement>(vk::QueueFlagBits::eTransfer);
 
-        auto& propertiesRequirements = deviceRequirements.emplace<un::DevicePropertiesRequirements>();
-        propertiesRequirements.emplace<VulkanDeviceTypeRequirement>(
+        auto& propertiesRequirements = deviceRequirements.emplace<device_properties_requirements>();
+        propertiesRequirements.emplace<vulkan_device_type_requirement>(
             std::initializer_list<vk::PhysicalDeviceType>(
                 {
                     vk::PhysicalDeviceType::eDiscreteGpu,
@@ -103,19 +104,18 @@ namespace un {
             )
         );
 
-
         std::unordered_map<u32, u32> scores;
         for (u32 i = 0; i < devices.size(); ++i) {
             const vk::PhysicalDevice& device = devices[i];
             vk::PhysicalDeviceProperties properties = device.getProperties();
-            un::Validator validator;
+            validator validator;
             deviceRequirements.check(device, validator);
-            if (!validator.isValid()) {
+            if (!validator.is_valid()) {
                 LOG(INFO) << "Device " << RED(properties.deviceName) << " is not suitable.";
-                const auto& problems = validator.getProblems();
+                const auto& problems = validator.get_problems();
                 LOG(INFO) << "Problems (" << problems.size() << "):";
-                for (const un::Problem& problem : problems) {
-                    LOG(INFO) << RED(problem.getDescription());
+                for (const problem& problem : problems) {
+                    LOG(INFO) << RED(problem.get_description());
                 }
                 //Not suitable
                 continue;
@@ -128,7 +128,7 @@ namespace un {
             //TODO: Scoring
             scores[i] = score;
         }
-        typedef typename std::unordered_map<u32, u32>::value_type pair_type;
+        using pair_type = std::unordered_map<u32, u32>::value_type;
         auto electedIndex = std::max_element(
             std::begin(scores), std::end(scores),
             [](const pair_type& p1, const pair_type& p2) {
@@ -140,10 +140,14 @@ namespace un {
 
         auto physicalDevice = elected;
         auto deviceProperties = physicalDevice.getProperties();
-        LOG(INFO) << "Elected " << GREEN(deviceProperties.deviceName) << " with score: " << PURPLE(score);
+        LOG(INFO) << "Elected " << GREEN(deviceProperties.deviceName) << " with score: "
+                  << PURPLE(score);
         vk::DeviceCreateInfo deviceCreateInfo;
         std::vector<vk::QueueFamilyProperties> queueProperties = physicalDevice.getQueueFamilyProperties();
-        auto graphicsInfo = makeQueueCreateInfoFor(vk::QueueFlagBits::eGraphics, queueProperties);
+        auto graphicsInfo = make_queue_create_info_for(
+            vk::QueueFlagBits::eGraphics,
+            queueProperties
+        );
         float priority = 1.0;
 
         std::optional<u32> graphicsQueue, presentQueue;
@@ -163,17 +167,19 @@ namespace un {
             }
         }
         std::vector<vk::DeviceQueueCreateInfo> queuesToCreate;
-        queuesToCreate.emplace_back((vk::DeviceQueueCreateFlags) 0,
-                                    graphicsQueue.value(),
-                                    1,
-                                    &priority
+        queuesToCreate.emplace_back(
+            static_cast<vk::DeviceQueueCreateFlags>(0),
+            graphicsQueue.value(),
+            1,
+            &priority
         );
         bool isSame = graphicsQueue.value() == presentQueue.value();
         if (!isSame) {
-            queuesToCreate.emplace_back((vk::DeviceQueueCreateFlags) 0,
-                                        presentQueue.value(),
-                                        1,
-                                        &priority
+            queuesToCreate.emplace_back(
+                static_cast<vk::DeviceQueueCreateFlags>(0),
+                presentQueue.value(),
+                1,
+                &priority
             );
         }
         deviceCreateInfo.setQueueCreateInfos(queuesToCreate);
@@ -184,47 +190,46 @@ namespace un {
         }
         deviceCreateInfo.setPEnabledExtensionNames(deviceExtensions);
         vk::PhysicalDeviceFeatures features;
-//        features.geometryShader = true;
+        //        features.geometryShader = true;
         deviceCreateInfo.setPEnabledFeatures(&features);
         auto virtualDevice = physicalDevice.createDevice(deviceCreateInfo);
-        auto graphics = Queue(
+        auto graphics = queue(
             graphicsInfo.queueFamilyIndex,
             virtualDevice.getQueue(graphicsInfo.queueFamilyIndex, 0)
         );
         auto memoryProperties = physicalDevice.getMemoryProperties();
         if (isSame) {
-            return un::RenderingDevice(
+            return rendering_device(
                 virtualDevice,
                 physicalDevice,
                 surface,
                 graphics,
                 graphics,
-                memoryProperties,
-                deviceProperties
-            );
-        } else {
-            return un::RenderingDevice(
-                virtualDevice,
-                physicalDevice,
-                surface,
-                graphics,
-                un::Queue(
-                    presentQueue.value(),
-                    virtualDevice.getQueue(presentQueue.value(), 0)
-                ),
                 memoryProperties,
                 deviceProperties
             );
         }
+        return rendering_device(
+            virtualDevice,
+            physicalDevice,
+            surface,
+            graphics,
+            queue(
+                presentQueue.value(),
+                virtualDevice.getQueue(presentQueue.value(), 0)
+            ),
+            memoryProperties,
+            deviceProperties
+        );
     }
 
-    u32 RenderingDevice::selectMemoryTypeFor(
+    u32 rendering_device::select_memory_type_for(
         const vk::MemoryRequirements& requirements,
         vk::MemoryPropertyFlags flags
     ) const {
         u32 typeFilter = requirements.memoryTypeBits;
-        for (u32 i = 0; i < memoryProperties.memoryTypeCount; ++i) {
-            vk::MemoryType type = memoryProperties.memoryTypes[i];
+        for (u32 i = 0; i < _memoryProperties.memoryTypeCount; ++i) {
+            vk::MemoryType type = _memoryProperties.memoryTypes[i];
             if ((type.propertyFlags & flags) != flags) {
                 continue;
             }
@@ -235,44 +240,44 @@ namespace un {
         return -1;
     }
 
-    Queue& RenderingDevice::getGraphics() {
-        return graphics;
+    queue& rendering_device::get_graphics() {
+        return _graphics;
     }
 
-    const Queue& RenderingDevice::getGraphics() const {
-        return graphics;
+    const queue& rendering_device::get_graphics() const {
+        return _graphics;
     }
 
-    Queue& RenderingDevice::getPresent() {
+    queue& rendering_device::get_present() {
         return present;
     }
 
-    const vk::PhysicalDeviceMemoryProperties&
-    RenderingDevice::getMemoryProperties() const {
-        return memoryProperties;
+    const vk::PhysicalDeviceMemoryProperties& rendering_device::get_memory_properties() const {
+        return _memoryProperties;
     }
 
-    const vk::PhysicalDeviceProperties& RenderingDevice::getDeviceProperties() const {
-        return deviceProperties;
+    const vk::PhysicalDeviceProperties& rendering_device::get_device_properties() const {
+        return _deviceProperties;
     }
 
-    RenderingDevice::RenderingDevice(
+    rendering_device::rendering_device(
         const vk::Device& virtualDevice,
         const vk::PhysicalDevice& physicalDevice,
         const vk::SurfaceKHR& surface,
-        const Queue& present,
-        const Queue& graphics,
+        const queue& present,
+        const queue& graphics,
         const vk::PhysicalDeviceMemoryProperties& memoryProperties,
         const vk::PhysicalDeviceProperties& deviceProperties
-    ) : virtualDevice(virtualDevice),
-        physicalDevice(physicalDevice),
-        surface(surface),
+    ) : _virtualDevice(virtualDevice),
+        _physicalDevice(physicalDevice),
+        _surface(surface),
         present(present),
-        graphics(graphics),
-        memoryProperties(memoryProperties),
-        deviceProperties(deviceProperties) { }
+        _graphics(graphics),
+        _memoryProperties(memoryProperties),
+        _deviceProperties(deviceProperties) {
+    }
 
-    const Queue& RenderingDevice::getPresent() const {
+    const queue& rendering_device::get_present() const {
         return present;
     }
 }

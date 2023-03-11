@@ -8,25 +8,26 @@
 #include <algorithms/max_rectangles_algorithm.h>
 
 namespace un::packer {
-    class AlgorithmRegistry {
+    class algorithm_registry {
     private:
-        std::vector<std::shared_ptr<un::packer::PackingAlgorithm>> algorithms;
+        std::vector<std::shared_ptr<packing_algorithm>> _algorithms;
+
     public:
-        AlgorithmRegistry() {
+        algorithm_registry() {
             un::for_types<
-                un::packer::MaxRectanglesAlgorithm<un::bottomLeftHeuristic>,
-                un::packer::MaxRectanglesAlgorithm<un::bestLongSideFitHeuristic>,
-                un::packer::MaxRectanglesAlgorithm<un::bestShortSideFitHeuristic>,
-                un::packer::MaxRectanglesAlgorithm<un::bestAreaFitHeuristic>
+                max_rectangles_algorithm<bottom_left_heuristic>,
+                max_rectangles_algorithm<best_long_side_fit_heuristic>,
+                max_rectangles_algorithm<best_short_side_fit_heuristic>,
+                max_rectangles_algorithm<best_area_fit_heuristic>
             >(
                 [&]<typename T>() {
-                    algorithms.emplace_back(std::make_shared<T>());
+                    _algorithms.emplace_back(std::make_shared<T>());
                 }
             );
         }
 
-        const std::vector<std::shared_ptr<un::packer::PackingAlgorithm>>& getAlgorithms() const {
-            return algorithms;
+        const std::vector<std::shared_ptr<packing_algorithm>>& get_algorithms() const {
+            return _algorithms;
         }
     };
 }

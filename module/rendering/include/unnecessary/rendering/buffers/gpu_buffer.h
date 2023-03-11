@@ -4,16 +4,16 @@
 #include <vulkan/vulkan.hpp>
 
 namespace un {
-    class GPUBuffer {
+    class gpu_buffer {
     private:
-        vk::Buffer value;
+        vk::Buffer _value;
     public:
         vk::Buffer operator*() const {
-            return value;
+            return _value;
         }
 
         vk::Buffer operator->() const {
-            return value;
+            return _value;
         }
     };
 }

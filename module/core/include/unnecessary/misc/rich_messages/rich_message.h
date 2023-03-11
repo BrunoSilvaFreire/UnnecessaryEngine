@@ -8,38 +8,38 @@
 #include <unnecessary/misc/rich_messages/message.h>
 
 namespace un {
-
-    class RichMessage : public CompositeMessage {
+    class rich_message : public composite_message {
     private:
         std::string _indent;
         std::string _header;
         std::string _level = INFO;
+
     public:
-        explicit RichMessage(std::string indent, std::string header);
+        explicit rich_message(std::string indent, std::string header);
 
-        ~RichMessage();
+        ~rich_message();
 
-        void setLevel(const std::string& level);
+        void set_level(const std::string& level);
 
-        void setHeader(const std::string& header);
+        void set_header(const std::string& header);
 
     protected:
         void prefix(
             std::ostream& stream,
             std::size_t i,
             std::size_t lineNbr,
-            const std::unique_ptr<IMessage>& msg
+            const std::unique_ptr<message>& msg
         ) const override;
     };
 
-    UN_AGGRESSIVE_INLINE un::RichMessage message() {
-        return un::RichMessage("", "");
+    UN_AGGRESSIVE_INLINE rich_message message() {
+        return rich_message("", "");
     }
 
-    UN_AGGRESSIVE_INLINE un::RichMessage
+    UN_AGGRESSIVE_INLINE rich_message
 
     message(const std::string& header) {
-        return un::RichMessage("", header);
+        return rich_message("", header);
     }
 }
 

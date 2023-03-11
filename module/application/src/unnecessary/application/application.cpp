@@ -1,65 +1,64 @@
 #include <unnecessary/application/application.h>
 
 namespace un {
-    void AppLoop::late(un::EventVoid::Listener listener) {
-        lateStep += listener;
+    void app_loop::late(event_void::listener listener) {
+        _lateStep += listener;
     }
 
-    void AppLoop::step() {
-        earlyStep();
-        lateStep();
+    void app_loop::step() {
+        _earlyStep();
+        _lateStep();
     }
 
-    void AppLoop::early(un::EventVoid::Listener listener) {
-        earlyStep += listener;
+    void app_loop::early(event_void::listener listener) {
+        _earlyStep += listener;
     }
 
-    const AppLoop& Application::getFixedLoop() const {
-        return fixedLoop;
+    const app_loop& application::get_fixed_loop() const {
+        return _fixedLoop;
     }
 
-    const AppLoop& Application::getVariableLoop() const {
-        return variableLoop;
+    const app_loop& application::get_variable_loop() const {
+        return _variableLoop;
     }
 
-    AppLoop& Application::getFixedLoop() {
-        return fixedLoop;
+    app_loop& application::get_fixed_loop() {
+        return _fixedLoop;
     }
 
-    AppLoop& Application::getVariableLoop() {
-        return variableLoop;
+    app_loop& application::get_variable_loop() {
+        return _variableLoop;
     }
 
-    void Application::waitExit() {
-
+    void application::wait_exit() {
     }
 
-    float Application::getFixedFrameRate() const {
-        return fixedFrameRate;
+    float application::get_fixed_frame_rate() const {
+        return _fixedFrameRate;
     }
 
-    void Application::setFixedFrameRate(float fixedFrameRate) {
-        Application::fixedFrameRate = fixedFrameRate;
+    void application::set_fixed_frame_rate(float fixedFrameRate) {
+        _fixedFrameRate = fixedFrameRate;
     }
 
-    const EventVoid& Application::getOnStart() const {
-        return onStart;
+    const event_void& application::get_on_start() const {
+        return _onStart;
     }
 
-    const EventVoid& Application::getOnStop() const {
-        return onStop;
+    const event_void& application::get_on_stop() const {
+        return _onStop;
     }
 
-    un::EventVoid& Application::getOnStop() {
-        return onStop;
+    event_void& application::get_on_stop() {
+        return _onStop;
     }
 
-    un::EventVoid& Application::getOnStart() {
-        return onStart;
+    event_void& application::get_on_start() {
+        return _onStart;
     }
 
-    void Application::stop() {
-        onStop();
-        running = false;
+    void application::stop() {
+        _onStop();
+        _running = false;
     }
 }

@@ -10,36 +10,36 @@
 namespace un {
 
     template<typename TVulkanValue>
-    class VulkanWrapper {
+    class vulkan_wrapper {
     public:
-        typedef TVulkanValue ValueType;
+        using value_type = TVulkanValue;
     protected:
-        ValueType _wrapped;
+        value_type _wrapped;
 
-        VulkanWrapper() : _wrapped(nullptr) {
+        vulkan_wrapper() : _wrapped(nullptr) {
         }
 
     public:
-        VulkanWrapper(ValueType wrapped) : _wrapped(wrapped) {
+        vulkan_wrapper(value_type wrapped) : _wrapped(wrapped) {
         }
 
-        operator ValueType() {
+        operator value_type() {
             return _wrapped;
         }
 
-        ValueType operator*() {
+        value_type operator*() {
             return _wrapped;
         }
 
-        ValueType* operator->() {
+        value_type* operator->() {
             return _wrapped;
         }
 
-        const ValueType& operator*() const {
+        const value_type& operator*() const {
             return _wrapped;
         }
 
-        const ValueType* operator->() const {
+        const value_type* operator->() const {
             return &_wrapped;
         }
     };

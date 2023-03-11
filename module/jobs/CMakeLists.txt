@@ -74,7 +74,7 @@ add_custom_target(
     ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_BINDIR}/mazes
 )
 
-foreach (INDEX IN LISTS JOBS_MAZES_SIZES)
+foreach(INDEX IN LISTS JOBS_MAZES_SIZES)
     set(MAZE_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mazes/maze_${INDEX}.json)
     message(VERBOSE "Discovered maze: ${MAZE_OUTPUT}")
     add_custom_command(
@@ -92,7 +92,7 @@ foreach (INDEX IN LISTS JOBS_MAZES_SIZES)
         COMMENT "Generating maze of size ${INDEX}..."
 
     )
-endforeach ()
+endforeach()
 add_dependencies(
     unnecessary_jobs_tests
     unnecessary_jobs_generate_mazes

@@ -1,41 +1,41 @@
-
 #include <unnecessary/shaderizer/inputs/glsl_type.h>
 
 namespace un {
-    GlslType::GlslType() { }
+    glsl_type::glsl_type() {
+    }
 
-    GlslType::GlslType(
+    glsl_type::glsl_type(
         size_t singleSize,
         size_t numElements,
         vk::Format format
     ) : singleSize(
         singleSize
-    ), numElements(numElements), format(format) { }
+    ), numElements(numElements), format(format) {
+    }
 
-    size_t GlslType::getSingleSize() const {
+    size_t glsl_type::get_single_size() const {
         return singleSize;
     }
 
-    size_t GlslType::getNumElements() const {
+    size_t glsl_type::get_num_elements() const {
         return numElements;
     }
 
-    vk::Format GlslType::getFormat() const {
+    vk::Format glsl_type::get_format() const {
         return format;
     }
 
-    bool GlslTypeDatabase::tryFind(std::string name, un::GlslType** pType) {
+    bool glsl_type_database::try_find(std::string name, GlslType** pType) {
         const auto& iterator = types.find(name);
         if (iterator != types.end()) {
             *pType = &iterator->second;
             return true;
-        } else {
-            pType = nullptr;
-            return false;
         }
+        pType = nullptr;
+        return false;
     }
 
-    GlslTypeDatabase::GlslTypeDatabase() {
+    glsl_type_database::glsl_type_database() {
         // Generate vec's
         std::array<vk::Format, 3> vecFormat = {
             vk::Format::eR32G32Sfloat,
@@ -46,7 +46,7 @@ namespace un {
             vk::Format::eUndefined,
             vk::Format::eUndefined,
             vk::Format::eUndefined,
-        };;
+        };
         for (std::size_t i = 2; i <= 4; ++i) {
             std::string name = "vec";
             name += std::to_string(i);
@@ -54,7 +54,7 @@ namespace un {
             translate(name, cpp + std::to_string(i));
             types.emplace(
                 name,
-                un::GlslType(
+                glsl_type(
                     sizeof(float),
                     i,
                     vecFormat[i - 2]
@@ -66,7 +66,7 @@ namespace un {
             name += std::to_string(i);
             std::string cpp = "glm::mat";
             translate(name, cpp + std::to_string(i));
-            types[name] = un::GlslType(
+            types[name] = glsl_type(
                 sizeof(float),
                 i * i,
                 matForms[i - 2]
@@ -74,11 +74,11 @@ namespace un {
         }
     }
 
-    void GlslTypeDatabase::translate(std::string glsl, std::string cpp) {
+    void glsl_type_database::translate(std::string glsl, std::string cpp) {
         glsl2Cpp[glsl] = cpp;
     }
 
-    std::string GlslTypeDatabase::glslToCpp(const std::string& basicString) {
+    std::string glsl_type_database::glsl_to_cpp(const std::string& basicString) {
         return glsl2Cpp[basicString];
     }
 }

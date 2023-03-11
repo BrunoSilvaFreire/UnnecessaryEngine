@@ -6,32 +6,33 @@
 #include <unnecessary/def.h>
 
 namespace un {
+    using job_handle = u32;
 
-    typedef u32 JobHandle;
-
-    template<typename TWorker>
-    class Job {
+    template<typename t_worker>
+    class job {
     public:
-        typedef TWorker WorkerType;
+        using worker_type = t_worker;
+
     protected:
-        std::string name = "Unnamed Job";
+        std::string _name = "Unnamed Job";
+
     public:
-        Job() = default;
+        job() = default;
 
-        Job(const Job<WorkerType>&) = delete;
+        job(const job<worker_type>&) = delete;
 
-        Job(Job<WorkerType>&&) = delete;
+        job(job<worker_type>&&) = delete;
 
-        virtual ~Job() = default;
+        virtual ~job() = default;
 
-        virtual void operator()(WorkerType* worker) = 0;
+        virtual void operator()(worker_type* worker) = 0;
 
-        const std::string& getName() const {
-            return name;
+        const std::string& get_name() const {
+            return _name;
         }
 
-        void setName(const std::string& newName) {
-            name = newName;
+        void set_name(const std::string& newName) {
+            _name = newName;
         }
     };
 }

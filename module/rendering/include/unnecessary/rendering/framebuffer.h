@@ -8,24 +8,22 @@
 #include <unnecessary/rendering/vulkan/vulkan_wrapper.h>
 
 namespace un {
+    class renderer;
 
-    class Renderer;
+    class render_graph;
 
-    class RenderGraph;
-
-    class FrameBuffer : public VulkanWrapper<vk::Framebuffer> {
+    class frame_buffer : public vulkan_wrapper<vk::Framebuffer> {
     private:
-        std::vector<un::Image> ownedImages;
-        std::vector<un::ImageView> ownedImagesView;
+        std::vector<image> _ownedImages;
+        std::vector<image_view> _ownedImagesView;
+
     public:
-        FrameBuffer(
-            un::Renderer* renderer,
-            const un::RenderGraph& graph,
+        frame_buffer(
+            renderer* renderer,
+            const render_graph& graph,
             vk::RenderPass renderPass,
             std::size_t frameBufferIndex
         );
-
     };
-
 }
 #endif

@@ -10,12 +10,11 @@
 #include <optional>
 
 namespace un {
-    class RenderPass;
+    class render_pass;
 
-    class Renderer;
+    class renderer;
 
-
-    struct PassOutput {
+    struct pass_output {
         vk::Semaphore doneSemaphore;
         vk::PipelineStageFlags pipelineStage;
         vk::CommandBuffer passCommands;
@@ -24,49 +23,50 @@ namespace un {
     /**
      * Contains information needed for _rendering a single frame
      */
-    struct FrameData {
+    struct frame_data {
     public:
-        std::vector<un::PassOutput> passesOutputs;
+        std::vector<pass_output> passesOutputs;
         vk::RenderPass renderPass;
         vk::Framebuffer framebuffer;
 
-        un::CommandBuffer requestCommandBuffer(
-            un::GraphicsWorker* graphicsWorker,
-            const size_t renderPassIndex
+        command_buffer request_command_buffer(
+            graphics_worker* graphicsWorker,
+            size_t renderPassIndex
         );
     };
 
-    class RenderGraph : public un::DependencyGraph<std::unique_ptr<un::RenderPass>> {
+    class render_graph : public dependency_graph<std::unique_ptr<render_pass>> {
     private:
-        std::optional<vk::RenderPass> renderPass;
-        std::vector<un::FrameBuffer> frameBuffers;
+        std::optional<vk::RenderPass> _renderPass;
+        std::vector<frame_buffer> _frameBuffers;
         /**
           * Attachments identified by indices in this set already exists and
           * don't need to be created
           */
-        std::set<u32> borrowedAttachments;
-        std::vector<un::Attachment> attachments;
+        std::set<u32> _borrowedAttachments;
+        std::vector<attachment> _attachments;
+
     public:
-        template<typename T, typename ...Args>
-        void enqueuePass(Args... args) {
-            enqueuePass(std::make_unique<T>(args...));
+        template<typename T, typename... Args>
+        void enqueue_pass(Args... args) {
+            enqueue_pass(std::make_unique<T>(args...));
         }
 
-        void enqueuePass(std::unique_ptr<un::RenderPass>&& pass) {
+        void enqueue_pass(std::unique_ptr<render_pass>&& pass) {
             add(std::move(pass));
         }
 
-        void bake(un::Renderer& renderer);
+        void bake(renderer& renderer);
 
-        vk::RenderPass getVulkanPass() const {
-            return *renderPass;
+        vk::RenderPass get_vulkan_pass() const {
+            return *_renderPass;
         }
 
-        vk::Framebuffer getFrameBuffer(std::size_t index) const {
-            return *frameBuffers[index];
+        vk::Framebuffer get_frame_buffer(std::size_t index) const {
+            return *_frameBuffers[index];
         }
 
-        std::size_t addBorrowedAttachment(
+        std::size_t add_borrowed_attachment(
             const vk::ClearValue& clearValue,
             vk::AttachmentDescriptionFlags flags = {},
             vk::Format format = vk::Format::eUndefined,
@@ -79,7 +79,7 @@ namespace un {
             vk::ImageLayout finalLayout = vk::ImageLayout::eUndefined
         );
 
-        std::size_t addColorAttachment(
+        std::size_t add_color_attachment(
             vk::ImageUsageFlags usageFlags,
             vk::ImageAspectFlags aspectFlags,
             const vk::ClearColorValue& clearValue,
@@ -92,7 +92,7 @@ namespace un {
             vk::ImageLayout finalLayout = vk::ImageLayout::eUndefined
         );
 
-        std::size_t addOwnedAttachment(
+        std::size_t add_owned_attachment(
             vk::ImageUsageFlags usageFlags,
             vk::ImageAspectFlags aspectFlags,
             const vk::ClearValue& clearValue,
@@ -107,15 +107,15 @@ namespace un {
             vk::ImageLayout finalLayout = vk::ImageLayout::eUndefined
         );
 
-        const un::Attachment& getAttachment(std::size_t index) const;
+        const attachment& get_attachment(std::size_t index) const;
 
-        void setAttachmentName(size_t attachment, std::string name);
+        void set_attachment_name(size_t attachment, std::string name);
 
-        bool isAttachmentBorrowed(size_t i) const;
+        bool is_attachment_borrowed(std::size_t index) const;
 
-        const std::vector<un::FrameBuffer>& getFrameBuffers() const;
+        const std::vector<frame_buffer>& get_frame_buffers() const;
 
-        const std::vector<un::Attachment>& getAttachments() const;
+        const std::vector<attachment>& get_attachments() const;
     };
 };
 #endif //UNNECESSARYENGINE_RENDER_GRAPH_H

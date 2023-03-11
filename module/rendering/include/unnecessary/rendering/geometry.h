@@ -12,38 +12,38 @@
 
 namespace un {
 
-    class LocalGeometry {
+    class local_geometry {
     private:
-        un::VertexLayout vertexLayout;
-        un::Buffer vertexBuffer;
-        un::Buffer indexBuffer;
-        std::size_t numVertices;
+        un::vertex_layout _vertexLayout;
+        un::byte_buffer _vertexBuffer;
+        un::byte_buffer _indexBuffer;
+        std::size_t _numVertices;
     public:
     };
 
-    class DeviceGeometry {
+    class device_geometry {
     private:
-        un::GPUBuffer vertexBuffer;
-        un::GPUBuffer indexBuffer;
-        std::size_t numVertices;
+        un::gpu_buffer _vertexBuffer;
+        un::gpu_buffer _indexBuffer;
+        std::size_t _numVertices;
     public:
-        const un::GPUBuffer& getIndexBuffer() const {
-            return vertexBuffer;
+        const un::gpu_buffer& get_index_buffer() const {
+            return _vertexBuffer;
         }
 
-        const GPUBuffer& getVertexBuffer() const {
-            return vertexBuffer;
+        const gpu_buffer& get_vertex_buffer() const {
+            return _vertexBuffer;
         }
 
-        std::size_t getNumVertices() const {
-            return numVertices;
+        std::size_t get_num_vertices() const {
+            return _numVertices;
         }
     };
 
-    class Geometry {
+    class geometry {
     private:
-        LocalGeometry ram;
-        DeviceGeometry vRam;
+        local_geometry _ram;
+        device_geometry _vRam;
     public:
     };
 }

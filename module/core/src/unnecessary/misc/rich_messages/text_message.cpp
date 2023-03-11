@@ -1,11 +1,11 @@
 #include <unnecessary/misc/rich_messages/text_message.h>
 
 namespace un {
-    void TextMessage::write(std::ostream& stream) const {
+    void text_message::write(std::ostream& stream) const {
         stream << _text.str();
     }
 
-    TextMessage::TextMessage() : _text() {
+    text_message::text_message() : _text() {
         _text << termcolor::colorize;
     }
 }

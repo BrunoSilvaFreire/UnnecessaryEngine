@@ -1,9 +1,10 @@
 #include "unnecessary/serialization/serialized_string.h"
 
 namespace un {
-    un::SerializedType SerializedString::getType() {
-        return un::SerializedType::eString;
+    serialized_type serialized_string::get_type() {
+        return string;
     }
 
-    SerializedString::SerializedString(const std::string& value) : SerializedPrimitive(value) { }
+    serialized_string::serialized_string(const std::string& value) : serialized_primitive(value) {
+    }
 }

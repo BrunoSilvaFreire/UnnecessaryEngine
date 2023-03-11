@@ -9,91 +9,91 @@
 
 namespace un {
 
-    template<typename TJobSystem>
-    class DynamicFlow;
+    template<typename t_job_system>
+    class dynamic_flow;
 
-    template<typename TJobSystem>
-    class DynamicChain;
+    template<typename t_job_system>
+    class dynamic_chain;
 
-    template<typename TJobSystem>
-    using Dynamic = std::function<void(un::DynamicChain<TJobSystem>& chain)>;
+    template<typename t_job_system>
+    using dynamic = std::function<void(un::dynamic_chain<t_job_system>& chain)>;
 
-    template<typename TJobSystem>
-    class DynamicChain : public un::JobChain<TJobSystem> {
+    template<typename t_job_system>
+    class dynamic_chain : public un::job_chain<t_job_system> {
     private:
-        un::ptr<un::DynamicFlow<TJobSystem>> _flow;
-        std::unordered_map<un::JobHandle, un::Dynamic<TJobSystem>> _dynamics;
+        un::ptr<un::dynamic_flow<t_job_system>> _flow;
+        std::unordered_map<un::job_handle, un::dynamic<t_job_system>> _dynamics;
     public:
-        explicit DynamicChain(
-            un::ptr<DynamicFlow<TJobSystem>> flow,
+        explicit dynamic_chain(
+            un::ptr<dynamic_flow<t_job_system>> flow,
             bool dispatchOnDispose = true
         );
 
-        DynamicChain(const un::DynamicChain<TJobSystem>&) = delete;
+        dynamic_chain(const un::dynamic_chain<t_job_system>&) = delete;
 
-        DynamicChain(un::DynamicChain<TJobSystem>&& other) noexcept
-            : un::JobChain<TJobSystem>(std::move(other)),
+        dynamic_chain(un::dynamic_chain<t_job_system>&& other) noexcept
+            : un::job_chain<t_job_system>(std::move(other)),
               _flow(std::move(other._flow)),
               _dynamics(std::move(other._dynamics)) {
-            other.dispatchOnDestruct = false;
+            other._dispatchOnDestruct = false;
 
         };
 
-        ~DynamicChain() override;
+        ~dynamic_chain() override;
 
-        DynamicChain&& dynamic(un::JobHandle handle, Dynamic<TJobSystem> dyn);
+        dynamic_chain&& dynamic(un::job_handle handle, dynamic<t_job_system> dyn);
 
         template<typename TJob, typename ...TArgs>
-        un::DynamicChain<TJobSystem>& enqueue(un::Dynamic<TJobSystem> dyn, TArgs... args) {
-            un::JobHandle handle;
+        un::dynamic_chain<t_job_system>& enqueue(un::dynamic<t_job_system> dyn, TArgs... args) {
+            un::job_handle handle;
             this->template immediately<TJob>(&handle, std::forward<TArgs>(args)...);
             dynamic(handle, dyn);
             return *this;
         }
 
         template<typename TJob>
-        un::DynamicChain<TJobSystem>& enqueue(un::Dynamic<TJobSystem> dyn, un::ptr<TJob> job) {
-            un::JobHandle handle;
+        un::dynamic_chain<t_job_system>& enqueue(un::dynamic<t_job_system> dyn, un::ptr<TJob> job) {
+            un::job_handle handle;
             this->template immediately<TJob>(&handle, job);
             dynamic(handle, dyn);
             return *this;
         }
 
-        friend class DynamicFlow<TJobSystem>;
+        friend class dynamic_flow<t_job_system>;
     };
 
-    template<typename TJobSystem>
-    class DynamicFlow {
+    template<typename t_job_system>
+    class dynamic_flow {
     public:
-        friend class DynamicChain<TJobSystem>;
+        friend class dynamic_chain<t_job_system>;
     private:
-        un::ptr<TJobSystem> _jobSystem;
+        un::ptr<t_job_system> _jobSystem;
         std::mutex _inFlightMutex;
-        std::unordered_set<un::JobHandle> _pendingJobs;
-        std::unordered_map<un::JobHandle, un::Dynamic<TJobSystem>> _dynamics;
+        std::unordered_set<un::job_handle> _pendingJobs;
+        std::unordered_map<un::job_handle, un::dynamic<t_job_system>> _dynamics;
         //
         std::condition_variable _completed;
 
-        void include(un::DynamicChain<TJobSystem>& chain, bool lock) {
+        void include(un::dynamic_chain<t_job_system>& chain, bool lock) {
             if (lock) {
                 _inFlightMutex.lock();
             }
             const auto& toAdd = chain._dynamics;
             _dynamics.insert(toAdd.begin(), toAdd.end());
             for (const auto& item : toAdd) {
-                JobHandle handle = item.first;
+                job_handle handle = item.first;
                 _pendingJobs.insert(handle);
-                JobHandle dynHandle;
-                chain.template after<LambdaJob<>>(
+                job_handle dynHandle;
+                chain.template after<lambda_job<>>(
                     handle,
                     &dynHandle,
                     [this, handle]() {
-                        onJobFinished(handle);
+                        on_job_finished(handle);
                     }
                 );
                 std::stringstream ss;
                 ss << "Invoke dynamic for job " << handle << ".";
-                chain.setName(dynHandle, ss.str());
+                chain.set_name(dynHandle, ss.str());
             }
 
             if (lock) {
@@ -101,18 +101,18 @@ namespace un {
             }
         }
 
-        void onJobFinished(un::JobHandle handle) {
+        void on_job_finished(un::job_handle handle) {
 
             std::lock_guard<std::mutex> lock(_inFlightMutex);
             _pendingJobs.erase(handle);
             auto iterator = _dynamics.find(handle);
             if (iterator != _dynamics.end()) {
                 auto& dynamic = iterator->second;
-                un::DynamicChain<TJobSystem> subChain(this, false);
+                un::dynamic_chain<t_job_system> subChain(this, false);
                 dynamic(subChain);
                 include(subChain, false);
                 /* const auto& jobs = subChain.getAllJobs();
-                 TJobSystem::for_each_archetype(
+                 t_job_system::for_each_archetype(
                      [&]<typename TJobArchetype, std::size_t Index>() {
                          const std::set<un::JobHandle>& batch = jobs.template getBatch<TJobArchetype>();
                          if (batch.empty()) {
@@ -137,10 +137,8 @@ namespace un {
         }
 
     public:
-        DynamicFlow(
-            un::ptr<TJobSystem> jobSystem
-        ) : _pendingJobs(),
-            _jobSystem(jobSystem) {
+        explicit dynamic_flow(un::ptr<t_job_system> jobSystem) : _pendingJobs(),
+                                                                 _jobSystem(jobSystem) {
         }
 
         void wait() {
@@ -148,34 +146,34 @@ namespace un {
             _completed.wait(lock);
         }
 
-
         template<typename TJob, typename ...TArgs>
-        un::DynamicChain<TJobSystem> enqueue(un::Dynamic<TJobSystem> dynamic, TArgs... args) {
-            un::DynamicChain<TJobSystem> chain(this);
+        un::dynamic_chain<t_job_system> enqueue(un::dynamic<t_job_system> dynamic, TArgs... args) {
+            un::dynamic_chain<t_job_system> chain(this);
             chain.template enqueue<TJob>(dynamic, args...);
             return std::move(chain);
         }
     };
 
-    template<typename TJobSystem>
-    DynamicChain<TJobSystem>::DynamicChain(
-        ptr<un::DynamicFlow<TJobSystem>> flow,
+    template<typename t_job_system>
+    dynamic_chain<t_job_system>::dynamic_chain(
+        ptr<un::dynamic_flow<t_job_system>> flow,
         bool dispatchOnDispose
-    ) : un::JobChain<TJobSystem>(flow->_jobSystem, dispatchOnDispose),
-        _flow(flow) { }
+    ) : un::job_chain<t_job_system>(flow->_jobSystem, dispatchOnDispose),
+        _flow(flow) {
+    }
 
-    template<typename TJobSystem>
-    DynamicChain<TJobSystem>&& DynamicChain<TJobSystem>::dynamic(
-        un::JobHandle handle,
-        un::Dynamic<TJobSystem> dyn
+    template<typename t_job_system>
+    dynamic_chain<t_job_system>&& dynamic_chain<t_job_system>::dynamic(
+        un::job_handle handle,
+        un::dynamic<t_job_system> dyn
     ) {
         _dynamics[handle] = dyn;
         return std::move(*this);
     }
 
-    template<typename TJobSystem>
-    DynamicChain<TJobSystem>::~DynamicChain() {
-        if (this->dispatchOnDestruct) {
+    template<typename t_job_system>
+    dynamic_chain<t_job_system>::~dynamic_chain() {
+        if (this->_dispatchOnDestruct) {
             _flow->include(*this, true);
         }
     }

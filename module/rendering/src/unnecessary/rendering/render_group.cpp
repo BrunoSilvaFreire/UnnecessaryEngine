@@ -1,73 +1,73 @@
 #include <unnecessary/rendering/render_group.h>
 
 namespace un {
-
-    bool MaterialBatch::operator<(const MaterialBatch& rhs) const {
-        return material < rhs.material;
+    bool material_batch::operator<(const material_batch& rhs) const {
+        return _material < rhs._material;
     }
 
-    bool MaterialBatch::operator>(const MaterialBatch& rhs) const {
+    bool material_batch::operator>(const material_batch& rhs) const {
         return rhs < *this;
     }
 
-    bool MaterialBatch::operator<=(const MaterialBatch& rhs) const {
+    bool material_batch::operator<=(const material_batch& rhs) const {
         return !(rhs < *this);
     }
 
-    bool MaterialBatch::operator>=(const MaterialBatch& rhs) const {
+    bool material_batch::operator>=(const material_batch& rhs) const {
         return !(*this < rhs);
     }
 
-    const std::vector<un::Drawable>& GeometryBatch::getDrawables() const {
+    const std::vector<Drawable>& geometry_batch::get_drawables() const {
         return drawables;
     }
 
-    MaterialBatch::MaterialBatch(Material* material) : material(material) { }
-
-    Material* MaterialBatch::getMaterial() const {
-        return material;
+    material_batch::material_batch(material* material) : _material(material) {
     }
 
-    un::GeometryBatch&
-    MaterialBatch::getOrCreateMeshBatchFor(const un::DeviceGeometry* const geometry) {
-        auto found = geometryBatches.find(geometry);
-        if (found != geometryBatches.end()) {
+    material* material_batch::get_material() const {
+        return _material;
+    }
+
+    geometry_batch&
+    material_batch::get_or_create_mesh_batch_for(const device_geometry* const geometry) {
+        auto found = _geometryBatches.find(geometry);
+        if (found != _geometryBatches.end()) {
             return found.operator*().second;
         }
-        auto iterator = geometryBatches.emplace(
+        auto iterator = _geometryBatches.emplace(
             std::make_pair(
                 geometry,
-                un::GeometryBatch()
+                geometry_batch()
             )
         ).first;
         return iterator->second;
     }
 
-    const MaterialBatch::GeometryMap& MaterialBatch::getGeometryBatches() const {
-        return geometryBatches;
+    const material_batch::geometry_map& material_batch::get_geometry_batches() const {
+        return _geometryBatches;
     }
 
-    un::MaterialBatch& RenderGroup::getOrCreateBatchFor(un::Material* material) {
-        auto found = materialBatches.find(material);
-        if (found != materialBatches.end()) {
-            return const_cast<MaterialBatch&>(found.operator*());
+    material_batch& render_group::get_or_create_batch_for(material* material) {
+        auto found = _materialBatches.find(material);
+        if (found != _materialBatches.end()) {
+            return const_cast<material_batch&>(found.operator*());
         }
-        return const_cast<MaterialBatch&>(
-            materialBatches.emplace(material).first.operator*()
+        return const_cast<material_batch&>(
+            _materialBatches.emplace(material).first.operator*()
         );
     }
 
-    const std::set<un::MaterialBatch>& RenderGroup::getMaterialBatches() const {
-        return materialBatches;
+    const std::set<material_batch>& render_group::get_material_batches() const {
+        return _materialBatches;
     }
 
-    void RenderGroup::push(
-        un::Drawable drawable,
-        un::Material* material,
-        const un::DeviceGeometry* const geometry
+    void render_group::push(
+        Drawable drawable,
+        material* material,
+        const device_geometry* const geometry
     ) {
-        un::MaterialBatch& materialBatch = getOrCreateBatchFor(material);
-        un::GeometryBatch& geometryBatch = materialBatch.getOrCreateMeshBatchFor(geometry);
+        material_batch& materialBatch = get_or_create_batch_for(material);
+        geometry_batch& geometryBatch = materialBatch.get_or_create_mesh_batch_for(geometry);
         geometryBatch.drawables.push_back(drawable);
     }
 }

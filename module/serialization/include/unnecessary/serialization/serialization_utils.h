@@ -12,7 +12,7 @@ namespace un::serialization {
         const un::Serialized& parent,
         TLambda&& forEach
     ) {
-        for (const auto& [name, property] : parent.getNamedProperties()) {
+        for (const auto& [name, property] : parent.get_named_properties()) {
             forEach(name, property);
         }
     }

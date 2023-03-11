@@ -5,14 +5,14 @@
 #include <unnecessary/misc/rich_messages/message.h>
 
 namespace un {
-
-    class MapMessage final : public IMessage {
+    class map_message final : public message {
     private:
-        std::vector<std::pair<std::string, std::unique_ptr<un::IMessage>>> _named;
+        std::vector<std::pair<std::string, std::unique_ptr<message>>> _named;
 
         template<typename TChild>
         TChild& add_child(const std::string& name) {
-            return static_cast<TChild&>(*_named.emplace_back(name, std::make_unique<TChild>()).second);
+            return static_cast<TChild&>(*_named.emplace_back(name, std::make_unique<TChild>())
+                                               .second);
         }
 
         void prefix(
@@ -20,7 +20,7 @@ namespace un {
             const std::string& name,
             std::size_t i,
             std::size_t lineNbr,
-            const std::unique_ptr<IMessage>& msg
+            const std::unique_ptr<message>& msg
         ) const;
 
     protected:
@@ -29,9 +29,9 @@ namespace un {
     public:
         bool is_node() override;
 
-        un::TextMessage& text(const std::string& name);
+        text_message& text(const std::string& name);
 
-        un::TreeMessage& tree(const std::string& name);
+        tree_message& tree(const std::string& name);
     };
 }
 #endif

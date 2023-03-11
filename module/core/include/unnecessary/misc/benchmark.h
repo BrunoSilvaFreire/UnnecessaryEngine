@@ -1,4 +1,3 @@
-
 #ifndef UNNECESSARYENGINE_BENCHMARK_H
 #define UNNECESSARYENGINE_BENCHMARK_H
 
@@ -8,32 +7,34 @@
 
 namespace un {
     template<class Resolution = std::chrono::milliseconds>
-    class Chronometer {
+    class chronometer {
     public:
-        using Clock = std::conditional_t<std::chrono::high_resolution_clock::is_steady,
+        using clock = std::conditional_t<
+            std::chrono::high_resolution_clock::is_steady,
             std::chrono::high_resolution_clock,
-            std::chrono::steady_clock>;
+            std::chrono::steady_clock
+        >;
 
     private:
-        Clock::time_point _start;
+        clock::time_point _start;
 
     public:
-        Chronometer(bool autoStart = true) {
+        chronometer(bool autoStart = true) {
             if (autoStart) {
                 start();
             }
         };
 
         void start() {
-            _start = Clock::now();
+            _start = clock::now();
         }
 
-        Clock::time_point getStart() const {
+        clock::time_point get_start() const {
             return _start;
         }
 
         Resolution stop() const {
-            const auto end = Clock::now();
+            const auto end = clock::now();
             return std::chrono::duration_cast<Resolution>(end - _start);
         }
     };

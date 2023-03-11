@@ -10,78 +10,80 @@
 #include <unnecessary/jobs/misc/lambda_job.h>
 
 namespace un {
-    template<typename TWorker>
-    class WorkerChain {
+    template<typename t_worker>
+    class worker_chain {
     public:
-        typedef TWorker WorkerType;
-        typedef typename WorkerType::JobType JobType;
+        using worker_type = t_worker;
+        typedef typename worker_type::job_type job_type;
     private:
         /**
          * A job that has been added to this worker chain.
          * Note that has not yet been available for execution
          * unless @see submit has been called.
          */
-        class BookedJob {
+        class booked_job {
         private:
-            std::set<un::JobHandle> localDependencies;
+            std::set<un::job_handle> _localDependencies;
             /**
              * The job pointer.
              */
-            JobType* job;
+            job_type* _job;
         public:
-            BookedJob(JobType* job) : job(job) { }
+            booked_job(job_type* job) : _job(job) {
+            }
 
-            friend class WorkerChain<WorkerType>;
+            friend class worker_chain<worker_type>;
 
         };
 
         /**
          * Jobs that have no dependencies
          */
-        std::set<un::JobHandle> independent;
+        std::set<un::job_handle> _independent;
         /**
          * Jobs that no one depends on
          */
-        std::set<un::JobHandle> leafs;
-        std::vector<BookedJob> jobs;
+        std::set<un::job_handle> _leafs;
+        std::vector<booked_job> _jobs;
     public:
-        WorkerChain() : independent(), jobs() { }
+        worker_chain() : _independent(), _jobs() {
+        }
 
-        un::JobHandle immediately(JobType* job) {
-            un::JobHandle handle = jobs.size();
-            jobs.push_back(job);
-            independent.emplace(handle);
-            leafs.emplace(handle);
+        un::job_handle immediately(job_type* job) {
+            un::job_handle handle = _jobs.size();
+            _jobs.push_back(job);
+            _independent.emplace(handle);
+            _leafs.emplace(handle);
             return handle;
         }
 
-        void after(un::JobHandle dependsOn, un::JobHandle job) {
-            BookedJob& booked = jobs[job];
-            independent.erase(job);
-            leafs.erase(dependsOn);
-            booked.localDependencies.emplace(dependsOn);
+        void after(un::job_handle dependsOn, un::job_handle job) {
+            booked_job& booked = _jobs[job];
+            _independent.erase(job);
+            _leafs.erase(dependsOn);
+            booked._localDependencies.emplace(dependsOn);
         }
 
-        un::JobHandle after(un::JobHandle dependsOn, JobType* job) {
-            un::JobHandle handle = jobs.size();
-            jobs.push_back(job);
-            BookedJob& booked = jobs[handle];
-            leafs.erase(dependsOn);
-            booked.localDependencies.emplace(dependsOn);
+        un::job_handle after(un::job_handle dependsOn, job_type* job) {
+            un::job_handle handle = _jobs.size();
+            _jobs.push_back(job);
+            booked_job& booked = _jobs[handle];
+            _leafs.erase(dependsOn);
+            booked._localDependencies.emplace(dependsOn);
             return handle;
         }
 
         template<typename T, typename ...Args>
-        un::JobHandle immediately(Args ...args) {
+        un::job_handle immediately(Args ...args) {
             return immediately(new T(args...));
         }
 
-        un::JobHandle finally(
-            typename un::LambdaJob<WorkerType>::VoidCallback callback
+        un::job_handle finally(
+            typename un::lambda_job<worker_type>::void_callback callback
         ) {
-            un::JobHandle job = immediately<un::LambdaJob<WorkerType>>(callback);
-            std::set<un::JobHandle> existingLeafs = leafs;
-            for (un::JobHandle leaf : existingLeafs) {
+            un::job_handle job = immediately<un::lambda_job<worker_type>>(callback);
+            std::set<un::job_handle> existingLeafs = _leafs;
+            for (un::job_handle leaf : existingLeafs) {
                 if (leaf != job) {
                     after(leaf, job);
                 }
@@ -89,46 +91,46 @@ namespace un {
             return job;
         }
 
-        un::JobHandle finally(
+        un::job_handle finally(
             const std::string& name,
-            typename un::LambdaJob<WorkerType>::VoidCallback callback
+            typename un::lambda_job<worker_type>::void_callback callback
         ) {
-            un::JobHandle job = finally(callback);
-            jobs[job].job->setName(name);
+            un::job_handle job = finally(callback);
+            _jobs[job]._job->set_name(name);
             return job;
         }
 
-        un::JobHandle finally(
-            typename un::LambdaJob<WorkerType>::Callback callback
+        un::job_handle finally(
+            typename un::lambda_job<worker_type>::callback callback
         ) {
-            un::JobHandle job = immediately<un::LambdaJob<WorkerType>>(callback);
-            std::set<un::JobHandle> existingLeafs = leafs;
-            for (un::JobHandle leaf : existingLeafs) {
+            un::job_handle job = immediately<un::lambda_job<worker_type>>(callback);
+            std::set<un::job_handle> existingLeafs = _leafs;
+            for (un::job_handle leaf : existingLeafs) {
                 after(leaf, job);
             }
             return job;
         }
 
-        un::JobHandle finally(
+        un::job_handle finally(
             const std::string& name,
-            typename un::LambdaJob<WorkerType>::Callback callback
+            typename un::lambda_job<worker_type>::callback callback
         ) {
-            un::JobHandle job = finally(callback);
-            jobs[job].job->setName(name);
+            un::job_handle job = finally(callback);
+            _jobs[job]._job->set_name(name);
             return job;
         }
 
-        void include(const un::WorkerChain<WorkerType>& other) {
-            const std::vector<BookedJob>& otherJobs = other.jobs;
+        void include(const un::worker_chain<worker_type>& other) {
+            const std::vector<booked_job>& otherJobs = other._jobs;
             std::vector<u32> newHandles(otherJobs.size());
             for (std::size_t i = 0; i < otherJobs.size(); ++i) {
                 const auto& job = otherJobs[i];
-                newHandles[i] = immediately(job.job);
+                newHandles[i] = immediately(job._job);
             }
             for (std::size_t i = 0; i < otherJobs.size(); ++i) {
-                un::JobHandle newHandle = newHandles[i];
-                for (std::size_t j : otherJobs[i].localDependencies) {
-                    un::JobHandle dependencyHandle = newHandles[j];
+                un::job_handle newHandle = newHandles[i];
+                for (std::size_t j : otherJobs[i]._localDependencies) {
+                    un::job_handle dependencyHandle = newHandles[j];
                     after(dependencyHandle, newHandle);
                 }
             }
@@ -137,35 +139,37 @@ namespace un {
         template<typename JobSystemType>
         void submit(JobSystemType* jobSystem) {
             {
-                std::unique_lock<std::mutex> lock(jobSystem->graphAccessMutex);
-                constexpr std::size_t ArchetypeIndex = JobSystemType::template index_of_archetype<WorkerType>();
-                un::WorkerPool<WorkerType>& pool = jobSystem->template getWorkerPool<WorkerType>();
-                std::vector<un::JobHandle> transformedHandles(jobs.size());
-                for (std::size_t i = 0; i < jobs.size(); ++i) {
-                    un::JobHandle graphHandle = jobSystem->graph.add(
-                        un::JobNode{
-                            .archetypeIndex = ArchetypeIndex
+                std::unique_lock<std::mutex> lock(jobSystem->_graphAccessMutex);
+                constexpr std::size_t archetype_index = JobSystemType::template index_of_archetype<
+                    worker_type
+                >();
+                un::worker_pool<worker_type>& pool = jobSystem->template get_worker_pool<worker_type>();
+                std::vector<un::job_handle> transformedHandles(_jobs.size());
+                for (std::size_t i = 0; i < _jobs.size(); ++i) {
+                    un::job_handle graphHandle = jobSystem->_graph.add(
+                        un::job_node{
+                            .archetypeIndex = archetype_index
                         }
                     );
-                    un::JobNode* node = jobSystem->graph[graphHandle];
+                    un::job_node* node = jobSystem->_graph[graphHandle];
                     auto transformedIndex = node->poolLocalIndex = pool.enqueue(
-                        jobs[i].job,
+                        _jobs[i]._job,
                         graphHandle,
                         false
                     );
                     transformedHandles[i] = transformedIndex;
                 }
-                for (std::size_t i = 0; i < jobs.size(); ++i) {
-                    BookedJob& bookedJob = jobs[i];
-                    JobHandle jobHandle = transformedHandles[i];
-                    for (JobHandle localDependency : bookedJob.localDependencies) {
-                        JobHandle dependencyHandle = transformedHandles[localDependency];
-                        jobSystem->graph.addDependency(jobHandle, dependencyHandle);
+                for (std::size_t i = 0; i < _jobs.size(); ++i) {
+                    booked_job& bookedJob = _jobs[i];
+                    job_handle jobHandle = transformedHandles[i];
+                    for (job_handle localDependency : bookedJob._localDependencies) {
+                        job_handle dependencyHandle = transformedHandles[localDependency];
+                        jobSystem->_graph.add_dependency(jobHandle, dependencyHandle);
                     }
 
                 }
-                std::set<un::JobHandle> handles;
-                for (un::JobHandle starter : independent) {
+                std::set<un::job_handle> handles;
+                for (un::job_handle starter : _independent) {
                     handles.emplace(transformedHandles[starter]);
                 }
                 pool.dispatch(handles);
@@ -173,8 +177,8 @@ namespace un {
 
         }
 
-        void setName(JobHandle i, const std::string& name) {
-            jobs[i].job->setName(name);
+        void set_name(job_handle i, const std::string& name) {
+            _jobs[i]._job->set_name(name);
         }
     };
 }

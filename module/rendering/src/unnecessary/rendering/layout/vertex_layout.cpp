@@ -1,39 +1,38 @@
 #include <unnecessary/rendering/layout/vertex_layout.h>
 
 namespace un {
-    un::VertexAttribute::VertexAttribute(
+    vertex_attribute::vertex_attribute(
         std::string name,
         u8 count,
         u8 singleSize,
         vk::Format format
-    ) : count(count), singleSize(singleSize), format(format), name(name) {
-
+    ) : _name(name), _count(count), _singleSize(singleSize), _format(format) {
     }
 
-    vk::Format VertexAttribute::getFormat() const {
-        return format;
+    vk::Format vertex_attribute::get_format() const {
+        return _format;
     }
 
-    std::size_t VertexAttribute::getSize() const {
-        return singleSize * count;
+    std::size_t vertex_attribute::get_size() const {
+        return _singleSize * _count;
     }
 
-    u8 VertexAttribute::getSingleSize() const {
-        return singleSize;
+    u8 vertex_attribute::get_single_size() const {
+        return _singleSize;
     }
 
-    u8 VertexAttribute::getCount() const {
-        return count;
+    u8 vertex_attribute::get_count() const {
+        return _count;
     }
 
-    const std::string& VertexAttribute::getName() const {
-        return name;
+    const std::string& vertex_attribute::get_name() const {
+        return _name;
     }
 
-    std::size_t VertexLayout::getStride() const {
+    std::size_t vertex_layout::get_stride() const {
         std::size_t stride = 0;
-        for (const auto& element : elements) {
-            stride += element.getSize();
+        for (const auto& element : _elements) {
+            stride += element.get_size();
         }
         return stride;
     }

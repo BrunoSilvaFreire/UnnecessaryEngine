@@ -18,19 +18,20 @@ namespace un {
         template<typename TValue>
         TValue value(TValue min, TValue max) {
             static_assert(can_be_randomized<TValue>());
-            if constexpr(std::is_integral<TValue>()) {
+            if constexpr (std::is_integral<TValue>()) {
                 return std::uniform_int_distribution<TValue>(min, max)(engine);
             }
-            if constexpr(std::is_floating_point<TValue>()) {
+            if constexpr (std::is_floating_point<TValue>()) {
                 return std::uniform_real_distribution<TValue>(min, max)(engine);
             }
         }
 
         template<typename TValue>
         TValue value() {
-            return value<TValue>(std::numeric_limits<TValue>::min(), std::numeric_limits<TValue>::max());
+            return value<TValue>(
+                std::numeric_limits<TValue>::min(),
+                std::numeric_limits<TValue>::max());
         }
-
 
     }
 }

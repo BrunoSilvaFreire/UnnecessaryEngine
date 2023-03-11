@@ -8,14 +8,13 @@
 #include <unnecessary/misc/rich_messages/message.h>
 
 namespace un {
-
-    class TreeMessage final : public CompositeMessage {
+    class tree_message final : public composite_message {
     protected:
         void prefix(
             std::ostream& stream,
             std::size_t i,
             std::size_t lineNbr,
-            const std::unique_ptr<IMessage>& msg
+            const std::unique_ptr<message>& msg
         ) const override;
     };
 }

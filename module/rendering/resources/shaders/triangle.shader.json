@@ -1,10 +1,10 @@
 {
-  "name": "triangle",
-  "stages": {
-    "vert": {},
-    "frag": {}
-  },
-  "depth": {
-    "enabled": false
-  }
+    "name": "triangle",
+    "stages": {
+        "vert": {},
+        "frag": {}
+    },
+    "depth": {
+        "enabled": false
+    }
 }

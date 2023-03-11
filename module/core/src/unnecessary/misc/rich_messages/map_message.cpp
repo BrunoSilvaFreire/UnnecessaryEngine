@@ -4,21 +4,21 @@
 #include <unnecessary/misc/rich_messages/map_message.h>
 
 namespace un {
-
-    void MapMessage::write(std::ostream& stream) const {
+    void map_message::write(std::ostream& stream) const {
         std::size_t i = 0;
         for (const auto& [name, child] : _named) {
             std::stringstream sub;
             sub << termcolor::colorize;
             child->write(sub);
-            auto lines = un::split_string(sub.str(), un::new_line());
+            auto lines = split_string(sub.str(), new_line());
             auto isNode = child->is_node();
             for (std::size_t j = 0; j < lines.size(); ++j) {
                 const auto& line = lines[j];
                 prefix(stream, name, i, j, child);
-                if (!isNode){
+                if (!isNode) {
                     stream << YELLOW(line) << std::endl;
-                } else {
+                }
+                else {
                     stream << line << std::endl;
                 }
             }
@@ -26,12 +26,12 @@ namespace un {
         }
     }
 
-    void MapMessage::prefix(
+    void map_message::prefix(
         std::ostream& stream,
         const std::string& name,
         std::size_t i,
         std::size_t lineNbr,
-        const std::unique_ptr<IMessage>& msg
+        const std::unique_ptr<message>& msg
     ) const {
         bool first = i == 0;
         std::size_t indentLength = name.size() + 3; // + 3 for suffix ": ┬"
@@ -49,27 +49,29 @@ namespace un {
         if (i == 0) {
             if (last) {
                 stream << "─";
-            } else {
+            }
+            else {
                 stream << "┬";
             }
-        } else if (last) {
+        }
+        else if (last) {
             stream << "└";
-        } else {
+        }
+        else {
             stream << "├";
         }
         stream << ' ' << PURPLE(name) << ": ";
     }
 
-    un::TextMessage& MapMessage::text(const std::string& name) {
-        return add_child<un::TextMessage>(name);
+    text_message& map_message::text(const std::string& name) {
+        return add_child<text_message>(name);
     }
 
-    un::TreeMessage& MapMessage::tree(const std::string& name) {
-        return add_child<un::TreeMessage>(name);
+    tree_message& map_message::tree(const std::string& name) {
+        return add_child<tree_message>(name);
     }
 
-    bool MapMessage::is_node() {
+    bool map_message::is_node() {
         return true;
     }
-
 }

@@ -3,45 +3,43 @@
 #include <unnecessary/rendering/buffers/command_buffer.h>
 
 namespace un {
-
-    CommandBuffer::CommandBuffer(
-        Renderer& renderer,
+    command_buffer::command_buffer(
+        renderer& renderer,
         vk::CommandPool pool,
         vk::CommandBufferLevel level
-    ) : pool(pool) {
-        device = renderer.getVirtualDevice();
+    ) : _pool(pool) {
+        _device = renderer.get_virtual_device();
         vk::CommandBufferAllocateInfo allocInfo(
             pool,
             level,
             1
         );
 
-        vkCall(
-            device.allocateCommandBuffers(
+        VK_CALL(
+            _device.allocateCommandBuffers(
                 &allocInfo,
-                &buffer
+                &_buffer
             )
         );
     }
 
-    CommandBuffer::~CommandBuffer() {
+    command_buffer::~command_buffer() {
         //usesPipeline.freeCommandBuffers(pool, 1, &buffer);
     }
 
-    vk::CommandBuffer CommandBuffer::getVulkanBuffer() {
-        return buffer;
+    vk::CommandBuffer command_buffer::get_vulkan_buffer() {
+        return _buffer;
     }
 
-    const vk::CommandBuffer* CommandBuffer::operator->() const {
-        return &buffer;
+    const vk::CommandBuffer* command_buffer::operator->() const {
+        return &_buffer;
     }
 
-    vk::CommandBuffer& CommandBuffer::operator*() {
-        return buffer;
+    vk::CommandBuffer& command_buffer::operator*() {
+        return _buffer;
     }
 
-    const vk::CommandBuffer& CommandBuffer::operator*() const {
-        return buffer;
+    const vk::CommandBuffer& command_buffer::operator*() const {
+        return _buffer;
     }
-
 }

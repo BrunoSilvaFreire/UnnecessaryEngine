@@ -17,50 +17,51 @@
 #endif
 
 namespace un {
-    struct ThreadParams {
+    struct thread_params {
     private:
         std::string _name;
         std::size_t _core;
         std::size_t _stackSize;
+
     public:
-        static const std::size_t kAnyCore = std::numeric_limits<std::size_t>::max();
-        static const std::size_t kDefaultStackSize = 4096;
+        static const std::size_t k_any_core = std::numeric_limits<std::size_t>::max();
+        static const std::size_t k_default_stack_size = 4096;
 
-        ThreadParams(std::string name, std::size_t core = kAnyCore);
+        explicit thread_params(std::string name, std::size_t core = k_any_core);
 
-        const std::string& getName() const;
+        const std::string& get_name() const;
 
-        size_t getCore() const;
+        size_t get_core() const;
 
-        void setStackSize(size_t stackSize);
+        void set_stack_size(size_t stackSize);
 
-        size_t getStackSize() const;
+        size_t get_stack_size() const;
     };
 
-    struct ThreadPlatformBridge;
+    struct thread_platform_bridge;
 
-    class Thread {
+    class thread {
     private:
         std::function<void()> _block;
         std::mutex _dataMutex;
         bool _alive;
-        un::ThreadParams _params;
-        un::ptr<ThreadPlatformBridge> _bridge;
+        thread_params _params;
+        ptr<thread_platform_bridge> _bridge;
 
         void operator()();
 
-        void setThreadName(const std::string& name);
+        void set_thread_name(const std::string& name);
 
-        bool setThreadCore(u32 core);
+        bool set_thread_core(u32 core);
 
     public:
-        explicit Thread(const std::function<void()>& block);
+        explicit thread(const std::function<void()>& block);
 
-        explicit Thread(un::ThreadParams name, const std::function<void()>& block);
+        explicit thread(thread_params name, const std::function<void()>& block);
 
-        Thread() = delete;
+        thread() = delete;
 
-        Thread(const Thread&) = delete;
+        thread(const thread&) = delete;
 
         void start();
 
@@ -68,7 +69,7 @@ namespace un {
 
 #if UN_PLATFORM_WINDOWS
 
-        friend DWORD WINAPI UnnecessaryThreadProc(_In_ LPVOID lpParameter);
+        friend DWORD WINAPI unnecessary_thread_proc(_In_ LPVOID lpParameter);
 #elif UN_PLATFORM_UNIX
 
         friend un::void_ptr unnecessary_unix_proc(un::void_ptr ptr);

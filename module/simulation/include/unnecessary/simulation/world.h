@@ -8,46 +8,49 @@
 #include <unnecessary/simulation/simulation_graph.h>
 
 namespace un {
-    class System;
+    class system;
 
-    class Layer {
-
+    class layer {
     };
 
-    class World : public entt::registry {
+    class world : public entt::registry {
     private:
-        constexpr static size_t kNumLayers = 32;
-        std::array<un::Layer, kNumLayers> layers;
-        un::SimulationGraph _simulationGraph;
-    public:
-        void addSystem(un::System* system) {
+        constexpr static size_t k_num_layers = 32;
+        std::array<layer, k_num_layers> _layers;
+        simulation_graph _simulationGraph;
 
+    public:
+        void add_system(system* system) {
         }
 
-        template<typename ...T>
-        std::tuple<entt::entity, T* ...> createWith() {
+        template<typename... t_T>
+        std::tuple<entt::entity, t_T* ...> create_with() {
             entt::entity entity = create();
-            return std::make_tuple<entt::entity, T* ...>(entity, &emplace<T...>(entity));
+            return std::make_tuple<entt::entity, t_T* ...>(entity, &emplace<t_T...>(entity));
         }
 
-        void step(f32 deltaTime, un::SimulationChain& chain);
-
+        void step(f32 deltaTime, simulation_chain& chain);
     };
 
-    template<typename JobSystemType>
-    class Simulator {
+    template<typename t_job_system>
+    class simulator {
     private:
-        JobSystemType* _jobSystem;
-        un::World* world;
-    public:
-        Simulator(JobSystemType* jobSystem, World* world)
-            : _jobSystem(jobSystem), world(world) { }
+        t_job_system* _jobSystem;
+        world* _world;
 
-        void apply(un::Application& application) {
-            application.getFixedLoop().early(
+    public:
+        simulator(
+            t_job_system* jobSystem,
+            world* world
+        ) : _jobSystem(jobSystem),
+            _world(world) {
+        }
+
+        void apply(application& application) {
+            application.get_fixed_loop().early(
                 [this, &application]() {
-                    un::SimulationChain chain;
-                    world->step(1 / application.getFixedFrameRate(), chain);
+                    simulation_chain chain;
+                    _world->step(1 / application.get_fixed_frame_rate(), chain);
                     chain.submit(_jobSystem);
                 }
             );

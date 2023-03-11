@@ -10,63 +10,62 @@
 #include <unnecessary/rendering/geometry.h>
 #include <set>
 
-
 namespace un {
-    class Drawable {
+    class drawable {
     };
 
-    class GeometryBatch {
+    class geometry_batch {
     private:
-        std::vector<un::Drawable> drawables;
-    public:
-        friend class RenderGroup;
+        std::vector<drawable> _drawables;
 
-        const std::vector<un::Drawable>& getDrawables() const;
+    public:
+        friend class render_group;
+
+        const std::vector<drawable>& get_drawables() const;
     };
 
-    class MaterialBatch {
+    class material_batch {
     public:
-        typedef std::unordered_map<const un::DeviceGeometry*, un::GeometryBatch> GeometryMap;
+        using geometry_map = std::unordered_map<const device_geometry*, geometry_batch>;
 
     private:
-        un::Material* material;
-        GeometryMap geometryBatches;
+        material* _material;
+        geometry_map _geometryBatches;
 
-        un::GeometryBatch& getOrCreateMeshBatchFor(const un::DeviceGeometry* const geometry);
+        geometry_batch& get_or_create_mesh_batch_for(const device_geometry* const geometry);
 
     public:
-        MaterialBatch(Material* material);
+        material_batch(material* material);
 
-        bool operator<(const MaterialBatch& rhs) const;
+        bool operator<(const material_batch& rhs) const;
 
-        bool operator>(const MaterialBatch& rhs) const;
+        bool operator>(const material_batch& rhs) const;
 
-        bool operator<=(const MaterialBatch& rhs) const;
+        bool operator<=(const material_batch& rhs) const;
 
-        bool operator>=(const MaterialBatch& rhs) const;
+        bool operator>=(const material_batch& rhs) const;
 
-        Material* getMaterial() const;
+        material* get_material() const;
 
-        const GeometryMap& getGeometryBatches() const;
+        const geometry_map& get_geometry_batches() const;
 
-        friend class RenderGroup;
+        friend class render_group;
     };
 
-    class RenderGroup {
+    class render_group {
     private:
-        std::set<un::MaterialBatch> materialBatches;
+        std::set<material_batch> _materialBatches;
 
-        un::MaterialBatch& getOrCreateBatchFor(un::Material* material);
+        material_batch& get_or_create_batch_for(material* material);
 
     public:
-        const std::set<un::MaterialBatch>& getMaterialBatches() const;
+        const std::set<material_batch>& get_material_batches() const;
 
         void push(
-            un::Drawable drawable,
-            un::Material* material,
-            const un::DeviceGeometry* const geometry
+            drawable drawable,
+            material* material,
+            const device_geometry* geometry
         );
     };
-
 }
 #endif //UNNECESSARYENGINE_RENDER_GROUP_H

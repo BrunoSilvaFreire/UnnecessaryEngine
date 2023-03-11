@@ -1,19 +1,18 @@
 #include <unnecessary/graphs/dependency_graph.h>
 
 namespace un {
-
-    std::ostream& operator<<(std::ostream& stream, const un::DependencyType& dependencyType) {
-        stream << un::to_string(dependencyType);
+    std::ostream& operator<<(std::ostream& stream, const dependency_type& dependencyType) {
+        stream << to_string(dependencyType);
         return stream;
     }
 
     template<>
-    std::string to_string(const DependencyType& type) {
+    std::string to_string(const dependency_type& type) {
         switch (type) {
-            case eUses:
+            case uses:
                 return "uses";
                 break;
-            case eUsed:
+            case used:
                 return "used";
                 break;
         }

@@ -1,5 +1,5 @@
-#ifndef UNNECESSARYENGINE_JOBSYSTEM_H
-#define UNNECESSARYENGINE_JOBSYSTEM_H
+#ifndef UNNECESSARYENGINE_JOB_SYSTEM_H
+#define UNNECESSARYENGINE_JOB_SYSTEM_H
 
 #include <queue>
 #include <utility>
@@ -23,37 +23,35 @@
 
 namespace un {
     template<typename T>
-    class ProfilerPool;
+    class profiler_pool;
 
-    template<typename ...Archetypes>
-    class JobSystem;
+    template<typename... Archetypes>
+    class job_system;
 
-    template<typename ...Archetypes>
-    using JobSystemExtension = un::Extension<un::JobSystem<Archetypes...>>;
+    template<typename... Archetypes>
+    using job_system_extension = extension<job_system<Archetypes...>>;
 
-    template<typename ...Archetypes>
-    class JobSystem : public Extensible<JobSystemExtension<Archetypes...>>, public ArchetypeMixin<Archetypes> ... {
+    template<typename... Archetypes>
+    class job_system
+        : public extensible<job_system_extension<Archetypes...>>,
+          public archetype_mixin<Archetypes> ... {
     public:
-
-        using WorkerAllocationConfig = std::tuple<WorkerPoolConfiguration<Archetypes>...>;
+        using worker_allocation_config = std::tuple<worker_pool_configuration<Archetypes>...>;
 
         template<typename TValue>
-        using RepeatedTuple = typename un::repeat_tuple<TValue, sizeof...(Archetypes)>::type;
+        using repeated_tuple = typename repeat_tuple<TValue, sizeof...(Archetypes)>::type;
 
         template<template<typename> typename TValue>
-        using ArchetypeTuple = std::tuple<TValue<Archetypes>...>;
+        using archetype_tuple = std::tuple<TValue<Archetypes>...>;
 
         template<template<typename> typename TValue>
         constexpr UN_AGGRESSIVE_INLINE static auto make_archetype_tuple() {
             return std::make_tuple<TValue<Archetypes>...>();
         }
 
-
-        typedef ArchetypeTuple<ProfilerPool> ProfilerPoolTuple;
-
-
-        typedef un::JobDispatchTable<Archetypes...> DispatchTable;
-        typedef std::index_sequence_for<Archetypes...> ArchetypesIndices;
+        using profiler_pool_tuple = archetype_tuple<profiler_pool>;
+        using dispatch_table = job_dispatch_table<Archetypes...>;
+        using archetypes_indices = std::index_sequence_for<Archetypes...>;
 
         template<typename Archetype>
         constexpr UN_AGGRESSIVE_INLINE static auto index_of_archetype() {
@@ -66,18 +64,18 @@ namespace un {
         }
 
     protected:
-        un::JobGraph graph;
-        std::mutex graphAccessMutex;
-        size_t totalNumberOfWorkers = 0;
-        un::Event<un::JobHandle, const un::JobNode&> unlockFailed;
+        job_graph _graph;
+        std::mutex _graphAccessMutex;
+        size_t _totalNumberOfWorkers = 0;
+        event<job_handle, const job_node&> _unlockFailed;
 
-        template<typename WorkerType, std::size_t WorkerIndex>
-        void done(typename WorkerType::JobType* job, JobHandle handle) {
+        template<typename worker_type, std::size_t WorkerIndex>
+        void done(typename worker_type::job_type* job, job_handle handle) {
             {
-                std::lock_guard<std::mutex> lock(graphAccessMutex);
-                for (auto subsequent : graph.dependantsOn(handle)) {
+                std::lock_guard<std::mutex> lock(_graphAccessMutex);
+                for (auto subsequent : _graph.dependants_on(handle)) {
                     bool ready = true;
-                    for (auto subsequentDependency : graph.dependenciesOf(subsequent)) {
+                    for (auto subsequentDependency : _graph.dependencies_of(subsequent)) {
                         if (subsequentDependency != handle) {
                             // There is another dependency we need to wait for
                             ready = false;
@@ -87,118 +85,122 @@ namespace un {
                     if (ready) {
                         // TODO: Ewww.
                         for_types_indexed<Archetypes...>(
-                            [&, subsequent]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
-                                const auto& other = graph[subsequent];
+                            [
+                                &,
+                                subsequent
+                            ]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
+                                const auto& other = _graph[subsequent];
                                 if (other->archetypeIndex == OtherWorkerIndex) {
-                                    auto& pool = getWorkerPool<OtherWorkerType>();
-                                    pool.unsafeDispatch(other->poolLocalIndex);
+                                    auto& pool = get_worker_pool<OtherWorkerType>();
+                                    pool.unsafe_dispatch(other->poolLocalIndex);
                                 }
                             }
                         );
-                    } else {
-                        unlockFailed(subsequent, *graph.getInnerGraph().vertex(subsequent));
                     }
-                    graph.disconnect(handle, subsequent);
+                    else {
+                        _unlockFailed(subsequent, *_graph.get_inner_graph().vertex(subsequent));
+                    }
+                    _graph.disconnect(handle, subsequent);
                 }
-                graph.remove(handle);
+                _graph.remove(handle);
             }
         }
 
-        template<typename JobWorkerType>
-        std::pair<un::JobHandle, un::JobNode*> create(
-            typename JobWorkerType::JobType* job,
+        template<typename worker_type>
+        std::pair<job_handle, job_node*> create(
+            typename worker_type::job_type* job,
             bool dispatch
         ) {
-            constexpr std::size_t ArchetypeIndex = un::index_of_type<JobWorkerType, Archetypes...>();
-            un::WorkerPool<JobWorkerType>& pool = getWorkerPool<JobWorkerType>();
-            un::JobHandle graphHandle = graph.add(
-                un::JobNode{
-                    .archetypeIndex = ArchetypeIndex
+            constexpr std::size_t archetype_index = un::index_of_type<
+                worker_type,
+                Archetypes...
+            >();
+
+            worker_pool<worker_type>& pool = get_worker_pool<worker_type>();
+            job_handle graphHandle = _graph.add(
+                job_node{
+                    .archetypeIndex = archetype_index
                 }
             );
-            un::JobNode* node = graph[graphHandle];
+            job_node* node = _graph[graphHandle];
             node->poolLocalIndex = pool.enqueue(job, graphHandle, dispatch);
             return std::make_pair(graphHandle, node);
         }
 
-        void dispatch(DispatchTable handles) {
+        void dispatch(dispatch_table handles) {
             for_types_indexed<Archetypes...>(
-                [this, &handles]<typename WorkerType, std::size_t WorkerIndex>() {
-                    const std::set<JobHandle>& toDispatch = handles.template getBatch<WorkerType>();
-                    this->ArchetypeMixin<WorkerType>::dispatchLocal(toDispatch);
+                [this, &handles]<typename worker_type, std::size_t WorkerIndex>() {
+                    const std::set<job_handle>& toDispatch = handles.template get_batch<worker_type>();
+                    this->archetype_mixin<worker_type>::dispatch_local(toDispatch);
                 }
             );
         }
 
-
     public:
-
-
-        explicit JobSystem(
-            WorkerAllocationConfig numWorkersPerArchetype
-        ) : graph() {
+        explicit job_system(
+            worker_allocation_config numWorkersPerArchetype
+        ) : _graph() {
             // Instantiate workerPools
             for_types_indexed<Archetypes...>(
-                [this, numWorkersPerArchetype]<typename WorkerType, std::size_t WorkerIndex>() {
-                    auto& pool = getWorkerPool<WorkerType>();
+                [this, numWorkersPerArchetype]<typename worker_type, std::size_t WorkerIndex>() {
+                    auto& pool = get_worker_pool<worker_type>();
                     auto& workerConfig = std::get<WorkerIndex>(numWorkersPerArchetype);
-                    totalNumberOfWorkers += workerConfig.getNumWorkers();
-                    using JobType = typename WorkerType::JobType;
-                    pool.allocateWorkers(workerConfig);
-                    pool.addJobCompletedListener(
-                        [&](JobType* job, un::JobHandle graphHandle) {
-                            done<WorkerType, WorkerIndex>(job, graphHandle);
+                    _totalNumberOfWorkers += workerConfig.get_num_workers();
+                    using job_type = typename worker_type::job_type;
+                    pool.allocate_workers(workerConfig);
+                    pool.add_job_completed_listener(
+                        [&](job_type* job, job_handle graphHandle) {
+                            done<worker_type, WorkerIndex>(job, graphHandle);
                         }
                     );
                 }
             );
         };
 
-        ~JobSystem(){
+        ~job_system() {
             LOG(INFO) << "Destroying Job System";
         }
-        template<typename TWorker>
-        un::WorkerPool<TWorker>& getWorkerPool() {
-            return ArchetypeMixin<TWorker>::_pool;
+
+        template<typename worker_type>
+        worker_pool<worker_type>& get_worker_pool() {
+            return archetype_mixin<worker_type>::_pool;
         }
 
-        template<typename TWorker>
-        const un::WorkerPool<TWorker>& getWorkerPool() const {
-            return ArchetypeMixin<TWorker>::_pool;
+        template<typename worker_type>
+        const worker_pool<worker_type>& get_worker_pool() const {
+            return archetype_mixin<worker_type>::_pool;
         }
 
-        void addDependency(JobHandle afterThis, JobHandle runThis) {
+        void add_dependency(job_handle afterThis, job_handle runThis) {
 #ifdef DEBUG
             if (afterThis == runThis) {
                 throw std::runtime_error("A job cannot depend on itself!");
             }
 #endif
             {
-                std::lock_guard<std::mutex> guard(graphAccessMutex);
-                graph.addDependency(runThis, afterThis);
+                std::lock_guard<std::mutex> guard(_graphAccessMutex);
+                _graph.add_dependency(runThis, afterThis);
             }
         }
 
-
-        void setName(un::JobHandle handle, const std::string& name) {
-            const auto& other = graph[handle];
+        void set_name(job_handle handle, const std::string& name) {
+            const auto& other = _graph[handle];
             for_types_indexed<Archetypes...>(
                 [&]<typename OtherWorkerType, std::size_t OtherWorkerIndex>() {
                     if (other->archetypeIndex == OtherWorkerIndex) {
-                        auto& pool = getWorkerPool<OtherWorkerType>();
-                        pool.getJob(other->poolLocalIndex)->setName(name);
+                        auto& pool = get_worker_pool<OtherWorkerType>();
+                        pool.get_job(other->poolLocalIndex)->set_name(name);
                     }
                 }
             );
         }
 
-        template<typename TArchetype>
-        typename TArchetype::JobType* getJob(un::JobHandle handle) {
-            const auto& other = graph[handle];
-            auto& pool = getWorkerPool<TArchetype>();
-            return pool.getJob(other->poolLocalIndex);
+        template<typename t_archetype>
+        typename t_archetype::job_type* get_job(job_handle handle) {
+            const auto& other = _graph[handle];
+            auto& pool = get_worker_pool<t_archetype>();
+            return pool.get_job(other->poolLocalIndex);
         }
-
 
         /**
          * Immediately stops this job system.
@@ -206,19 +208,17 @@ namespace un {
          * @param block Should we block while the job system isn't stopped?
          */
         void stop(bool block) {
-
             if (block) {
-
-                std::atomic<size_t> remaining = totalNumberOfWorkers;
+                std::atomic<size_t> remaining = _totalNumberOfWorkers;
                 std::condition_variable allExited;
                 std::mutex mutex;
-                LOG(INFO) << "Stopping " << totalNumberOfWorkers << " total workers.";
+                LOG(INFO) << "Stopping " << _totalNumberOfWorkers << " total workers.";
                 for_types_indexed<Archetypes...>(
-                    [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                        auto& pool = getWorkerPool<WorkerType>();
-                        for (WorkerType* worker : pool->getWorkers()) {
-                            worker->getOnFinished() += [&]() {
-                                remaining--;
+                    [&]<typename worker_type, std::size_t WorkerIndex>() {
+                        auto& pool = get_worker_pool<worker_type>();
+                        for (worker_type* worker : pool->get_workers()) {
+                            worker->get_on_finished() += [&]() {
+                                --remaining;
                                 allExited.notify_one();
                             };
                             worker->stop(false);
@@ -232,12 +232,12 @@ namespace un {
                         return remaining == 0;
                     }
                 );
-
-            } else {
+            }
+            else {
                 for_types_indexed<Archetypes...>(
-                    [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                        auto& pool = getWorkerPool<WorkerType>();
-                        for (WorkerType* worker : pool->getWorkers()) {
+                    [&]<typename worker_type, std::size_t WorkerIndex>() {
+                        auto& pool = get_worker_pool<worker_type>();
+                        for (worker_type* worker : pool->get_workers()) {
                             worker->stop(false);
                         }
                     }
@@ -250,21 +250,21 @@ namespace un {
 
             std::size_t i = 0;
             for_types_indexed<Archetypes...>(
-                [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                    auto& pool = getWorkerPool<WorkerType>();
-                    for (WorkerType* worker : pool.getWorkers()) {
+                [&]<typename worker_type, std::size_t WorkerIndex>() {
+                    auto& pool = get_worker_pool<worker_type>();
+                    for (worker_type* worker : pool.get_workers()) {
                         workers.emplace(i++);
                     }
                 }
             );
 
             std::size_t j = 0;
-            un::Fence<> fence(workers);
+            fence<> fence(workers);
             for_types_indexed<Archetypes...>(
-                [&]<typename WorkerType, std::size_t WorkerIndex>() mutable {
-                    auto& pool = getWorkerPool<WorkerType>();
-                    for (WorkerType* worker : pool.getWorkers()) {
-                        worker->join(un::FenceNotifier<std::size_t>(&fence, j++));
+                [&]<typename worker_type, std::size_t WorkerIndex>() mutable {
+                    auto& pool = get_worker_pool<worker_type>();
+                    for (worker_type* worker : pool.get_workers()) {
+                        worker->join(un::fence_notifier<std::size_t>(&fence, j++));
                     }
                 }
             );
@@ -275,19 +275,19 @@ namespace un {
             std::set<std::size_t> workers;
             std::size_t i = 0;
             for_types_indexed<Archetypes...>(
-                [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                    auto& pool = getWorkerPool<WorkerType>();
-                    for (WorkerType* worker : pool.getWorkers()) {
+                [&]<typename worker_type, std::size_t WorkerIndex>() {
+                    auto& pool = get_worker_pool<worker_type>();
+                    for (worker_type* worker : pool.get_workers()) {
                         workers.emplace(i++);
                     }
                 }
             );
             i = 0;
-            un::Fence<> fence(workers);
+            fence<> fence(workers);
             for_types_indexed<Archetypes...>(
-                [&]<typename WorkerType, std::size_t WorkerIndex>() {
-                    auto& pool = getWorkerPool<WorkerType>();
-                    for (WorkerType* worker : pool.getWorkers()) {
+                [&]<typename worker_type, std::size_t WorkerIndex>() {
+                    auto& pool = get_worker_pool<worker_type>();
+                    for (worker_type* worker : pool.get_workers()) {
                         worker->join(i++, fence);
                     }
                 }
@@ -298,10 +298,10 @@ namespace un {
         template<typename TFunc>
         void for_each_worker(TFunc block) {
             for_each_archetype(
-                [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
-                    un::WorkerPool<TArchetype>& pool = getWorkerPool<TArchetype>();
-                    for (const auto& worker : pool.getWorkers()) {
-                        block.template operator()<TArchetype, TArchetypeIndex>(worker);
+                [&]<typename t_archetype, std::size_t TArchetypeIndex>() {
+                    worker_pool<t_archetype>& pool = get_worker_pool<t_archetype>();
+                    for (const auto& worker : pool.get_workers()) {
+                        block.template operator()<t_archetype, TArchetypeIndex>(worker);
                     }
                 }
             );
@@ -309,32 +309,31 @@ namespace un {
 
         void start() {
             for_each_archetype(
-                [&]<typename TArchetype, std::size_t TArchetypeIndex>() {
-                    getWorkerPool<TArchetype>().start();
+                [&]<typename t_archetype, std::size_t TArchetypeIndex>() {
+                    get_worker_pool<t_archetype>().start();
                 }
             );
         }
 
-        const JobGraph& getJobGraph() const {
-            return graph;
+        const job_graph& get_job_graph() const {
+            return _graph;
         }
 
-        Event<un::JobHandle, const un::JobNode&>& onUnlockFailed() {
-            return unlockFailed;
+        event<job_handle, const job_node&>& on_unlock_failed() {
+            return _unlockFailed;
         }
 
-        const Event<un::JobHandle, const un::JobNode&>& onUnlockFailed() const {
-            return unlockFailed;
+        const event<job_handle, const job_node&>& on_unlock_failed() const {
+            return _unlockFailed;
         }
 
-        template<typename TWorker>
+        template<typename worker_type>
         friend
-        class WorkerChain;
+        class worker_chain;
 
-        template<typename TJobSystem>
+        template<typename t_job_system>
         friend
-        class JobChain;
+        class job_chain;
     };
-
 }
 #endif

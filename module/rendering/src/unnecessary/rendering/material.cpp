@@ -1,28 +1,27 @@
 #include <unnecessary/rendering/material.h>
 
 namespace un {
-
-    bool un::Material::operator<(const un::Material& rhs) const {
-        return pipeline < rhs.pipeline;
+    bool material::operator<(const material& rhs) const {
+        return _pipeline < rhs._pipeline;
     }
 
-    bool un::Material::operator>(const un::Material& rhs) const {
+    bool material::operator>(const material& rhs) const {
         return rhs < *this;
     }
 
-    bool un::Material::operator<=(const un::Material& rhs) const {
+    bool material::operator<=(const material& rhs) const {
         return !(rhs < *this);
     }
 
-    bool un::Material::operator>=(const un::Material& rhs) const {
+    bool material::operator>=(const material& rhs) const {
         return !(*this < rhs);
     }
 
-    int Material::getRenderOrder() const {
-        return renderOrder;
+    int material::get_render_order() const {
+        return _renderOrder;
     }
 
-    un::Pipeline* Material::getPipeline() const {
-        return pipeline;
+    pipeline* material::get_pipeline() const {
+        return _pipeline;
     }
 }

@@ -11,67 +11,69 @@
 #include <unnecessary/algorithms/maps.h>
 
 namespace un {
-
-    class CXXNamed {
+    class cxx_named {
     public:
-        virtual std::string getName() const = 0;
+        virtual std::string get_name() const = 0;
     };
 
-    class CXXSymbol : public un::CXXNamed {
+    class cxx_symbol : public cxx_named {
     private:
-        std::string name;
+        std::string _name;
+
     public:
-        CXXSymbol() = default;
+        cxx_symbol() = default;
 
-        explicit CXXSymbol(std::string name);
+        explicit cxx_symbol(std::string name);
 
-        virtual ~CXXSymbol();
+        virtual ~cxx_symbol();
 
-        std::string getName() const override;
+        std::string get_name() const override;
 
-        virtual std::string getFullName() const;
+        virtual std::string get_full_name() const;
     };
 
-    enum CXXTypeKind : u16 {
-        eInteger8,
-        eInteger16,
-        eInteger32,
-        eInteger64,
-        eInteger128,
-        eFloat,
-        eDouble,
+    enum cxx_type_kind : u16 {
+        integer8,
+        integer16,
+        integer32,
+        integer64,
+        integer128,
+        float_single,
+        float_double,
         eBool,
-        eComplex,
+        complex,
         eEnum,
         ePointer,
-        eUnsignedFlag = 1 << 15, // Last bit indicates if isSigned
-        eUnsignedInteger8 = eInteger8 | eUnsignedFlag,
-        eUnsignedInteger16 = eInteger16 | eUnsignedFlag,
-        eUnsignedInteger32 = eInteger32 | eUnsignedFlag,
-        eUnsignedInteger64 = eInteger64 | eUnsignedFlag,
-        eUnsignedInteger128 = eInteger128 | eUnsignedFlag,
+        eUnsignedFlag = 1 << 15,
+        // Last bit indicates if isSigned
+        eUnsignedInteger8 = integer8 | eUnsignedFlag,
+        eUnsignedInteger16 = integer16 | eUnsignedFlag,
+        eUnsignedInteger32 = integer32 | eUnsignedFlag,
+        eUnsignedInteger64 = integer64 | eUnsignedFlag,
+        eUnsignedInteger128 = integer128 | eUnsignedFlag,
     };
 
     template<>
-    std::string to_string(const un::CXXTypeKind& kind);
+    std::string to_string(const cxx_type_kind& kind);
 
-    class CXXType : public un::CXXSymbol {
+    class cxx_type : public cxx_symbol {
     private:
-        un::CXXTypeKind innerType;
-        std::vector<std::string> templateTypes;
+        cxx_type_kind _innerType;
+        std::vector<std::string> _templateTypes;
+
     public:
-        CXXType() = default;
+        cxx_type() = default;
 
-        CXXType(const std::string& name, CXXTypeKind innerType);
+        cxx_type(const std::string& name, cxx_type_kind innerType);
 
-        CXXTypeKind getKind() const;
+        cxx_type_kind get_kind() const;
 
-        const std::vector<std::string>& getTemplateTypes() const;
+        const std::vector<std::string>& get_template_types() const;
 
-        void addTemplate(std::string&& type);
+        void add_template(std::string&& type);
     };
 
-    enum CXXAccessModifier {
+    enum cxx_access_modifier {
         eNone,
         ePublic,
         eProtected,
@@ -79,71 +81,75 @@ namespace un {
     };
 
     template<>
-    std::string to_string(const un::CXXAccessModifier& value);
+    std::string to_string(const cxx_access_modifier& value);
 
-    class CXXAttribute : CXXNamed {
+    class cxx_attribute : cxx_named {
     private:
-        std::string name;
-        std::set<std::string> arguments;
+        std::string _name;
+        std::set<std::string> _arguments;
+
     public:
-        CXXAttribute(std::string name, const std::vector<std::string>& argsSegments);
+        cxx_attribute(std::string name, const std::vector<std::string>& argsSegments);
 
-        CXXAttribute(std::string name);
+        cxx_attribute(std::string name);
 
-        std::string getName() const override;
+        std::string get_name() const override;
 
-        const std::set<std::string>& getArguments() const;
+        const std::set<std::string>& get_arguments() const;
 
-        bool hasArgument(const std::string& arg) const;
+        bool has_argument(const std::string& arg) const;
 
-        std::string getArgumentValue(const std::string& arg) const;
+        std::string get_argument_value(const std::string& arg) const;
     };
 
-    class CXXField : public CXXSymbol {
+    class cxx_field : public cxx_symbol {
     private:
-        std::vector<un::CXXAttribute> attributes;
-        CXXAccessModifier accessModifier;
-        un::CXXType type;
+        std::vector<cxx_attribute> _attributes;
+        cxx_access_modifier _accessModifier;
+        cxx_type _type;
+
     public:
-        CXXField(
-            CXXAccessModifier accessModifier,
-            std::string name, un::CXXType type,
-            std::vector<un::CXXAttribute> expansions
+        cxx_field(
+            cxx_access_modifier accessModifier,
+            std::string name, cxx_type type,
+            std::vector<cxx_attribute> expansions
         );
 
-        const std::vector<un::CXXAttribute>& getAttributes() const;
+        const std::vector<cxx_attribute>& get_attributes() const;
 
-        const un::CXXAttribute& getAttribute(const std::string& name) const;
+        const cxx_attribute& get_attribute(const std::string& name) const;
 
-        const un::CXXAttribute* findAttribute(const std::string& name) const;
+        const cxx_attribute* find_attribute(const std::string& name) const;
 
-        bool hasAttribute(const std::string& name) const;
+        bool has_attribute(const std::string& name) const;
 
-        CXXAccessModifier getAccessModifier() const;
+        cxx_access_modifier get_access_modifier() const;
 
-        const un::CXXType& getType() const;
+        const cxx_type& get_type() const;
     };
 
-    class CXXScope {
+    class cxx_scope {
     private:
-        std::vector<std::shared_ptr<CXXSymbol>> symbols;
+        std::vector<std::shared_ptr<cxx_symbol>> _symbols;
+
     public:
-        void addSymbol(const std::shared_ptr<CXXSymbol>& symbol) {
-            symbols.emplace_back(symbol);
+        void addSymbol(const std::shared_ptr<cxx_symbol>& symbol) {
+            _symbols.emplace_back(symbol);
         }
 
-        template<typename TSymbol>
-        bool findSymbol(const std::string& fullName, std::shared_ptr<TSymbol>& out) const {
-            for (const auto& item : symbols) {
-                std::shared_ptr<TSymbol> ptr = std::dynamic_pointer_cast<TSymbol>(item);
+        template<typename t_symbol>
+        bool
+        find_symbol(const std::string& fullName, std::shared_ptr<un::cxx_composite>& out) const {
+            for (const auto& item : _symbols) {
+                std::shared_ptr<t_symbol> ptr = std::dynamic_pointer_cast<t_symbol>(item);
                 if (ptr == nullptr) {
                     continue;
                 }
-                std::shared_ptr<un::CXXNamed> named = std::dynamic_pointer_cast<un::CXXNamed>(item);
+                std::shared_ptr<cxx_named> named = std::dynamic_pointer_cast<cxx_named>(item);
                 if (named == nullptr) {
                     continue;
                 }
-                if (named->getName() == fullName) {
+                if (named->get_name() == fullName) {
                     out = ptr;
                     return true;
                 }
@@ -151,17 +157,16 @@ namespace un {
             return false;
         }
 
-
-        template<typename TSymbol>
-        inline bool findSymbol(const un::CXXType& type, std::shared_ptr<TSymbol>& out) const {
-            return findSymbol<TSymbol>(type.getName(), out);
+        template<typename t_symbol>
+        bool find_symbol(const cxx_type& type, std::shared_ptr<t_symbol>& out) const {
+            return find_symbol<t_symbol>(type.get_name(), out);
         }
 
-        template<typename TSymbol>
-        std::vector<std::shared_ptr<TSymbol>> collectSymbols() const {
-            std::vector<std::shared_ptr<TSymbol>> view;
-            for (const auto& item : symbols) {
-                std::shared_ptr<TSymbol> ptr = std::dynamic_pointer_cast<TSymbol>(item);
+        template<typename t_symbol>
+        std::vector<std::shared_ptr<t_symbol>> collect_symbols() const {
+            std::vector<std::shared_ptr<t_symbol>> view;
+            for (const auto& item : _symbols) {
+                std::shared_ptr<t_symbol> ptr = std::dynamic_pointer_cast<t_symbol>(item);
                 if (ptr != nullptr) {
                     view.push_back(std::move(ptr));
                 }
@@ -170,80 +175,84 @@ namespace un {
         }
     };
 
-    class CXXDeclaration : public CXXSymbol {
+    class cxx_declaration : public cxx_symbol {
     private:
-        std::string ns;
+        std::string _namespace;
+
     public:
-        CXXDeclaration() = default;
+        cxx_declaration() = default;
 
-        CXXDeclaration(const std::string& name, std::string ns);
+        cxx_declaration(const std::string& name, std::string ns);
 
-        std::string getFullName() const override;
+        std::string get_full_name() const override;
     };
 
-    class CXXEnumValue : public CXXSymbol {
+    class cxx_enum_value : public cxx_symbol {
     private:
-        std::size_t value;
-    public:
-        CXXEnumValue(const std::string& name, size_t value);
+        std::size_t _value;
 
-        size_t getValue() const;
+    public:
+        cxx_enum_value(const std::string& name, size_t value);
+
+        size_t get_value() const;
     };
 
-    class CXXEnum : public CXXDeclaration {
+    class cxx_enum : public cxx_declaration {
     private:
-        std::vector<CXXEnumValue> values;
+        std::vector<cxx_enum_value> _values;
+
     public:
-        CXXEnum(
+        cxx_enum(
             const std::string& name,
             const std::string& ns,
-            std::vector<CXXEnumValue> values
+            std::vector<cxx_enum_value> values
         );
 
-        const std::vector<CXXEnumValue>& getValues() const;
+        const std::vector<cxx_enum_value>& get_values() const;
     };
 
-    class CXXComposite : public CXXDeclaration {
+    class cxx_composite : public cxx_declaration {
     private:
-        std::vector<CXXField> fields;
+        std::vector<cxx_field> _fields;
+
     public:
-        explicit CXXComposite(const std::string& name, std::string ns);
+        explicit cxx_composite(const std::string& name, std::string ns);
 
-        void addField(CXXField&& field);
+        void add_field(cxx_field&& field);
 
-        const std::vector<CXXField>& getFields() const;;
-
+        const std::vector<cxx_field>& get_fields() const;;
     };
 
     template<>
-    bool CXXScope::findSymbol(const std::string& fullName, std::shared_ptr<un::CXXComposite>& out) const;
+    bool
+    cxx_scope::find_symbol(const std::string& fullName, std::shared_ptr<cxx_composite>& out) const;
 
-    class CXXTranslationUnit : public CXXScope {
+    class cxx_translation_unit : public cxx_scope {
     private:
-        std::vector<std::string> includes;
-        std::string selfInclude;
-        std::filesystem::path location;
-        std::unordered_map<std::string, un::CXXType> _typeIndex;
+        std::vector<std::string> _includes;
+        std::string _selfInclude;
+        std::filesystem::path _location;
+        std::unordered_map<std::string, cxx_type> _typeIndex;
+
     public:
-        explicit CXXTranslationUnit(
+        explicit cxx_translation_unit(
             std::filesystem::path location,
             std::string selfInclude
         );
 
-        void addInclude(const std::string& include);
+        void add_include(const std::string& include);
 
-        const std::vector<std::string>& getIncludes() const;
+        const std::vector<std::string>& get_includes() const;
 
-        bool searchType(const std::string& type, un::CXXType& out);
+        bool search_type(const std::string& type, cxx_type& out);
 
-        void addType(const std::string& key, const un::CXXType& type);
+        void add_type(const std::string& key, const cxx_type& type);
 
-        void addType(const un::CXXType& out);
+        void add_type(const cxx_type& out);
 
-        const std::string& getSelfInclude() const;
+        const std::string& get_self_include() const;
 
-        const std::filesystem::path& getLocation() const;
+        const std::filesystem::path& get_location() const;
     };
-
 }
 #endif

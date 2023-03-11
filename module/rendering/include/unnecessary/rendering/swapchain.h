@@ -9,104 +9,107 @@
 #include <unnecessary/rendering/rendering_device.h>
 
 namespace un {
-    class Renderer;
+    class renderer;
 
-    class SwapChainSupportDetails {
+    class swap_chain_support_details {
     private:
-        vk::SurfaceCapabilitiesKHR capabilities;
-        std::vector<vk::SurfaceFormatKHR> formats;
-        std::vector<vk::PresentModeKHR> presentModes;
+        vk::SurfaceCapabilitiesKHR _capabilities;
+        std::vector<vk::SurfaceFormatKHR> _formats;
+        std::vector<vk::PresentModeKHR> _presentModes;
+
     public:
-        SwapChainSupportDetails(
-            const un::RenderingDevice& renderingDevice,
+        swap_chain_support_details(
+            const rendering_device& renderingDevice,
             vk::ImageUsageFlags usageFlags,
             vk::ImageCreateFlags createFlags
         );
 
-        const vk::SurfaceCapabilitiesKHR& getCapabilities() const;
+        const vk::SurfaceCapabilitiesKHR& get_capabilities() const;
 
-        vk::SurfaceFormatKHR selectFormat();
+        vk::SurfaceFormatKHR select_format();
 
-        vk::Extent2D selectExtent(const un::Size2D& application);
+        vk::Extent2D select_extent(const size2d& application);
 
-        vk::PresentModeKHR selectPresentMode();
+        vk::PresentModeKHR select_present_mode();
     };
 
-
-    class SwapChain {
+    class swap_chain {
     public:
-        struct ChainImage {
+        struct chain_image {
         private:
-            vk::Image image;
-            un::ImageView imageView;
+            vk::Image _image;
+            image_view _imageView;
+
         public:
-            ChainImage(const vk::Image& image, const un::ImageView& imageView);
+            chain_image(const vk::Image& image, const image_view& imageView);
 
-            const vk::Image& getImage() const;
+            const vk::Image& get_image() const;
 
-            const un::ImageView& getImageView() const;
+            const image_view& get_image_view() const;
         };
 
-        class ChainSynchronizer {
+        class chain_synchronizer {
         private:
-            vk::Semaphore imageReady;
-            vk::Semaphore renderFinished;
-            vk::Fence fence;
-            bool inUse;
+            vk::Semaphore _imageReady;
+            vk::Semaphore _renderFinished;
+            vk::Fence _fence;
+            bool _inUse;
             std::mutex _mutex;
-            std::condition_variable available;
+            std::condition_variable _available;
+
         public:
-            ChainSynchronizer(vk::Device device);
+            chain_synchronizer(vk::Device device);
 
             void access();
 
             void unlock();
 
-            const vk::Semaphore& getImageReady() const;
+            const vk::Semaphore& get_image_ready() const;
 
-            const vk::Semaphore& getRenderFinished() const;
+            const vk::Semaphore& get_render_finished() const;
 
-            const vk::Fence& getFence() const;
+            const vk::Fence& get_fence() const;
 
 #ifdef DEBUG
-        private:
-            std::size_t innerIndex;
-        public:
-            size_t getInnerIndex() const;
 
-            void setInnerIndex(size_t innerIndex);
+        private:
+            std::size_t _innerIndex;
+
+        public:
+            size_t get_inner_index() const;
+
+            void set_inner_index(size_t innerIndex);
 
 #endif
         };
 
     private:
-        vk::Format format;
-        vk::SwapchainKHR swapChain;
-        un::Size2D resolution;
-        std::vector<ChainImage> images;
-        std::size_t semaphoreIndex;
-        std::vector<std::unique_ptr<ChainSynchronizer>> synchonizers;
+        vk::Format _format;
+        vk::SwapchainKHR _swapChain;
+        size2d _resolution;
+        std::vector<chain_image> _images;
+        std::size_t _semaphoreIndex;
+        std::vector<std::unique_ptr<chain_synchronizer>> _synchronizers;
+
     public:
+        swap_chain() = default;
 
-
-        SwapChain() = default;
-
-        SwapChain(
-            const un::Renderer& renderer,
-            const un::Size2D& targetSize
+        swap_chain(
+            const renderer& renderer,
+            const size2d& targetSize
         );
 
-        vk::Format getFormat() const;
+        vk::Format get_format() const;
 
-        const vk::SwapchainKHR& getSwapChain() const;
+        const vk::SwapchainKHR& get_swap_chain() const;
 
-        const Size2D& getResolution() const;
+        const size2d& get_resolution() const;
 
-        ChainSynchronizer& acquireSynchronizer();
+        chain_synchronizer& acquire_synchronizer();
 
-        const std::vector<ChainImage>& getImages() const;
+        const std::vector<chain_image>& get_images() const;
 
-        std::size_t getNumLinks();
+        std::size_t get_num_links();
     };
 }
 #endif

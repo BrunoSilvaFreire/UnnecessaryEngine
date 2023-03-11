@@ -15,16 +15,15 @@
 #include <grapphs/dot.h>
 #include "unnecessary/source_analysis/parse_plan.h"
 
-static const char* const kFileArgName = "file";
-static const char* const kRelativeToName = "relative_to";
-static const char* const kGlobalIncludeName = "global_include";
-static const char* const kNumWorkersName = "num_workers";
-static const char* const kJobSystemLogger = "job_system_logger";
+static const char* const k_file_arg_name = "file";
+static const char* const k_relative_to_name = "relative_to";
+static const char* const k_global_include_name = "global_include";
+static const char* const k_num_workers_name = "num_workers";
+static const char* const k_job_system_logger = "job_system_logger";
+static const char* const k_include_arg_name = "include";
+static const char* const k_output_dir = "output";
 
-static const char* const kIncludeArgName = "include";
-static const char* const kOutputDir = "output";
-
-bool isSerializable(const std::shared_ptr<un::CXXComposite>& composite);
+bool is_serializable(const std::shared_ptr<un::cxx_composite>& composite);
 
 void process(
     const std::vector<std::string>& parsingIncludes,
@@ -34,63 +33,68 @@ void process(
     const std::string& relativeTo
 );
 
-void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot);
+void
+write_job_to_dot(
+    std::unique_ptr<un::simple_job_system>& jobSystem,
+    const std::filesystem::path& jobsDot
+);
 
 int main(int argc, char** args) {
-    un::Chronometer<> mainChronometer;
+    un::chronometer<> mainChronometer;
     LOG(INFO) << "Generating serialization.";
     cxxopts::Options options("unnecessary_serialization_generator");
     options.add_options("required")
                (
-                   kFileArgName, "File to parse and generate",
+                   k_file_arg_name, "File to parse and generate",
                    cxxopts::value<std::vector<std::string>>()
                )
                (
-                   kIncludeArgName, "Adds an include directory to parsing",
+                   k_include_arg_name, "Adds an include directory to parsing",
                    cxxopts::value<std::vector<std::string>>()
                )
                (
-                   kNumWorkersName, "Number of thread workers to use",
+                   k_num_workers_name, "Number of thread workers to use",
                    cxxopts::value<std::size_t>()
                )
                (
-                   kOutputDir, "Directory where to write the generated files",
+                   k_output_dir, "Directory where to write the generated files",
                    cxxopts::value<std::string>()
                );
     options.add_options("optional")
                (
-                   kGlobalIncludeName, "Specifies an include that will be added to all generated files",
+                   k_global_include_name,
+                   "Specifies an include that will be added to all generated files",
                    cxxopts::value<std::vector<std::string>>()
                )
                (
-                   kRelativeToName, "Directory where to write the generated files",
+                   k_relative_to_name, "Directory where to write the generated files",
                    cxxopts::value<std::string>()
                )
-               (kJobSystemLogger, "Whether to log job system status", cxxopts::value<bool>());
-
+               (k_job_system_logger, "Whether to log job system status", cxxopts::value<bool>());
 
     std::filesystem::path output;
     std::filesystem::path relativeTo;
     std::vector<std::string> files;
     std::vector<std::string> includes;
-    un::JobSystemBuilder<un::SimpleJobSystem> builder;
+    un::job_system_builder<un::simple_job_system> builder;
     bool logJobSystem = false;
     try {
         cxxopts::ParseResult result = options.parse(argc, args);
-        includes = result[kIncludeArgName].as<std::vector<std::string>>();
+        includes = result[k_include_arg_name].as<std::vector<std::string>>();
         std::vector<std::string> globalIncludes;
-        if (result.count(kGlobalIncludeName) > 0) {
-            globalIncludes = result[kGlobalIncludeName].as<std::vector<std::string>>();
+        if (result.count(k_global_include_name) > 0) {
+            globalIncludes = result[k_global_include_name].as<std::vector<std::string>>();
         }
-        std::size_t numSpecifiedFiles = result.count(kFileArgName);
-        output = result[kOutputDir].as<std::string>();
-        if (result.count(kRelativeToName) > 0) {
-            relativeTo = result[kRelativeToName].as<std::string>();
-        } else {
+        std::size_t numSpecifiedFiles = result.count(k_file_arg_name);
+        output = result[k_output_dir].as<std::string>();
+        if (result.count(k_relative_to_name) > 0) {
+            relativeTo = result[k_relative_to_name].as<std::string>();
+        }
+        else {
             relativeTo = std::filesystem::current_path();
         }
         std::filesystem::path filePath = "temp";
-        files = result[kFileArgName].as<std::vector<std::string>>();
+        files = result[k_file_arg_name].as<std::vector<std::string>>();
         std::for_each(
             files.begin(), files.end(),
             [](std::string& path) {
@@ -98,15 +102,16 @@ int main(int argc, char** args) {
             }
         );
 
-        if (result.count(kNumWorkersName) > 0) {
-            std::size_t numWorkers = result[kNumWorkersName].as<std::size_t>();
-            builder.setNumWorkers<un::JobWorker>(numWorkers);
+        if (result.count(k_num_workers_name) > 0) {
+            std::size_t numWorkers = result[k_num_workers_name].as<std::size_t>();
+            builder.set_num_workers<un::job_worker>(numWorkers);
         }
 
-        if (result.count(kJobSystemLogger) > 0) {
+        if (result.count(k_job_system_logger) > 0) {
             logJobSystem = true;
         }
-    } catch (const cxxopts::OptionParseException& x) {
+    }
+    catch (const cxxopts::OptionParseException& x) {
         std::cerr << "unnecessary_serializer_generator: " << x.what() << '\n';
         std::cerr << "usage: unnecessary_serializer_generator [options] <input_file> ...\n";
         return EXIT_FAILURE;
@@ -127,31 +132,32 @@ int main(int argc, char** args) {
         }
     }
     if (logJobSystem) {
-        builder.withLogger();
+        builder.with_logger();
     }
     auto jobSystem = builder.build();
 
     auto index = std::make_shared<cppast::cpp_entity_index>();
 
-    std::vector<un::GenerationFile> genFiles;
+    std::vector<un::generation_file> genFiles;
     {
-        un::ParsePlan parsePlan(index);
+        un::parse_plan parsePlan(index);
         std::for_each(
             includes.begin(), includes.end(),
             [&](const auto& inc) {
-                parsePlan.addInclude(inc);
+                parsePlan.add_include(inc);
             }
         );
         std::for_each(
             files.begin(), files.end(),
             [&](const auto& item) {
-                parsePlan.addFile(item);
+                parsePlan.add_file(item);
             }
         );
-        std::vector<un::CXXTranslationUnit> units = parsePlan.parse(jobSystem.get());
+        std::vector<un::cxx_translation_unit> units = parsePlan.parse(jobSystem.get());
         for (auto& item : units) {
-            std::filesystem::path location = item.getLocation();
-            std::string fileName = location.filename().replace_extension().string() + ".serializer.generated.h";
+            std::filesystem::path location = item.get_location();
+            std::string fileName =
+                location.filename().replace_extension().string() + ".serializer.generated.h";
             genFiles.emplace_back(
                 location,
                 output / fileName,
@@ -160,27 +166,27 @@ int main(int argc, char** args) {
         }
     }
 
-    un::GenerationPlan plan(index, output);
-    un::Chronometer<> chronometer(false);
+    un::generation_plan plan(index, output);
+    un::chronometer<> chronometer(false);
 
     {
-        un::JobChain<un::SimpleJobSystem> chain(jobSystem.get());
-        std::unordered_map<u32, std::set<un::JobHandle>> include2DeclarationsJobs;
+        un::job_chain<un::simple_job_system> chain(jobSystem.get());
+        std::unordered_map<u32, std::set<un::job_handle>> include2DeclarationsJobs;
         for (const auto& pGenerationFile : genFiles) {
-            std::filesystem::path filePath = pGenerationFile.getSource();
-            const un::CXXTranslationUnit& pUnit = pGenerationFile.getUnit();
-            std::vector<std::shared_ptr<un::CXXDeclaration>> symbols = pUnit.collectSymbols<un::CXXDeclaration>();
-            std::vector<std::shared_ptr<un::Buffer>> toJoin;
-            std::set<un::JobHandle> dependencies;
-            std::filesystem::path outPath = pGenerationFile.getOutput();
+            std::filesystem::path filePath = pGenerationFile.get_source();
+            const un::cxx_translation_unit& pUnit = pGenerationFile.get_unit();
+            std::vector<std::shared_ptr<un::cxx_declaration>> symbols = pUnit.collect_symbols<un::cxx_declaration>();
+            std::vector<std::shared_ptr<un::byte_buffer>> toJoin;
+            std::set<un::job_handle> dependencies;
+            std::filesystem::path outPath = pGenerationFile.get_output();
             std::string fileName = outPath.filename().string();
             LOG(INFO) << filePath.filename() << " serializer will be written to "
-                      << un::prettify(outPath);
+                      << un::uri(outPath);
 
-            std::shared_ptr<un::Buffer> includeBuf = std::make_shared<un::Buffer>();
-            un::JobHandle includeHandle;
+            auto includeBuf = std::make_shared<un::byte_buffer>();
+            un::job_handle includeHandle;
             u32 index = 0;
-            chain.immediately<un::GenerateIncludesJobs>(
+            chain.immediately<un::generate_includes_jobs>(
                 &includeHandle,
                 index,
                 &pUnit,
@@ -188,63 +194,71 @@ int main(int argc, char** args) {
                 includeBuf
             );
             std::stringstream name;
-            name << "Generate includes for translation unit (" << un::prettify(pGenerationFile.getSource()) << ")";
-            chain.setName(includeHandle, name.str());
+            name << "Generate includes for translation unit ("
+                 << un::uri(pGenerationFile.get_source()) << ")";
+            chain.set_name(includeHandle, name.str());
             toJoin.emplace_back(includeBuf);
             dependencies.emplace(includeHandle);
 
             for (const auto& item : symbols) {
-                std::shared_ptr<un::Buffer> buffer = std::make_shared<un::Buffer>();
+                auto buffer = std::make_shared<un::byte_buffer>();
                 toJoin.emplace_back(buffer);
-                un::JobHandle handle;
-                chain.immediately<un::GenerateSerializerJob>(
+                un::job_handle handle;
+                chain.immediately<un::generate_serializer_job>(
                     &handle,
                     buffer,
                     item,
                     &pUnit
                 );
-                chain.setName(
+                chain.set_name(
                     handle,
-                    std::string("Generate ").append(item->getFullName()).append(" serializer")
+                    std::string("Generate ").append(item->get_full_name()).append(" serializer")
                 );
                 dependencies.emplace(handle);
                 include2DeclarationsJobs[index].emplace(handle);
             }
-            un::JobHandle joinHandle;
-            un::JobHandle writeHandle;
-            auto finalBuffer = std::make_shared<un::Buffer>();
-            chain.immediately<un::JoinBuffersJob>(
+            un::job_handle joinHandle;
+            un::job_handle writeHandle;
+            auto finalBuffer = std::make_shared<un::byte_buffer>();
+            chain.immediately<un::join_buffers_job>(
                 &joinHandle,
                 toJoin,
                 finalBuffer
-            ).after<un::WriteFileJob>(
+            ).after<un::write_file_job>(
                 joinHandle,
                 &writeHandle,
                 outPath,
-                static_cast<std::ios::openmode>(std::ios::out | std::ios::trunc),
+                std::ios::out | std::ios::trunc,
                 finalBuffer
             );
-            chain.setName(
+            chain.set_name(
                 joinHandle,
                 std::string("Join buffers for ").append(fileName)
             );
-            chain.setName(
+            chain.set_name(
                 writeHandle,
                 std::string("Write to file ").append(fileName)
             );
             for (const auto& generationHandle : dependencies) {
-                chain.after<un::JoinBuffersJob>(generationHandle, joinHandle);
+                chain.after<un::join_buffers_job>(generationHandle, joinHandle);
             }
         }
-        writeJobToDot(jobSystem, output / "generate_jobs.dot");
-        LOG(INFO) << "Dispatching " << chain.getNumJobs() << " generation jobs...";
+        write_job_to_dot(jobSystem, output / "generate_jobs.dot");
+        LOG(INFO) << "Dispatching " << chain.get_num_jobs() << " generation jobs...";
     }
     jobSystem->complete();
-//    auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::SimpleJobSystem>>();
-//    ptr->saveToFile(output / "recording.csv");
+    //    auto ptr = jobSystem->findExtension<un::JobSystemRecorder<un::simple_job_system>>();
+    //    ptr->saveToFile(output / "recording.csv");
     LOG(INFO) << "Sources generated in " << mainChronometer.stop().count() << " ms";
 }
 
-void writeJobToDot(std::unique_ptr<un::SimpleJobSystem>& jobSystem, const std::filesystem::path& jobsDot) {
-    un::create_job_system_graph_writer(*jobSystem).save_to_dot(jobSystem->getJobGraph().getInnerGraph(), jobsDot);
+void
+write_job_to_dot(
+    std::unique_ptr<un::simple_job_system>& jobSystem,
+    const std::filesystem::path& jobsDot
+) {
+    create_job_system_graph_writer(*jobSystem).save_to_dot(
+        jobSystem->get_job_graph()
+                 .get_inner_graph(), jobsDot
+    );
 }

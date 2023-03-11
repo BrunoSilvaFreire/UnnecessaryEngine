@@ -11,23 +11,27 @@
 
 namespace un {
 
-    class VulkanQueueAvailableRequirement
-        : public Requirement<std::vector<vk::QueueFamilyProperties>> {
+    class vulkan_queue_available_requirement
+        : public requirement<std::vector<vk::QueueFamilyProperties>> {
     private:
-        vk::QueueFlagBits bits;
+        vk::QueueFlagBits _bits;
     public:
-        explicit VulkanQueueAvailableRequirement(vk::QueueFlagBits bits);
+        explicit vulkan_queue_available_requirement(vk::QueueFlagBits bits);
 
-        void check(const std::vector<vk::QueueFamilyProperties>& value, un::Validator& validator) override;
+        void
+        check(
+            const std::vector<vk::QueueFamilyProperties>& value,
+            un::validator& validator
+        ) override;
     };
 
-    class VulkanDeviceTypeRequirement : public Requirement<vk::PhysicalDeviceProperties> {
+    class vulkan_device_type_requirement : public requirement<vk::PhysicalDeviceProperties> {
     private:
-        std::vector<vk::PhysicalDeviceType> acceptableTypes;
+        std::vector<vk::PhysicalDeviceType> _acceptableTypes;
     public:
-        explicit VulkanDeviceTypeRequirement(const std::initializer_list<vk::PhysicalDeviceType>& acceptableTypes);
+        vulkan_device_type_requirement(const std::initializer_list<vk::PhysicalDeviceType>& acceptableTypes);
 
-        void check(const vk::PhysicalDeviceProperties& value, un::Validator& validator) override;
+        void check(const vk::PhysicalDeviceProperties& value, un::validator& validator) override;
     };
 }
 #endif //UNNECESSARYENGINE_VULKAN_REQUIREMENTS_H

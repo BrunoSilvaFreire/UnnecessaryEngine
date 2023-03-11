@@ -13,18 +13,22 @@
 #include <vulkan/vulkan.hpp>
 
 namespace un {
-    class PipelineStage {
+    class pipeline_stage {
     private:
-        vk::ShaderStageFlagBits stage;
+        vk::ShaderStageFlagBits _stage;
         vk::ShaderModule module;
+
     public:
-        PipelineStage(vk::ShaderStageFlagBits stage, const vk::ShaderModule& module);
+        pipeline_stage(
+            vk::ShaderStageFlagBits stage, const vk::ShaderModule&
+        module);
 
-        const vk::ShaderModule& getModule() const;
+        const vk::ShaderModule& get_module() const;
 
-        vk::ShaderStageFlagBits getStageFlags() const;
+        vk::ShaderStageFlagBits get_stage_flags() const;
 
-        static PipelineStage fromBuffer(vk::Device device, const un::Buffer& buffer, vk::ShaderStageFlagBits flags) {
+        static pipeline_stage
+        from_buffer(vk::Device device, const byte_buffer& buffer, vk::ShaderStageFlagBits flags) {
             size_t size = buffer.size();
             size_t rest = size % 4;
             if (rest != 0) {
@@ -32,22 +36,22 @@ namespace un {
             }
             vk::ShaderModule vulkanModule = device.createShaderModule(
                 vk::ShaderModuleCreateInfo(
-                    (vk::ShaderModuleCreateFlags) 0,
+                    static_cast<vk::ShaderModuleCreateFlags>(0),
                     size,
                     reinterpret_cast<const uint32_t*>(buffer.data())
                 )
             );
-            return un::PipelineStage(flags, vulkanModule);
+            return pipeline_stage(flags, vulkanModule);
         }
 
-        static PipelineStage fromFile(
+        static pipeline_stage from_file(
             vk::Device device,
             const std::filesystem::path& path,
             vk::ShaderStageFlagBits flags
         ) {
-            un::Buffer spirv;
-            un::files::read_file_into_buffer(path, spirv, std::ios::binary);
-            return fromBuffer(device, spirv, flags);
+            byte_buffer spirv;
+            files::read_file_into_buffer(path, spirv, std::ios::binary);
+            return from_buffer(device, spirv, flags);
         };
     };
 }

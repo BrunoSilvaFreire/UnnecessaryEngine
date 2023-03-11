@@ -1,18 +1,19 @@
-#ifndef UNNECESSARYENGINE_basic_RENDERING_PIPELINE_H
-#define UNNECESSARYENGINE_basic_RENDERING_PIPELINE_H
+#ifndef UNNECESSARYENGINE_BASIC_RENDERING_PIPELINE_H
+#define UNNECESSARYENGINE_BASIC_RENDERING_PIPELINE_H
 
 #include <unnecessary/rendering/rendering_pipeline.h>
 #include <unnecessary/rendering/renderer.h>
 #include <unnecessary/rendering/passes/draw_objects_pass.h>
 
 namespace un {
-    class BasicRenderingPipeline : public un::RenderingPipeline {
+    class basic_rendering_pipeline : public rendering_pipeline {
     protected:
-        un::RenderGroup opaqueGroup;
-        std::size_t color, depth;
+        render_group _opaqueGroup;
+        std::size_t _color, _depth;
+
     public:
-        void configure(un::Renderer& renderer, RenderGraph& graph) override {
-            color = graph.addBorrowedAttachment(
+        void configure(renderer& renderer, render_graph& graph) override {
+            _color = graph.add_borrowed_attachment(
                 vk::ClearColorValue(
                     std::array<float, 4>({0, 1, 0, 1})
                 ),
@@ -26,8 +27,8 @@ namespace un {
                 vk::ImageLayout::eUndefined,
                 vk::ImageLayout::ePresentSrcKHR
             );
-            graph.setAttachmentName(color, "Color");
-            depth = graph.addOwnedAttachment(
+            graph.set_attachment_name(_color, "Color");
+            _depth = graph.add_owned_attachment(
                 vk::ImageUsageFlagBits::eDepthStencilAttachment,
                 vk::ImageAspectFlagBits::eDepth,
                 vk::ClearDepthStencilValue(0, 0),
@@ -41,19 +42,19 @@ namespace un {
                 vk::ImageLayout::eUndefined,
                 vk::ImageLayout::eDepthStencilAttachmentOptimal
             );
-            graph.setAttachmentName(depth, "Depth");
+            graph.set_attachment_name(_depth, "Depth");
             vk::Rect2D attachmentSize{};
-            const auto& resolution = renderer.getSwapChain().getResolution();
+            const auto& resolution = renderer.get_swap_chain().get_resolution();
             attachmentSize.extent.width = resolution.x;
             attachmentSize.extent.height = resolution.y;
         }
 
-        size_t getColor() const {
-            return color;
+        size_t get_color() const {
+            return _color;
         }
 
-        size_t getDepth() const {
-            return depth;
+        size_t get_depth() const {
+            return _depth;
         }
     };
 }

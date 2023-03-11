@@ -6,7 +6,7 @@
 #include <string>
 
 namespace un {
-    class IDisposable {
+    class disposable {
     public:
         virtual void dispose(const vk::Device& device) = 0;
     };

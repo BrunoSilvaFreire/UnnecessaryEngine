@@ -10,45 +10,45 @@
 #include <unnecessary/baf/file_reader.h>
 
 namespace un {
-    struct BAFSection {
+    struct baf_section {
         std::size_t origin;
         std::size_t length;
     };
 
-    struct BAFEntry {
-        BAFSection bounds;
+    struct baf_entry {
+        baf_section bounds;
     };
-    struct BAFEntryPair {
+
+    struct baf_entry_pair {
         uuids::uuid uuid;
-        BAFEntry actual;
+        baf_entry actual;
     };
 
-
-    class BAFFile {
+    class baf_file {
     private:
         const static char* kBafMagic;
         constexpr static std::size_t kNumBytesForVersion = 8;
-        std::FILE* file;
-        std::array<u8, kNumBytesForVersion> version;
-        std::size_t blocksStart;
-        std::unordered_map<uuids::uuid, BAFEntry> entries;
+        std::FILE* _file;
+        std::array<u8, kNumBytesForVersion> _version;
+        std::size_t _blocksStart;
+        std::unordered_map<uuids::uuid, baf_entry> _entries;
 
-        un::FileHelper get_reader() {
-            return std::ifstream(file);
+        file_helper get_reader() {
+            return un::file_helper((std::ifstream(reinterpret_cast<const char*>(_file))));
         }
 
     public:
-        BAFFile(const std::filesystem::path& path);
+        baf_file(const std::filesystem::path& path);
 
-        virtual ~BAFFile();
+        virtual ~baf_file();
 
-        const std::array<u8, kNumBytesForVersion>& getVersion() const;
+        const std::array<u8, kNumBytesForVersion>& get_version() const;
 
-        std::string getVersionString() const {
-            return std::string(reinterpret_cast<const char*>(version.data()), kNumBytesForVersion);
+        std::string get_version_string() const {
+            return std::string(reinterpret_cast<const char*>(_version.data()), kNumBytesForVersion);
         }
 
-        void read_section(const un::BAFSection& section, un::Buffer& into, std::size_t intoOffset);
+        void read_section(const baf_section& section, byte_buffer& into, std::size_t intoOffset);
     };
 }
 #endif

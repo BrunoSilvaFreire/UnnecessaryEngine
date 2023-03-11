@@ -1,13 +1,11 @@
 #!/usr/bin/python
-import csv
 import argparse
 import enum
-import json
 import os.path
 
+import jinja2
 import numpy as np
 import pandas as pd
-import jinja2
 
 # Instantiate the parser
 parser = argparse.ArgumentParser(description='Compiles an html timeline from a Job System CSV file')

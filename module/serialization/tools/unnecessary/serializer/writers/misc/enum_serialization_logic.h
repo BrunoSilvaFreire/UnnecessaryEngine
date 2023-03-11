@@ -10,25 +10,23 @@
 #include <unnecessary/source_analysis/structures.h>
 
 namespace un::serialization {
-
     void write_enum_serialization_logic(
         std::stringstream& ss,
-        const un::GenerationInfo& info,
-        const std::shared_ptr<un::CXXEnum>& anEnum
+        const generation_info& info,
+        const std::shared_ptr<cxx_enum>& anEnum
     );
 
     void write_enum_deserialization_logic(
         std::stringstream& ss,
-        const un::GenerationInfo& info,
-        const std::shared_ptr<un::CXXEnum>& anEnum
+        const generation_info& info,
+        const std::shared_ptr<cxx_enum>& anEnum
     );
 
     void write_enum_serialization_logic_pair(
         std::stringstream& ss,
-        const un::GenerationInfo& info,
-        const std::shared_ptr<CXXEnum>& anEnum
+        const generation_info& info,
+        const std::shared_ptr<cxx_enum>& anEnum
     );
 }
-
 
 #endif

@@ -5,16 +5,15 @@
 #include <unnecessary/jobs/workers/worker.h>
 
 namespace un {
-    class JobWorker;
+    class job_worker;
 
-    typedef un::Job<JobWorker> SimpleJob;
+    using simple_job = job<job_worker>;
 
-    class JobWorker : public un::JobWorkerMixin<SimpleJob> {
+    class job_worker : public job_worker_mixin<simple_job> {
     public:
-        JobWorker(std::size_t index, std::size_t core, bool autostart);
+        job_worker(std::size_t index, std::size_t core, bool autostart);
     };
 
-    typedef un::JobSystem<un::JobWorker> SimpleJobSystem;
-
+    using simple_job_system = job_system<job_worker>;
 }
 #endif

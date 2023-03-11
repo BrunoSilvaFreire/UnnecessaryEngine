@@ -5,35 +5,44 @@
 #include "delegate_writer.h"
 
 namespace un {
-    bool DelegateWriter::accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) {
+    bool
+    delegate_writer::accepts(
+        const cxx_field& field,
+        const cxx_translation_unit& unit,
+        float& outPriority
+    ) {
         outPriority = 50;
-        const CXXAttribute& att = field.getAttribute("un::serialize");
-        return att.hasArgument("serializer") && att.hasArgument("deserializer");
+        const cxx_attribute& att = field.get_attribute("un::serialize");
+        return att.has_argument("serializer") && att.has_argument("deserializer");
     }
 
     void
-    DelegateWriter::write_serializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-                                     const un::WriterRegistry& registry) {
-        const CXXAttribute& att = field.getAttribute("un::serialize");
-        std::string serializer = att.getArgumentValue("serializer");
-        ss << serializer << "(value." << field.getName() << ", into);" << std::endl;
+    delegate_writer::write_serializer(
+        std::stringstream& ss, const cxx_field& field, const cxx_translation_unit& unit,
+        const writer_registry& registry
+    ) {
+        const cxx_attribute& att = field.get_attribute("un::serialize");
+        std::string serializer = att.get_argument_value("serializer");
+        ss << serializer << "(value." << field.get_name() << ", into);" << std::endl;
     }
 
     void
-    DelegateWriter::write_deserializer(std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-                                       const un::WriterRegistry& registry) {
-        const CXXAttribute& att = field.getAttribute("un::serialize");
-        std::string deserializer = att.getArgumentValue("deserializer");
-        ss << "un::Serialized serialized_" << field.getName() << ";" << std::endl;
-        ss << "if (from.try_get(\"" << field.getName() << "\", serialized_" << field.getName() << ")) {" << std::endl;
-        ss << "value." << field.getName() << " = " << deserializer << "(serialized_" << field.getName() << ");"
+    delegate_writer::write_deserializer(
+        std::stringstream& ss, const cxx_field& field, const cxx_translation_unit& unit,
+        const writer_registry& registry
+    ) {
+        const cxx_attribute& att = field.get_attribute("un::serialize");
+        std::string deserializer = att.get_argument_value("deserializer");
+        ss << "un::Serialized serialized_" << field.get_name() << ";" << std::endl;
+        ss << "if (from.try_get(\"" << field.get_name() << "\", serialized_" << field.get_name()
+           << ")) {" << std::endl;
+        ss << "value." << field.get_name() << " = " << deserializer << "(serialized_"
+           << field.get_name() << ");"
            << std::endl;
         ss << "}" << std::endl;
-
     }
 
-    std::string DelegateWriter::name() {
+    std::string delegate_writer::name() {
         return "DelegateWriter";
     }
-
 }

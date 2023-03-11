@@ -5,7 +5,6 @@
 #ifndef UNNECESSARYENGINE_SHADER_STAGE_META_H
 #define UNNECESSARYENGINE_SHADER_STAGE_META_H
 
-
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -15,29 +14,30 @@
 #include <unnecessary/shaderizer/inputs/shader_input.h>
 
 namespace un {
-    struct DepthInfo {
+    struct depth_info {
         bool enabled;
     };
 
-    class ShaderStageMeta {
+    class shader_stage_meta {
     private:
-        std::string name;
-        std::set<std::string> usedInputs;
-        std::vector<un::InputUsage> usedVertexAttributes;
+        std::string _name;
+        std::set<std::string> _usedInputs;
+        std::vector<input_usage> _usedVertexAttributes;
+
     public:
-        ShaderStageMeta(const std::string& name);
+        shader_stage_meta(const std::string& name);
 
-        void usesInput(const std::string& input);
+        void uses_input(const std::string& input);
 
-        void usesVertexAttribute(const std::string& vertex, const std::string& modifier);
+        void uses_vertex_attribute(const std::string& vertex, const std::string& modifier);
 
-        const std::string& getName() const;
+        const std::string& get_name() const;
 
-        const std::set<std::string>& getUsedInputs() const;
+        const std::set<std::string>& get_used_inputs() const;
 
-        const std::vector<un::InputUsage>& getUsedVertexAttributes() const;
+        const std::vector<input_usage>& get_used_vertex_attributes() const;
 
-        bool isUsingInputPack(const un::InputPack& scope) const;
+        bool is_using_input_pack(const input_pack& scope) const;
     };
 }
 

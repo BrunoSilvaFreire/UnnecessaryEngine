@@ -11,23 +11,23 @@
 
 namespace un {
 
-    class RenderingPipeline {
+    class rendering_pipeline {
     private:
-        std::vector<std::unique_ptr<un::RenderPass>> extraPasses;
+        std::vector<std::unique_ptr<un::render_pass>> _extraPasses;
 
     public:
-        virtual void configure(un::Renderer& renderer, RenderGraph& graph) = 0;
+        virtual void configure(un::renderer& renderer, render_graph& graph) = 0;
 
-        void setup(un::Renderer& renderer, RenderGraph& graph) {
+        void setup(un::renderer& renderer, render_graph& graph) {
             configure(renderer, graph);
-            for (std::unique_ptr<un::RenderPass>& pass : extraPasses) {
-                graph.enqueuePass(std::move(pass));
+            for (std::unique_ptr<un::render_pass>& pass : _extraPasses) {
+                graph.enqueue_pass(std::move(pass));
             }
-            extraPasses.clear();
+            _extraPasses.clear();
         };
 
-        void enqueueExtraPass(std::unique_ptr<un::RenderPass>&& pass) {
-            extraPasses.push_back(std::move(pass));
+        void enqueue_extra_pass(std::unique_ptr<un::render_pass>&& pass) {
+            _extraPasses.push_back(std::move(pass));
         }
 
     };

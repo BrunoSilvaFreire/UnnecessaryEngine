@@ -66,7 +66,6 @@ namespace un {
     > {
     };
 
-
     template<typename T, typename ...Types>
     constexpr static auto index_of_type() {
         return index<T, Types...>::value;

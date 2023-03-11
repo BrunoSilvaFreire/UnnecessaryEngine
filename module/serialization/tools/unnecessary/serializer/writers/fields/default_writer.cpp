@@ -1,43 +1,47 @@
 #include "default_writer.h"
 
 namespace un {
-
-    bool PrimitiveWriter::accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) {
+    bool
+    primitive_writer::accepts(
+        const cxx_field& field,
+        const cxx_translation_unit& unit,
+        float& outPriority
+    ) {
         outPriority = 0;
         return true;
     }
 
-    void PrimitiveWriter::write_deserializer(
-        std::stringstream& ss, const CXXField& field,
-        const un::CXXTranslationUnit& unit,
-        const un::WriterRegistry& registry
+    void primitive_writer::write_deserializer(
+        std::stringstream& ss, const cxx_field& field,
+        const cxx_translation_unit& unit,
+        const writer_registry& registry
     ) {
-        std::string fName = field.getName();
-        std::string typeName = field.getType().getName();
-        bool optional = isOptional(field);
+        std::string fName = field.get_name();
+        std::string typeName = field.get_type().get_name();
+        bool optional = is_optional(field);
         if (optional) {
-            ss << "from.try_get<" << typeName << ">" << "(\"" << fName << "\", value." << fName << "); // Optional"
+            ss << "from.try_get<" << typeName << ">" << "(\"" << fName << "\", value." << fName
+               << "); // Optional"
                << std::endl;
-        } else {
+        }
+        else {
             ss << "if (!from.try_get<" << typeName << ">"
                << "(\"" << fName << "\", value." << fName << ")) {" << std::endl;
-            addMissingFieldException(ss, field);
+            add_missing_field_exception(ss, field);
             ss << "}" << std::endl;
         }
     }
 
-    void PrimitiveWriter::write_serializer(
+    void primitive_writer::write_serializer(
         std::stringstream& ss,
-        const CXXField& field,
-        const un::CXXTranslationUnit& unit,
-        const un::WriterRegistry& registry
+        const cxx_field& field,
+        const cxx_translation_unit& unit,
+        const writer_registry& registry
     ) {
-        trySerializePrimitive(ss, field.getName(), field.getType());
+        try_serialize_primitive(ss, field.get_name(), field.get_type());
     }
 
-    std::string PrimitiveWriter::name() {
+    std::string primitive_writer::name() {
         return "PrimitiveWriter";
     }
-
-
 }

@@ -3,22 +3,20 @@
 #include "unnecessary/shaderizer/inputs/glsl_type.h"
 #include "shader_stage_meta.h"
 
-
 namespace un {
-
-    std::pair<RichInput, un::InputScope> shader_tool::parseInput(
+    std::pair<rich_input, input_scope> shader_tool::parse_input(
         const std::string& name,
         const nlohmann::json& jsonInput
     ) {
-        un::InputScope scope = un::InputScope::eGlobal;
+        input_scope scope = global;
         if (jsonInput.contains("scope")) {
             auto scopeName = jsonInput["scope"].get<std::string>();
-            if (un::inputs::kStringIdsToInputScope.contains(scopeName)) {
-                scope = un::inputs::kStringIdsToInputScope.at(scopeName);
+            if (inputs::kStringIdsToInputScope.contains(scopeName)) {
+                scope = inputs::kStringIdsToInputScope.at(scopeName);
             }
         }
         return std::make_pair(
-            RichInput(
+            rich_input(
                 name,
                 jsonInput["type"].get<std::string>()
             ),
@@ -26,22 +24,21 @@ namespace un {
         );
     }
 
-    un::ShaderMeta
-    shader_tool::parse(const std::string& shaderName, const nlohmann::json& json) {
-        un::ShaderMeta meta(shaderName);
+    shader_meta shader_tool::parse(const std::string& shaderName, const nlohmann::json& json) {
+        shader_meta meta(shaderName);
 
         if (json.contains(kInputsKey)) {
-            nlohmann::json inputs = json[kInputsKey].get<nlohmann::json>();
+            auto inputs = json[kInputsKey].get<nlohmann::json>();
             for (const auto& item : inputs.items()) {
                 std::string name = item.key();
-                const nlohmann::json& input = item.value().get<nlohmann::json>();
-                const auto [parsed, scope] = un::shader_tool::parseInput(
+                const nlohmann::json& input = item._value().get<nlohmann::json>();
+                const auto [parsed, scope] = parse_input(
                     name,
                     input
                 );
-                meta.addInput(
+                meta.add_input(
                     scope,
-                    std::move(const_cast<RichInput&&>(parsed))
+                    std::move(const_cast<rich_input&&>(parsed))
                 );
             }
         }
@@ -50,52 +47,52 @@ namespace un {
             auto shaderStages = json[kStagesKey].get<nlohmann::json>();
             for (const auto& item : shaderStages.items()) {
                 std::string name = item.key();
-                const nlohmann::json& input = item.value().get<nlohmann::json>();
-                const ShaderStageMeta& stageMeta = un::shader_tool::parseStage(
+                const nlohmann::json& input = item._value().get<nlohmann::json>();
+                const shader_stage_meta& stageMeta = parse_stage(
                     name,
                     input
                 );
-                meta.addStage(stageMeta);
+                meta.add_stage(stageMeta);
             }
         }
-        un::GlslTypeDatabase database;
+        glsl_type_database database;
         if (json.contains(kVertexStreamKey)) {
             const auto& vertexStream = json[kVertexStreamKey].get<nlohmann::json>();
-            un::VertexLayout layout;
+            vertex_layout layout;
             std::vector<std::string> types;
             for (const auto& item : vertexStream.items()) {
                 std::string name = item.key();
-                const nlohmann::json& input = item.value().get<nlohmann::json>();
+                const nlohmann::json& input = item._value().get<nlohmann::json>();
                 const auto& type = input[kTypeKey].get<std::string>();
-                un::GlslType* pType;
-                if (database.tryFind(type, &pType)) {
+                glsl_type* pType;
+                if (database.try_find(type, &pType)) {
                     types.emplace_back(type);
-                    layout += un::VertexAttribute(
+                    layout += vertex_attribute(
                         name,
-                        pType->getNumElements(),
-                        static_cast<u8>(pType->getSingleSize()),
-                        pType->getFormat()
+                        pType->get_num_elements(),
+                        static_cast<u8>(pType->get_single_size()),
+                        pType->get_format()
                     );
                 }
             }
-            meta.setVertexStreamLayout(layout, types);
+            meta.set_vertex_stream_layout(layout, types);
         }
         return meta;
     }
 
-    ShaderStageMeta
-    shader_tool::parseStage(const std::string& name, const nlohmann::json& jsonStage) {
-        ShaderStageMeta meta(name);
+    shader_stage_meta
+    shader_tool::parse_stage(const std::string& name, const nlohmann::json& jsonStage) {
+        shader_stage_meta meta(name);
         if (jsonStage.contains(kInputsKey)) {
             auto inputs = jsonStage[kInputsKey].get<std::vector<std::string>>();
             for (const auto& item : inputs) {
-                meta.usesInput(item);
+                meta.uses_input(item);
             }
         }
         if (jsonStage.contains(kVertexStreamKey)) {
             const auto& vertexStream = jsonStage[kVertexStreamKey].get<nlohmann::json>();
             for (const auto& item : vertexStream.items()) {
-                meta.usesVertexAttribute(item.key(), item.value().get<std::string>());
+                meta.uses_vertex_attribute(item.key(), item._value().get<std::string>());
             }
         }
         return meta;

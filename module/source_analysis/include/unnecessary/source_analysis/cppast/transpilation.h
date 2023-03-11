@@ -10,6 +10,6 @@
 #include <unnecessary/source_analysis/structures.h>
 
 namespace un {
-    void transpile(const cppast::cpp_file& from, un::CXXTranslationUnit& into);
+    void transpile(const cppast::cpp_file& from, cxx_translation_unit& into);
 }
 #endif

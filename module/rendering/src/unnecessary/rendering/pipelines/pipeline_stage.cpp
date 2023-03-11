@@ -1,15 +1,19 @@
 #include <unnecessary/rendering/pipelines/pipeline_stage.h>
 
 namespace un {
+    pipeline_stage::pipeline_stage(
+        vk::ShaderStageFlagBits stage, const vk::ShaderModule&
+    module)
+    : module(module),
+    stage(stage)
+        {
+        }
 
-    PipelineStage::PipelineStage(vk::ShaderStageFlagBits stage, const vk::ShaderModule& module)
-        : module(module), stage(stage) { }
-
-    const vk::ShaderModule& PipelineStage::getModule() const {
+    const vk::ShaderModule& pipeline_stage::get_module() const {
         return module;
     }
 
-    vk::ShaderStageFlagBits PipelineStage::getStageFlags() const {
-        return stage;
+    vk::ShaderStageFlagBits pipeline_stage::get_stage_flags() const {
+        return _stage;
     }
 }

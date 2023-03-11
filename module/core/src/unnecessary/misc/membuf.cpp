@@ -1,27 +1,24 @@
 #include "unnecessary/memory/membuf.h"
 
 namespace un {
-
-    Buffer::Buffer(const MemoryBuffer<u8>& other) : MemoryBuffer(other) { }
-
-    Buffer::Buffer() { }
-
-    Buffer::Buffer(size_t size, bool zero) : MemoryBuffer(size) {
-        if (zero) {
-            zeroBuffer();
-        }
-
+    byte_buffer::byte_buffer(const buffer<u8>& other) : buffer(other) {
     }
 
-    Buffer::Buffer(const std::vector<u8>& vector) {
+    byte_buffer::byte_buffer() {
+    }
+
+    byte_buffer::byte_buffer(size_t size, bool zero) : buffer(size) {
+        if (zero) {
+            zero_buffer();
+        }
+    }
+
+    byte_buffer::byte_buffer(const std::vector<u8>& vector) {
         auto len = vector.size();
         resize(len);
-        std::memcpy(ptr, vector.data(), len);
+        std::memcpy(_ptr, vector.data(), len);
     }
 
-    Buffer::Buffer(Buffer&& other) noexcept: un::MemoryBuffer<u8>(std::move(other)) {
-
+    byte_buffer::byte_buffer(byte_buffer&& other) noexcept: buffer<u8>(std::move(other)) {
     }
-
-
 }

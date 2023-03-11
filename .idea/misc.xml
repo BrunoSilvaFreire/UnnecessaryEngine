@@ -50,6 +50,7 @@
       <file path="$PROJECT_DIR$/module/source_analysis/tests" />
     </sourceRoots>
     <excludeRoots>
+      <file path="$PROJECT_DIR$/.cache" />
       <file path="$PROJECT_DIR$/legacy" />
     </excludeRoots>
   </component>

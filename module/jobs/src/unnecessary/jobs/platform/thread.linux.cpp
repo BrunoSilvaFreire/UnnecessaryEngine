@@ -6,25 +6,26 @@
 
 namespace un {
 
-    struct ThreadPlatformBridge {
+    struct thread_platform_bridge {
     public:
         pthread_t _pthread;
         char* _nameStorage = nullptr;
     };
 
     un::void_ptr unnecessary_unix_proc(un::void_ptr ptr) {
-        auto* thread = reinterpret_cast<un::Thread*>(ptr);
+        auto* thread = reinterpret_cast<un::thread*>(ptr);
 
-        const std::string& name = thread->_params.getName();
+        const std::string& name = thread->_params.get_name();
         if (!name.empty()) {
             const std::size_t kMaxLength = 16;
-            ThreadPlatformBridge* pBridge = thread->_bridge;
+            thread_platform_bridge* pBridge = thread->_bridge;
             const char* pName;
             if (name.size() >= kMaxLength) {
                 pBridge->_nameStorage = new char[kMaxLength];
                 std::memcpy(pBridge->_nameStorage, name.data(), kMaxLength - 1);
                 pName = pBridge->_nameStorage;
-            } else {
+            }
+            else {
                 pName = name.c_str();
             }
             int statusCode = pthread_setname_np(pBridge->_pthread, pName);
@@ -39,15 +40,15 @@ namespace un {
         return nullptr;
     }
 
-    void Thread::start() {
-        _bridge = new un::ThreadPlatformBridge();
+    void thread::start() {
+        _bridge = new un::thread_platform_bridge();
         pthread_t* pThread = &_bridge->_pthread;
         pthread_attr_t attr{};
         pthread_attr_init(&attr);
         //pthread_attr_setstacksize(&attr, _params.getStackSize());
 
-        size_t core = _params.getCore();
-        if (core != un::ThreadParams::kAnyCore) {
+        size_t core = _params.get_core();
+        if (core != un::thread_params::k_any_core) {
             cpu_set_t set;
             CPU_ZERO(&set);
             CPU_SET(core, &set);
@@ -57,7 +58,7 @@ namespace un {
         pthread_create(pThread, &attr, &unnecessary_unix_proc, this);
     }
 
-    void Thread::join() {
+    void thread::join() {
 
         std::unique_lock<std::mutex> lock(_dataMutex);
         if (_alive) {

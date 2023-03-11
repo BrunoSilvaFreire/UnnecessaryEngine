@@ -37,7 +37,7 @@ namespace un {
     }
 
     [[gnu::always_inline]]
-    void ApplyRandomizationJob::operator()(size_t index, un::JobWorker* worker) {
+    void ApplyRandomizationJob::operator()(size_t index, un::job_worker* worker) {
         entt::entity entity = findEntity(index);
         un::Randomizer& randomizer = world->get<un::Randomizer>(entity);
 

@@ -8,68 +8,71 @@
 #include "unnecessary/source_analysis/structures.h"
 
 namespace un {
-    class WriterRegistry;
+    class writer_registry;
 
-    class FieldWriter {
+    class field_writer {
     protected:
-        static bool isOptional(const un::CXXField& field);
+        static bool is_optional(const cxx_field& field);
 
-        static void addMissingFieldException(std::stringstream& ss, const un::CXXField& field);
+        static void add_missing_field_exception(std::stringstream& ss, const cxx_field& field);
 
-        static void addMissingFieldException(std::stringstream& ss, const std::string& fieldName);
+        static void
+        add_missing_field_exception(std::stringstream& ss, const std::string& fieldName);
 
-        static bool trySerializePrimitive(
+        static bool try_serialize_primitive(
             std::stringstream& ss,
             const std::string& name,
-            const un::CXXType& primitiveCandidate
+            const cxx_type& primitiveCandidate
         );
 
-        bool tryDeserializePrimitive(
+        static bool try_deserialize_primitive(
             std::stringstream& ss,
             const std::string& name,
-            const CXXType& primitiveCandidate
+            const cxx_type& primitiveCandidate
         );
 
     public:
         // The following priorities are *hints*, don't feel obliged to follow them
-        static constexpr float kDefaultPriority = 0.0F;
-        static constexpr float kBasicPriority = 1.0F;
-        static constexpr float kSpecializedKindPriority = 1.5F;
+        static constexpr float k_default_priority = 0.0F;
+        static constexpr float k_basic_priority = 1.0F;
+        static constexpr float k_specialized_kind_priority = 1.5F;
 
-        virtual bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) = 0;
+        virtual bool
+        accepts(const cxx_field& field, const cxx_translation_unit& unit, float& outPriority) = 0;
 
         virtual void write_serializer(
             std::stringstream& ss,
-            const CXXField& field,
-            const un::CXXTranslationUnit& unit,
-            const un::WriterRegistry& registry
+            const cxx_field& field,
+            const cxx_translation_unit& unit,
+            const writer_registry& registry
         ) = 0;
 
         virtual void write_deserializer(
             std::stringstream& ss,
-            const CXXField& field,
-            const un::CXXTranslationUnit& unit,
-            const un::WriterRegistry& registry
+            const cxx_field& field,
+            const cxx_translation_unit& unit,
+            const writer_registry& registry
         ) = 0;
 
         virtual std::string name() = 0;
     };
 
-    class WriterRegistry {
+    class writer_registry {
     private:
-        std::vector<std::shared_ptr<un::FieldWriter>> writers;
-    public:
-        WriterRegistry();
+        std::vector<std::shared_ptr<field_writer>> _writers;
 
-        std::shared_ptr<un::FieldWriter> getWriter(
-            const un::CXXField& field,
-            const un::CXXTranslationUnit& unit
+    public:
+        writer_registry();
+
+        std::shared_ptr<field_writer> get_writer(
+            const cxx_field& field,
+            const cxx_translation_unit& unit
         ) const;
 
         template<typename TWriter>
-        void addWriter() {
+        void add_writer() {
             std::shared_ptr<TWriter> val = std::make_shared<TWriter>();
-            writers.emplace_back(std::move(std::static_pointer_cast<un::FieldWriter>(val)));
+            _writers.emplace_back(std::move(std::static_pointer_cast<field_writer>(val)));
         }
     };
 }

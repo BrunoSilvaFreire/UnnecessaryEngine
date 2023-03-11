@@ -15,47 +15,50 @@
 #include <utility>
 
 namespace un {
-
-    class DrawTrianglePass : public un::RenderPass {
+    class draw_triangle_pass : public render_pass {
     public:
-        DrawTrianglePass(
+        draw_triangle_pass(
             const vk::Rect2D& renderArea,
             std::vector<vk::ClearValue> clears,
             std::size_t colorAttachmentIndex,
             std::size_t depthAttachmentIndex
-        ) : RenderPass(
+        ) : render_pass(
             "Draw Triangle",
             vk::PipelineStageFlagBits::eAllGraphics
         ),
-            renderArea(renderArea),
-            clears(std::move(clears)),
-            trianglePipeline() {
-            usesColorAttachment(colorAttachmentIndex, vk::ImageLayout::eColorAttachmentOptimal);
-            usesDepthAttachment(depthAttachmentIndex, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+            _renderArea(renderArea),
+            _clears(std::move(clears)),
+            _trianglePipeline() {
+            uses_color_attachment(colorAttachmentIndex, vk::ImageLayout::eColorAttachmentOptimal);
+            uses_depth_attachment(depthAttachmentIndex, vk::ImageLayout::eDepthStencilAttachmentOptimal);
         }
 
     private:
-        vk::Rect2D renderArea;
-        std::vector<vk::ClearValue> clears;
-        std::optional<un::Pipeline> trianglePipeline;
+        vk::Rect2D _renderArea;
+        std::vector<vk::ClearValue> _clears;
+        std::optional<pipeline> _trianglePipeline;
+
     public:
-        void onVulkanPassCreated(vk::RenderPass renderPass, un::Renderer& renderer) override {
-            trianglePipeline = un::pipelines::createTrianglePipeline(renderer.getVirtualDevice(), renderPass);
+        void on_vulkan_pass_created(vk::RenderPass renderPass, renderer& renderer) override {
+            _trianglePipeline = un::pipelines::createTrianglePipeline(
+                renderer.get_virtual_device(),
+                renderPass
+            );
         }
 
         void record(
-            const un::FrameData& data,
-            un::CommandBuffer& cmdBuffer
+            const frame_data& data,
+            command_buffer& cmdBuffer
         ) const override {
-            if (!trianglePipeline.has_value()) {
+            if (!_trianglePipeline.has_value()) {
                 return;
             }
             cmdBuffer->beginRenderPass(
                 vk::RenderPassBeginInfo(
                     data.renderPass,
                     data.framebuffer,
-                    renderArea,
-                    clears
+                    _renderArea,
+                    _clears
                 ),
                 vk::SubpassContents::eInline
             );
@@ -64,7 +67,7 @@ namespace un {
             if (!pipelineDescriptorSets.empty()) {
                 cmdBuffer->bindDescriptorSets(
                     vk::PipelineBindPoint::eGraphics,
-                    trianglePipeline->getLayout(),
+                    _trianglePipeline->get_layout(),
                     0,
                     pipelineDescriptorSets,
                     dynamicOffsets
@@ -73,7 +76,7 @@ namespace un {
 
             cmdBuffer->bindPipeline(
                 vk::PipelineBindPoint::eGraphics,
-                trianglePipeline->operator*()
+                _trianglePipeline->operator*()
             );
             cmdBuffer->setViewport(
                 0,
@@ -81,8 +84,8 @@ namespace un {
                     {
                         vk::Viewport(
                             0, 0,
-                            renderArea.extent.width,
-                            renderArea.extent.height,
+                            _renderArea.extent.width,
+                            _renderArea.extent.height,
                             0,
                             1.0F
                         )
@@ -92,7 +95,7 @@ namespace un {
                 0,
                 std::vector<vk::Rect2D>(
                     {
-                        renderArea
+                        _renderArea
                     }
                 )
             );
@@ -104,7 +107,6 @@ namespace un {
             );
             cmdBuffer->endRenderPass();
         }
-
     };
 }
 #endif

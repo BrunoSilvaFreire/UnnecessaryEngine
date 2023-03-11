@@ -6,17 +6,15 @@
 #include <unnecessary/rendering/vulkan/vulkan_wrapper.h>
 
 namespace un {
-    class Queue : public un::VulkanWrapper<vk::Queue> {
+    class queue : public un::vulkan_wrapper<vk::Queue> {
     private:
-        u32 index;
-        vk::Queue vulkan;
+        u32 _index;
     public:
 
-        Queue(u32 index, const vk::Queue& vulkan);
+        queue(u32 index, const vk::Queue& vulkan);
 
-        u32 getIndex() const;
+        u32 get_index() const;
     };
 }
-
 
 #endif

@@ -13,30 +13,34 @@
 #include "draw_triangle_pass.h"
 #include <triangle.gen.h>
 #include <pipelinedescription.serializer.generated.h>
-namespace un {
-    typedef un::JobSystem<un::JobWorker, un::SimulationWorker, un::GraphicsWorker> UnnecessaryJobSystem;
+
+namespace un
+{
+    using unnecessary_job_system = job_system<job_worker, simulation_worker, graphics_worker>;
 }
 
-int main(int argc, char** argv) {
-    un::World world;
-    un::Application app;
+int main(int argc, char** argv)
+{
+    un::world world;
+    un::application app;
     {
-        un::Window window = un::Window::withSize("Triangle", app, un::Size2D(1080, 900));
-        un::Renderer renderer = un::Renderer(
+        un::window window = un::window::with_size("Triangle", app, un::size2d(1080, 900));
+        auto renderer = un::renderer(
             &window,
             "Orbital",
-            un::Version(0, 1, 0)
+            un::version(0, 1, 0)
         );
-        un::UnnecessaryJobSystem jobSystem(
+        un::unnecessary_job_system jobSystem(
             std::make_tuple(
-                un::WorkerPoolConfiguration<un::JobWorker>::forwarding(4),
-                un::WorkerPoolConfiguration<un::SimulationWorker>::forwarding(4),
-                un::WorkerPoolConfiguration<un::GraphicsWorker>(
+                un::worker_pool_configuration<un::job_worker>::forwarding(4),
+                un::worker_pool_configuration<un::simulation_worker>::forwarding(4),
+                un::worker_pool_configuration<un::graphics_worker>(
                     1,
                     [&renderer](
-                        std::size_t index
-                    ) {
-                        return new un::GraphicsWorker(
+                    std::size_t index
+                )
+                    {
+                        return new un::graphics_worker(
                             &renderer,
                             index,
                             true
@@ -45,12 +49,12 @@ int main(int argc, char** argv) {
                 )
             )
         );
-        world.addSystem(new un::RenderGraphSystem<un::UnnecessaryJobSystem>());
-        auto* pipeline = new un::BasicRenderingPipeline();
+        world.add_system(new un::render_graph_system<un::unnecessary_job_system>());
+        auto* pipeline = new un::basic_rendering_pipeline();
 
-        const un::Size2D& windowSize = window.getWindowSize();
-        pipeline->enqueueExtraPass(
-            std::make_unique<un::DrawTrianglePass>(
+        const un::size2d& windowSize = window.get_window_size();
+        pipeline->enqueue_extra_pass(
+            std::make_unique<un::draw_triangle_pass>(
                 vk::Rect2D(vk::Offset2D(), vk::Extent2D(windowSize.x, windowSize.y)),
                 std::vector<vk::ClearValue>(
                     {
@@ -58,20 +62,20 @@ int main(int argc, char** argv) {
                         vk::ClearDepthStencilValue(0, 0)
                     }
                 ),
-                pipeline->getColor(),
+                pipeline->get_color(),
                 1
             )
         );
-        renderer.usePipeline(pipeline);
+        renderer.use_pipeline(pipeline);
 
 
-        un::RenderThread<un::UnnecessaryJobSystem> renderThread(&jobSystem, &renderer);
-        un::Simulator<un::UnnecessaryJobSystem> simulator(&jobSystem, &world);
+        un::render_thread<un::unnecessary_job_system> renderThread(&jobSystem, &renderer);
+        un::simulator<un::unnecessary_job_system> simulator(&jobSystem, &world);
         app.extend(simulator);
         app.extend(renderThread);
         app.extend(window);
         app.start();
-        app.waitExit();
+        app.wait_exit();
         app.stop();
     }
 }

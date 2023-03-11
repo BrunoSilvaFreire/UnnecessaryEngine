@@ -1,13 +1,13 @@
 #include <unnecessary/jobs/simple_jobs.h>
 
 namespace un {
-
-    JobWorker::JobWorker(
+    job_worker::job_worker(
         std::size_t index,
         std::size_t core,
         bool autostart
-    ) : JobWorkerMixin(
+    ) : job_worker_mixin(
         index,
         core
-    ) { }
+    ) {
+    }
 }

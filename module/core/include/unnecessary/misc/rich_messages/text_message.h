@@ -8,18 +8,18 @@
 #include <unnecessary/misc/rich_messages/message.h>
 
 namespace un {
-
-    class TextMessage final : public IMessage {
+    class text_message final : public message {
     private:
         std::stringstream _text;
+
     public:
-        TextMessage();
+        text_message();
 
         void write(std::ostream& stream) const override;
 
         template<typename TAny>
         std::ostream& operator<<(TAny any) {
-            return TextMessage::_text << any;
+            return _text << any;
         }
     };
 }

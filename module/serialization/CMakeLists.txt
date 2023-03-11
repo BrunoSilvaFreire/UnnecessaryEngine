@@ -63,12 +63,12 @@ add_unnecessary_tool(
     unnecessary_jobs
     grapphs-graphviz
 )
-if (WIN32)
+if(WIN32)
     message("Adding libclang_s")
     target_link_libraries(
         unnecessary_serializer_generator
         PUBLIC
         libclang_s
     )
-endif ()
+endif()
 add_subdirectory(nlohmann)

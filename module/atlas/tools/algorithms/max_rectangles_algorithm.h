@@ -5,76 +5,75 @@
 #include <packing_algorithm.h>
 
 namespace un::packer {
-    template<float (* Heuristic)(const un::packer::PackerEntry& entry, const un::uRect& rect, u32 w, u32 h)>
-    class MaxRectanglesAlgorithm final : public PackingAlgorithm {
+    template<float (* Heuristic)(const packer_entry& entry, const rectu& rect, u32 w, u32 h)>
+    class max_rectangles_algorithm final : public packing_algorithm {
     private:
-        glm::uvec2 rootMaxSize;
+        glm::uvec2 _rootMaxSize;
 
-        inline float getScore(const PackerEntry& entry, Rect<u32>& rect, u32 w, u32 h) const {
+        float get_score(const packer_entry& entry, rect <u32>& rect, u32 w, u32 h) const {
             return Heuristic(entry, rect, w, h);
         }
 
-
-        void removeOverlaps(Rect<u32>& rect, const Rect<u32>& designated) const {
-            un::Rect<u32> cutout(
-                designated.getMinX(),
-                designated.getMinY(),
-                std::numeric_limits<u32>::max() - designated.getMinX(),
-                std::numeric_limits<u32>::max() - designated.getMinY()
+        void remove_overlaps(un::rect<u32>& rect, const un::rect<u32>& designated) const {
+            un::rect<u32> cutout(
+                designated.get_min_x(),
+                designated.get_min_y(),
+                std::numeric_limits<u32>::max() - designated.get_min_x(),
+                std::numeric_limits<u32>::max() - designated.get_min_y()
             );
             const auto& toUse = designated;
-            auto minX = rect.getMinX();
-            auto maxX = rect.getMaxX();
-            auto minY = rect.getMinY();
-            auto maxY = rect.getMaxY();
-            auto rMinX = toUse.getMinX();
-            auto rMaxX = toUse.getMaxX();
-            auto rMinY = toUse.getMinY();
-            auto rMaxY = toUse.getMaxY();
-            bool intersectsX = un::within_inclusive(rMinX, rMaxX, minX) || un::within_inclusive(rMinX, rMaxX, maxX);
-            bool intersectsY = un::within_inclusive(rMinY, rMaxY, minY) || un::within_inclusive(rMinY, rMaxY, maxY);
+            auto minX = rect.get_min_x();
+            auto maxX = rect.get_max_x();
+            auto minY = rect.get_min_y();
+            auto maxY = rect.get_max_y();
+            auto rMinX = toUse.get_min_x();
+            auto rMaxX = toUse.get_max_x();
+            auto rMinY = toUse.get_min_y();
+            auto rMaxY = toUse.get_max_y();
+            bool intersectsX =
+                within_inclusive(rMinX, rMaxX, minX) || within_inclusive(rMinX, rMaxX, maxX);
+            bool intersectsY =
+                within_inclusive(rMinY, rMaxY, minY) || within_inclusive(rMinY, rMaxY, maxY);
             if (maxX >= rMinX && rMaxX > maxX) {
-                rect.setMaxX(rMinX);
+                rect.set_max_x(rMinX);
             }
             if (minX <= rMaxX && minX > rMinX) {
-                rect.setMinX(rMaxX);
+                rect.set_min_x(rMaxX);
             }
             if (maxY >= rMinY && rMaxY > maxY) {
-                rect.setMaxY(rMinY);
+                rect.set_max_y(rMinY);
             }
             if (minY <= rMaxY && minY > rMinY) {
-                rect.setMinY(rMaxY);
+                rect.set_min_y(rMaxY);
             }
         }
 
     public:
-        explicit MaxRectanglesAlgorithm(
+        explicit max_rectangles_algorithm(
             glm::uvec2 rootMaxSize = glm::uvec2(
                 std::numeric_limits<u32>::max(),
                 std::numeric_limits<u32>::max()
             )
-        ) : rootMaxSize(rootMaxSize) {
-
+        ) : _rootMaxSize(rootMaxSize) {
         }
 
-
-        PackingStrategy operator()(std::vector<un::packer::PackerEntry> entries) const override {
-            un::Rect<u32> root(
+        packing_strategy operator()(std::vector<packer_entry> entries) const override {
+            rect<u32> root(
                 glm::uvec2(0, 0),
                 glm::uvec2(
                     std::numeric_limits<glm::uvec2::value_type>::max(),
                     std::numeric_limits<glm::uvec2::value_type>::max()
                 )
             );
-            std::vector<un::Rect<u32>> availablePoints = {root};
-            std::vector<un::packer::PackingOperation> operations;
+            std::vector<rect<u32>> availablePoints = {root};
+            std::vector<packing_operation> operations;
             u32 w = 0, h = 0;
             std::size_t pass = 0;
             for (const auto& item : entries) {
                 auto result = std::max_element(
                     availablePoints.begin(),
                     availablePoints.end(),
-                    [&](un::Rect<u32>& first, un::Rect<u32>& second) {
+                    [&](rect<u32>& first, rect<u32>& second) {
                         if (!item.fits(first)) {
                             return false;
                         }
@@ -82,53 +81,56 @@ namespace un::packer {
                             return true;
                         }
 
-                        float fs = getScore(item, first, w, h);
-                        float ss = getScore(item, second, w, h);
+                        float fs = get_score(item, first, w, h);
+                        float ss = get_score(item, second, w, h);
                         return fs < ss;
                     }
                 );
-                un::Rect<u32> rect = *result;
+                rect<u32> rect = *result;
                 auto selectedIndex = result - availablePoints.begin();
-                un::Rect<u32> destinated(
-                    rect.getOrigin(),
-                    item.getSize()
+                un::rect<u32> destinated(
+                    rect.get_origin(),
+                    item.get_size()
                 );
                 availablePoints.erase(result);
 
-                const glm::uvec2& pos = rect.getOrigin();
+                const glm::uvec2& pos = rect.get_origin();
 
                 const auto& operation = operations.emplace_back(
-                    item.getPath(),
+                    item.get_path(),
                     destinated
                 );
 
-                glm::uvec2 sizeLeft = rect.getSize() - item.getSize();
+                glm::uvec2 sizeLeft = rect.get_size() - item.get_size();
 
-                un::Rect<u32> topPoint = rect.addMinY(destinated.getHeight());
-                un::Rect<u32> rightPoint = rect.addMinX(destinated.getWidth());
+                un::rect<u32> topPoint = rect.add_min_y(destinated.get_height());
+                un::rect<u32> rightPoint = rect.add_min_x(destinated.get_width());
                 availablePoints.push_back(topPoint);
                 availablePoints.push_back(rightPoint);
+
                 for (auto& toCorrect : availablePoints) {
-                    removeOverlaps(toCorrect, destinated);
+                    remove_overlaps(toCorrect, destinated);
                 }
+
                 availablePoints.erase(
-                    std::remove_if(availablePoints.begin(), availablePoints.end(), [&](const auto& item) {
-                        return std::any_of(
-                            availablePoints.begin(), availablePoints.end(),
-                            [&](const auto& other) {
-                                return item != other && other.contains(item);
-                            }
-                        );
-                    }),
+                    std::remove_if(
+                        availablePoints.begin(), availablePoints.end(), [&](const auto& item) {
+                            return std::any_of(
+                                availablePoints.begin(), availablePoints.end(),
+                                [&](const auto& other) {
+                                    return item != other && other.contains(item);
+                                }
+                            );
+                        }
+                    ),
                     availablePoints.end()
                 );
-                w = std::max(w, destinated.getMaxX() + 1);
-                h = std::max(h, destinated.getMaxY() + 1);
+                w = std::max(w, destinated.get_max_x() + 1);
+                h = std::max(h, destinated.get_max_y() + 1);
                 pass++;
             }
-            return PackingStrategy(operations);
+            return packing_strategy(operations);
         }
-
     };
 }
 #endif

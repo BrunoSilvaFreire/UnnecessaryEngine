@@ -1,9 +1,7 @@
 #include "unnecessary/source_analysis/unnecessary_logger.h"
 
 namespace un {
-
-
-    std::string UnnecessaryLogger::msg(const cppast::diagnostic& d) const {
+    std::string unnecessary_logger::msg(const cppast::diagnostic& d) const {
         std::stringstream ss;
         const type_safe::optional<std::string>& file = d.location.file;
         ss << "cppast: " << d.message;
@@ -19,10 +17,8 @@ namespace un {
         return ss.str();
     }
 
-    bool UnnecessaryLogger::do_log(const char* source, const cppast::diagnostic& d) const {
-
+    bool unnecessary_logger::do_log(const char* source, const cppast::diagnostic& d) const {
         switch (d.severity) {
-
             case cppast::severity::debug:
                 LOG(VERBOSE) << msg(d);
                 break;

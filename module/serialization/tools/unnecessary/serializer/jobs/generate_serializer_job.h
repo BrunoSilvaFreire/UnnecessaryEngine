@@ -12,46 +12,42 @@
 #include <unnecessary/serializer/generation.h>
 
 namespace un {
-    class GenerateSerializerJob : public un::SimpleJob {
+    class generate_serializer_job : public simple_job {
     private:
-        un::GenerationInfo info;
-        std::shared_ptr<un::Buffer> buffer;
-        std::shared_ptr<un::CXXDeclaration> toGenerate;
-        const un::CXXTranslationUnit* translationUnit;
-        un::WriterRegistry writerRegistry;
+        generation_info _info;
+        std::shared_ptr<byte_buffer> _buffer;
+        std::shared_ptr<cxx_declaration> _toGenerate;
+        const cxx_translation_unit* _translationUnit;
+        writer_registry _writerRegistry;
 
-        void generateInfoComments(std::stringstream& ss, const std::shared_ptr<CXXComposite>& ptr);
+        void
+        generate_info_comments(std::stringstream& ss, const std::shared_ptr<cxx_composite>& ptr);
 
-        void writeFieldInfo(
+        void write_field_info(
             std::stringstream& stream,
-            const CXXField& field,
-            const std::shared_ptr<FieldWriter>& writer
+            const cxx_field& field,
+            const std::shared_ptr<field_writer>& writer
         );
 
-        void serializeFields(
-            const std::shared_ptr<un::CXXComposite>& composite,
+        void serialize_fields(
+            const std::shared_ptr<cxx_composite>& composite,
             std::stringstream& ss
         );
 
-        void generateCompositeSerializer(
+        void generate_composite_serializer(
             std::stringstream& ss,
-            const std::shared_ptr<CXXComposite>& comp
+            const std::shared_ptr<cxx_composite>& comp
         );
 
     public:
-
-        GenerateSerializerJob(
-            std::shared_ptr<un::Buffer> buffer,
-            const std::shared_ptr<un::CXXDeclaration>& toGenerate,
-            const un::CXXTranslationUnit* translationUnit
+        generate_serializer_job(
+            std::shared_ptr<byte_buffer> buffer,
+            const std::shared_ptr<cxx_declaration>& toGenerate,
+            const cxx_translation_unit* translationUnit
         );
 
-        void operator()(WorkerType* worker) override;
-
+        void operator()(worker_type* worker) override;
     };
-
-
 };
-
 
 #endif //UNNECESSARYENGINE_GENERATE_SERIALIZER_JOB_H

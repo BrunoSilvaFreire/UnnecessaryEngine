@@ -5,20 +5,19 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace un {
-
-    struct Translation {
+    struct translation {
         glm::vec3 value;
     };
 
-    struct Rotation {
+    struct rotation {
         glm::quat value;
     };
 
-    struct Scale {
+    struct scale {
         glm::vec3 value;
     };
 
-    struct LocalToWorld {
+    struct local_to_world {
         glm::mat4 value;
     };
 }

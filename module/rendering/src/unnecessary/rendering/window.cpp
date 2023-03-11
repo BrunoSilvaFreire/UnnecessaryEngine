@@ -2,19 +2,18 @@
 #include <functional>
 
 namespace un {
-
-    Window::Window(un::Application& application, GLFWwindow* window) : _window(window) {
+    window::window(application& application, GLFWwindow* window) : _window(window) {
         int w, h;
         glfwGetWindowSize(window, &w, &h);
-        _windowSize = un::Size2D(w, h);
-        application.getVariableLoop().early(
+        _windowSize = size2d(w, h);
+        application.get_variable_loop().early(
             [this]() {
                 pool();
             }
         );
     }
 
-    void Window::initGLFW() {
+    void window::init_glfw() {
         if (!glfwInit()) {
             throw std::runtime_error("Unable to initialize glfw");
         }
@@ -29,12 +28,12 @@ namespace un {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 
-    Window Window::withSize(
-        std::string title,
-        un::Application& application,
-        un::Size2D size
+    Window window::with_size(
+        const std::string& title,
+        application& application,
+        size2d size
     ) {
-        initGLFW();
+        init_glfw();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         auto window = glfwCreateWindow(
             size.x, size.y,
@@ -42,15 +41,15 @@ namespace un {
             nullptr,
             nullptr
         );
-        return un::Window(application, window);
+        return window(application, window);
     }
 
-    Window Window::fullscreen(
+    un::window window::fullscreen(
         std::string title,
-        un::Application& application,
+        application& application,
         GLFWmonitor* monitor
     ) {
-        initGLFW();
+        init_glfw();
         int w, h;
         glfwGetMonitorPhysicalSize(monitor, &w, &h);
         auto window = glfwCreateWindow(
@@ -59,27 +58,29 @@ namespace un {
             monitor,
             nullptr
         );
-        return un::Window(application, window);
+        return un::window(application, window);
     }
 
-    GLFWwindow* Window::getWindow() const {
+    GLFWwindow* window::get_window() const {
         return _window;
     }
 
-    const Size2D& Window::getWindowSize() const {
+    const size2d& window::get_window_size() const {
         return _windowSize;
     }
 
-    bool Window::shouldClose() {
+    bool window::should_close() {
         return glfwWindowShouldClose(_window);
     }
 
-    void Window::apply(Application& application) {
-        application.getVariableLoop().early([this, &application]() {
-            pool();
-            if (shouldClose()) {
-                application.stop();
+    void window::apply(application& application) {
+        application.get_variable_loop().early(
+            [this, &application]() {
+                pool();
+                if (should_close()) {
+                    application.stop();
+                }
             }
-        });
+        );
     }
 }

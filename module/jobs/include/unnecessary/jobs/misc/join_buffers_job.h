@@ -8,17 +8,18 @@
 #include <unnecessary/jobs/simple_jobs.h>
 
 namespace un {
-    class JoinBuffersJob : public un::SimpleJob {
+    class join_buffers_job : public simple_job {
     private:
-        std::vector<std::shared_ptr<un::Buffer>> buffers;
-        std::shared_ptr<un::Buffer> output;
+        std::vector<std::shared_ptr<byte_buffer>> _buffers;
+        std::shared_ptr<byte_buffer> _output;
+
     public:
-        JoinBuffersJob(
-            const std::vector<std::shared_ptr<un::Buffer>>& buffers,
-            const std::shared_ptr<un::Buffer>& output
+        join_buffers_job(
+            const std::vector<std::shared_ptr<byte_buffer>>& buffers,
+            const std::shared_ptr<byte_buffer>& output
         );
 
-        void operator()(WorkerType* worker) override;
+        void operator()(worker_type* worker) override;
     };
 }
 #endif

@@ -10,20 +10,20 @@
 #include <istream>
 
 namespace un {
-    template<typename TBuffer = un::Buffer>
-    class BufferStream final : public std::streambuf {
+    template<typename t_buffer = byte_buffer>
+    class buffer_stream final : public std::streambuf {
     private:
-        std::size_t index;
-        std::shared_ptr<TBuffer> buffer;
-        using TElement = typename TBuffer::ElementType;
+        std::size_t _index;
+        std::shared_ptr<t_buffer> _buffer;
+        using t_element = typename t_buffer::element_type;
+
     public:
-        BufferStream(const std::shared_ptr<TBuffer>& buffer) : std::streambuf(), buffer(buffer) {
-            TBuffer& buf = *buffer;
+        buffer_stream(const std::shared_ptr<t_buffer>& buffer) : std::streambuf(), _buffer(buffer) {
+            t_buffer& buf = *buffer;
             auto start = reinterpret_cast<char*>(buf.begin());
             auto end = reinterpret_cast<char*>(buf.end());
             setg(start, start, end);
         }
     };
-
 }
 #endif

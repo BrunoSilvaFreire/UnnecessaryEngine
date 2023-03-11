@@ -11,23 +11,23 @@
 #include <unnecessary/serializer/generation_plan.h>
 
 namespace un {
-    class GenerateIncludesJobs : public SimpleJob {
+    class generate_includes_jobs : public simple_job {
     private:
-        un::const_ptr<un::CXXTranslationUnit> translationUnit;
-        un::const_ptr<un::GenerationPlan> plan;
-        u32 unitGraphIndex;
-        std::shared_ptr<un::Buffer> buf;
+        const_ptr<cxx_translation_unit> _translationUnit;
+        const_ptr<generation_plan> _plan;
+        u32 _unitGraphIndex;
+        std::shared_ptr<byte_buffer> _buf;
+
     public:
-        GenerateIncludesJobs(
+        generate_includes_jobs(
             u32 unitGraphIndex,
-            un::const_ptr<CXXTranslationUnit> translationUnit,
-            un::const_ptr<un::GenerationPlan> plan,
-            std::shared_ptr<un::Buffer> buf
+            const_ptr<cxx_translation_unit> translationUnit,
+            const_ptr<generation_plan> plan,
+            std::shared_ptr<byte_buffer> buf
         );
 
-        void operator()(WorkerType* worker) override;
+        void operator()(worker_type* worker) override;
     };
 }
-
 
 #endif //UNNECESSARYENGINE_GENERATE_INCLUDES_JOB_H

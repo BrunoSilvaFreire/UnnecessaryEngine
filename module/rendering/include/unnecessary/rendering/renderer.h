@@ -25,71 +25,67 @@
 
 #endif
 namespace un {
-
-    class Renderer {
+    class renderer {
     private:
-
-        un::Window* _window;
+        window* _window;
         vk::Instance _vulkan;
-        un::RenderingDevice _device;
+        rendering_device _device;
 #ifdef UN_VULKAN_DEBUG
-        un::VulkanDebugger _debugger;
+        vulkan_debugger _debugger;
 #endif
-        un::SwapChain _swapChain;
-        un::RenderGraph _graph;
+        swap_chain _swapChain;
+        render_graph _graph;
 
     public:
+        renderer(window* window, std::string string, version version);
 
-        Renderer(Window* window, std::string string, Version version);
-
-        void usePipeline(un::RenderingPipeline* pipeline) {
+        void use_pipeline(rendering_pipeline* pipeline) {
             pipeline->setup(*this, _graph);
             _graph.bake(*this);
-            auto vkPass = _graph.getVulkanPass();
-            DependencyGraph<std::unique_ptr<un::RenderPass>>::InnerGraph& innerGraph = _graph.getInnerGraph();
+            auto vkPass = _graph.get_vulkan_pass();
+            dependency_graph<std::unique_ptr<render_pass>>::inner_graph& innerGraph = _graph.get_inner_graph();
             for (auto [index, passPtr] : innerGraph.all_vertices()) {
-                (*passPtr)->onVulkanPassCreated(vkPass, *this);
+                (*passPtr)->on_vulkan_pass_created(vkPass, *this);
             }
 #ifdef DEBUG
             auto cwd = std::filesystem::current_path();
             auto output = cwd / "render_graph.dot";
             LOG(INFO) << "Printing pipeline render graph to " << output;
-            gpp::save_to_dot(innerGraph, output);
+            save_to_dot(innerGraph, output);
 #endif
         }
 
-        un::Window* getWindow() const {
+        window* get_window() const {
             return _window;
         }
 
-        const vk::Instance& getVulkan() const {
+        const vk::Instance& get_vulkan() const {
             return _vulkan;
         }
 
-        vk::Device getVirtualDevice() const {
-            return _device.getVirtualDevice();
+        vk::Device get_virtual_device() const {
+            return _device.get_virtual_device();
         }
 
-        vk::PhysicalDevice getPhysicalDevice() const {
-            return _device.getPhysicalDevice();
+        vk::PhysicalDevice get_physical_device() const {
+            return _device.get_physical_device();
         }
 
-        const RenderingDevice& getDevice() const;
+        const rendering_device& get_device() const;
 
-        const un::RenderGraph& getRenderGraph() const {
+        const render_graph& get_render_graph() const {
             return _graph;
         }
 
 #if DEBUG
 
-        const un::VulkanDebugger& getDebugger() const;
+        const vulkan_debugger& get_debugger() const;
 
 #endif
 
-        const un::SwapChain& getSwapChain() const;
+        const swap_chain& get_swap_chain() const;
 
-        un::SwapChain& getSwapChain();
-
+        swap_chain& get_swap_chain();
 
         template<typename ValueType>
         UN_AGGRESSIVE_INLINE void tag(
@@ -100,8 +96,6 @@ namespace un {
             _debugger.tag<ValueType>(value, tagName);
 #endif
         }
-
-
     };
 }
 #endif

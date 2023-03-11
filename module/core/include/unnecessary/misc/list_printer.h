@@ -20,12 +20,15 @@ namespace un {
             if (i == 0) {
                 if (last) {
                     ss << "─";
-                } else {
+                }
+                else {
                     ss << "┬";
                 }
-            } else if (last) {
+            }
+            else if (last) {
                 ss << "└";
-            } else {
+            }
+            else {
                 ss << "├";
             }
             ss << "[" << i << "] " << vector[i];

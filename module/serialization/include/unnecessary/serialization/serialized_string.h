@@ -8,11 +8,11 @@
 #include "serialized_primitive.h"
 
 namespace un {
-    class SerializedString : public SerializedPrimitive<std::string> {
+    class serialized_string : public serialized_primitive<std::string> {
     public:
-        SerializedString(const std::string& value);
+        serialized_string(const std::string& value);
 
-        un::SerializedType getType() override;
+        serialized_type get_type() override;
     };
 };
 #endif

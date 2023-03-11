@@ -6,26 +6,27 @@
 #define UNNECESSARYENGINE_COMMAND_BUFFER_H
 
 #include <vulkan/vulkan.hpp>
+#include <unnecessary/def.h>
 
 namespace un {
-    class Renderer;
+    class renderer;
 
-    class CommandBuffer {
+    class command_buffer {
     private:
-        vk::CommandBuffer buffer;
-        vk::CommandPool pool;
-        vk::Device device;
-    public:
+        vk::CommandBuffer _buffer;
+        vk::CommandPool _pool;
+        vk::Device _device;
 
-        CommandBuffer(
-            un::Renderer& renderer,
+    public:
+        command_buffer(
+            renderer& renderer,
             vk::CommandPool pool,
             vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary
         );
 
-        virtual ~CommandBuffer();
+        virtual ~command_buffer();
 
-        vk::CommandBuffer getVulkanBuffer();
+        vk::CommandBuffer get_vulkan_buffer();
 
         const vk::CommandBuffer* operator->() const;
 
@@ -33,7 +34,6 @@ namespace un {
 
         const vk::CommandBuffer& operator*() const;
     };
-
 }
 
 #endif //UNNECESSARYENGINE_COMMAND_BUFFER_H

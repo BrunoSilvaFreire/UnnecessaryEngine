@@ -2,25 +2,24 @@
 #include <unnecessary/rendering/renderer.h>
 
 namespace un {
-    un::CommandBuffer GraphicsWorker::requestCommandBuffer() const {
-        return un::CommandBuffer(
+    command_buffer graphics_worker::request_command_buffer() const {
+        return command_buffer(
             *_renderer,
             _commandPool,
             vk::CommandBufferLevel::ePrimary
         );
     }
 
-    GraphicsWorker::GraphicsWorker(
-        un::Renderer* renderer,
+    graphics_worker::graphics_worker(
+        renderer* renderer,
         size_t index,
         bool autostart
-    ) : JobWorkerMixin(index, autostart), _renderer(renderer) {
-
-        vk::Device device = renderer->getVirtualDevice();
+    ) : job_worker_mixin(index, autostart), _renderer(renderer) {
+        vk::Device device = renderer->get_virtual_device();
         _commandPool = device.createCommandPool(
             vk::CommandPoolCreateInfo(
                 vk::CommandPoolCreateFlagBits::eTransient,
-                renderer->getDevice().getGraphics().getIndex()
+                renderer->get_device().get_graphics().get_index()
             )
         );
         std::ostringstream name;
@@ -29,7 +28,7 @@ namespace un {
         renderer->tag(_commandPool, name.str());
     }
 
-    Renderer* GraphicsWorker::getRenderer() const {
+    renderer* graphics_worker::get_renderer() const {
         return _renderer;
     }
 }

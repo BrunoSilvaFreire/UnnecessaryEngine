@@ -1,36 +1,35 @@
 #include "unnecessary/jobs/recorder/data/recorder_events.h"
 
 namespace un {
-
-    const std::string WorkerSleepingMeta::getLabel() const {
+    const std::string worker_sleeping_meta::get_label() const {
         return "worker_sleeping";
     }
 
-    ProfilerEventType WorkerSleepingMeta::getEventType() const {
-        return un::ProfilerEventType::eWorkerSleeping;
+    profiler_event_type worker_sleeping_meta::get_event_type() const {
+        return worker_sleeping;
     }
 
-    const std::string WorkerStartMeta::getLabel() const {
+    const std::string worker_start_meta::get_label() const {
         return "worker_started";
     }
 
-    ProfilerEventType WorkerStartMeta::getEventType() const {
-        return un::ProfilerEventType::eWorkerStarted;
+    profiler_event_type worker_start_meta::get_event_type() const {
+        return worker_started;
     }
 
-    const std::string WorkerExitedMeta::getLabel() const {
+    const std::string worker_exited_meta::get_label() const {
         return "worker_exited";
     }
 
-    ProfilerEventType WorkerExitedMeta::getEventType() const {
-        return un::ProfilerEventType::eWorkerExited;
+    profiler_event_type worker_exited_meta::get_event_type() const {
+        return worker_exited;
     }
 
-    const std::string WorkerAwakeMeta::getLabel() const {
+    const std::string worker_awake_meta::get_label() const {
         return "worker_awake";
     }
 
-    ProfilerEventType WorkerAwakeMeta::getEventType() const {
-        return un::ProfilerEventType::eWorkerAwaken;
+    profiler_event_type worker_awake_meta::get_event_type() const {
+        return worker_awaken;
     }
 }

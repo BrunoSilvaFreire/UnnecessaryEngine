@@ -1,43 +1,43 @@
 #include <unnecessary/rendering/render_pass.h>
 
 namespace un {
-
-    un::RenderPass::RenderPass(
+    render_pass::render_pass(
         const std::string& name,
         const vk::Flags<vk::PipelineStageFlagBits>& stageFlags
-    ) : name(name), stageFlags(stageFlags) { }
-
-    const std::string& RenderPass::getName() const {
-        return name;
+    ) : _name(name), _stageFlags(stageFlags) {
     }
 
-    const vk::PipelineStageFlags& RenderPass::getStageFlags() const {
-        return stageFlags;
+    const std::string& render_pass::get_name() const {
+        return _name;
     }
 
-    const std::vector<vk::AttachmentReference>& RenderPass::getColorAttachments() const {
-        return colorAttachments;
+    const vk::PipelineStageFlags& render_pass::get_stage_flags() const {
+        return _stageFlags;
     }
 
-    const std::vector<vk::AttachmentReference>& RenderPass::getUsedAttachments() const {
-        return usedAttachments;
+    const std::vector<vk::AttachmentReference>& render_pass::get_color_attachments() const {
+        return _colorAttachments;
+    }
+
+    const std::vector<vk::AttachmentReference>& render_pass::get_used_attachments() const {
+        return _usedAttachments;
     }
 
     const std::vector<vk::AttachmentReference>&
-    RenderPass::getResolveAttachments() const {
-        return resolveAttachments;
+    render_pass::get_resolve_attachments() const {
+        return _resolveAttachments;
     }
 
-    const std::optional<vk::AttachmentReference>& RenderPass::getDepthAttachment() const {
-        return depthAttachment;
+    const std::optional<vk::AttachmentReference>& render_pass::get_depth_attachment() const {
+        return _depthAttachment;
     }
 
-    std::ostream& operator<<(std::ostream& os, const RenderPass& pass) {
-        os << "name: " << pass.name << " stageFlags: " << vk::to_string(pass.stageFlags);
+    std::ostream& operator<<(std::ostream& os, const render_pass& pass) {
+        os << "name: " << pass._name << " stageFlags: " << vk::to_string(pass._stageFlags);
         return os;
     }
 
-    std::ostream& operator<<(std::ostream& os, const RenderPass* pass) {
+    std::ostream& operator<<(std::ostream& os, const render_pass* pass) {
         return os << *pass;
     }
 }

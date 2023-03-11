@@ -1,40 +1,40 @@
 #include <unnecessary/rendering/pipelines/pipeline.h>
 
 namespace un {
-
-    vk::Pipeline Pipeline::operator*() const {
-        return pipeline;
+    vk::Pipeline pipeline::operator*() const {
+        return _pipeline;
     }
 
-    const vk::PipelineCache& Pipeline::getCache() const {
-        return cache;
+    const vk::PipelineCache& pipeline::get_cache() const {
+        return _cache;
     }
 
-    const vk::PipelineLayout& Pipeline::getLayout() const {
-        return layout;
+    const vk::PipelineLayout& pipeline::get_layout() const {
+        return _layout;
     }
 
-    Pipeline::Pipeline(
+    pipeline::pipeline(
         const vk::Pipeline& pipeline,
         const vk::PipelineCache& cache,
         const vk::PipelineLayout& layout
-    ) : pipeline(pipeline), cache(cache), layout(layout) { }
-
-    void PipelineBuilder::setPipelineLayout(const PipelineLayout& layout) {
-        PipelineBuilder::pipelineLayout = layout;
+    ) : _pipeline(pipeline), _cache(cache), _layout(layout) {
     }
 
-    void PipelineBuilder::setVertexLayout(const std::optional<un::VertexLayout>& layout) {
-        PipelineBuilder::vertexLayout = layout;
-        withTriangleListTopology();
+    void pipeline_builder::set_pipeline_layout(const pipeline_layout& layout) {
+        _pipelineLayout = layout;
     }
 
-    void PipelineBuilder::addStage(PipelineStage&& stage) {
-        stages.push_back(std::move(stage));
+    void pipeline_builder::set_vertex_layout(const std::optional<vertex_layout>& layout) {
+        _vertexLayout = layout;
+        with_triangle_list_topology();
     }
 
-    void PipelineBuilder::withTriangleListTopology() {
-        withInputAssembly(
+    void pipeline_builder::add_stage(pipeline_stage&& stage) {
+        _stages.push_back(std::move(stage));
+    }
+
+    void pipeline_builder::with_triangle_list_topology() {
+        with_input_assembly(
             vk::PipelineInputAssemblyStateCreateInfo(
                 static_cast<vk::PipelineInputAssemblyStateCreateFlags>(0),
                 vk::PrimitiveTopology::eTriangleList
@@ -42,70 +42,71 @@ namespace un {
         );
     }
 
-    void PipelineBuilder::withInputAssembly(const vk::PipelineInputAssemblyStateCreateInfo& inputAssembly) {
-        PipelineBuilder::inputAssembly = inputAssembly;
+    void
+    pipeline_builder::with_input_assembly(const vk::PipelineInputAssemblyStateCreateInfo& inputAssembly) {
+        _inputAssembly = inputAssembly;
     }
 
-    un::Pipeline PipelineBuilder::create(vk::Device device, vk::RenderPass renderPass) {
+    pipeline pipeline_builder::create(vk::Device device, vk::RenderPass renderPass) {
         vk::GraphicsPipelineCreateInfo graphicsCreateInfo;
         vk::PipelineCache cache = device.createPipelineCache(
             vk::PipelineCacheCreateInfo(
-                (vk::PipelineCacheCreateFlags) 0
+                static_cast<vk::PipelineCacheCreateFlags>(0)
             )
         );
         std::optional<vk::PipelineVertexInputStateCreateInfo> vertexInput;
         std::vector<vk::VertexInputBindingDescription> inputBindings;
         std::vector<vk::VertexInputAttributeDescription> inputAttributes;
-        if (vertexLayout) {
-            if (vertexLayout->getLength() > 0) {
-                u32 stride = static_cast<u32>(vertexLayout->getStride());
-                const std::vector<un::VertexAttribute>& elements = vertexLayout->getElements();
+        if (_vertexLayout) {
+            if (_vertexLayout->get_length() > 0) {
+                u32 stride = static_cast<u32>(_vertexLayout->get_stride());
+                const std::vector<vertex_attribute>& elements = _vertexLayout->get_elements();
                 u32 count = static_cast<u32>(elements.size());
                 std::size_t offset = 0;
                 u32 binding = 0; //TODO: Allow for multiple vertex streams
                 inputBindings.emplace_back(binding, stride);
                 for (u32 i = 0; i < count; ++i) {
-                    const un::VertexAttribute& input = elements[i];
+                    const vertex_attribute& input = elements[i];
                     inputAttributes.emplace_back(
                         i,
                         binding,
-                        input.getFormat(),
+                        input.get_format(),
                         static_cast<u32>(offset)
                     );
-                    offset += input.getSize();
+                    offset += input.get_size();
                 }
             }
             vertexInput = vk::PipelineVertexInputStateCreateInfo(
-                (vk::PipelineVertexInputStateCreateFlags) 0,
+                static_cast<vk::PipelineVertexInputStateCreateFlags>(0),
                 inputBindings,
                 inputAttributes
             );
             graphicsCreateInfo.setPVertexInputState(vertexInput.operator->());
         }
-        if (inputAssembly.has_value()) {
-            graphicsCreateInfo.setPInputAssemblyState(inputAssembly.operator->());
+        if (_inputAssembly.has_value()) {
+            graphicsCreateInfo.setPInputAssemblyState(_inputAssembly.operator->());
         }
 
         std::vector<vk::DescriptorSetLayout> layouts;
-        for (auto& [scope, descriptors] : pipelineLayout.getDescriptorsLayout()) {
+        for (auto& [scope, descriptors] : _pipelineLayout.get_descriptors_layout()) {
             layouts.emplace_back(descriptors.build(device));
         }
-/*const auto& descriptors = stages;
-     for (u32 i = 0; i < pipelineLayout.size(); ++i) {
-         const auto& descriptor = descriptors[i];
-         switch (descriptor.getType()) {
-             case un::DescriptorSetType::eShared:
-                 layouts.push_back(descriptor.getSharedSetLayout());
-                 break;
-             case un::DescriptorSetType::eUnique:
-                 const auto& layout = descriptor.getUniqueLayout();
-                 if (layout.isEmpty()) {
-                     continue;
+        /*const auto& descriptors = stages;
+             for (u32 i = 0; i < pipelineLayout.size(); ++i) {
+                 const auto& descriptor = descriptors[i];
+                 switch (descriptor.getType()) {
+                     case un::DescriptorSetType::eShared:
+                         layouts.push_back(descriptor.getSharedSetLayout());
+                         break;
+                     case un::DescriptorSetType::eUnique:
+                         const auto& layout = descriptor.getUniqueLayout();
+                         if (layout.isEmpty()) {
+                             continue;
+                         }
+                         layouts.push_back(layout.build(device, descriptorAccessFlags[i]));
+                         break;
                  }
-                 layouts.push_back(layout.build(device, descriptorAccessFlags[i]));
-                 break;
-         }
-     }*/
+             }*/
 
         std::vector<vk::PushConstantRange> pushes;
         /* for (const un::ShaderStage* stage : stages) {
@@ -122,25 +123,24 @@ namespace un {
         // TODO: Add descriptor sets and push constants
         vk::PipelineLayout vkPipelineLayout = device.createPipelineLayout(
             vk::PipelineLayoutCreateInfo(
-                (vk::PipelineLayoutCreateFlags) 0,
+                static_cast<vk::PipelineLayoutCreateFlags>(0),
                 layouts,
                 pushes
             )
         );
         graphicsCreateInfo.setLayout(vkPipelineLayout);
         std::vector<vk::PipelineShaderStageCreateInfo> stageInfos;
-        if (!stages.empty()) {
-            for (const un::PipelineStage& stage : stages) {
+        if (!_stages.empty()) {
+            for (const pipeline_stage& stage : _stages) {
                 stageInfos.emplace_back(
-                    (vk::PipelineShaderStageCreateFlags) 0,
-                    stage.getStageFlags(),
-                    stage.getModule(),
+                    static_cast<vk::PipelineShaderStageCreateFlags>(0),
+                    stage.get_stage_flags(),
+                    stage.get_module(),
                     "main"
                 );
             }
             graphicsCreateInfo.setStages(stageInfos);
         }
-
 
         std::array<const vk::DynamicState, 3> dynamicStates(
             {
@@ -149,7 +149,7 @@ namespace un {
                 vk::DynamicState::eLineWidth
             }
         );
-        un::Size2D swapChainSize(100, 100);
+        size2d swapChainSize(100, 100);
         std::array<const vk::Viewport, 1> viewports(
             {
                 vk::Viewport(
@@ -169,17 +169,18 @@ namespace un {
             }
         );
         vk::PipelineViewportStateCreateInfo viewportState(
-            (vk::PipelineViewportStateCreateFlags) 0,
+            static_cast<vk::PipelineViewportStateCreateFlags>(0),
             viewports,
             scissors
         );
         graphicsCreateInfo.setPViewportState(&viewportState);
-        vk::PipelineDynamicStateCreateInfo dynamicState((vk::PipelineDynamicStateCreateFlags) 0,
-                                                        dynamicStates
+        vk::PipelineDynamicStateCreateInfo dynamicState(
+            static_cast<vk::PipelineDynamicStateCreateFlags>(0),
+            dynamicStates
         );
         graphicsCreateInfo.setPDynamicState(&dynamicState);
         vk::PipelineMultisampleStateCreateInfo multisample(
-            (vk::PipelineMultisampleStateCreateFlags) 0,
+            static_cast<vk::PipelineMultisampleStateCreateFlags>(0),
             vk::SampleCountFlagBits::e1,
             false
         );
@@ -201,7 +202,7 @@ namespace un {
         );
 
         vk::PipelineColorBlendStateCreateInfo colorBlend(
-            (vk::PipelineColorBlendStateCreateFlags) 0,
+            static_cast<vk::PipelineColorBlendStateCreateFlags>(0),
             false,
             vk::LogicOp::eCopy,
             attachmentBlend,
@@ -229,22 +230,22 @@ namespace un {
         );
         graphicsCreateInfo.setPRasterizationState(&rasterization);
 
-//            vk::GraphicsPipelineCreateInfo createInfo(
-//                (vk::PipelineCreateFlags) 0,
-//                stageInfos,
-//                &vertexInput,
-//                inputAssembly.operator->(),
-//                nullptr,
-//                &viewportState,
-//                &rasterization,
-//                &multisample,
-//                &depth,
-//                &colorBlend,
-//                &dynamicState,
-//                vkPipelineLayout,
-//                renderPass,
-//                0 //TODO: Deferred _rendering
-//            );
+        //            vk::GraphicsPipelineCreateInfo createInfo(
+        //                (vk::PipelineCreateFlags) 0,
+        //                stageInfos,
+        //                &vertexInput,
+        //                inputAssembly.operator->(),
+        //                nullptr,
+        //                &viewportState,
+        //                &rasterization,
+        //                &multisample,
+        //                &depth,
+        //                &colorBlend,
+        //                &dynamicState,
+        //                vkPipelineLayout,
+        //                renderPass,
+        //                0 //TODO: Deferred _rendering
+        //            );
         graphicsCreateInfo.setRenderPass(renderPass);
         auto pipelineResult = device.createGraphicsPipeline(
             cache,
@@ -259,7 +260,7 @@ namespace un {
             throw std::runtime_error(str.str());
         }
         auto pipeline = pipelineResult.value;
-        return un::Pipeline(
+        return un::pipeline(
             pipeline,
             cache,
             vkPipelineLayout

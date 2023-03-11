@@ -2,27 +2,27 @@
 #include <unnecessary/algorithms/n_tree.h>
 
 TEST(trees, assignment_and_access) {
-    un::QuadTree<int> tree;
-    constexpr std::size_t Index = 0;
-    un::QuadTree<int>::TPointer& ptr = tree.getChild<Index>();
+    un::quad_tree<int> tree;
+    constexpr std::size_t index = 0;
+    un::quad_tree<int>::pointer_type& ptr = tree.get_child<index>();
     ASSERT_EQ(ptr, nullptr);
-    ptr = tree.setChild<Index>(5);
+    ptr = tree.set_child<index>(5);
     ASSERT_NE(ptr, nullptr);
-    ASSERT_EQ(ptr->getData(), 5);
+    ASSERT_EQ(ptr->get_data(), 5);
 }
 
 template<typename TTree>
 void test_add_child() {
     TTree tree;
-    constexpr std::size_t Count = TTree::num_children();
-    for (int i = 0; i < Count; ++i) {
-        ASSERT_NO_THROW(tree.addChild(i));
+    constexpr std::size_t count = TTree::num_children();
+    for (int i = 0; i < count; ++i) {
+        ASSERT_NO_THROW(tree.add_child(i));
     }
-    ASSERT_THROW(tree.addChild(Count), std::runtime_error);
+    ASSERT_THROW(tree.add_child(count), std::runtime_error);
 }
 
 TEST(trees, add_child) {
-    test_add_child<un::BinaryTree<int>>();
-    test_add_child<un::QuadTree<int>>();
-    test_add_child<un::OcTree<int>>();
+    test_add_child<un::binary_tree<int>>();
+    test_add_child<un::quad_tree<int>>();
+    test_add_child<un::oc_tree<int>>();
 }

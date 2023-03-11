@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 template<typename T>
-void access(const un::Serialized& obj, const std::string& key, T expected) {
+void access(const un::serialized& obj, const std::string& key, T expected) {
     T result{};
     bool found = obj.try_get<T>(key, result);
     ASSERT_TRUE(found) << "Unable to find object named " << key << ".";
@@ -14,7 +14,7 @@ void access(const un::Serialized& obj, const std::string& key, T expected) {
 }
 
 TEST(serialization, serialized_access) {
-    un::Serialized obj;
+    un::serialized obj;
     obj.set("integer", 0u);
     obj.set("float", 0.0F);
     obj.set("double", 0.0);

@@ -7,46 +7,49 @@
 #include <functional>
 
 namespace un {
-    class Solution {
+    class solution {
     private:
         std::string _description;
         std::function<void()> _action;
+
     public:
-        Solution(
+        solution(
             std::string description,
             std::function<void()> action
         );
 
-        const std::string& getDescription() const;
+        const std::string& get_description() const;
 
-        const std::function<void()>& getAction() const;
+        const std::function<void()>& get_action() const;
     };
 
-    class Problem {
+    class problem {
     private:
         std::string _description;
-        std::vector<un::Solution> _solutions;
+        std::vector<solution> _solutions;
+
     public:
-        explicit Problem(std::string description);
+        explicit problem(std::string description);
 
-        void addSolution(un::Solution&& solution);
+        void add_solution(solution&& solution);
 
-        const std::string& getDescription() const;
+        const std::string& get_description() const;
 
-        const std::vector<un::Solution>& getSolutions() const;
+        const std::vector<solution>& get_solutions() const;
     };
 
-    class Validator {
+    class validator {
     private:
-        std::vector<un::Problem> _problems;
+        std::vector<problem> _problems;
+
     public:
-        void addProblem(un::Problem&& problem);
+        void add_problem(problem&& problem);
 
-        const std::vector<un::Problem>& getProblems() const;
+        const std::vector<problem>& get_problems() const;
 
-        bool isValid() const;
+        bool is_valid() const;
 
-        Problem& addProblem(const std::string& problem);
+        problem& add_problem(const std::string& problem);
     };
 }
 #endif

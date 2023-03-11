@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head>
+<_head>
     <title>Timeline</title>
     <script
             type="text/javascript"
@@ -14,60 +14,60 @@
     <style type="text/css">
         #visualization {
             width: 100%;
-            height: 100%;
+            _height: 100%;
             border: 1px solid lightgray;
         }
     </style>
-</head>
+</_head>
 <body>
 <div id="visualization"></div>
 <script type="text/javascript">
     // DOM element where the Timeline will be attached
     const container = document.getElementById('visualization');
 
-    // Create a DataSet (allows two way data-binding)
+    // Create a DataSet (allows two way _data-binding)
     var items = new vis.DataSet([
-        //Archetypes
-        {% set ns = namespace() %}
-        {% set ns.workerIndex = 0 %}
+        //archetypes
+        {% set _namespace = namespace() %}
+        {% set _namespace.workerIndex = 0 %}
         {% for archetype in workloads %}
         {% for worker in archetype %}
-        {% set ns.workerIndex = ns.workerIndex + 1 %}
-        {% for job in worker %}
+        {% set _namespace.workerIndex = _namespace.workerIndex + 1 %}
+        {% for _job in worker %}
         {
-            group: {{ns.workerIndex}},
-            content: "{{job.label}}",
-            start: {{job.time_start}} / 1000,
-            end: {{job.time_end}} / 1000
+            group: {{_namespace.workerIndex}},
+            content: "{{_job.label}}",
+            start: {{_job.time_start}} / 1000,
+            end: {{_job.time_end}} / 1000
         },
         {% endfor %}
         {% endfor %}
         {% endfor %}
     ]);
     var groups = [
-        {% set ns = namespace() %}
-        {% set ns.groupIndex = 0 %}
+        {% set _namespace = namespace() %}
+        {% set _namespace.groupIndex = 0 %}
         {% for archetype in workloads %}
             {% set subGroups = [] %}
             {% for worker in archetype %}
-                {% set subGroupIndex = ns.groupIndex + (loop.index) %}
+                {% set subGroupIndex = _namespace.groupIndex + (loop._index) %}
                 {% set subGroups = subGroups.append(subGroupIndex) %}
             {% endfor %}
             {
-                id: {{ns.groupIndex}},
-                content: "Archetype: {{loop.index - 1}}",
+                id: {{_namespace.groupIndex}},
+                content: "Archetype: {{loop._index - 1}}",
                 nestedGroups: [
                     {{subGroups}}
                 ],
             },
             {% for worker in archetype %}
-                {% set ns.groupIndex = ns.groupIndex + 1 %}
+                {% set _namespace.groupIndex = _namespace.groupIndex + 1 %}
                 {
-                       id: {{ns.groupIndex}},
-                       content: "Worker: {{loop.index - 1}}",
+                       id: {{_namespace.groupIndex}},
+                       content: "t_worker: {{loop._index - 1}}",
                 },
             {% endfor %}
-            {% set ns.groupIndex = ns.groupIndex + 1 %}
+            {% set _namespace.groupIndex = _namespace.groupIndex + 1 %}
         {% endfor %}
     ];
     // Configuration for the Timeline

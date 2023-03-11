@@ -6,20 +6,19 @@
 #include <unnecessary/serialization/serialized.h>
 
 namespace un {
-    class Archiver {
+    class archiver {
     public:
-        un::Serialized read_file(const std::filesystem::path& file) {
-            un::Buffer buf;
-            un::files::read_file_into_buffer(file, buf);
-            un::Serialized result;
+        serialized read_file(const std::filesystem::path& file) {
+            byte_buffer buf;
+            files::read_file_into_buffer(file, buf);
+            serialized result;
             read(buf, result);
             return result;
         };
 
+        virtual byte_buffer write(const serialized& serialized) = 0;
 
-        virtual un::Buffer write(const un::Serialized& serialized) = 0;
-
-        virtual void read(const un::Buffer& buffer, un::Serialized& into) = 0;
+        virtual void read(const byte_buffer& buffer, serialized& into) = 0;
     };
 }
 #endif

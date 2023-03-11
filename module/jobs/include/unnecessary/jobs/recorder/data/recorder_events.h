@@ -7,94 +7,94 @@
 
 namespace un {
     template<typename TJob>
-    class JobMeta : public EventMeta {
+    class job_meta : public event_meta {
     public:
-        JobMeta(const TJob* const job, un::JobHandle jobHandle)
-            : jobLabel(job->getName()), jobHandle(jobHandle) {
+        job_meta(const TJob* const job, job_handle jobHandle)
+            : _jobLabel(job->get_name()), _jobHandle(jobHandle) {
         }
 
-        const std::string getLabel() const {
-            return jobLabel;
+        const std::string get_label() const override {
+            return _jobLabel;
         }
 
-        bool tryGetHandle(JobHandle& handle) const override {
-            handle = jobHandle;
+        bool try_get_handle(job_handle& handle) const override {
+            handle = _jobHandle;
             return true;
         }
 
     private:
-        std::string jobLabel;
-        un::JobHandle jobHandle;
+        std::string _jobLabel;
+        job_handle _jobHandle;
     };
 
     template<typename TJob>
-    class JobStartedMeta : public JobMeta<TJob> {
+    class job_started_meta : public job_meta<TJob> {
     public:
-        JobStartedMeta(const TJob* const job, JobHandle jobHandle) : JobMeta<TJob>(
+        job_started_meta(const TJob* const job, job_handle jobHandle) : job_meta<TJob>(
             job,
             jobHandle
-        ) { }
+        ) {
+        }
 
-
-        ProfilerEventType getEventType() const override {
-            return un::ProfilerEventType::eJobStarted;
+        profiler_event_type get_event_type() const override {
+            return job_started;
         }
     };
 
     template<typename TJob>
-    class JobFinishedMeta : public JobMeta<TJob> {
+    class job_finished_meta : public job_meta<TJob> {
     public:
-        JobFinishedMeta(const TJob* const job, JobHandle jobHandle) : JobMeta<TJob>(
+        job_finished_meta(const TJob* const job, job_handle jobHandle) : job_meta<TJob>(
             job,
             jobHandle
-        ) { }
-
-        ProfilerEventType getEventType() const override {
-            return un::ProfilerEventType::eJobFinished;
+        ) {
         }
 
+        profiler_event_type get_event_type() const override {
+            return job_finished;
+        }
     };
 
     template<typename TJob>
-    class JobEnqueuedMeta : public JobMeta<TJob> {
+    class job_enqueued_meta : public job_meta<TJob> {
     public:
-        JobEnqueuedMeta(const TJob* const job, JobHandle jobHandle) : JobMeta<TJob>(
-            job,
-            jobHandle
-        ) { }
-
-        ProfilerEventType getEventType() const override {
-            return un::ProfilerEventType::eJobEnqueued;
+        job_enqueued_meta(
+            const TJob* const job,
+            job_handle jobHandle
+        ) : job_meta<TJob>(job, jobHandle) {
         }
 
+        profiler_event_type get_event_type() const override {
+            return job_enqueued;
+        }
     };
 
-    class WorkerSleepingMeta : public EventMeta {
+    class worker_sleeping_meta : public event_meta {
     public:
-        ProfilerEventType getEventType() const override;
+        profiler_event_type get_event_type() const override;
 
-        const std::string getLabel() const override;
+        const std::string get_label() const override;
     };
 
-    class WorkerStartMeta : public EventMeta {
+    class worker_start_meta : public event_meta {
     public:
-        const std::string getLabel() const override;
+        const std::string get_label() const override;
 
-        ProfilerEventType getEventType() const override;
+        profiler_event_type get_event_type() const override;
     };
 
-    class WorkerExitedMeta : public EventMeta {
+    class worker_exited_meta : public event_meta {
     public:
-        const std::string getLabel() const override;
+        const std::string get_label() const override;
 
-        ProfilerEventType getEventType() const override;
+        profiler_event_type get_event_type() const override;
     };
 
-    class WorkerAwakeMeta : public EventMeta {
+    class worker_awake_meta : public event_meta {
     public:
-        const std::string getLabel() const override;
+        const std::string get_label() const override;
 
-        ProfilerEventType getEventType() const override;
+        profiler_event_type get_event_type() const override;
     };
 }
 #endif

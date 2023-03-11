@@ -7,59 +7,59 @@
 
 namespace un {
 
-    class RenderingDevice {
+    class rendering_device {
     private:
-        vk::Device virtualDevice;
-        vk::PhysicalDevice physicalDevice;
-        vk::SurfaceKHR surface;
-        un::Queue present;
-        un::Queue graphics;
-        vk::PhysicalDeviceMemoryProperties memoryProperties;
-        vk::PhysicalDeviceProperties deviceProperties;
+        vk::Device _virtualDevice;
+        vk::PhysicalDevice _physicalDevice;
+        vk::SurfaceKHR _surface;
+        un::queue _present;
+        un::queue _graphics;
+        vk::PhysicalDeviceMemoryProperties _memoryProperties;
+        vk::PhysicalDeviceProperties _deviceProperties;
 
-        RenderingDevice(
+        rendering_device(
             const vk::Device& virtualDevice,
             const vk::PhysicalDevice& physicalDevice,
             const vk::SurfaceKHR& surface,
-            const Queue& present,
-            const Queue& graphics,
+            const queue& present,
+            const queue& graphics,
             const vk::PhysicalDeviceMemoryProperties& memoryProperties,
             const vk::PhysicalDeviceProperties& deviceProperties
         );
 
     public:
 
-        static un::RenderingDevice create(
+        static un::rendering_device create(
             const vk::Instance& vulkanInstance,
             GLFWwindow* window
         );
 
-        u32 selectMemoryTypeFor(
+        u32 select_memory_type_for(
             const vk::MemoryRequirements& requirements,
             vk::MemoryPropertyFlags flags = static_cast<vk::MemoryPropertyFlags>(0)
         ) const;
 
-        const vk::Device& getVirtualDevice() const;
+        const vk::Device& get_virtual_device() const;
 
-        const vk::PhysicalDevice& getPhysicalDevice() const;
+        const vk::PhysicalDevice& get_physical_device() const;
 
-        const vk::PhysicalDeviceMemoryProperties& getMemoryProperties() const;
+        const vk::PhysicalDeviceMemoryProperties& get_memory_properties() const;
 
-        const vk::PhysicalDeviceProperties& getDeviceProperties() const;
+        const vk::PhysicalDeviceProperties& get_device_properties() const;
 
-        const vk::SurfaceKHR& getSurface() const;
+        const vk::SurfaceKHR& get_surface() const;
 
-        Queue& getGraphics();
+        queue& get_graphics();
 
-        Queue& getPresent();
+        queue& get_present();
 
-        const Queue& getGraphics() const;
+        const queue& get_graphics() const;
 
-        const Queue& getPresent() const;
+        const queue& get_present() const;
     };
 
-    vk::DeviceMemory allocateMemoryFor(
-        const un::RenderingDevice& device,
+    vk::DeviceMemory allocate_memory_for(
+        const rendering_device& device,
         vk::MemoryPropertyFlags flags,
         vk::MemoryRequirements requirements
     );

@@ -5,6 +5,7 @@
 
 #ifndef UNNECESSARYENGINE_SDF_GENERATOR_H
 #define UNNECESSARYENGINE_SDF_GENERATOR_H
+
 namespace un::sdf {
     void process_sdf(
         int size,

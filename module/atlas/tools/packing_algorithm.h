@@ -8,58 +8,59 @@
 #include <packer_entry.h>
 
 namespace un::packer {
-    struct PackingOperation {
+    struct packing_operation {
     private:
-        std::filesystem::path path;
-        un::Rect<u32> destination;
+        std::filesystem::path _path;
+        rect<u32> _destination;
+
     public:
-        PackingOperation(
+        packing_operation(
             const std::filesystem::path& path,
-            const Rect<u32>& destination
-        ) : path(path),
-            destination(destination) { }
-
-        const Rect<u32>& getDestination() const {
-            return destination;
+            const rect<u32>& destination
+        ) : _path(path),
+            _destination(destination) {
         }
 
-        const std::filesystem::path& getPath() const {
-            return path;
+        const rect<u32>& get_destination() const {
+            return _destination;
         }
 
+        const std::filesystem::path& get_path() const {
+            return _path;
+        }
     };
 
-
-    struct PackingStrategy {
+    struct packing_strategy {
     private:
-        u32 width, height;
-        std::vector<un::packer::PackingOperation> operations;
+        u32 _width, _height;
+        std::vector<packing_operation> _operations;
+
     public:
-        PackingStrategy(const std::vector<un::packer::PackingOperation>& operations)
-            : width(0), height(0), operations(operations) {
+        packing_strategy(const std::vector<packing_operation>& operations)
+            : _width(0), _height(0), _operations(operations) {
             for (const auto& operation : operations) {
-                const auto& destination = operation.getDestination();
-                width = std::max(width, destination.getMaxX() + 1);
-                height = std::max(height, destination.getMaxY() + 1);
+                const auto& destination = operation.get_destination();
+                _width = std::max(_width, destination.get_max_x() + 1);
+                _height = std::max(_height, destination.get_max_y() + 1);
             }
         }
 
-        u32 getWidth() const {
-            return width;
+        u32 get_width() const {
+            return _width;
         }
 
-        u32 getHeight() const {
-            return height;
+        u32 get_height() const {
+            return _height;
         }
 
-        const std::vector<un::packer::PackingOperation>& getOperations() const {
-            return operations;
+        const std::vector<packing_operation>& get_operations() const {
+            return _operations;
         }
     };
 
-    class PackingAlgorithm {
+    class packing_algorithm {
     public:
-        virtual un::packer::PackingStrategy operator()(std::vector<un::packer::PackerEntry> entries) const = 0;
+        virtual packing_strategy operator()(std::vector<packer_entry> entries) const = 0;
     };
 }
 #endif

@@ -8,61 +8,60 @@
 
 namespace un::serialization {
     template<typename TCpp>
-    struct TypeTranslation {
-        typedef TCpp CppSerialized;
+    struct type_translation {
+        using cpp_serialized = TCpp;
     };
 
-
     template<>
-    struct TypeTranslation<std::string> {
+    struct type_translation<std::string> {
     public:
-        typedef un::SerializedString SerializedType;
+        typedef un::serialized_string serialized_type;
     };
     template<>
-    struct TypeTranslation<u8> {
+    struct type_translation<u8> {
     public:
-        typedef un::SerializedByte SerializedType;
+        typedef un::serialized_byte serialized_type;
     };
     template<>
-    struct TypeTranslation<u16> {
+    struct type_translation<u16> {
     public:
-        typedef un::SerializedShort SerializedType;
+        typedef un::serialized_short serialized_type;
     };
     template<>
-    struct TypeTranslation<u32> {
-        typedef un::SerializedInteger SerializedType;
+    struct type_translation<u32> {
+        typedef un::serialized_integer serialized_type;
     };
     template<>
-    struct TypeTranslation<u64> {
-        typedef un::SerializedLong SerializedType;
+    struct type_translation<u64> {
+        typedef un::serialized_long serialized_type;
 
     };
     template<>
-    struct TypeTranslation<f32> {
-        typedef un::SerializedFloat SerializedType;
+    struct type_translation<f32> {
+        typedef un::serialized_float serialized_type;
 
     };
     template<>
-    struct TypeTranslation<f64> {
-        typedef un::SerializedDouble SerializedType;
+    struct type_translation<f64> {
+        typedef un::serialized_double serialized_type;
     };
 
     template<typename T>
-    typename TypeTranslation<T>::SerializedType create_node(const T& value) {
-        using SerializedType = typename TypeTranslation<T>::SerializedType;
-        return SerializedType(value);
+    typename type_translation<T>::serialized_type create_node(const T& value) {
+        using serialized_type = typename type_translation<T>::serialized_type;
+        return serialized_type(value);
     }
 
     template<typename T>
-    T read_value(const typename TypeTranslation<T>::SerializedType& node) {
-        using SerializedType = typename TypeTranslation<T>::SerializedType;
+    T read_value(const typename type_translation<T>::serialized_type& node) {
+        using serialized_type = typename type_translation<T>::serialized_type;
         return static_cast<T>(node);
     }
 
     template<typename T>
-    T read_value(const std::shared_ptr<un::SerializedNode>& node) {
-        using SerializedType = typename TypeTranslation<T>::SerializedType;
-        return read_value<T>(*std::dynamic_pointer_cast<SerializedType>(node));
+    T read_value(const std::shared_ptr<un::serialized_node>& node) {
+        using serialized_type = typename type_translation<T>::serialized_type;
+        return read_value<T>(*std::dynamic_pointer_cast<serialized_type>(node));
     }
 
 }

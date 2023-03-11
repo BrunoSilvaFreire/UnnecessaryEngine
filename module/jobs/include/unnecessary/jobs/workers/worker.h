@@ -1,5 +1,3 @@
-
-
 #ifndef UNNECESSARYENGINE_WORKER_H
 #define UNNECESSARYENGINE_WORKER_H
 
@@ -15,17 +13,17 @@
 #include <unnecessary/misc/types.h>
 
 namespace un {
-
-    template<class TJob>
-    class JobWorkerMixin {
+    template<class t_job>
+    class job_worker_mixin {
     public:
-        typedef TJob JobType;
-        typedef JobType* JobPointer;
+        using job_type = t_job;
+        using job_pointer = job_type*;
+
     private:
         std::size_t _index;
         u32 _core;
         std::string _name;
-        un::Thread _thread;
+        thread _thread;
         /**
          * Is this worker still processing it's tasks or should it exit?
          */
@@ -38,18 +36,18 @@ namespace un {
          * Has this worker been ordered to immediately stop?
          */
         bool _evacuating = false;
-        std::queue<std::pair<un::JobHandle, JobType*>> _pending;
+        std::queue<std::pair<job_handle, job_type*>> _pending;
         std::mutex _queueMutex;
         std::mutex _sleepingMutex;
         std::mutex _runningMutex;
         std::condition_variable _jobAvailable;
-        un::ThreadSafeEvent<> _onStarted, _onExited, _onSleeping, _onAwaken;
-        un::ThreadSafeEvent<JobType*, JobHandle> _onEnqueued, _onFetched, _onExecuted;
+        thread_safe_event<> _onStarted, _onExited, _onSleeping, _onAwaken;
+        thread_safe_event<job_type*, job_handle> _onEnqueued, _onFetched, _onExecuted;
 
         void worker_thread() {
             _onStarted();
-            JobType* jobPtr;
-            JobHandle id;
+            job_type* jobPtr;
+            job_handle id;
             while (next_job(&jobPtr, &id)) {
                 _onFetched(jobPtr, id);
                 execute(jobPtr, id);
@@ -57,7 +55,7 @@ namespace un {
             _onExited();
         }
 
-        bool dequeue(JobType** jobPtr, JobHandle* id) {
+        bool dequeue(job_type** jobPtr, job_handle* id) {
             std::unique_lock<std::mutex> lock(_queueMutex);
             bool hasJobs = !_pending.empty();
             if (hasJobs) {
@@ -70,7 +68,7 @@ namespace un {
             return false;
         }
 
-        bool next_job(JobType** jobPtr, JobHandle* id) {
+        bool next_job(job_type** jobPtr, job_handle* id) {
             {
                 std::lock_guard<std::mutex> lock(_runningMutex);
                 if (_evacuating || !_running) {
@@ -97,18 +95,17 @@ namespace un {
             return next_job(jobPtr, id);
         }
 
-        void execute(JobType* job, JobHandle id) {
-            job->operator()(reinterpret_cast<typename JobType::WorkerType*>(this));
+        void execute(job_type* job, job_handle id) {
+            job->operator()(reinterpret_cast<typename job_type::worker_type*>(this));
             _onExecuted(job, id);
             delete job;
         }
 
         static std::string default_name(size_t index) {
             std::stringstream ss;
-            ss << type_name_of<typename TJob::WorkerType>() << '#' << to_string(index);
+            ss << type_name_of<typename t_job::worker_type>() << '#' << to_string(index);
             return ss.str();
         }
-
 
         bool try_awake() {
             {
@@ -122,27 +119,27 @@ namespace un {
         }
 
     public:
-        JobWorkerMixin(
+        job_worker_mixin(
             std::size_t index,
             std::size_t core
         ) : _index(index),
-            _jobAvailable(),
-            _running(false),
-            _sleeping(false),
             _core(static_cast<u32>(core)),
-            _onExited(),
             _name(default_name(index)),
             _thread(
-                un::ThreadParams(_name, _core),
-                std::bind(&JobWorkerMixin::worker_thread, this)
-            ) {
+                thread_params(_name, _core),
+                std::bind(&job_worker_mixin::worker_thread, this)
+            ),
+            _running(false),
+            _sleeping(false),
+            _jobAvailable(),
+            _onExited() {
         }
 
-        un::ThreadSafeEvent<>& getOnFinished() {
+        thread_safe_event<>& get_on_finished() {
             return _onExited;
         }
 
-        void enqueue(un::JobHandle handle, JobType* job) {
+        void enqueue(job_handle handle, job_type* job) {
             {
                 std::lock_guard<std::mutex> lock(_queueMutex);
                 _pending.push(std::make_pair(handle, job));
@@ -151,7 +148,7 @@ namespace un {
             }
         }
 
-        void join(un::FenceNotifier<> notifier) {
+        void join(fence_notifier<> notifier) {
             {
                 std::lock_guard<std::mutex> lock(_runningMutex);
                 if (_evacuating || !_running) {
@@ -164,8 +161,9 @@ namespace un {
                 std::lock_guard<std::mutex> lock(_sleepingMutex);
                 if (_sleeping) {
                     notifier.notify();
-                } else {
-                    _onSleeping.addSingleFireListener(
+                }
+                else {
+                    _onSleeping.add_single_fire_listener(
                         [notifier]() mutable {
                             notifier.notify();
                         }
@@ -174,27 +172,26 @@ namespace un {
             }
         }
 
-        u32 getCore() const {
+        u32 get_core() const {
             return _core;
         }
 
-        void setCore(u32 newCore) {
+        void set_core(u32 newCore) {
             if (_running) {
                 return;
             }
-            JobWorkerMixin::_core = newCore;
+            _core = newCore;
         }
 
-        const std::string& getName() const {
+        const std::string& get_name() const {
             return _name;
         }
 
-        void setName(const std::string& name) {
+        void set_name(const std::string& name) {
             if (_running) {
                 return;
             }
-            JobWorkerMixin::_name = name;
-
+            _name = name;
         }
 
         void start() {
@@ -209,14 +206,14 @@ namespace un {
             }
         }
 
-        void stop(un::FenceNotifier<> notifier) {
+        void stop(fence_notifier<> notifier) {
             {
                 std::lock_guard<std::mutex> lock(_runningMutex);
                 if (!_running || _evacuating) {
                     return;
                 }
 
-                _onExited.addSingleFireListener(
+                _onExited.add_single_fire_listener(
                     [notifier]() mutable {
                         notifier.notify();
                     }
@@ -227,55 +224,53 @@ namespace un {
             }
         }
 
-        bool isRunning() const {
+        bool is_running() const {
             return _running;
         }
 
-        bool isWaiting() const {
+        bool is_waiting() const {
             return _sleeping;
         }
 
-        bool isExiting() const {
+        bool is_exiting() const {
             return _evacuating;
         }
 
-        const un::Thread& getThread() const {
+        const thread& get_thread() const {
             return _thread;
         }
 
-        size_t getIndex() const {
+        size_t get_index() const {
             return _index;
         }
 
-        un::ThreadSafeEvent<>& onExited() {
+        thread_safe_event<>& on_exited() {
             return _onExited;
         }
 
-        un::ThreadSafeEvent<>& onSleeping() {
+        thread_safe_event<>& on_sleeping() {
             return _onSleeping;
         }
 
-        un::ThreadSafeEvent<>& onAwaken() {
+        thread_safe_event<>& on_awaken() {
             return _onAwaken;
         }
 
-        un::ThreadSafeEvent<>& onStarted() {
+        thread_safe_event<>& on_started() {
             return _onStarted;
         }
 
-        un::ThreadSafeEvent<JobType*, JobHandle>& onFetched() {
+        thread_safe_event<job_type*, job_handle>& on_fetched() {
             return _onFetched;
         }
 
-        un::ThreadSafeEvent<JobType*, JobHandle>& onExecuted() {
+        thread_safe_event<job_type*, job_handle>& on_executed() {
             return _onExecuted;
         }
 
-        un::ThreadSafeEvent<JobType*, JobHandle>& onEnqueued() {
+        thread_safe_event<job_type*, job_handle>& on_enqueued() {
             return _onEnqueued;
         }
-
     };
-
 }
 #endif

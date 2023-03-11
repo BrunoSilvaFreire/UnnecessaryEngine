@@ -6,37 +6,37 @@
 #include <vulkan/vulkan.hpp>
 
 namespace un {
-    class GlslType {
+    class glsl_type {
     private:
-        std::size_t singleSize;
-        std::size_t numElements;
-        vk::Format format;
+        std::size_t _singleSize;
+        std::size_t _numElements;
+        vk::Format _format;
+
     public:
-        GlslType();
+        glsl_type();
 
-        GlslType(size_t singleSize, size_t numElements, vk::Format format);
+        glsl_type(size_t singleSize, size_t numElements, vk::Format format);
 
-        size_t getSingleSize() const;
+        size_t get_single_size() const;
 
-        size_t getNumElements() const;
+        size_t get_num_elements() const;
 
-        vk::Format getFormat() const;
+        vk::Format get_format() const;
     };
 
-
-    class GlslTypeDatabase {
+    class glsl_type_database {
     private:
-        std::unordered_map<std::string, un::GlslType> types;
-        std::unordered_map<std::string, std::string> glsl2Cpp;
+        std::unordered_map<std::string, glsl_type> _types;
+        std::unordered_map<std::string, std::string> _glsl2Cpp;
 
         void translate(std::string glsl, std::string cpp);
 
     public:
-        GlslTypeDatabase();
+        glsl_type_database();
 
-        bool tryFind(std::string name, un::GlslType** pType);
+        bool try_find(std::string name, glsl_type** pType);
 
-        std::string glslToCpp(const std::string& basicString);
+        std::string glsl_to_cpp(const std::string& basicString);
     };
 }
 #endif

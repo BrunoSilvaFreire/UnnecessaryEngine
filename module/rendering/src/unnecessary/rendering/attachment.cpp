@@ -1,48 +1,45 @@
-
 #include <utility>
 #include <unnecessary/rendering/attachment.h>
 
 namespace un {
-
-    Attachment::Attachment(
+    attachment::attachment(
         const vk::AttachmentDescription& description,
         const vk::ClearValue& clear,
         vk::ImageLayout ownedImageLayout,
         vk::ImageUsageFlags ownedImageUsage,
         vk::ImageAspectFlags ownedImageFlags
-    ) : description(description),
-        clear(clear),
-        ownedImageLayout(ownedImageLayout),
-        ownedImageUsage(ownedImageUsage),
-        ownedImageFlags(ownedImageFlags) {
-
+    ) : _description(description),
+        _clear(clear),
+        _ownedImageLayout(ownedImageLayout),
+        _ownedImageUsage(ownedImageUsage),
+        _ownedImageFlags(ownedImageFlags) {
     }
 
-    const vk::AttachmentDescription& Attachment::getDescription() const {
-        return description;
+    const vk::AttachmentDescription& attachment::get_description() const {
+        return _description;
     }
 
-    const vk::ClearValue& Attachment::getClear() const {
-        return clear;
+    const vk::ClearValue& attachment::get_clear() const {
+        return _clear;
     }
 
-    vk::ImageLayout Attachment::getOwnedImageLayout() const {
-        return ownedImageLayout;
+    vk::ImageLayout attachment::get_owned_image_layout() const {
+        return _ownedImageLayout;
     }
 
-    vk::ImageUsageFlags Attachment::getOwnedImageUsage() const {
-        return ownedImageUsage;
+    vk::ImageUsageFlags attachment::get_owned_image_usage() const {
+        return _ownedImageUsage;
     }
 
-    vk::ImageAspectFlags Attachment::getOwnedImageFlags() const {
-        return ownedImageFlags;
+    vk::ImageAspectFlags attachment::get_owned_image_flags() const {
+        return _ownedImageFlags;
     }
 
-    const std::string& Attachment::getName() const {
-        return name;
+    const std::string& attachment::get_name() const {
+        return _name;
     }
 
-    void Attachment::setName(const std::string& name) {
-        Attachment::name = name;
+    void attachment::set_name(const std::string& name) {
+        _name = name;
     }
 };

@@ -8,25 +8,29 @@
 #include "field_writer.h"
 
 namespace un {
-    class CollectionWriter : public un::FieldWriter {
+    class collection_writer : public field_writer {
     public:
-        bool accepts(const CXXField& field, const un::CXXTranslationUnit& unit, float& outPriority) override;
+        bool
+        accepts(
+            const cxx_field& field,
+            const cxx_translation_unit& unit,
+            float& outPriority
+        ) override;
 
         void write_serializer(
             std::stringstream& ss,
-            const CXXField& field,
-            const un::CXXTranslationUnit& unit,
-            const un::WriterRegistry& registry
+            const cxx_field& field,
+            const cxx_translation_unit& unit,
+            const writer_registry& registry
         ) override;
 
         void write_deserializer(
-            std::stringstream& ss, const CXXField& field, const un::CXXTranslationUnit& unit,
-            const un::WriterRegistry& registry
+            std::stringstream& ss, const cxx_field& field, const cxx_translation_unit& unit,
+            const writer_registry& registry
         ) override;
 
         std::string name() override;
     };
 }
-
 
 #endif //UNNECESSARYENGINE_COLLECTION_WRITER_H

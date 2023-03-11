@@ -5,34 +5,41 @@
 #include "enum_writer.h"
 
 namespace un {
-
-    bool EnumByNameWriter::accepts(const CXXField& field, const CXXTranslationUnit& unit, float& outPriority) {
+    bool
+    enum_by_name_writer::accepts(
+        const cxx_field& field,
+        const cxx_translation_unit& unit,
+        float& outPriority
+    ) {
         outPriority = 10;
-        return field.getType().getKind() == un::CXXTypeKind::eEnum;
+        return field.get_type().get_kind() == eEnum;
     }
 
-    void EnumByNameWriter::write_serializer(
+    void enum_by_name_writer::write_serializer(
         std::stringstream& ss,
-        const CXXField& field,
-        const CXXTranslationUnit& unit,
-        const WriterRegistry& registry
+        const cxx_field& field,
+        const cxx_translation_unit& unit,
+        const writer_registry& registry
     ) {
-        ss << "un::serialization::serialize_inline<" << field.getType().getFullName() << ">(\"" << field.getName()
-           << "\", value." << field.getName() << ", into);" << std::endl;
+        ss << "un::serialization::serialize_inline<" << field.get_type().get_full_name() << ">(\""
+           << field
+               .get_name()
+           << "\", value." << field.get_name() << ", into);" << std::endl;
     }
 
-    void EnumByNameWriter::write_deserializer(
+    void enum_by_name_writer::write_deserializer(
         std::stringstream& ss,
-        const CXXField& field,
-        const CXXTranslationUnit& unit,
-        const WriterRegistry& registry
+        const cxx_field& field,
+        const cxx_translation_unit& unit,
+        const writer_registry& registry
     ) {
-        ss << "return un::serialization::deserialize_inline<" << field.getType().getFullName() << ">(\""
-           << field.getName()
+        ss << "return un::serialization::deserialize_inline<" << field.get_type().get_full_name()
+           << ">(\""
+           << field.get_name()
            << "\", from);" << std::endl;
     }
 
-    std::string EnumByNameWriter::name() {
+    std::string enum_by_name_writer::name() {
         return "EnumByNameWriter";
     }
 }

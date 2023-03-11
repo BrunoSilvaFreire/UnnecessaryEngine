@@ -6,23 +6,23 @@
 namespace un {
     namespace serialization {
         template<typename TValue>
-        void serialize_structure(const TValue& value, un::Serialized& into);
+        void serialize_structure(const TValue& value, un::serialized& into);
 
         template<typename TValue>
-        TValue deserialize_structure(un::Serialized& from);
+        TValue deserialize_structure(un::serialized& from);
 
         template<typename TValue>
-        void serialize_inline(const std::string& key, const TValue& value, un::Serialized& into);
+        void serialize_inline(const std::string& key, const TValue& value, un::serialized& into);
 
         template<typename TValue>
-        TValue deserialize_inline(const std::string& key, un::Serialized& from);
+        TValue deserialize_inline(const std::string& key, un::serialized& from);
     }
 
     template<typename TValue>
-    class Serializer {
-        virtual void serialize(const TValue& value, un::Serialized& into) = 0;
+    class serializer {
+        virtual void serialize(const TValue& value, un::serialized& into) = 0;
 
-        virtual TValue deserialize(un::Serialized& from) = 0;
+        virtual TValue deserialize(un::serialized& from) = 0;
     };
 }
 #endif

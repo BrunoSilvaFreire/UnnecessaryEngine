@@ -5,11 +5,10 @@
 #include <unnecessary/serialization/serializer.h>
 
 namespace un {
+    class atlas_serializer : public serializer<atlas> {
+        void serialize(const atlas& value, serialized& into) override;
 
-    class AtlasSerializer : public un::Serializer<un::Atlas> {
-        void serialize(const Atlas& value, Serialized& into) override;
-
-        Atlas deserialize(Serialized& from) override;
+        atlas deserialize(serialized& from) override;
     };
 }
 #endif

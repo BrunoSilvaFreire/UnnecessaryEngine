@@ -1,41 +1,39 @@
 #include <unnecessary/nlohmann/adapter.h>
 
 namespace un::serialization {
-
-    nlohmann::json adapt(const Serialized& serialized) {
+    nlohmann::json adapt(const serialized& serialized) {
         nlohmann::json obj;
-        for (const auto& [key, value] : serialized.getNamedProperties()) {
-            un::SerializedType type = value->getType();
+        for (const auto& [key, value] : serialized.get_named_properties()) {
+            serialized_type type = value->get_type();
             switch (type) {
-                case eInteger8:
+                case integer8:
                     obj[key] = un::serialization::read_value<u8>(value);
                     break;
-                case eInteger16:
+                case integer16:
                     obj[key] = un::serialization::read_value<u16>(value);
                     break;
-                case eInteger32:
+                case integer32:
                     obj[key] = un::serialization::read_value<u32>(value);
                     break;
-                case eInteger64:
+                case integer64:
                     obj[key] = un::serialization::read_value<u64>(value);
                     break;
-                case eFloat:
+                case float_single:
                     obj[key] = un::serialization::read_value<f32>(value);
                     break;
-                case eDouble:
+                case float_double:
                     obj[key] = un::serialization::read_value<f64>(value);
                     break;
-                case eString:
+                case string:
                     obj[key] = un::serialization::read_value<std::string>(value);
                     break;
-                case eComplex:
-                    obj[key] = adapt(*std::static_pointer_cast<un::Serialized>(value));
+                case complex:
+                    obj[key] = adapt(*std::static_pointer_cast<serialized>(value));
                     break;
-                case eArray: {
-
+                case array: {
                 }
                     break;
-                case eBinary:
+                case binary:
                     break;
             }
         }
@@ -43,15 +41,15 @@ namespace un::serialization {
     }
 
     template<typename TElement>
-    void read_arr_into(const nlohmann::json& jsonArr, std::string key, Serialized& serialized) {
-        un::SerializedArray<TElement> arr = std::move(adapt_array<TElement>(jsonArr));
+    void read_arr_into(const nlohmann::json& jsonArr, std::string key, serialized& serialized) {
+        serialized_array<TElement> arr = std::move(adapt_array<TElement>(jsonArr));
         serialized.set(key, std::move(arr));
     }
 
-    void adapt_arr(const nlohmann::json& jsonArr, std::string key, Serialized& serialized) {
+    void adapt_arr(const nlohmann::json& jsonArr, std::string key, serialized& serialized) {
         switch (jsonArr.begin()->type()) {
             case nlohmann::json::value_t::object:
-                return read_arr_into<un::Serialized>(jsonArr, key, serialized);
+                return read_arr_into<serialized>(jsonArr, key, serialized);
             case nlohmann::json::value_t::string:
                 return read_arr_into<std::string>(jsonArr, key, serialized);
             case nlohmann::json::value_t::boolean:
@@ -67,11 +65,11 @@ namespace un::serialization {
         }
     }
 
-    void adapt(const nlohmann::json& json, Serialized& serialized) {
+    void adapt(const nlohmann::json& json, serialized& serialized) {
         for (const auto& [key, item] : json.items()) {
             switch (item.type()) {
                 case nlohmann::json::value_t::object: {
-                    un::Serialized obj;
+                    serialized obj;
                     adapt(item, obj);
                     serialized.set(key, obj);
                 }
@@ -103,10 +101,10 @@ namespace un::serialization {
     }
 
     template<>
-    un::SerializedArray<un::Serialized>&& adapt_array(const nlohmann::json& json) {
-        un::SerializedArray<un::Serialized> arr;
+    serialized_array<serialized>&& adapt_array(const nlohmann::json& json) {
+        serialized_array<serialized> arr;
         for (const auto& item : json.items()) {
-            un::Serialized s;
+            serialized s;
             adapt(json, s);
             arr.add(std::move(s));
         }

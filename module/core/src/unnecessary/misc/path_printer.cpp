@@ -2,12 +2,14 @@
 #include "unnecessary/strings.h"
 
 namespace un {
-    std::string prettify(const std::filesystem::path& path) {
+    std::string uri(const std::filesystem::path& path) {
 #if UN_PLATFORM_WINDOWS
-        return "file:///" + un::to_string(path);
+        return "file:///" + to_string(_path);
 #else
         return "file://" + un::to_string(path);
 #endif
     }
-
+    std::string prettify(const std::filesystem::path& path) {
+        return un::uri(path);
+    }
 }

@@ -1,30 +1,30 @@
 #include <unnecessary/shaderizer/inputs/shader_input.h>
 
 namespace un {
-    RichInput::RichInput(
+    rich_input::rich_input(
         const std::string& name,
         const std::string& type
-    ) : name(name),
-        type(type) { }
-
-    const std::string& RichInput::getName() const {
-        return name;
+    ) : _name(name),
+        _type(type) {
     }
 
-    const std::string& RichInput::getType() const {
-        return type;
+    const std::string& rich_input::get_name() const {
+        return _name;
     }
 
-    void InputPack::operator+=(RichInput&& other) {
-        inputs.emplace_back(std::move(other));
+    const std::string& rich_input::get_type() const {
+        return _type;
     }
 
-    const std::vector<RichInput>& InputPack::getInputs() const {
-        return inputs;
+    void input_pack::operator+=(rich_input&& other) {
+        _inputs.emplace_back(std::move(other));
     }
 
-    std::vector<RichInput>& InputPack::getInputs() {
-        return inputs;
+    const std::vector<rich_input>& input_pack::get_inputs() const {
+        return _inputs;
     }
 
+    std::vector<rich_input>& input_pack::get_inputs() {
+        return _inputs;
+    }
 }

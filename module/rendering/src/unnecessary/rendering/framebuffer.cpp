@@ -3,19 +3,18 @@
 #include <unnecessary/rendering/render_graph.h>
 
 namespace un {
-
-    FrameBuffer::FrameBuffer(
-        un::Renderer* renderer,
-        const un::RenderGraph& graph,
+    frame_buffer::frame_buffer(
+        renderer* renderer,
+        const render_graph& graph,
         vk::RenderPass renderPass,
         std::size_t frameBufferIndex
     ) {
-        auto device = renderer->getVirtualDevice();
-        const auto& chain = renderer->getSwapChain();
-        const un::Size2D& resolution = chain.getResolution();
-        const un::RenderingDevice& renderingDevice = renderer->getDevice();
-        const auto& chainImages = chain.getImages();
-        const auto& attachments = graph.getAttachments();
+        auto device = renderer->get_virtual_device();
+        const auto& chain = renderer->get_swap_chain();
+        const size2d& resolution = chain.get_resolution();
+        const rendering_device& renderingDevice = renderer->get_device();
+        const auto& chainImages = chain.get_images();
+        const auto& attachments = graph.get_attachments();
         std::vector<vk::ImageView> views;
         std::string prefix = "FrameBuffer-";
         prefix += std::to_string(frameBufferIndex);
@@ -24,15 +23,16 @@ namespace un {
 #ifdef DEBUG
 
             std::string suffix = "-";
-            const std::string& name = attachment.getName();
+            const std::string& name = attachment.get_name();
             if (!name.empty()) {
                 suffix += name;
-            } else {
+            }
+            else {
                 suffix += std::to_string(i);
-            };
+            }
 #endif
-            if (graph.isAttachmentBorrowed(i)) {
-                vk::ImageView view = *chainImages[frameBufferIndex].getImageView();
+            if (graph.is_attachment_borrowed(i)) {
+                vk::ImageView view = *chainImages[frameBufferIndex].get_image_view();
                 views.emplace_back(
                     view
                 );
@@ -42,23 +42,24 @@ namespace un {
 
                 renderer->tag(view, str.str());
 #endif
-            } else {
-                const vk::AttachmentDescription& description = attachment.getDescription();
+            }
+            else {
+                const vk::AttachmentDescription& description = attachment.get_description();
                 vk::Format format = description.format;
-                un::Image& image = ownedImages.emplace_back(
+                image& image = _ownedImages.emplace_back(
                     renderingDevice,
                     format,
                     vk::Extent3D(resolution.x, resolution.y, 1),
-                    attachment.getOwnedImageLayout(),
-                    attachment.getOwnedImageUsage(),
+                    attachment.get_owned_image_layout(),
+                    attachment.get_owned_image_usage(),
                     vk::ImageType::e2D
                 );
-                un::ImageView& imageView = ownedImagesView.emplace_back(
+                image_view& imageView = _ownedImagesView.emplace_back(
                     renderingDevice,
                     image,
                     format,
                     vk::ImageViewType::e2D,
-                    attachment.getOwnedImageFlags()
+                    attachment.get_owned_image_flags()
                 );
                 views.emplace_back(imageView);
 #ifdef DEBUG
@@ -73,7 +74,7 @@ namespace un {
         }
         _wrapped = device.createFramebuffer(
             vk::FramebufferCreateInfo(
-                (vk::FramebufferCreateFlags) 0,
+                static_cast<vk::FramebufferCreateFlags>(0),
                 renderPass,
                 views,
                 resolution.x,

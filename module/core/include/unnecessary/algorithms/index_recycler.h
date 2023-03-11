@@ -10,25 +10,25 @@
 
 namespace un {
     template<typename TIndex = std::size_t>
-    class IndexRecycler {
-        using IndexType = TIndex;
+    class index_recycler {
+        using index_type = TIndex;
+
     private:
-        std::queue<TIndex> available;
+        std::queue<TIndex> _available;
+
     public:
         void recycle(TIndex index) {
-            available.emplace(index);
+            _available.emplace(index);
         }
 
         bool try_reuse(TIndex& index) {
-            if (available.empty()) {
+            if (_available.empty()) {
                 return false;
             }
-            index = available.front();
-            available.pop();
+            index = _available.front();
+            _available.pop();
             return true;
         }
-
-
     };
 }
 #endif
