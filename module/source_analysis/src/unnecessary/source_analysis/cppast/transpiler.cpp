@@ -104,7 +104,7 @@ namespace un {
                 }
             }
         );
-        _translationUnit->addSymbol(std::make_shared<cxx_composite>(composite));
+        _translationUnit->add_symbol(std::make_shared<cxx_composite>(composite));
     }
 
     void
@@ -294,7 +294,7 @@ namespace un {
             get_namespace(anEnum),
             values
         );
-        _translationUnit->addSymbol(parsed);
+        _translationUnit->add_symbol(parsed);
     }
 
     void transpiler::write_ast(const cppast::cpp_file& file, const std::filesystem::path& path) {

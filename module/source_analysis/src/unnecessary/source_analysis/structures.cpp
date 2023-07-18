@@ -154,8 +154,10 @@ namespace un {
     }
 
     template<>
-    bool
-    cxx_scope::find_symbol(const std::string& fullName, std::shared_ptr<cxx_composite>& out) const {
+    bool cxx_scope::find_symbol(
+        const std::string& fullName,
+        std::shared_ptr<cxx_composite>& out
+    ) const {
         for (const auto& item : _symbols) {
             std::shared_ptr<cxx_composite> ptr = std::dynamic_pointer_cast<cxx_composite>(item);
             if (ptr == nullptr) {

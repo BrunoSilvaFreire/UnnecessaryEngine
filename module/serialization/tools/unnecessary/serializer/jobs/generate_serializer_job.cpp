@@ -65,7 +65,7 @@ namespace un {
     generate_serializer_job::generate_serializer_job(
         std::shared_ptr<byte_buffer> buffer,
         const std::shared_ptr<cxx_declaration>& toGenerate,
-        const CXXTranslationUnit* translationUnit
+        const cxx_translation_unit* translationUnit
     ) : _info(*toGenerate),
         _buffer(std::move(buffer)),
         _toGenerate(toGenerate),

@@ -133,13 +133,15 @@ namespace un {
         std::vector<std::shared_ptr<cxx_symbol>> _symbols;
 
     public:
-        void addSymbol(const std::shared_ptr<cxx_symbol>& symbol) {
+        void add_symbol(const std::shared_ptr<cxx_symbol>& symbol) {
             _symbols.emplace_back(symbol);
         }
 
         template<typename t_symbol>
-        bool
-        find_symbol(const std::string& fullName, std::shared_ptr<un::cxx_composite>& out) const {
+        bool find_symbol(
+            const std::string& fullName,
+            std::shared_ptr<t_symbol>& out
+        ) const {
             for (const auto& item : _symbols) {
                 std::shared_ptr<t_symbol> ptr = std::dynamic_pointer_cast<t_symbol>(item);
                 if (ptr == nullptr) {
@@ -174,6 +176,14 @@ namespace un {
             return view;
         }
     };
+
+    class cxx_composite;
+
+    template<>
+    bool cxx_scope::find_symbol(
+        const std::string& fullName,
+        std::shared_ptr<cxx_composite>& out
+    ) const;
 
     class cxx_declaration : public cxx_symbol {
     private:
@@ -222,10 +232,6 @@ namespace un {
 
         const std::vector<cxx_field>& get_fields() const;;
     };
-
-    template<>
-    bool
-    cxx_scope::find_symbol(const std::string& fullName, std::shared_ptr<cxx_composite>& out) const;
 
     class cxx_translation_unit : public cxx_scope {
     private:

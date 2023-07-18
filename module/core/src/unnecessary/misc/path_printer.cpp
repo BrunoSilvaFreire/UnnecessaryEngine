@@ -4,7 +4,7 @@
 namespace un {
     std::string uri(const std::filesystem::path& path) {
 #if UN_PLATFORM_WINDOWS
-        return "file:///" + to_string(_path);
+        return "file:///" + to_string(path);
 #else
         return "file://" + un::to_string(path);
 #endif

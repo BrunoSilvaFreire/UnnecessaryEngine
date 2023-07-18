@@ -2,10 +2,12 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/cmake-build-debug-clang/_deps/type_safe-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/cmake-build-debug-visual-studio-clang/_deps/type_safe-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug-llvm/_deps/type_safe-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug-mingw/_deps/type_safe-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug-msvc-clang/_deps/type_safe-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug-visual-studio-2022/_deps/type_safe-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-debug-visual-studio/_deps/type_safe-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/cmake-build-relwithdebinfo-clang/_deps/type_safe-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug-wsl-gcc/_deps/type_safe-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/thirdparty/cppast" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/thirdparty/grapphs" vcs="Git" />
   </component>
